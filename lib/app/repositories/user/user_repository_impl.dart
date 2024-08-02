@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:get/get_connect/http/src/status/http_status.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../core/exceptions/failure.dart';
 import '../../core/exceptions/user_exists_exception.dart';
@@ -81,11 +83,13 @@ class UserRepositoryImpl implements UserRepository {
     try {
       // final deviceToken = await FirebaseMessaging.instance.getToken();
 
-      final deviceToken = '';
+      final deviceToken = const Uuid().v4();
+
+      _logger.debug('Device Token: $deviceToken');
 
       final data = {
-        'web_token': Platform.isAndroid ? deviceToken : null,
-        "windows_token": Platform.isWindows ? deviceToken : null,
+        if (kIsWeb) 'web_token': deviceToken,
+        if (!kIsWeb && Platform.isWindows) 'windows_token': deviceToken,
       };
 
       _logger.info('Data being sent: $data');
