@@ -1,0 +1,52 @@
+name: boost_sys_weblurk
+description: "A new Flutter project."
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  cupertino_icons: ^1.0.6
+  get: ^4.6.6
+  http: ^1.2.1
+  google_fonts: ^6.2.1
+  validatorless: ^1.2.3
+  intl: ^0.19.0
+  shared_preferences: ^2.2.3
+  ###
+  flutter_modular: ^5.0.0
+  mobx: ^2.3.3
+  flutter_mobx: ^2.2.1
+  asuka: ^2.2.1
+  dio: ^5.5.0
+  flutter_screenutil: ^5.3.1
+  firebase_core: ^2.24.2
+  flutter_dotenv: ^5.1.0
+  firebase_remote_config: ^4.3.8
+  firebase_analytics: ^10.8.0
+  logger: ^2.4.0
+  flutter_secure_storage: ^9.2.2
+  universal_platform: ^1.1.0
+  firebase_messaging: ^14.7.10
+  uuid: ^4.4.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mobx_codegen: ^2.0.5+2
+  build_runner: ^2.1.8
+  
+  flutter_lints: ^3.0.0
+
+flutter:  
+  uses-material-design: true
+
+  # assets:
+  #   - assets/images/background.png
+  #   - assets/images/logo-cla-boost.png
+  #   - .env
