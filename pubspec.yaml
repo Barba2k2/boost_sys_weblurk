@@ -25,15 +25,16 @@ dependencies:
   asuka: ^2.2.1
   dio: ^5.5.0
   flutter_screenutil: ^5.3.1
-  firebase_core: ^2.24.2
+  firebase_core: ^3.3.0
   flutter_dotenv: ^5.1.0
-  firebase_remote_config: ^4.3.8
-  firebase_analytics: ^10.8.0
+  firebase_remote_config: ^5.0.4
+  firebase_analytics: ^11.2.1
   logger: ^2.4.0
   flutter_secure_storage: ^9.2.2
   universal_platform: ^1.1.0
-  firebase_messaging: ^14.7.10
+  firebase_messaging: ^15.0.4
   uuid: ^4.4.2
+  flutter_secure_storage_windows: ^3.1.2
 
 dev_dependencies:
   flutter_test:
