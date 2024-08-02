@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "br.com.barbatech.boostweblurk" "\0"
-            VALUE "FileDescription", "boost_sys_weblurk" "\0"
+            VALUE "CompanyName", "br.com.barbatech.boost_weblurk" "\0"
+            VALUE "FileDescription", "boost_weblurk" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "boost_sys_weblurk" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 br.com.barbatech.boostweblurk. All rights reserved." "\0"
-            VALUE "OriginalFilename", "boost_sys_weblurk.exe" "\0"
-            VALUE "ProductName", "boost_sys_weblurk" "\0"
+            VALUE "InternalName", "boost_weblurk" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 br.com.barbatech.boost_weblurk. All rights reserved." "\0"
+            VALUE "OriginalFilename", "boost_weblurk.exe" "\0"
+            VALUE "ProductName", "boost_weblurk" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
