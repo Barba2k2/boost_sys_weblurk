@@ -24,28 +24,6 @@ class UserRepositoryImpl implements UserRepository {
         _logger = logger;
 
   @override
-  Future<void> register(String nickname, String password, String role) async {
-    try {
-      await _restClient.auth().post(
-        '/auth/register',
-        data: {
-          'nickname': nickname,
-          'password': password,
-          'role': role,
-        },
-      );
-    } on RestClientException catch (e, s) {
-      if (e.statusCode == HttpStatus.badRequest &&
-          e.response.data['message'].contains('User already exists')) {
-        _logger.error('User already exists - ${e.error}', e, s);
-        throw UserExistsException();
-      }
-      _logger.error('Failed to register user', e, s);
-      throw Failure(message: 'Failed to register user');
-    }
-  }
-
-  @override
   Future<String> login(String nickname, String password) async {
     try {
       final result = await _restClient.unAuht().post(
