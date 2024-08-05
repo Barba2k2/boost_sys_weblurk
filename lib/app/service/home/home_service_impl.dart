@@ -17,21 +17,6 @@ class HomeServiceImpl implements HomeService {
         _logger = logger;
 
   @override
-  Future<void> saveSchedules(
-    DateTime selectedDate,
-    List<String> streamerUrls,
-  ) async {
-    try {
-      await _homeRepository.saveSchedules(selectedDate, streamerUrls);
-      Messages.success('Agendamento salvo com sucesso');
-    } catch (e, s) {
-      _logger.error('Error on save schedules', e, s);
-      Messages.warning('Erro ao salvar o agendamento');
-      throw Failure(message: 'Erro ao salvar o agendamento');
-    }
-  }
-
-  @override
   Future<void> loadSchedules(
       DateTime selectedDate, List<TextEditingController> controllers) async {
     try {
