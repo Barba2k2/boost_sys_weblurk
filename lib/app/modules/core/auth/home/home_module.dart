@@ -1,5 +1,4 @@
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:flutter/material.dart';
 
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/rest_client/rest_client.dart';
@@ -25,19 +24,10 @@ class HomeModule extends Module {
             logger: i<AppLogger>(),
           ),
         ),
-        Bind.factory(
-          (i) => List<TextEditingController>.generate(
-            24,
-            (index) => TextEditingController(),
-          ),
-        ),
-        Bind.factory((i) => DateTime.now()),
         Bind.lazySingleton<HomeController>(
           (i) => HomeController(
-            controllers: i<List<TextEditingController>>(),
             homeService: i<HomeService>(),
             logger: i<AppLogger>(),
-            selectedDate: i<DateTime>(),
           ),
         ),
       ];
