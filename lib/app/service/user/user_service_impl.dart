@@ -22,16 +22,6 @@ class UserServiceImpl implements UserService {
         _localSecureStorage = localSecureStorage;
 
   @override
-  Future<void> register(String nickname, String password, String role) async {
-    try {
-      await _userRepository.register(nickname, password, role);
-    } catch (e, s) {
-      _logger.error('Failed to register user on database', e, s);
-      throw Failure(message: 'Failed to register user on database');
-    }
-  }
-
-  @override
   Future<void> login(String nickname, String password) async {
     try {
       final accessToken = await _userRepository.login(nickname, password);
