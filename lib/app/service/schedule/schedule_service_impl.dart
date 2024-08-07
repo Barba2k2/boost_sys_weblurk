@@ -14,9 +14,10 @@ class StreamerServiceImpl implements ScheduleService {
         _streamerRepository = streamerRepository;
 
   @override
-  Future<List> fetchSchedule() {
+  Future<List> fetchSchedule() async {
     try {
-      throw UnimplementedError();
+      final schedules = await _streamerRepository.fetchSchedule();
+      return schedules;
     } catch (e, s) {
       _logger.error('Error on fetch schedule', e, s);
       throw Failure(message: 'Erro ao buscar os agendamentos');
