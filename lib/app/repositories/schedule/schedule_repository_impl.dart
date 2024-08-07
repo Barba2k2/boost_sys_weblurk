@@ -14,13 +14,15 @@ class ScheduleRepositoryImpl implements SchedulesRepository {
         _logger = logger;
 
   @override
-  Future<void> fetchSchedule() async {
+  Future<List> fetchSchedule() async {
     try {
       final response = await _restClient.auth().get('/schedule/');
 
       _logger.info('Response data ${response.data}');
 
       if (response.statusCode == 200) {
+        return response.data as List;
+      } else {
         throw Failure(message: 'Erro ao buscar os agendamentos');
       }
     } catch (e, s) {
