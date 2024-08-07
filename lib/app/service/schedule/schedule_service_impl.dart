@@ -14,7 +14,7 @@ class StreamerServiceImpl implements ScheduleService {
         _streamerRepository = streamerRepository;
 
   @override
-  Future<void> fetchSchedule() {
+  Future<List> fetchSchedule() {
     try {
       throw UnimplementedError();
     } catch (e, s) {
