@@ -7,10 +7,10 @@ import '../../core/logger/app_logger.dart';
 import '../../core/logger/logger_app_logger_impl.dart';
 import '../../core/rest_client/dio/dio_rest_client.dart';
 import '../../core/rest_client/rest_client.dart';
-import '../../repositories/streamer/streamer_repository.dart';
-import '../../repositories/streamer/streamer_repository_impl.dart';
-import '../../service/streamer/streamer_service.dart';
-import '../../service/streamer/streamer_service_impl.dart';
+import '../../repositories/schedule/schedule_repository.dart';
+import '../../repositories/schedule/schedule_repository_impl.dart';
+import '../../service/schedule/schedule_service.dart';
+import '../../service/schedule/schedule_service_impl.dart';
 import 'auth/auth_store.dart';
 
 class CoreModule extends Module {
@@ -42,14 +42,14 @@ class CoreModule extends Module {
           ),
           export: true,
         ),
-        Bind.lazySingleton<StreamerRepository>(
-          (i) => StreamerRepositoryImpl(
+        Bind.lazySingleton<SchedulesRepository>(
+          (i) => ScheduleRepositoryImpl(
             restClient: i(),
             logger: i(),
           ),
           export: true,
         ),
-        Bind.lazySingleton<StreamerService>(
+        Bind.lazySingleton<ScheduleService>(
           (i) => StreamerServiceImpl(
             streamerRepository: i(),
             logger: i(),
