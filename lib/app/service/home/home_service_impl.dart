@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../../core/exceptions/failure.dart';
 import '../../core/logger/app_logger.dart';
 import '../../core/ui/widgets/messages.dart';
@@ -17,15 +15,14 @@ class HomeServiceImpl implements HomeService {
         _logger = logger;
 
   @override
-  Future<void> loadSchedules(
-      DateTime selectedDate, List<TextEditingController> controllers) async {
+  Future<void> fetchSchedules() async {
     try {
-      final schedules = await _homeRepository.loadSchedules(selectedDate);
+      // final schedules = await _homeRepository.loadSchedules(selectedDate);
 
-      for (var schedule in schedules) {
-        final index = int.parse(schedule['id'].toString()) - 1;
-        controllers[index].text = schedule['streamerUrl'];
-      }
+      // for (var schedule in schedules) {
+      //   final index = int.parse(schedule['id'].toString()) - 1;
+      //   controllers[index].text = schedule['streamerUrl'];
+      // }
     } catch (e, s) {
       _logger.error('Error on load schedules', e, s);
       Messages.warning('Erro ao carregar os agendamentos');
