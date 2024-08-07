@@ -8,7 +8,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final urlController = Modular.get<UrlController>();
+    final urlController = Modular.get<UrlLaunchController>();
 
     return AppBar(
       backgroundColor: Colors.grey[200],
@@ -86,45 +86,45 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                   value: 'score',
                   child: const Text('Pontuação'),
                   onTap: () async {
-                    // await urlController.launchURL(
-                    //   'https://docs.google.com/spreadsheets/d/1kh4zc2INhLEOGbLqqte8NnP4NsNRvFTgSWvKNKKM9qk/edit?usp=sharing',
-                    // );
+                    await urlController.launchURL(
+                      'https://docs.google.com/spreadsheets/d/1kh4zc2INhLEOGbLqqte8NnP4NsNRvFTgSWvKNKKM9qk/edit?usp=sharing',
+                    );
                   },
                 ),
                 PopupMenuItem<String>(
                   value: 'discord',
                   child: const Text('Discord'),
                   onTap: () async {
-                    // await urlController.launchURL(
-                    //   'https://discord.gg/udteYpaGuB',
-                    // );
+                    await urlController.launchURL(
+                      'https://discord.gg/udteYpaGuB',
+                    );
                   },
                 ),
                 PopupMenuItem<String>(
                   value: 'social_media',
                   child: const Text('Redes Sociais'),
                   onTap: () async {
-                    // await urlController.launchURL(
-                    //   'https://www.twitch.com/BoostTeam_',
-                    // );
+                    await urlController.launchURL(
+                      'https://www.twitch.com/BoostTeam_',
+                    );
                   },
                 ),
                 PopupMenuItem<String>(
                   value: 'schedule_form',
                   child: const Text('Formulário de horários'),
                   onTap: () async {
-                    // await urlController.launchURL(
-                    //   'https://forms.gle/RN4NGWm8Qvi1daqp7',
-                    // );
+                    await urlController.launchURL(
+                      'https://forms.gle/RN4NGWm8Qvi1daqp7',
+                    );
                   },
                 ),
                 PopupMenuItem<String>(
                   value: 'weblurk',
                   child: const Text('WebLurk'),
                   onTap: () async {
-                    // await urlController.launchURL(
-                    //   'https://drive.google.com/drive/folders/1XsmNh_gpKYLEkMSaBPFLuT3Y5vDmeWC3?usp=sharing',
-                    // );
+                    await urlController.launchURL(
+                      'https://drive.google.com/drive/folders/1XsmNh_gpKYLEkMSaBPFLuT3Y5vDmeWC3?usp=sharing',
+                    );
                   },
                 ),
               ];
@@ -155,7 +155,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                   value: 'about',
                   child: const Text('Sobre o WebLurk'),
                   onTap: () async {
-                    // await urlController.launchURL('https://www.google.com');
+                    await urlController.launchURL('https://www.google.com');
                   },
                 ),
               ];
