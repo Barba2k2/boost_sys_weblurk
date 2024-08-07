@@ -1,40 +1,39 @@
-// import 'dart:io';
-// import 'dart:developer';
-// import 'package:mobx/mobx.dart';
-// import 'package:flutter/material.dart';
-// import 'package:process_run/shell.dart';
-// import 'package:flutter_modular/flutter_modular.dart';
+import 'dart:io';
 
-// import '../logger/app_logger.dart';
-// import '../ui/widgets/messages.dart';
+import 'package:flutter/material.dart';
+import 'package:mobx/mobx.dart';
+import 'package:process_run/process_run.dart';
 
-// part 'url_store.g.dart';
+import '../logger/app_logger.dart';
+import '../ui/widgets/messages.dart';
 
-// class UrlStore = _UrlStore with _$UrlStore;
+part 'url_launch_controller.g.dart';
 
-// abstract class _UrlStore with Store {
-//   final AppLogger _logger;
+class UrlLaunchController = UrlLaunchControllerBase with _$UrlLaunchController;
 
-//   _UrlStore({
-//     required AppLogger logger,
-//   }) : _logger = logger;
+abstract class UrlLaunchControllerBase with Store {
+  final AppLogger _logger;
 
-//   @action
-//   Future<void> launchURL(BuildContext context, String url) async {
-//     try {
-//       final Shell shell = Shell();
-//       if (Platform.isWindows) {
-//         await shell.run('start $url');
-//       } else if (Platform.isMacOS) {
-//         await shell.run('open $url');
-//       } else if (Platform.isLinux) {
-//         await shell.run('xdg-open $url');
-//       } else {
-//         throw 'Platform not supported';
-//       }
-//     } catch (e) {
-//       log('Error launching URL: $e');
-//       Messages.alert('Erro ao abrir URL');
-//     }
-//   }
-// }
+  UrlLaunchControllerBase({
+    required AppLogger logger,
+  }) : _logger = logger;
+
+  @action
+  Future<void> launchURL(BuildContext context, String url) async {
+    try {
+      final Shell shell = Shell();
+      if (Platform.isWindows) {
+        await shell.run('start $url');
+      } else if (Platform.isMacOS) {
+        await shell.run('open $url');
+      } else if (Platform.isLinux) {
+        await shell.run('xdg-open $url');
+      } else {
+        throw 'Platform not supported';
+      }
+    } catch (e) {
+      _logger.error('Error launching URL: $e');
+      Messages.alert('Erro ao abrir URL');
+    }
+  }
+}
