@@ -30,4 +30,8 @@ abstract class HomeControllerBase with Store {
   Future<void> forceUpdateLive() async {
     await _homeService.forceUpdateLive();
   }
+
+  Future<void> updateLists() async {
+    await _homeService.forceUpdateLive();
+  }
 }
