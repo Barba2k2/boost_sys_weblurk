@@ -33,7 +33,7 @@ class HomeRepositoryImpl implements HomeRepository {
       throw Failure(message: 'Erro do RestClient ao carregar o agendamento');
     } catch (e, s) {
       _logger.error('Error on load schedules', e, s);
-      throw Failure(message: 'Erro generico carregar o agendamento');
+      throw Failure(message: 'Erro genérico ao carregar o agendamento');
     }
   }
 
