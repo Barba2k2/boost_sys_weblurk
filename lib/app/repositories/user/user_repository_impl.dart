@@ -5,7 +5,6 @@ import 'package:get/get_connect/http/src/status/http_status.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/exceptions/failure.dart';
-import '../../core/exceptions/user_exists_exception.dart';
 import '../../core/logger/app_logger.dart';
 import '../../core/rest_client/rest_client.dart';
 import '../../core/rest_client/rest_client_exception.dart';
@@ -33,10 +32,6 @@ class UserRepositoryImpl implements UserRepository {
           'password': password,
         },
       );
-
-      _logger.info('Response Data: ${result.data}');
-      _logger.info('Response Data: ${result.statusCode}');
-      _logger.info('Response Data: ${result.statusMessage}');
 
       return result.data['access_token'];
     } on RestClientException catch (e, s) {
