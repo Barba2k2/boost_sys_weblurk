@@ -1,37 +1,42 @@
 import 'package:mobx/mobx.dart';
-
+import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
+import '../../../../core/ui/widgets/messages.dart';
 import '../../../../service/home/home_service.dart';
+
 part 'home_controller.g.dart';
 
 class HomeController = HomeControllerBase with _$HomeController;
 
 abstract class HomeControllerBase with Store {
   final HomeService _homeService;
+  final AppLogger _logger;
 
   HomeControllerBase({
     required HomeService homeService,
     required AppLogger logger,
-  }) : _homeService = homeService;
+  })  : _homeService = homeService,
+        _logger = logger;
 
-  Future<void> saveSchedules() async {
-    // final streamerUrls = _controllers
-    //     .map(
-    //       (controller) => controller.text,
-    //     )
-    //     .toList();
-    // await _homeService.saveSchedules(_selectedDate, streamerUrls);
-  }
-
+  @action
   Future<void> loadSchedules() async {
-    // await _homeService.loadSchedules(_selectedDate, _controllers);
+    try {
+      await _homeService.fetchSchedules();
+    } catch (e, s) {
+      _logger.error('Error on load schedules', e, s);
+      Messages.warning('Erro ao carregar os agendamentos');
+      throw Failure(message: 'Erro ao carregar os agendamentos');
+    }
   }
 
-  Future<void> forceUpdateLive() async {
-    await _homeService.forceUpdateLive();
-  }
-
+  @action
   Future<void> updateLists() async {
-    await _homeService.forceUpdateLive();
+    try {
+      await _homeService.forceUpdateLive();
+    } catch (e, s) {
+      _logger.error('Error on force update live', e, s);
+      Messages.warning('Erro ao forçar a atualização da live');
+      throw Failure(message: 'Erro ao forçar a atualização da live');
+    }
   }
 }
