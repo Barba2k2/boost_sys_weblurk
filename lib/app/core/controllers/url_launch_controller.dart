@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:process_run/process_run.dart';
 
@@ -19,7 +18,7 @@ abstract class UrlLaunchControllerBase with Store {
   }) : _logger = logger;
 
   @action
-  Future<void> launchURL(BuildContext context, String url) async {
+  Future<void> launchURL(String url) async {
     try {
       final Shell shell = Shell();
       if (Platform.isWindows) {

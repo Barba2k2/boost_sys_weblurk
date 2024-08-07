@@ -13,8 +13,8 @@ mixin _$UrlLaunchController on UrlLaunchControllerBase, Store {
       AsyncAction('UrlLaunchControllerBase.launchURL', context: context);
 
   @override
-  Future<void> launchURL(BuildContext context, String url) {
-    return _$launchURLAsyncAction.run(() => super.launchURL(context, url));
+  Future<void> launchURL(String url) {
+    return _$launchURLAsyncAction.run(() => super.launchURL(url));
   }
 
   @override
