@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../../../modules/core/auth/home/home_controller.dart';
 import '../../controllers/url_launch_controller.dart';
 
 class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -9,6 +11,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final urlController = Modular.get<UrlLaunchController>();
+    final homeController = Modular.get<HomeController>();
 
     return AppBar(
       backgroundColor: Colors.grey[200],
@@ -20,35 +23,21 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         children: [
           PopupMenuButton<String>(
-            onSelected: (value) async {
-              if (value == 'update_list') {
-                // Get.find<HomeController>().updateLists();
-              } else if (value == 'terminate') {
-                // Get.find<HomeController>().terminate();
-              } else if (value == 'audio') {
-                // Get.find<HomeController>().toggleAudio();
-              } else if (value == 'timezone') {
-                // Future feature, no action needed now
-              }
-            },
             itemBuilder: (BuildContext context) {
               return [
                 PopupMenuItem<String>(
-                  value: 'update_list',
                   child: const Text('Atualizar Listas'),
                   onTap: () {
-                    // Get.find<HomeController>().updateLists();
+                    homeController.updateLists();
                   },
                 ),
                 PopupMenuItem<String>(
-                  value: 'terminate',
                   child: const Text('Encerrar'),
                   onTap: () {
                     // Get.find<HomeController>().terminate();
                   },
                 ),
                 PopupMenuItem<String>(
-                  value: 'audio',
                   child: const Text('Audio'),
                   onTap: () {
                     // Get.find<HomeController>().toggleAudio();
