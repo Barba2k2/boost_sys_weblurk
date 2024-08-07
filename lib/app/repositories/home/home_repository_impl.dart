@@ -1,7 +1,3 @@
-import 'dart:convert';
-
-import 'package:intl/intl.dart';
-
 import '../../core/exceptions/failure.dart';
 import '../../core/logger/app_logger.dart';
 import '../../core/rest_client/rest_client.dart';
@@ -19,51 +15,12 @@ class HomeRepositoryImpl implements HomeRepository {
         _logger = logger;
 
   @override
-  Future<void> saveSchedules(
-    DateTime selectedDate,
-    List<String> streamerUrls,
-  ) async {
+  Future<List<Map<String, dynamic>>> loadSchedules(DateTime date) async {
     try {
-      final schedules = streamerUrls.asMap().entries.map(
-        (entry) {
-          final index = entry.key;
-          final url = entry.value;
-          return {
-            'id': (index + 1).toString(),
-            'streamerUrl': url,
-            'date': DateFormat('yyyy-MM-dd').format(selectedDate),
-            'startTime': '${index.toString().padLeft(2, '0')}:00:00',
-            'endTime': '${(index + 1).toString().padLeft(2, '0')}:00:00',
-          };
-        },
-      ).toList();
-
-      final response = await _restClient.auth().post(
-            '/schedules/save',
-            data: jsonEncode(schedules),
-          );
-
-      if (response.statusCode != 200) {
-        throw Failure(message: 'Erro ao salvar o agendamento');
-      }
-    } on RestClientException catch (e, s) {
-      _logger.error('Error on save schedules', e, s);
-      throw Failure(message: 'Erro do RestClient ao salvar o agendamento');
-    } catch (e, s) {
-      _logger.error('Error on save schedules', e, s);
-      throw Failure(message: 'Erro generico salvar o agendamento');
-    }
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> loadSchedules(
-    DateTime selectedDate,
-  ) async {
-    try {
-      var dateSelected = DateFormat('yyyy-MM-dd').format(selectedDate);
+      final todayDate = DateTime.now();
 
       final response = await _restClient.auth().get(
-            '/schedules/get?date=$dateSelected',
+            '/schedules/get?date=$todayDate',
           );
 
       if (response.statusCode == 200) {
