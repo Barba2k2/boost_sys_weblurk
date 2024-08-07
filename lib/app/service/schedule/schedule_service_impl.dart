@@ -1,6 +1,5 @@
 import '../../core/exceptions/failure.dart';
 import '../../core/logger/app_logger.dart';
-import '../../models/user_model.dart';
 import '../../repositories/schedule/schedule_repository.dart';
 import 'schedule_service.dart';
 
@@ -15,8 +14,12 @@ class StreamerServiceImpl implements ScheduleService {
         _streamerRepository = streamerRepository;
 
   @override
-  Future<List> fetchSchedule(String token) {
-    // TODO: implement fetchSchedule
-    throw UnimplementedError();
+  Future<void> fetchSchedule() {
+    try {
+      throw UnimplementedError();
+    } catch (e, s) {
+      _logger.error('Error on fetch schedule', e, s);
+      throw Failure(message: 'Erro ao buscar os agendamentos');
+    }
   }
 }
