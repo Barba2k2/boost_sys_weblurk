@@ -17,12 +17,7 @@ class HomeServiceImpl implements HomeService {
   @override
   Future<void> fetchSchedules() async {
     try {
-      // final schedules = await _homeRepository.loadSchedules(selectedDate);
-
-      // for (var schedule in schedules) {
-      //   final index = int.parse(schedule['id'].toString()) - 1;
-      //   controllers[index].text = schedule['streamerUrl'];
-      // }
+      await _homeRepository.loadSchedules(DateTime.now());
     } catch (e, s) {
       _logger.error('Error on load schedules', e, s);
       Messages.warning('Erro ao carregar os agendamentos');
@@ -34,11 +29,14 @@ class HomeServiceImpl implements HomeService {
   Future<void> forceUpdateLive() async {
     try {
       await _homeRepository.forceUpdateLive();
-      Messages.success('Live atualizada com sucesso');
+      Messages.success('Lista atualizada com sucesso');
     } catch (e, s) {
       _logger.error('Error on force update live', e, s);
       Messages.warning('Erro ao forçar a atualização da live');
       throw Failure(message: 'Erro ao forçar a atualização da live');
     }
   }
+
+  @override
+  Future<void> updateLists() async => await fetchSchedules();
 }
