@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:webview_windows/webview_windows.dart';
 
 import '../../../../core/ui/widgets/live_url_bar.dart';
 import '../../../../core/ui/widgets/syslurk_app_bar.dart';
+import 'home_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,7 +23,7 @@ class _HomePageState extends State<HomePage> {
     // final scheduleScrollController = ScrollController();
 
     return Scaffold(
-      appBar: const SyslurkAppBar(),
+      appBar: SyslurkAppBar(),
       body: Observer(
         builder: (_) {
           return Stack(
