@@ -3,12 +3,15 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../modules/core/auth/home/home_controller.dart';
+import '../../controllers/settings_controller.dart';
 import '../../controllers/url_launch_controller.dart';
+import 'messages.dart';
 
 class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
   final urlController = Modular.get<UrlLaunchController>();
   final homeController = Modular.get<HomeController>();
-  
+  final settingsController = Modular.get<SettingsController>();
+
   SyslurkAppBar({super.key});
 
   @override
@@ -34,18 +37,21 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                 PopupMenuItem<String>(
                   child: const Text('Encerrar'),
                   onTap: () {
-                    // Get.find<HomeController>().terminate();
+                    settingsController.terminateApp();
                   },
                 ),
                 PopupMenuItem<String>(
                   child: const Text('Audio'),
                   onTap: () {
-                    // Get.find<HomeController>().toggleAudio();
+                    settingsController.muteAppAudio();
                   },
                 ),
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'timezone',
-                  child: Text('Fuso Horário'),
+                  child: const Text('Fuso Horário'),
+                  onTap: () {
+                    Messages.info('Funcionalidade ainda não funcional');
+                  },
                 ),
               ];
             },
