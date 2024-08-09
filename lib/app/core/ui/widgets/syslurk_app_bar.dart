@@ -6,13 +6,13 @@ import '../../../modules/core/auth/home/home_controller.dart';
 import '../../controllers/url_launch_controller.dart';
 
 class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const SyslurkAppBar({super.key});
+  final urlController = Modular.get<UrlLaunchController>();
+  final homeController = Modular.get<HomeController>();
+  
+  SyslurkAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final urlController = Modular.get<UrlLaunchController>();
-    final homeController = Modular.get<HomeController>();
-
     return AppBar(
       backgroundColor: Colors.grey[200],
       iconTheme: const IconThemeData(
