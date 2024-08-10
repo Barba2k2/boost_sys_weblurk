@@ -5,6 +5,7 @@ import 'package:webview_windows/webview_windows.dart';
 
 import '../../../../core/ui/widgets/live_url_bar.dart';
 import '../../../../core/ui/widgets/syslurk_app_bar.dart';
+import '../../../../core/ui/widgets/webview_widget.dart';
 import 'home_controller.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,13 +16,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final homeController = Modular.get<HomeController>();
   final webViewController = WebviewController();
 
   @override
-  Widget build(BuildContext context) {
-    // final homeController = Modular.get<HomeController>();
-    // final scheduleScrollController = ScrollController();
+  void initState() {
+    super.initState();
+    homeController.onInit();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: SyslurkAppBar(),
       body: Observer(
@@ -34,15 +39,9 @@ class _HomePageState extends State<HomePage> {
                     currentChannel: 'Canal XYZ',
                   ),
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: 1,
-                      itemBuilder: (context, index) {
-                        return const ListTile(
-                          title: Text('Nome'),
-                          subtitle: Text('Horario'),
-                          // trailing: Text(homeController.getStatusText(item['status'])),
-                        );
-                      },
+                    child: WebviewWidget(
+                      webViewController: webViewController,
+                      initializationFuture: homeController.initializationFuture,
                     ),
                   ),
                   // Next Feature
