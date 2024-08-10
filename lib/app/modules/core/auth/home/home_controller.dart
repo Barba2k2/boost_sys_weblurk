@@ -1,4 +1,5 @@
 import 'package:mobx/mobx.dart';
+import 'package:webview_windows/webview_windows.dart';
 import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/ui/widgets/messages.dart';
@@ -17,6 +18,18 @@ abstract class HomeControllerBase with Store {
     required AppLogger logger,
   })  : _homeService = homeService,
         _logger = logger;
+
+  @observable
+  late Future<void> initializationFuture;
+
+  @observable
+  var isScheduleVisible = false;
+
+  @observable
+  var currentChannel = 'BoostTeam_';
+
+  final webViewController = WebviewController();
+  bool isWebViewInitialized = false;
 
   @action
   Future<void> loadSchedules() async {
@@ -38,5 +51,29 @@ abstract class HomeControllerBase with Store {
       Messages.warning('Erro ao forçar a atualização da live');
       throw Failure(message: 'Erro ao forçar a atualização da live');
     }
+  }
+
+  @action
+  Future<void> initializeWebView() async {
+    if (!isWebViewInitialized) {
+      try {
+        await webViewController.initialize();
+        await webViewController.setUserAgent(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        );
+        final correctUrl = 'https://www.twitch.tv/currentChannel';
+        await webViewController.loadUrl(correctUrl);
+
+        isWebViewInitialized = true;
+      } catch (e) {
+        _logger.error('Error initializing webview', e);
+        Messages.warning('Erro ao inicializar o WebView');
+      }
+    }
+  }
+
+  void onInit() {
+    initializationFuture = initializeWebView();
+    loadSchedules();
   }
 }
