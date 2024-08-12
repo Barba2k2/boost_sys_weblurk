@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
 import '../../../core/helpers/constants.dart';
@@ -30,7 +31,7 @@ abstract class AuthStoreBase with Store {
       _userLogged = UserModel.fromJson(json.decode(userModelJson));
     } else {
       _userLogged = UserModel.empty();
-      // await logout();
+      await logout();
     }
   }
 
@@ -38,5 +39,6 @@ abstract class AuthStoreBase with Store {
   Future<void> logout() async {
     await _localStorage.clear();
     _userLogged = UserModel.empty();
+    Modular.to.navigate('/auth/login/');
   }
 }
