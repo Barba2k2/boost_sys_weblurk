@@ -6,6 +6,7 @@ import '../../../../repositories/home/home_repository.dart';
 import '../../../../repositories/home/home_repository_impl.dart';
 import '../../../../service/home/home_service.dart';
 import '../../../../service/home/home_service_impl.dart';
+import '../auth_store.dart';
 import 'home_controller.dart';
 import 'home_page.dart';
 
@@ -27,6 +28,7 @@ class HomeModule extends Module {
         Bind.lazySingleton<HomeController>(
           (i) => HomeController(
             homeService: i<HomeService>(),
+            authStore: i<AuthStore>(),
             logger: i<AppLogger>(),
           ),
         ),
