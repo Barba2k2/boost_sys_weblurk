@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import '../../core/exceptions/failure.dart';
 import '../../core/logger/app_logger.dart';
 import '../../core/rest_client/rest_client.dart';
@@ -17,10 +19,10 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<List<Map<String, dynamic>>> loadSchedules(DateTime date) async {
     try {
-      final todayDate = DateTime.now();
+      final formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
       final response = await _restClient.auth().get(
-            '/schedules/get?date=$todayDate',
+            '/schedules/get?date=$formattedDate',
           );
 
       if (response.statusCode == 200) {
