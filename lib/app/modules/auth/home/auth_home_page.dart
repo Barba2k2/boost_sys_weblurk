@@ -24,9 +24,10 @@ class _AuthHomePageState extends State<AuthHomePage> {
     super.initState();
     reaction<UserModel?>(
       (_) => widget._authStore.userLogged,
-      (userLogger) {
-        if (userLogger != null && userLogger.nickname.isNotEmpty) {
-          Modular.to.navigate('/home/');
+      (userLogged) {
+        if (userLogged != null && userLogged.nickname.isNotEmpty) {
+          Modular.to.navigate('/auth/login/');
+          // Modular.to.navigate('/home/');
         } else {
           Modular.to.navigate('/auth/login/');
         }
