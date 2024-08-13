@@ -31,7 +31,10 @@ abstract class HomeControllerBase with Store {
   var isScheduleVisible = false;
 
   @observable
-  var currentChannel = 'BoostTeam_';
+  String initialChannel = 'BoostTeam_';
+
+  @observable
+  String? currentChannel;
 
   final webViewController = WebviewController();
   bool isWebViewInitialized = false;
@@ -47,16 +50,16 @@ abstract class HomeControllerBase with Store {
     }
   }
 
-  @action
-  Future<void> updateLists() async {
-    try {
-      await _homeService.forceUpdateLive();
-    } catch (e, s) {
-      _logger.error('Error on force update live', e, s);
-      Messages.warning('Erro ao forçar a atualização da live');
-      throw Failure(message: 'Erro ao forçar a atualização da live');
-    }
-  }
+  // @action
+  // Future<void> updateLists() async {
+  //   try {
+  //     await _homeService.forceUpdateLive();
+  //   } catch (e, s) {
+  //     _logger.error('Error on force update live', e, s);
+  //     Messages.warning('Erro ao forçar a atualização da live');
+  //     throw Failure(message: 'Erro ao forçar a atualização da live');
+  //   }
+  // }
 
   @action
   Future<void> initializeWebView() async {
@@ -66,14 +69,34 @@ abstract class HomeControllerBase with Store {
         await webViewController.setUserAgent(
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
         );
-        final correctUrl = 'https://www.twitch.tv/currentChannel';
+        final correctUrl = 'https://www.twitch.tv/$initialChannel';
+
         await webViewController.loadUrl(correctUrl);
 
         isWebViewInitialized = true;
-      } catch (e) {
-        _logger.error('Error initializing webview', e);
+      } catch (e, s) {
+        _logger.error('Error initializing webview', e, s);
         Messages.warning('Erro ao inicializar o WebView');
       }
+    }
+  }
+
+  @action
+  Future<void> loadCurrentChannel() async {
+    try {
+      // Supondo que o método fetchCurrentChannelUrl() existe no HomeService e retorna a URL do banco
+      currentChannel = await _homeService.fetchCurrentChannel();
+
+      _logger.info('Current channel: $currentChannel');
+
+      // Atualiza o WebView com a URL carregada
+      await webViewController.loadUrl(
+        currentChannel ?? 'https://www.twitch.tv/BoostTeam_',
+      );
+    } catch (e, s) {
+      _logger.error('Error loading current channel URL', e, s);
+      Messages.warning('Erro ao carregar o canal atual');
+      throw Failure(message: 'Erro ao carregar o canal atual');
     }
   }
 
