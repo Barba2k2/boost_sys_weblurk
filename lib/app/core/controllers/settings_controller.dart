@@ -1,7 +1,5 @@
 import 'dart:io';
 import 'package:mobx/mobx.dart';
-import '../../service/schedule/schedule_service.dart';
-import '../formatters/date_formatter.dart';
 import '../logger/app_logger.dart';
 import '../ui/widgets/messages.dart';
 
