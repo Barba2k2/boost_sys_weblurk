@@ -39,4 +39,16 @@ class HomeServiceImpl implements HomeService {
 
   @override
   Future<void> updateLists() async => await fetchSchedules();
+  
+  @override
+  Future<String?> fetchCurrentChannel() async {
+    try {
+    final response = await _homeRepository.getCurrentChannel();
+
+    return response;
+  } catch (e, s) {
+    _logger.error('Error fetching current channel URL', e, s);
+    throw Failure(message: 'Erro ao buscar a URL do canal atual');
+  }
+  }
 }
