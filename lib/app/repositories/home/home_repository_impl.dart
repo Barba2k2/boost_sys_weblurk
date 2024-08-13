@@ -42,7 +42,7 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<void> forceUpdateLive() async {
     try {
-      final response = await _restClient.auth().post('/schedules/update');
+      final response = await _restClient.auth().get('/schedules/update');
 
       if (response.statusCode == 200) {
         return;
@@ -57,6 +57,35 @@ class HomeRepositoryImpl implements HomeRepository {
     } catch (e, s) {
       _logger.error('Error forcing live update', e, s);
       throw Failure(message: 'Erro genérico ao forçar a atualização da live');
+    }
+  }
+
+  @override
+  Future<String?> getCurrentChannel() async {
+    try {
+      final formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      final response = await _restClient.auth().get(
+            '/schedules/get?date=$formattedDate',
+          );
+
+      if (response.statusCode == 200) {
+        // Certifique-se de que a resposta é uma lista e pegue o primeiro item
+        if (response.data is List && response.data.isNotEmpty) {
+          final firstSchedule = response.data[1];
+          return firstSchedule['streamer_url'] as String?;
+        } else {
+          _logger.warning(
+            'A lista de agendamentos está vazia ou a estrutura dos dados não está correta',
+          );
+          return null;
+        }
+      } else {
+        throw Failure(message: 'Erro ao buscar a URL do canal');
+      }
+    } catch (e, s) {
+      _logger.error('Error fetching channel URL', e, s);
+      throw Failure(message: 'Erro ao buscar a URL do canal');
     }
   }
 }
