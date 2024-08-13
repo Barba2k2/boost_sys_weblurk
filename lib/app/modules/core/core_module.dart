@@ -67,7 +67,6 @@ class CoreModule extends Module {
         Bind.lazySingleton<SettingsController>(
           (i) => SettingsController(
             logger: i<AppLogger>(),
-            scheduleService: i<ScheduleService>(),
           ),
           export: true,
         ),
