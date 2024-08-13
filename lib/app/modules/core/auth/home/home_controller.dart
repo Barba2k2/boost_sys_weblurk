@@ -84,15 +84,17 @@ abstract class HomeControllerBase with Store {
   @action
   Future<void> loadCurrentChannel() async {
     try {
-      // Supondo que o método fetchCurrentChannelUrl() existe no HomeService e retorna a URL do banco
       currentChannel = await _homeService.fetchCurrentChannel();
 
-      _logger.info('Current channel: $currentChannel');
-
-      // Atualiza o WebView com a URL carregada
-      await webViewController.loadUrl(
-        currentChannel ?? 'https://www.twitch.tv/BoostTeam_',
-      );
+      if (isWebViewInitialized) {
+        await webViewController.loadUrl(
+          currentChannel ?? 'https://www.twitch.tv/BoostTeam_',
+        );
+      } else {
+        _logger.warning(
+          'Tentativa de carregar URL antes da inicialização do WebView',
+        );
+      }
     } catch (e, s) {
       _logger.error('Error loading current channel URL', e, s);
       Messages.warning('Erro ao carregar o canal atual');
