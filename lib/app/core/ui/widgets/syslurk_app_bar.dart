@@ -31,7 +31,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                 PopupMenuItem<String>(
                   child: const Text('Atualizar Listas'),
                   onTap: () {
-                    homeController.updateLists();
+                    homeController.loadSchedules();
                   },
                 ),
                 PopupMenuItem<String>(
