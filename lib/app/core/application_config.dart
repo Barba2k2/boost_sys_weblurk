@@ -18,7 +18,7 @@ class ApplicationConfig {
     await windowManager.ensureInitialized();
 
     windowManager.setSize(
-      const Size(800, 600),
+      const Size(1024, 768),
     );
 
     windowManager.setResizable(false);
