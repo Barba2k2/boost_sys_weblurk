@@ -50,17 +50,6 @@ abstract class HomeControllerBase with Store {
     }
   }
 
-  // @action
-  // Future<void> updateLists() async {
-  //   try {
-  //     await _homeService.forceUpdateLive();
-  //   } catch (e, s) {
-  //     _logger.error('Error on force update live', e, s);
-  //     Messages.warning('Erro ao forçar a atualização da live');
-  //     throw Failure(message: 'Erro ao forçar a atualização da live');
-  //   }
-  // }
-
   @action
   Future<void> initializeWebView() async {
     if (!isWebViewInitialized) {
@@ -69,9 +58,7 @@ abstract class HomeControllerBase with Store {
         await webViewController.setUserAgent(
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
         );
-        final correctUrl = 'https://www.twitch.tv/$initialChannel';
-
-        await webViewController.loadUrl(correctUrl);
+        await _loadInitialChannel();
 
         isWebViewInitialized = true;
       } catch (e, s) {
@@ -82,23 +69,67 @@ abstract class HomeControllerBase with Store {
   }
 
   @action
+  Future<void> _loadInitialChannel() async {
+    try {
+      final correctUrl = await _homeService.fetchCurrentChannel();
+      await webViewController.loadUrl(correctUrl ?? '$correctUrl');
+    } catch (e, s) {
+      _logger.error('Error loading initial channel URL', e, s);
+      Messages.warning('Erro ao carregar o canal inicial');
+      throw Failure(message: 'Erro ao carregar o canal inicial');
+    }
+  }
+
+  @action
   Future<void> loadCurrentChannel() async {
     try {
-      currentChannel = await _homeService.fetchCurrentChannel();
-
-      if (isWebViewInitialized) {
-        await webViewController.loadUrl(
-          currentChannel ?? 'https://www.twitch.tv/BoostTeam_',
-        );
+      final newChannel = await _homeService.fetchCurrentChannel();
+      if (newChannel != null && isWebViewInitialized) {
+        currentChannel = newChannel;
+        await webViewController.loadUrl(newChannel);
+        _logger.info('Current Channel: $newChannel');
       } else {
-        _logger.warning(
-          'Tentativa de carregar URL antes da inicialização do WebView',
-        );
+        // Canal padrão se não houver um canal agendado no momento
+        const defaultChannel = 'https://twitch.tv/BoostTeam_';
+        currentChannel = defaultChannel;
+        if (isWebViewInitialized) {
+          await webViewController.loadUrl(defaultChannel);
+          _logger.warning(
+            'Nenhum canal ao vivo no momento, carregando canal padrão: $defaultChannel',
+          );
+        } else {
+          _logger.warning(
+            'Nenhum canal ao vivo no momento e WebView não inicializada',
+          );
+        }
       }
     } catch (e, s) {
       _logger.error('Error loading current channel URL', e, s);
       Messages.warning('Erro ao carregar o canal atual');
       throw Failure(message: 'Erro ao carregar o canal atual');
+    }
+  }
+
+  @action
+  Future<void> startPollingForUpdates() async {
+    const pollingInterval = Duration(seconds: 10);
+
+    while (true) {
+      await Future.delayed(pollingInterval);
+
+      // Chame o método que verifica o canal atual
+      await loadCurrentChannel();
+    }
+  }
+
+  @action
+  Future<void> forceUpdateLive() async {
+    try {
+      await _homeService.forceUpdateLive();
+      await loadCurrentChannel();
+    } catch (e, s) {
+      _logger.error('Error on force update', e, s);
+      throw Failure(message: 'Erro ao forçar a atualização da live');
     }
   }
 
@@ -110,6 +141,7 @@ abstract class HomeControllerBase with Store {
     } else {
       initializationFuture = initializeWebView();
       loadSchedules();
+      startPollingForUpdates();
     }
   }
 }

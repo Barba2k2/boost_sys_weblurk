@@ -94,6 +94,15 @@ mixin _$HomeController on HomeControllerBase, Store {
     return _$initializeWebViewAsyncAction.run(() => super.initializeWebView());
   }
 
+  late final _$_loadInitialChannelAsyncAction =
+      AsyncAction('HomeControllerBase._loadInitialChannel', context: context);
+
+  @override
+  Future<void> _loadInitialChannel() {
+    return _$_loadInitialChannelAsyncAction
+        .run(() => super._loadInitialChannel());
+  }
+
   late final _$loadCurrentChannelAsyncAction =
       AsyncAction('HomeControllerBase.loadCurrentChannel', context: context);
 
@@ -101,6 +110,24 @@ mixin _$HomeController on HomeControllerBase, Store {
   Future<void> loadCurrentChannel() {
     return _$loadCurrentChannelAsyncAction
         .run(() => super.loadCurrentChannel());
+  }
+
+  late final _$startPollingForUpdatesAsyncAction = AsyncAction(
+      'HomeControllerBase.startPollingForUpdates',
+      context: context);
+
+  @override
+  Future<void> startPollingForUpdates() {
+    return _$startPollingForUpdatesAsyncAction
+        .run(() => super.startPollingForUpdates());
+  }
+
+  late final _$forceUpdateLiveAsyncAction =
+      AsyncAction('HomeControllerBase.forceUpdateLive', context: context);
+
+  @override
+  Future<void> forceUpdateLive() {
+    return _$forceUpdateLiveAsyncAction.run(() => super.forceUpdateLive());
   }
 
   late final _$HomeControllerBaseActionController =
