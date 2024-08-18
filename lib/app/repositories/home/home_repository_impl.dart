@@ -42,21 +42,22 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<void> forceUpdateLive() async {
     try {
-      final response = await _restClient.auth().get('/schedules/update');
+      final response = await _restClient.auth().post('/schedule/force-update');
 
       if (response.statusCode == 200) {
-        return;
+        final responseBody = response.data;
+        final newChannel = responseBody['currentChannel'] as String?;
+
+        if (newChannel != null && newChannel.isNotEmpty) {
+          _logger.info('New channel detected: $newChannel');
+        }
       } else {
+        _logger.error('Failed to force update live: ${response.statusCode}');
         throw Failure(message: 'Erro ao forçar a atualização da live');
       }
-    } on RestClientException catch (e, s) {
-      _logger.error('Error on force update live', e, s);
-      throw Failure(
-        message: 'Erro do RestClient ao forçar a atualização da live',
-      );
     } catch (e, s) {
       _logger.error('Error forcing live update', e, s);
-      throw Failure(message: 'Erro genérico ao forçar a atualização da live');
+      throw Failure(message: 'Erro ao forçar a atualização da live');
     }
   }
 
