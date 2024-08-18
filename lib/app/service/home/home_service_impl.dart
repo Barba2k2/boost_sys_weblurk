@@ -29,26 +29,63 @@ class HomeServiceImpl implements HomeService {
   Future<void> forceUpdateLive() async {
     try {
       await _homeRepository.forceUpdateLive();
-      Messages.success('Lista atualizada com sucesso');
     } catch (e, s) {
-      _logger.error('Error on force update live', e, s);
-      Messages.warning('Erro ao forçar a atualização da live');
+      _logger.error('Error forcing live update', e, s);
       throw Failure(message: 'Erro ao forçar a atualização da live');
     }
   }
 
   @override
   Future<void> updateLists() async => await fetchSchedules();
-  
+
   @override
   Future<String?> fetchCurrentChannel() async {
     try {
-    final response = await _homeRepository.getCurrentChannel();
+      final now = DateTime.now();
+      final schedules = await _homeRepository.loadSchedules(now);
 
-    return response;
-  } catch (e, s) {
-    _logger.error('Error fetching current channel URL', e, s);
-    throw Failure(message: 'Erro ao buscar a URL do canal atual');
-  }
+      if (schedules.isEmpty) {
+        _logger.warning(
+          'Nenhuma live correspondente ao horário atual, carregando canal padrão',
+        );
+        return 'https://twitch.tv/BoostTeam_';
+      }
+
+      final currentSchedule = schedules.firstWhere(
+        (schedule) {
+          final startTimeParts = schedule['start_time'].split(':');
+          final endTimeParts = schedule['end_time'].split(':');
+
+          final startDateTime = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            int.parse(startTimeParts[0]),
+            int.parse(startTimeParts[1]),
+            int.parse(startTimeParts[2]),
+          );
+          final endDateTime = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            int.parse(endTimeParts[0]),
+            int.parse(endTimeParts[1]),
+            int.parse(endTimeParts[2]),
+          );
+
+          return now.isAfter(startDateTime) && now.isBefore(endDateTime);
+        },
+      );
+
+      if (currentSchedule.isNotEmpty) {
+        return currentSchedule['streamer_url'] as String?;
+      } else {
+        _logger.warning('Nenhuma live correspondente ao horário atual');
+        return 'https://twitch.tv/BoostTeam_';
+      }
+    } catch (e, s) {
+      _logger.error('Erro ao buscar o canal atual', e, s);
+      throw Failure(message: 'Erro ao buscar o canal atual');
+    }
   }
 }
