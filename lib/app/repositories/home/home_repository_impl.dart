@@ -4,6 +4,7 @@ import '../../core/exceptions/failure.dart';
 import '../../core/logger/app_logger.dart';
 import '../../core/rest_client/rest_client.dart';
 import '../../core/rest_client/rest_client_exception.dart';
+import '../../models/score_model.dart';
 import './home_repository.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
@@ -87,6 +88,56 @@ class HomeRepositoryImpl implements HomeRepository {
     } catch (e, s) {
       _logger.error('Error fetching channel URL', e, s);
       throw Failure(message: 'Erro ao buscar a URL do canal');
+    }
+  }
+
+  @override
+  Future<void> saveScore(ScoreModel score) async {
+    try {
+      final response = await _restClient.auth().post(
+        '/scores/save',
+        data: {
+          'streamer_id': score.streamerId,
+          'date': DateFormat('yyyy-MM-dd').format(score.date),
+          'hour': score.hour,
+          'points': score.points,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        _logger.error('Failed to save score: ${response.statusCode}');
+        throw Failure(message: 'Erro ao salvar a pontuação');
+      } else {
+        _logger.info(
+          'Score saved successfully for streamer ${score.streamerId}',
+        );
+      }
+    } catch (e, s) {
+      _logger.error('Error saving score', e, s);
+      throw Failure(message: 'Erro ao salvar a pontuação');
+    }
+  }
+
+  @override
+  Future<void> updateStreamerStatus(int streamerId, String status) async {
+    try {
+      final response = await _restClient.auth().post(
+        '/streamer/status/update',
+        data: {
+          'streamerId': streamerId,
+          'status': status,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        _logger.error(
+          'Failed to update streamer status: ${response.statusCode}',
+        );
+        throw Failure(message: 'Erro ao atualizar o status do streamer');
+      }
+    } catch (e, s) {
+      _logger.error('Error updating streamer status', e, s);
+      throw Failure(message: 'Erro ao atualizar o status do streamer');
     }
   }
 }
