@@ -134,6 +134,99 @@ abstract class HomeControllerBase with Store {
   }
 
   @action
+  Future<void> startCheckingScores() async {
+    const Duration interval = Duration(seconds: 20);
+    while (true) {
+      _logger.info('Checking and saving score...');
+      await Future.delayed(interval);
+      await _checkAndSaveScore();
+    }
+  }
+
+  Future<void> _checkAndSaveScore() async {
+    try {
+      final isLoggedIn = await _checkIfStreamerIsLoggedIn();
+
+      if (isLoggedIn) {
+        final now = DateTime.now();
+        final hour = now.hour;
+        const points = 1;
+        final streamerId = _getCurrentStreamerId();
+
+        await _homeService.saveScore(
+          streamerId,
+          DateTime(now.year, now.month, now.day),
+          hour,
+          points,
+        );
+        _logger.info('Score saved successfully for streamer $streamerId.');
+      } else {
+        _logger.warning('Streamer is not logged in.');
+      }
+    } catch (e, s) {
+      _logger.error('Error checking and saving score', e, s);
+    }
+  }
+
+  @action
+  Future<void> startCheckingStreamerStatus() async {
+    const Duration interval = Duration(minutes: 1);
+    while (true) {
+      await Future.delayed(interval);
+      await _updateStreamerStatus();
+    }
+  }
+
+  Future<void> _updateStreamerStatus() async {
+    try {
+      final isLoggedIn = await _checkIfStreamerIsLoggedIn();
+      final streamerId = _getCurrentStreamerId();
+      await _homeService.updateStreamerStatus(streamerId, isLoggedIn);
+    } catch (e, s) {
+      _logger.error('Error updating streamer status', e, s);
+    }
+  }
+
+  Future<bool> _checkIfStreamerIsLoggedIn() async {
+    try {
+      // Supondo que há um endpoint para verificar o status de login do streamer
+      final response = await _homeService.isStreamerLoggedIn();
+
+      if (response) {
+        _logger.info('Streamer is logged in.');
+        return true;
+      } else {
+        _logger.warning('Streamer is not logged in.');
+        return false;
+      }
+    } catch (e, s) {
+      _logger.error('Error checking if streamer is logged in', e, s);
+      return false;
+    }
+  }
+
+  int _getCurrentStreamerId() {
+    try {
+      // Supondo que o ID do streamer logado está armazenado no AuthStore ou em uma variável local
+      final streamerId =
+          int.tryParse(_authStore.userLogged?.streamerId ?? '0') ?? 0;
+
+      _logger.info('Streamer ID: $streamerId');
+
+      if (streamerId > 0) {
+        _logger.info('Current streamer ID: $streamerId');
+        return streamerId;
+      } else {
+        _logger.warning('Streamer ID not found.');
+        throw Failure(message: 'Streamer ID não encontrado');
+      }
+    } catch (e, s) {
+      _logger.error('Error getting current streamer ID', e, s);
+      throw Failure(message: 'Erro ao obter o ID do streamer');
+    }
+  }
+
+  @action
   void onInit() {
     if (_authStore.userLogged == null ||
         _authStore.userLogged!.nickname.isEmpty) {
@@ -142,6 +235,7 @@ abstract class HomeControllerBase with Store {
       initializationFuture = initializeWebView();
       loadSchedules();
       startPollingForUpdates();
+      startCheckingScores();
     }
   }
 }
