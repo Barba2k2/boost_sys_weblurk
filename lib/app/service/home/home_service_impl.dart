@@ -1,6 +1,7 @@
 import '../../core/exceptions/failure.dart';
 import '../../core/logger/app_logger.dart';
 import '../../core/ui/widgets/messages.dart';
+import '../../models/score_model.dart';
 import '../../repositories/home/home_repository.dart';
 import 'home_service.dart';
 
@@ -87,5 +88,39 @@ class HomeServiceImpl implements HomeService {
       _logger.error('Erro ao buscar o canal atual', e, s);
       throw Failure(message: 'Erro ao buscar o canal atual');
     }
+  }
+
+  @override
+  Future<void> saveScore(
+    int streamerId,
+    DateTime date,
+    int hour,
+    int points,
+  ) async {
+    final score = ScoreModel(
+      id: 0,
+      streamerId: streamerId,
+      date: date,
+      hour: hour,
+      points: points,
+    );
+    await _homeRepository.saveScore(score);
+  }
+
+  @override
+  Future<void> updateStreamerStatus(int streamerId, bool isLoggedIn) async {
+    try {
+      final status = isLoggedIn ? 'ON' : 'OFF';
+      await _homeRepository.updateStreamerStatus(streamerId, status);
+      _logger.info('Streamer status updated successfully: $status');
+    } catch (e, s) {
+      _logger.error('Error updating streamer status', e, s);
+      throw Failure(message: 'Erro ao atualizar o status do streamer');
+    }
+  }
+  
+  @override
+  Future<bool> isStreamerLoggedIn() {
+    throw UnimplementedError();
   }
 }
