@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
+
 class UserModel {
   final int id;
   final String nickname;
   final String? password;
   final String role;
   final String? streamerId;
+  final String status;
 
   UserModel({
     required this.id,
@@ -13,6 +16,7 @@ class UserModel {
     this.password,
     required this.role,
     this.streamerId,
+    required this.status,
   });
 
   UserModel.empty()
@@ -20,7 +24,8 @@ class UserModel {
         nickname = '',
         password = '',
         role = '',
-        streamerId = '';
+        streamerId = '',
+        status = 'OFF';
 
   Map<String, dynamic> toMap() {
     return {
@@ -29,6 +34,7 @@ class UserModel {
       'password': password,
       'role': role,
       'streamerId': streamerId,
+      'status': status,
     };
   }
 
@@ -39,6 +45,7 @@ class UserModel {
       password: map['password'],
       role: map['role'] ?? '',
       streamerId: map['streamerId'] ?? '',
+      status: map['status'] ?? 'OFF'
     );
   }
 
@@ -46,5 +53,23 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> map) {
     return UserModel.fromMap(map);
+  }
+
+  UserModel copyWith({
+    int? id,
+    String? nickname,
+    ValueGetter<String?>? password,
+    String? role,
+    ValueGetter<String?>? streamerId,
+    String? status,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      nickname: nickname ?? this.nickname,
+      password: password != null ? password() : this.password,
+      role: role ?? this.role,
+      streamerId: streamerId != null ? streamerId() : this.streamerId,
+      status: status ?? this.status,
+    );
   }
 }
