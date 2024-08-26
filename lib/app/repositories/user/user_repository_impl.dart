@@ -96,4 +96,32 @@ class UserRepositoryImpl implements UserRepository {
       throw Failure(message: 'Erro ao obter usuário logado - 2');
     }
   }
+
+  @override
+  Future<void> updateLoginStatus(int userId, String status) async {
+    try {
+      final data = {
+        'status': status,
+      };
+      await _restClient.auth().patch('/user/status/$userId', data: data);
+      _logger.info('User status updated successfully');
+    } catch (e, s) {
+      _logger.error('Failed to update login status', e, s);
+      throw Failure(message: 'Failed to update login status');
+    }
+  }
+
+  @override
+  Future<void> saveLastSeen(int userId) async {
+    try {
+      final data = {
+        'last_seen': DateTime.now().toIso8601String(),
+      };
+      await _restClient.auth().patch('/user/last-seen/$userId', data: data);
+      _logger.info('User last seen time updated successfully');
+    } catch (e, s) {
+      _logger.error('Failed to update last seen time', e, s);
+      throw Failure(message: 'Failed to update last seen time');
+    }
+  }
 }
