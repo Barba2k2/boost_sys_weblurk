@@ -92,7 +92,9 @@ class UserServiceImpl implements UserService {
       await _localSecureStorage.remove(
         Constants.LOCAL_SOTRAGE_REFRESH_TOKEN_KEY,
       );
-      await _localStorage.remove(Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY);
+      await _localStorage.remove(
+        Constants.LOCAL_SOTRAGE_USER_LOGGED_STATUS_KEY,
+      );
     } catch (e, s) {
       _logger.error('Service - Failed to logout user', e, s);
       throw Failure(message: 'Failed to logout user');
@@ -103,6 +105,7 @@ class UserServiceImpl implements UserService {
     try {
       final userModel = await _userRepository.getUserLogged();
       await _userRepository.updateLoginStatus(userModel.id, status);
+      await _saveLastSeen();
       _logger.info('User status updated to $status');
     } catch (e, s) {
       _logger.error('Failed to update login status', e, s);
@@ -112,8 +115,8 @@ class UserServiceImpl implements UserService {
 
   Future<void> _saveLastSeen() async {
     try {
-      final userModel = await _userRepository.getUserLogged();
-      await _userRepository.saveLastSeen(userModel.id);
+      await _userRepository.getUserLogged();
+      // await _userRepository.saveLastSeen(userModel.id);
       _logger.info('User last seen time saved');
     } catch (e, s) {
       _logger.error('Failed to save last seen time', e, s);
