@@ -36,6 +36,17 @@ abstract class AuthStoreBase with Store {
   }
 
   @action
+  Future<void> updateUserStatus(String status) async {
+    if (_userLogged != null) {
+      _userLogged = _userLogged!.copyWith(status: status);
+      await _localStorage.write(
+        Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
+        _userLogged!.toJson(),
+      );
+    }
+  }
+
+  @action
   Future<void> logout() async {
     await _localStorage.clear();
     _userLogged = UserModel.empty();

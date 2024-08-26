@@ -35,6 +35,15 @@ mixin _$AuthStore on AuthStoreBase, Store {
     return _$loadUserLoggedAsyncAction.run(() => super.loadUserLogged());
   }
 
+  late final _$updateUserStatusAsyncAction =
+      AsyncAction('AuthStoreBase.updateUserStatus', context: context);
+
+  @override
+  Future<void> updateUserStatus(String status) {
+    return _$updateUserStatusAsyncAction
+        .run(() => super.updateUserStatus(status));
+  }
+
   late final _$logoutAsyncAction =
       AsyncAction('AuthStoreBase.logout', context: context);
 
