@@ -6,5 +6,5 @@ abstract class UserRepository {
   Future<ConfirmLoginModel> confirmLogin();
   Future<UserModel> getUserLogged();
   Future<void> updateLoginStatus(int userId, String status);
-  Future<void> saveLastSeen(int userId);
+  // Future<void> saveLastSeen(int userId);
 }
