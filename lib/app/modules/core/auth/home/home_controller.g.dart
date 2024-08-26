@@ -139,16 +139,6 @@ mixin _$HomeController on HomeControllerBase, Store {
         .run(() => super.startCheckingScores());
   }
 
-  late final _$startCheckingStreamerStatusAsyncAction = AsyncAction(
-      'HomeControllerBase.startCheckingStreamerStatus',
-      context: context);
-
-  @override
-  Future<void> startCheckingStreamerStatus() {
-    return _$startCheckingStreamerStatusAsyncAction
-        .run(() => super.startCheckingStreamerStatus());
-  }
-
   late final _$HomeControllerBaseActionController =
       ActionController(name: 'HomeControllerBase', context: context);
 

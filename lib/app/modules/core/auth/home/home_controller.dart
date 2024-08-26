@@ -112,7 +112,7 @@ abstract class HomeControllerBase with Store {
 
   @action
   Future<void> startPollingForUpdates() async {
-    const pollingInterval = Duration(seconds: 10);
+    const pollingInterval = Duration(minutes: 10);
 
     while (true) {
       await Future.delayed(pollingInterval);
@@ -135,73 +135,39 @@ abstract class HomeControllerBase with Store {
 
   @action
   Future<void> startCheckingScores() async {
-    const Duration interval = Duration(seconds: 20);
+    const Duration interval = Duration(minutes: 6);
     while (true) {
-      _logger.info('Checking and saving score...');
       await Future.delayed(interval);
-      await _checkAndSaveScore();
-    }
-  }
 
-  Future<void> _checkAndSaveScore() async {
-    try {
-      final isLoggedIn = await _checkIfStreamerIsLoggedIn();
+      // Verifica se o streamer está logado baseado no status
+      final userStatus = _authStore.userLogged?.status;
 
-      if (isLoggedIn) {
-        final now = DateTime.now();
-        final hour = now.hour;
-        const points = 1;
-        final streamerId = _getCurrentStreamerId();
-
-        await _homeService.saveScore(
-          streamerId,
-          DateTime(now.year, now.month, now.day),
-          hour,
-          points,
-        );
-        _logger.info('Score saved successfully for streamer $streamerId.');
+      if (userStatus == 'ON') {
+        _logger.info('User is ON. Checking and saving score...');
+        await _saveScore();
       } else {
-        _logger.warning('Streamer is not logged in.');
+        _logger.warning('User is OFF. Stopping score generation.');
+        break; // Saia do loop se o status for 'OFF'
       }
-    } catch (e, s) {
-      _logger.error('Error checking and saving score', e, s);
     }
   }
 
-  @action
-  Future<void> startCheckingStreamerStatus() async {
-    const Duration interval = Duration(minutes: 1);
-    while (true) {
-      await Future.delayed(interval);
-      await _updateStreamerStatus();
-    }
-  }
-
-  Future<void> _updateStreamerStatus() async {
+  Future<void> _saveScore() async {
     try {
-      final isLoggedIn = await _checkIfStreamerIsLoggedIn();
+      final now = DateTime.now();
+      final hour = now.hour;
+      const points = 1;
       final streamerId = _getCurrentStreamerId();
-      await _homeService.updateStreamerStatus(streamerId, isLoggedIn);
-    } catch (e, s) {
-      _logger.error('Error updating streamer status', e, s);
-    }
-  }
 
-  Future<bool> _checkIfStreamerIsLoggedIn() async {
-    try {
-      // Supondo que há um endpoint para verificar o status de login do streamer
-      final response = await _homeService.isStreamerLoggedIn();
-
-      if (response) {
-        _logger.info('Streamer is logged in.');
-        return true;
-      } else {
-        _logger.warning('Streamer is not logged in.');
-        return false;
-      }
+      await _homeService.saveScore(
+        streamerId,
+        DateTime(now.year, now.month, now.day),
+        hour,
+        points,
+      );
+      _logger.info('Score saved successfully for streamer $streamerId.');
     } catch (e, s) {
-      _logger.error('Error checking if streamer is logged in', e, s);
-      return false;
+      _logger.error('Error saving score', e, s);
     }
   }
 
@@ -235,7 +201,9 @@ abstract class HomeControllerBase with Store {
       initializationFuture = initializeWebView();
       loadSchedules();
       startPollingForUpdates();
-      startCheckingScores();
+      if (_authStore.userLogged?.status == 'ON') {
+        startCheckingScores();
+      }
     }
   }
 }
