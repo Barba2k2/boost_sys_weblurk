@@ -9,6 +9,6 @@ abstract class HomeService {
     int hour,
     int points,
   );
-  Future<void> updateStreamerStatus(int streamerId, bool isLoggedIn);
+  // Future<void> updateStreamerStatus(int streamerId, bool isLoggedIn);
   Future<bool> isStreamerLoggedIn();
 }

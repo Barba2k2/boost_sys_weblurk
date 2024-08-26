@@ -97,28 +97,22 @@ class HomeServiceImpl implements HomeService {
     int hour,
     int points,
   ) async {
-    final score = ScoreModel(
-      id: 0,
-      streamerId: streamerId,
-      date: date,
-      hour: hour,
-      points: points,
-    );
-    await _homeRepository.saveScore(score);
-  }
-
-  @override
-  Future<void> updateStreamerStatus(int streamerId, bool isLoggedIn) async {
     try {
-      final status = isLoggedIn ? 'ON' : 'OFF';
-      await _homeRepository.updateStreamerStatus(streamerId, status);
-      _logger.info('Streamer status updated successfully: $status');
+      final score = ScoreModel(
+        // id: 0,
+        streamerId: streamerId,
+        date: date,
+        hour: hour,
+        points: points,
+      );
+
+      await _homeRepository.saveScore(score);
     } catch (e, s) {
-      _logger.error('Error updating streamer status', e, s);
-      throw Failure(message: 'Erro ao atualizar o status do streamer');
+      _logger.error('Error saving score', e, s);
+      throw Failure(message: 'Erro ao salvar a pontuação');
     }
   }
-  
+
   @override
   Future<bool> isStreamerLoggedIn() {
     throw UnimplementedError();
