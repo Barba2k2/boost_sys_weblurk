@@ -31,6 +31,8 @@ class UserServiceImpl implements UserService {
       await _confirmLogin();
 
       await _getUserData();
+
+      await _updateLoginStatus('ON');
     } catch (e, s) {
       _logger.error('Service - Failed to login user', e, s);
       throw Failure(message: 'Failed to login user');
@@ -75,6 +77,47 @@ class UserServiceImpl implements UserService {
     } catch (e, s) {
       _logger.error('Failed to get user data', e, s);
       throw Failure(message: 'Failed to get user data');
+    }
+  }
+
+  @override
+  Future<void> logout() async {
+    try {
+      // Atualizar o status para 'OFF' e registrar o horário de logout
+      await _updateLoginStatus('OFF');
+      await _saveLastSeen();
+
+      // Limpar tokens e dados do usuário
+      await _localStorage.remove(Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY);
+      await _localSecureStorage.remove(
+        Constants.LOCAL_SOTRAGE_REFRESH_TOKEN_KEY,
+      );
+      await _localStorage.remove(Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY);
+    } catch (e, s) {
+      _logger.error('Service - Failed to logout user', e, s);
+      throw Failure(message: 'Failed to logout user');
+    }
+  }
+
+  Future<void> _updateLoginStatus(String status) async {
+    try {
+      final userModel = await _userRepository.getUserLogged();
+      await _userRepository.updateLoginStatus(userModel.id, status);
+      _logger.info('User status updated to $status');
+    } catch (e, s) {
+      _logger.error('Failed to update login status', e, s);
+      throw Failure(message: 'Failed to update login status');
+    }
+  }
+
+  Future<void> _saveLastSeen() async {
+    try {
+      final userModel = await _userRepository.getUserLogged();
+      await _userRepository.saveLastSeen(userModel.id);
+      _logger.info('User last seen time saved');
+    } catch (e, s) {
+      _logger.error('Failed to save last seen time', e, s);
+      throw Failure(message: 'Failed to save last seen time');
     }
   }
 }
