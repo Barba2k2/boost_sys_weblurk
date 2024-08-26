@@ -40,7 +40,7 @@ abstract class AuthStoreBase with Store {
     if (_userLogged != null) {
       _userLogged = _userLogged!.copyWith(status: status);
       await _localStorage.write(
-        Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
+        Constants.LOCAL_SOTRAGE_USER_LOGGED_STATUS_KEY,
         _userLogged!.toJson(),
       );
     }
