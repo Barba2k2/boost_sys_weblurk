@@ -94,50 +94,30 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<void> saveScore(ScoreModel score) async {
     try {
+      final data = {
+        'streamerId': score.streamerId,
+        'date': DateFormat('yyyy-MM-dd').format(score.date),
+        'hour': score.hour,
+        'points': score.points,
+      };
+
       final response = await _restClient.auth().post(
-        '/scores/save',
-        data: {
-          'streamer_id': score.streamerId,
-          'date': DateFormat('yyyy-MM-dd').format(score.date),
-          'hour': score.hour,
-          'points': score.points,
-        },
-      );
+            '/score/save',
+            data: data,
+          );
 
       if (response.statusCode != 200) {
         _logger.error('Failed to save score: ${response.statusCode}');
         throw Failure(message: 'Erro ao salvar a pontuação');
       } else {
         _logger.info(
-          'Score saved successfully for streamer ${score.streamerId}',
+          'Score saved successfully for streamer ${score.streamerId}, with ${response.statusCode}',
         );
+        throw Failure(message: 'Erro ao salvar a pontuação');
       }
     } catch (e, s) {
       _logger.error('Error saving score', e, s);
       throw Failure(message: 'Erro ao salvar a pontuação');
-    }
-  }
-
-  @override
-  Future<void> updateStreamerStatus(int streamerId, String status) async {
-    try {
-      final response = await _restClient.auth().post(
-        '/streamer/status/update',
-        data: {
-          'streamerId': streamerId,
-          'status': status,
-        },
-      );
-
-      if (response.statusCode != 200) {
-        _logger.error(
-          'Failed to update streamer status: ${response.statusCode}',
-        );
-        throw Failure(message: 'Erro ao atualizar o status do streamer');
-      }
-    } catch (e, s) {
-      _logger.error('Error updating streamer status', e, s);
-      throw Failure(message: 'Erro ao atualizar o status do streamer');
     }
   }
 }

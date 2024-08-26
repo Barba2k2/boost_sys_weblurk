@@ -5,5 +5,5 @@ abstract class HomeRepository {
   Future<void> forceUpdateLive();
   Future<String?> getCurrentChannel();
   Future<void> saveScore(ScoreModel score);
-  Future<void> updateStreamerStatus(int streamerId, String status);
+  // Future<void> updateStreamerStatus(int streamerId, String status);
 }
