@@ -84,24 +84,15 @@ abstract class HomeControllerBase with Store {
   Future<void> loadCurrentChannel() async {
     try {
       final newChannel = await _homeService.fetchCurrentChannel();
-      if (newChannel != null && isWebViewInitialized) {
-        currentChannel = newChannel;
-        await webViewController.loadUrl(newChannel);
-        _logger.info('Current Channel: $newChannel');
+      currentChannel = newChannel ?? 'https://twitch.tv/BoostTeam_';
+
+      if (isWebViewInitialized) {
+        await webViewController.loadUrl(currentChannel!);
+        _logger.info('Current Channel: $currentChannel');
       } else {
-        // Canal padrão se não houver um canal agendado no momento
-        const defaultChannel = 'https://twitch.tv/BoostTeam_';
-        currentChannel = defaultChannel;
-        if (isWebViewInitialized) {
-          await webViewController.loadUrl(defaultChannel);
-          _logger.warning(
-            'Nenhum canal ao vivo no momento, carregando canal padrão: $defaultChannel',
-          );
-        } else {
-          _logger.warning(
-            'Nenhum canal ao vivo no momento e WebView não inicializada',
-          );
-        }
+        _logger.warning(
+          'WebView não inicializada',
+        );
       }
     } catch (e, s) {
       _logger.error('Error loading current channel URL', e, s);
@@ -117,7 +108,6 @@ abstract class HomeControllerBase with Store {
     while (true) {
       await Future.delayed(pollingInterval);
 
-      // Chame o método que verifica o canal atual
       await loadCurrentChannel();
     }
   }
@@ -139,16 +129,7 @@ abstract class HomeControllerBase with Store {
     while (true) {
       await Future.delayed(interval);
 
-      // Verifica se o streamer está logado baseado no status
-      final userStatus = _authStore.userLogged?.status;
-
-      if (userStatus == 'ON') {
-        _logger.info('User is ON. Checking and saving score...');
-        await _saveScore();
-      } else {
-        _logger.warning('User is OFF. Stopping score generation.');
-        break; // Saia do loop se o status for 'OFF'
-      }
+      await _saveScore();
     }
   }
 
@@ -156,8 +137,13 @@ abstract class HomeControllerBase with Store {
     try {
       final now = DateTime.now();
       final hour = now.hour;
-      const points = 1;
+      const points = 10;
       final streamerId = _getCurrentStreamerId();
+
+      if (streamerId == 0) {
+        _logger.warning('Invalid streamer ID. Aborting save score operation.');
+        return;
+      }
 
       await _homeService.saveScore(
         streamerId,
@@ -165,26 +151,28 @@ abstract class HomeControllerBase with Store {
         hour,
         points,
       );
-      _logger.info('Score saved successfully for streamer $streamerId.');
     } catch (e, s) {
       _logger.error('Error saving score', e, s);
+      throw Failure(message: 'Erro ao salvar a pontuação');
     }
   }
 
   int _getCurrentStreamerId() {
     try {
-      // Supondo que o ID do streamer logado está armazenado no AuthStore ou em uma variável local
-      final streamerId =
-          int.tryParse(_authStore.userLogged?.streamerId ?? '0') ?? 0;
+      if (_authStore.userLogged == null) {
+        _logger.warning('No user is currently logged in.');
+        throw Failure(message: 'Nenhum usuário está logado.');
+      }
 
-      _logger.info('Streamer ID: $streamerId');
+      final streamerId =
+          int.tryParse(_authStore.userLogged?.id.toString() ?? '0') ?? 0;
 
       if (streamerId > 0) {
         _logger.info('Current streamer ID: $streamerId');
         return streamerId;
       } else {
         _logger.warning('Streamer ID not found.');
-        throw Failure(message: 'Streamer ID não encontrado');
+        return 0;
       }
     } catch (e, s) {
       _logger.error('Error getting current streamer ID', e, s);
@@ -198,12 +186,13 @@ abstract class HomeControllerBase with Store {
         _authStore.userLogged!.nickname.isEmpty) {
       Modular.to.navigate('/auth/login/');
     } else {
-      initializationFuture = initializeWebView();
-      loadSchedules();
-      startPollingForUpdates();
-      if (_authStore.userLogged?.status == 'ON') {
-        startCheckingScores();
-      }
+      initializationFuture = initializeWebView().then(
+        (_) {
+          loadSchedules();
+          startPollingForUpdates();
+          startCheckingScores();
+        },
+      );
     }
   }
 }
