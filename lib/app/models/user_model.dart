@@ -7,7 +7,6 @@ class UserModel {
   final String nickname;
   final String? password;
   final String role;
-  final String? streamerId;
   final String status;
 
   UserModel({
@@ -15,7 +14,6 @@ class UserModel {
     required this.nickname,
     this.password,
     required this.role,
-    this.streamerId,
     required this.status,
   });
 
@@ -24,7 +22,6 @@ class UserModel {
         nickname = '',
         password = '',
         role = '',
-        streamerId = '',
         status = 'OFF';
 
   Map<String, dynamic> toMap() {
@@ -33,7 +30,6 @@ class UserModel {
       'nickname': nickname,
       'password': password,
       'role': role,
-      'streamerId': streamerId,
       'status': status,
     };
   }
@@ -44,7 +40,6 @@ class UserModel {
       nickname: map['nickname'] ?? '',
       password: map['password'],
       role: map['role'] ?? '',
-      streamerId: map['streamerId'] ?? '',
       status: map['status'] ?? 'OFF'
     );
   }
@@ -68,7 +63,6 @@ class UserModel {
       nickname: nickname ?? this.nickname,
       password: password != null ? password() : this.password,
       role: role ?? this.role,
-      streamerId: streamerId != null ? streamerId() : this.streamerId,
       status: status ?? this.status,
     );
   }
