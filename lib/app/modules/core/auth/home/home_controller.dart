@@ -170,7 +170,6 @@ abstract class HomeControllerBase with Store {
           int.tryParse(_authStore.userLogged?.id.toString() ?? '0') ?? 0;
 
       if (streamerId > 0) {
-        _logger.info('Current streamer ID: $streamerId');
         return streamerId;
       } else {
         _logger.warning('Streamer ID not found.');
