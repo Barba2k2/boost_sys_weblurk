@@ -18,8 +18,6 @@ class ScheduleRepositoryImpl implements SchedulesRepository {
     try {
       final response = await _restClient.auth().get('/schedule/');
 
-      _logger.info('Response data ${response.data}');
-
       if (response.statusCode == 200) {
         return response.data as List;
       } else {
