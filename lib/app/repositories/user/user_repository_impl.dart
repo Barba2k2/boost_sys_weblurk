@@ -65,8 +65,6 @@ class UserRepositoryImpl implements UserRepository {
         if (!kIsWeb && Platform.isWindows) 'windows_token': deviceToken,
       };
 
-      _logger.info('Data being sent: $data');
-
       final result = await _restClient.auth().patch(
             '/auth/confirm',
             data: data,
@@ -107,7 +105,6 @@ class UserRepositoryImpl implements UserRepository {
           'status': status,
         },
       );
-      _logger.info('User status updated successfully');
     } catch (e, s) {
       _logger.error('Failed to update login status', e, s);
       throw Failure(message: 'Failed to update login status');
