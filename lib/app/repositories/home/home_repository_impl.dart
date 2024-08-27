@@ -40,27 +40,27 @@ class HomeRepositoryImpl implements HomeRepository {
     }
   }
 
-  @override
-  Future<void> forceUpdateLive() async {
-    try {
-      final response = await _restClient.auth().post('/schedule/force-update');
+  // @override
+  // Future<void> forceUpdateLive() async {
+  //   try {
+  //     final response = await _restClient.auth().post('/schedule/update');
 
-      if (response.statusCode == 200) {
-        final responseBody = response.data;
-        final newChannel = responseBody['currentChannel'] as String?;
+  //     if (response.statusCode == 200) {
+  //       final responseBody = response.data;
+  //       final newChannel = responseBody['currentChannel'] as String?;
 
-        if (newChannel != null && newChannel.isNotEmpty) {
-          _logger.info('New channel detected: $newChannel');
-        }
-      } else {
-        _logger.error('Failed to force update live: ${response.statusCode}');
-        throw Failure(message: 'Erro ao forçar a atualização da live');
-      }
-    } catch (e, s) {
-      _logger.error('Error forcing live update', e, s);
-      throw Failure(message: 'Erro ao forçar a atualização da live');
-    }
-  }
+  //       if (newChannel != null && newChannel.isNotEmpty) {
+  //         _logger.info('New channel detected: $newChannel');
+  //       }
+  //     } else {
+  //       _logger.error('Failed to force update live: ${response.statusCode}');
+  //       throw Failure(message: 'Erro ao forçar a atualização da live');
+  //     }
+  //   } catch (e, s) {
+  //     _logger.error('Error forcing live update', e, s);
+  //     throw Failure(message: 'Erro ao forçar a atualização da live');
+  //   }
+  // }
 
   @override
   Future<String?> getCurrentChannel() async {
