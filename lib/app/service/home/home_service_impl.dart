@@ -26,15 +26,15 @@ class HomeServiceImpl implements HomeService {
     }
   }
 
-  @override
-  Future<void> forceUpdateLive() async {
-    try {
-      await _homeRepository.forceUpdateLive();
-    } catch (e, s) {
-      _logger.error('Error forcing live update', e, s);
-      throw Failure(message: 'Erro ao forçar a atualização da live');
-    }
-  }
+  // @override
+  // Future<void> forceUpdateLive() async {
+  //   try {
+  //     await _homeRepository.forceUpdateLive();
+  //   } catch (e, s) {
+  //     _logger.error('Error forcing live update', e, s);
+  //     throw Failure(message: 'Erro ao forçar a atualização da live');
+  //   }
+  // }
 
   @override
   Future<void> updateLists() async => await fetchSchedules();
@@ -111,10 +111,5 @@ class HomeServiceImpl implements HomeService {
       _logger.error('Error saving score', e, s);
       throw Failure(message: 'Erro ao salvar a pontuação');
     }
-  }
-
-  @override
-  Future<bool> isStreamerLoggedIn() {
-    throw UnimplementedError();
   }
 }

@@ -1,6 +1,6 @@
 abstract class HomeService {
   Future<void> fetchSchedules();
-  Future<void> forceUpdateLive();
+  // Future<void> forceUpdateLive();
   Future<void> updateLists();
   Future<String?> fetchCurrentChannel();
   Future<void> saveScore(
@@ -9,6 +9,4 @@ abstract class HomeService {
     int hour,
     int points,
   );
-  // Future<void> updateStreamerStatus(int streamerId, bool isLoggedIn);
-  Future<bool> isStreamerLoggedIn();
 }
