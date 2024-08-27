@@ -122,14 +122,6 @@ mixin _$HomeController on HomeControllerBase, Store {
         .run(() => super.startPollingForUpdates());
   }
 
-  late final _$forceUpdateLiveAsyncAction =
-      AsyncAction('HomeControllerBase.forceUpdateLive', context: context);
-
-  @override
-  Future<void> forceUpdateLive() {
-    return _$forceUpdateLiveAsyncAction.run(() => super.forceUpdateLive());
-  }
-
   late final _$startCheckingScoresAsyncAction =
       AsyncAction('HomeControllerBase.startCheckingScores', context: context);
 
