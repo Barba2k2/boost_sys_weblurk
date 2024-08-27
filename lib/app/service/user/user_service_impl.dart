@@ -106,7 +106,6 @@ class UserServiceImpl implements UserService {
       final userModel = await _userRepository.getUserLogged();
       await _userRepository.updateLoginStatus(userModel.id, status);
       await _saveLastSeen();
-      _logger.info('User status updated to $status');
     } catch (e, s) {
       _logger.error('Failed to update login status', e, s);
       throw Failure(message: 'Failed to update login status');
@@ -116,8 +115,6 @@ class UserServiceImpl implements UserService {
   Future<void> _saveLastSeen() async {
     try {
       await _userRepository.getUserLogged();
-      // await _userRepository.saveLastSeen(userModel.id);
-      _logger.info('User last seen time saved');
     } catch (e, s) {
       _logger.error('Failed to save last seen time', e, s);
       throw Failure(message: 'Failed to save last seen time');
