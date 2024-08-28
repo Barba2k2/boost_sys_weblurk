@@ -137,7 +137,8 @@ abstract class HomeControllerBase with Store {
     try {
       final now = DateTime.now();
       final hour = now.hour;
-      const points = 10;
+      final minute = now.minute;
+      const points = 1;
       final streamerId = _getCurrentStreamerId();
 
       if (streamerId == 0) {
@@ -148,6 +149,7 @@ abstract class HomeControllerBase with Store {
       await _homeService.saveScore(
         streamerId,
         DateTime(now.year, now.month, now.day),
+        minute,
         hour,
         points,
       );
@@ -168,6 +170,7 @@ abstract class HomeControllerBase with Store {
           int.tryParse(_authStore.userLogged?.id.toString() ?? '0') ?? 0;
 
       if (streamerId > 0) {
+        _logger.info('Streamer ID: $streamerId');
         return streamerId;
       } else {
         _logger.warning('Streamer ID not found.');
