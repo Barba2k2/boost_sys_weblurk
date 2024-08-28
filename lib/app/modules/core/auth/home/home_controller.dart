@@ -103,7 +103,7 @@ abstract class HomeControllerBase with Store {
 
   @action
   Future<void> startPollingForUpdates() async {
-    const pollingInterval = Duration(minutes: 1);
+    const pollingInterval = Duration(minutes: 6);
 
     while (true) {
       await Future.delayed(pollingInterval);
@@ -128,7 +128,7 @@ abstract class HomeControllerBase with Store {
     const Duration interval = Duration(minutes: 6);
     while (true) {
       await Future.delayed(interval);
-
+      _logger.info('Saving score...');
       await _saveScore();
     }
   }
