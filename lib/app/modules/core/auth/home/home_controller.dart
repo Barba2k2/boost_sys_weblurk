@@ -1,6 +1,5 @@
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:webview_windows/webview_windows.dart';
 import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
@@ -39,7 +38,6 @@ abstract class HomeControllerBase with Store {
 
   final webViewController = WebviewController();
   bool isWebViewInitialized = false;
-  late WebSocketChannel channel;
 
   @action
   Future<void> loadSchedules() async {
