@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 
 import '../../../modules/core/auth/auth_store.dart';
@@ -124,11 +122,6 @@ class DioRestClient implements RestClient {
         queryParameters: queryParameters,
         options: Options(headers: headers),
       );
-
-      log('Request URL: ${_dio.options.baseUrl}$path');
-      log('Request Headers: ${Options(headers: headers).headers}');
-      log('Request Data: $data');
-      log('Base URL: ${_dio.options.baseUrl}');
 
       return _dioResponseConverter(response);
     } on DioException catch (e) {
