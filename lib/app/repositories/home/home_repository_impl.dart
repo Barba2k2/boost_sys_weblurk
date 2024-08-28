@@ -98,6 +98,7 @@ class HomeRepositoryImpl implements HomeRepository {
         'streamerId': score.streamerId,
         'date': DateFormat('yyyy-MM-dd').format(score.date),
         'hour': score.hour,
+        'minute': score.minute,
         'points': score.points,
       };
 
