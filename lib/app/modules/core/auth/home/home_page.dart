@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -23,13 +21,14 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     homeController.onInit();
-    homeController.loadCurrentChannel();
+    homeController.initializeWebView().then((_) {
+      homeController.loadCurrentChannel();
+    });
+    // homeController.loadCurrentChannel();
   }
 
   @override
   Widget build(BuildContext context) {
-    log('Current channel: ${homeController.currentChannel}');
-
     return LayoutBuilder(
       builder: (context, constraints) {
         return Scaffold(
