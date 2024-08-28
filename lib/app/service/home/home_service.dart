@@ -7,6 +7,7 @@ abstract class HomeService {
     int streamerId,
     DateTime date,
     int hour,
+    int minute,
     int points,
   );
 }

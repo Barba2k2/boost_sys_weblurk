@@ -95,6 +95,7 @@ class HomeServiceImpl implements HomeService {
     int streamerId,
     DateTime date,
     int hour,
+    int minute,
     int points,
   ) async {
     try {
@@ -103,6 +104,7 @@ class HomeServiceImpl implements HomeService {
         streamerId: streamerId,
         date: date,
         hour: hour,
+        minute: minute,
         points: points,
       );
 
