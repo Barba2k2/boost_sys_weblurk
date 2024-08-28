@@ -111,9 +111,8 @@ class HomeRepositoryImpl implements HomeRepository {
         throw Failure(message: 'Erro ao salvar a pontuação');
       } else {
         _logger.info(
-          'Score saved successfully for streamer ${score.streamerId}, with ${response.statusCode}',
+          'Score saved successfully for streamer ${score.streamerId}',
         );
-        throw Failure(message: 'Erro ao salvar a pontuação');
       }
     } catch (e, s) {
       _logger.error('Error saving score', e, s);
