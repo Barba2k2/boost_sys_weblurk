@@ -18,20 +18,10 @@ class WebviewWidget extends StatelessWidget {
     return FutureBuilder<void>(
       future: initializationFuture,
       builder: (context, snapshot) {
-        // Log the snapshot details
-        // log('Snapshot connection state: ${snapshot.connectionState}');
-        // log('Snapshot hasData: ${snapshot.hasData}');
-        // log('Snapshot hasError: ${snapshot.hasError}');
-        // log('Snapshot error: ${snapshot.error}');
-        // log('Snapshot stack trace: ${snapshot.stackTrace}');
-
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
             log('Error: ${snapshot.error}');
           }
-          // if (!snapshot.hasData) {
-          //   log('No data found in snapshot');
-          // }
           return Webview(
             webViewController,
             permissionRequested: (url, permissionKind, isUserInitiated) {
