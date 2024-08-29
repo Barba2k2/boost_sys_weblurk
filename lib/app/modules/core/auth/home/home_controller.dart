@@ -149,8 +149,8 @@ abstract class HomeControllerBase with Store {
       await _homeService.saveScore(
         streamerId,
         DateTime(now.year, now.month, now.day),
-        minute,
         hour,
+        minute,
         points,
       );
     } catch (e, s) {
