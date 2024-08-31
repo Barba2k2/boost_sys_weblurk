@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 import 'package:webview_windows/webview_windows.dart';
@@ -39,6 +41,8 @@ abstract class HomeControllerBase with Store {
   final webViewController = WebviewController();
   bool isWebViewInitialized = false;
 
+  final Completer<void> _webViewCompleter = Completer<void>();
+
   @action
   Future<void> loadSchedules() async {
     try {
@@ -52,19 +56,32 @@ abstract class HomeControllerBase with Store {
 
   @action
   Future<void> initializeWebView() async {
-    if (!isWebViewInitialized) {
-      try {
-        await webViewController.initialize();
-        await webViewController.setUserAgent(
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        );
-        await _loadInitialChannel();
+    if (isWebViewInitialized) {
+      return;
+    }
 
-        isWebViewInitialized = true;
-      } catch (e, s) {
-        _logger.error('Error initializing webview', e, s);
-        Messages.warning('Erro ao inicializar o WebView');
+    try {
+      await webViewController.initialize();
+
+      await webViewController.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      );
+
+      isWebViewInitialized = true;
+
+      await _loadInitialChannel();
+
+      if (!_webViewCompleter.isCompleted) {
+        _webViewCompleter.complete();
       }
+    } catch (e, s) {
+      _logger.error('Error initializing webview', e, s);
+
+      if (!_webViewCompleter.isCompleted) {
+        _webViewCompleter.completeError(e);
+      }
+
+      throw Failure(message: 'Erro ao inicializar o WebView');
     }
   }
 
@@ -88,11 +105,7 @@ abstract class HomeControllerBase with Store {
 
       if (isWebViewInitialized) {
         await webViewController.loadUrl(currentChannel!);
-        _logger.info('Current Channel: $currentChannel');
-      } else {
-        _logger.warning(
-          'WebView não inicializada',
-        );
+        // _logger.info('Current Channel: $currentChannel');
       }
     } catch (e, s) {
       _logger.error('Error loading current channel URL', e, s);
@@ -128,7 +141,6 @@ abstract class HomeControllerBase with Store {
     const Duration interval = Duration(minutes: 6);
     while (true) {
       await Future.delayed(interval);
-      _logger.info('Saving score...');
       await _saveScore();
     }
   }
@@ -178,12 +190,14 @@ abstract class HomeControllerBase with Store {
       }
     } catch (e, s) {
       _logger.error('Error getting current streamer ID', e, s);
+      Messages.warning('Erro ao obter o ID do Streamer');
       throw Failure(message: 'Erro ao obter o ID do streamer');
     }
   }
 
   @action
   void onInit() {
+    _logger.info('Iniciando HomeController...');
     if (_authStore.userLogged == null ||
         _authStore.userLogged!.nickname.isEmpty) {
       Modular.to.navigate('/auth/login/');
@@ -193,6 +207,11 @@ abstract class HomeControllerBase with Store {
           loadSchedules();
           startPollingForUpdates();
           startCheckingScores();
+        },
+      ).catchError(
+        (error) {
+          _logger.error('Falha na inicialização', error);
+          Messages.warning('Erro na inicialização.');
         },
       );
     }
