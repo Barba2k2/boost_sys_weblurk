@@ -41,8 +41,6 @@ abstract class HomeControllerBase with Store {
   final webViewController = WebviewController();
   bool isWebViewInitialized = false;
 
-  final Completer<void> _webViewCompleter = Completer<void>();
-
   @action
   Future<void> loadSchedules() async {
     try {
@@ -56,32 +54,19 @@ abstract class HomeControllerBase with Store {
 
   @action
   Future<void> initializeWebView() async {
-    if (isWebViewInitialized) {
-      return;
-    }
+    if (!isWebViewInitialized) {
+      try {
+        await webViewController.initialize();
+        await webViewController.setUserAgent(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        );
+        isWebViewInitialized = true;
 
-    try {
-      await webViewController.initialize();
-
-      await webViewController.setUserAgent(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      );
-
-      isWebViewInitialized = true;
-
-      await _loadInitialChannel();
-
-      if (!_webViewCompleter.isCompleted) {
-        _webViewCompleter.complete();
+        await _loadInitialChannel();
+      } catch (e, s) {
+        _logger.error('Error initializing webview', e, s);
+        // Messages.warning('Erro ao inicializar o WebView');
       }
-    } catch (e, s) {
-      _logger.error('Error initializing webview', e, s);
-
-      if (!_webViewCompleter.isCompleted) {
-        _webViewCompleter.completeError(e);
-      }
-
-      throw Failure(message: 'Erro ao inicializar o WebView');
     }
   }
 
