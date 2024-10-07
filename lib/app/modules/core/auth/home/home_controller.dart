@@ -41,6 +41,8 @@ abstract class HomeControllerBase with Store {
   final webViewController = WebviewController();
   bool isWebViewInitialized = false;
 
+  final Completer<void> _webViewInitialized = Completer<void>();
+
   @action
   Future<void> loadSchedules() async {
     try {
@@ -60,12 +62,14 @@ abstract class HomeControllerBase with Store {
         await webViewController.setUserAgent(
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
         );
-        isWebViewInitialized = true;
 
         await _loadInitialChannel();
       } catch (e, s) {
+        if (!_webViewInitialized.isCompleted) {
+          _webViewInitialized.completeError(e);
+        }
         _logger.error('Error initializing webview', e, s);
-        // Messages.warning('Erro ao inicializar o WebView');
+        Messages.warning('Erro ao inicializar o WebView');
       }
     }
   }
@@ -90,7 +94,7 @@ abstract class HomeControllerBase with Store {
 
       if (isWebViewInitialized) {
         await webViewController.loadUrl(currentChannel!);
-        // _logger.info('Current Channel: $currentChannel');
+        _logger.info('Current Channel: $currentChannel');
       }
     } catch (e, s) {
       _logger.error('Error loading current channel URL', e, s);
@@ -135,7 +139,7 @@ abstract class HomeControllerBase with Store {
       final now = DateTime.now();
       final hour = now.hour;
       final minute = now.minute;
-      const points = 1;
+      const points = 10;
       final streamerId = _getCurrentStreamerId();
 
       if (streamerId == 0) {
@@ -187,18 +191,14 @@ abstract class HomeControllerBase with Store {
         _authStore.userLogged!.nickname.isEmpty) {
       Modular.to.navigate('/auth/login/');
     } else {
-      initializationFuture = initializeWebView().then(
-        (_) {
-          loadSchedules();
-          startPollingForUpdates();
-          startCheckingScores();
-        },
-      ).catchError(
-        (error) {
-          _logger.error('Falha na inicialização', error);
-          Messages.warning('Erro na inicialização.');
-        },
-      );
+      initializationFuture = initializeWebView().then((_) {
+        loadSchedules();
+        startPollingForUpdates();
+        startCheckingScores();
+      }).catchError((error) {
+        _logger.error('Falha na inicialização', error);
+        Messages.warning('Erro na inicialização.');
+      });
     }
   }
 }
