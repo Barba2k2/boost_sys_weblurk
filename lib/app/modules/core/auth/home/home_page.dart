@@ -21,10 +21,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     homeController.onInit();
-    homeController.initializeWebView().then((_) {
-      homeController.loadCurrentChannel();
-    });
-    // homeController.loadCurrentChannel();
+    homeController.loadCurrentChannel();
   }
 
   @override
@@ -39,7 +36,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Column(
                     children: [
-                      FutureBuilder<void>(
+                      FutureBuilder(
                         future: homeController.loadCurrentChannel(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
