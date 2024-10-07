@@ -4,12 +4,17 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/ui/ui_config.dart';
+import 'modules/core/auth/login/login_controller.dart';
 
 class AppWidget extends StatelessWidget {
   const AppWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final loginController = Modular.get<LoginController>();
+
+    loginController.checkUserLogged();
+
     Modular.setInitialRoute('/auth/');
 
     Modular.setObservers([
@@ -31,3 +36,4 @@ class AppWidget extends StatelessWidget {
     );
   }
 }
+
