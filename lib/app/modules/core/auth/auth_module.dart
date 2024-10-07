@@ -1,10 +1,12 @@
 import 'package:flutter_modular/flutter_modular.dart';
 
+import '../../../core/logger/app_logger.dart';
 import '../../../repositories/user/user_repository.dart';
 import '../../../repositories/user/user_repository_impl.dart';
 import '../../../service/user/user_service.dart';
 import '../../../service/user/user_service_impl.dart';
 import '../../auth/home/auth_home_page.dart';
+import 'login/login_controller.dart';
 import 'login/login_module.dart';
 
 class AuthModule extends Module {
@@ -22,6 +24,12 @@ class AuthModule extends Module {
             userRepository: i(),
             localStorage: i(),
             localSecureStorage: i(),
+          ),
+        ),
+        Bind.lazySingleton(
+          (i) => LoginController(
+            userService: i.get<UserService>(),
+            logger: i.get<AppLogger>(),
           ),
         ),
       ];
