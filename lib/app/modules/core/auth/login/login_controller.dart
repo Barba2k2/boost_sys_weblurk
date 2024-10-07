@@ -19,6 +19,18 @@ abstract class LoginControllerBase with Store {
   })  : _userService = userService,
         _logger = logger;
 
+  @action
+  Future<void> checkUserLogged() async {
+    final String? token = await _userService.getToken();
+
+    if (token != null && token.isNotEmpty) {
+      Loader.show();
+      Modular.to.navigate('/home/');
+    } else {
+      // Caso contrário, permanece na tela de login
+    }
+  }
+
   Future<void> login({
     required String nickname,
     required String password,

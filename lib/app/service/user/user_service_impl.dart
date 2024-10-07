@@ -112,6 +112,19 @@ class UserServiceImpl implements UserService {
     }
   }
 
+  @override
+  Future<String?> getToken() async {
+    try {
+      final token = await _localStorage.read(
+        Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY,
+      );
+      return token;
+    } catch (e, s) {
+      _logger.error('Failed to get token from local storage', e, s);
+      return null;
+    }
+  }
+
   Future<void> _saveLastSeen() async {
     try {
       await _userRepository.getUserLogged();
