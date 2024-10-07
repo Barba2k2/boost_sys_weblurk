@@ -12,7 +12,6 @@ class AppModule extends Module {
   List<Module> get imports => [
     CoreModule(),
     HomeModule(),
-    // RegisterStreamerModule(),
   ];
 
   @override
@@ -25,9 +24,5 @@ class AppModule extends Module {
           '/home/',
           module: HomeModule(),
         ),
-        // ModuleRoute(
-        //   '/add-user/',
-        //   module: RegisterStreamerModule(),
-        // ),
       ];
 }
