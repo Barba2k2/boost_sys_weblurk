@@ -10,9 +10,9 @@ class AppModule extends Module {
 
   @override
   List<Module> get imports => [
-    CoreModule(),
-    HomeModule(),
-  ];
+        CoreModule(),
+        HomeModule(),
+      ];
 
   @override
   List<ModularRoute> get routes => [
