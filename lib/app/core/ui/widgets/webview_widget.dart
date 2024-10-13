@@ -1,7 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart';
+
+import '../../logger/app_logger.dart';
 
 class WebviewWidget extends StatelessWidget {
   final WebviewController webViewController;
@@ -22,7 +22,7 @@ class WebviewWidget extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
-            logger.e('⚠️ Snapshot Error: ${snapshot.error}');
+            logger!.error('⚠️ Snapshot Error: ${snapshot.error}');
           }
           return Webview(
             webViewController,
