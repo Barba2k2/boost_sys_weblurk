@@ -6,10 +6,12 @@ import 'package:webview_windows/webview_windows.dart';
 class WebviewWidget extends StatelessWidget {
   final WebviewController webViewController;
   final Future<void> initializationFuture;
+  final AppLogger? logger;
 
   const WebviewWidget({
     required this.webViewController,
     required this.initializationFuture,
+    this.logger,
     super.key,
   });
 
@@ -20,7 +22,7 @@ class WebviewWidget extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
-            log('Error: ${snapshot.error}');
+            logger.e('⚠️ Snapshot Error: ${snapshot.error}');
           }
           return Webview(
             webViewController,
