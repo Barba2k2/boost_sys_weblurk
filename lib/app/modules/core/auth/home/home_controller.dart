@@ -59,17 +59,57 @@ abstract class HomeControllerBase with Store {
     if (!isWebViewInitialized) {
       try {
         await webViewController.initialize();
-        await webViewController.setUserAgent(
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        );
 
-        await _loadInitialChannel();
+        // Configurar cache e zoom
+        await webViewController.setCacheDisabled(false);
+        await webViewController.setZoomFactor(1.0);
+
+        // Monitorar estado de carregamento
+        webViewController.loadingState.listen((loadingState) {
+          if (loadingState == LoadingState.loading) {
+            _logger.info("Página está carregando...");
+          } else if (loadingState == LoadingState.navigationCompleted) {
+            _logger.info("Navegação completada.");
+          } else {
+            _logger.info("Nenhuma navegação ativa.");
+          }
+        });
+
+        // Monitorar erros de navegação
+        webViewController.onLoadError.listen((errorStatus) {
+          switch (errorStatus) {
+            case WebErrorStatus.WebErrorStatusServerUnreachable:
+              _logger.error("Erro: Servidor inalcançável.");
+              break;
+            case WebErrorStatus.WebErrorStatusTimeout:
+              _logger.error("Erro: Tempo de carregamento excedido.");
+              break;
+            default:
+              _logger.error("Erro inesperado no WebView: $errorStatus");
+          }
+        });
+
+        // Configurar política de pop-up
+        await webViewController
+            .setPopupWindowPolicy(WebviewPopupWindowPolicy.sameWindow);
+
+        // Monitorar mudanças de URL
+        webViewController.url.listen((url) {
+          _logger.info("Página carregada: $url");
+        });
+
+        isWebViewInitialized = true;
+
+        if (!_webViewInitialized.isCompleted) {
+          _webViewInitialized.complete();
+        }
+
+        await _loadInitialChannel(); // Carregar canal inicial
       } catch (e, s) {
         if (!_webViewInitialized.isCompleted) {
           _webViewInitialized.completeError(e);
         }
         _logger.error('Error initializing webview', e, s);
-        Messages.warning('Erro ao inicializar o WebView');
       }
     }
   }
