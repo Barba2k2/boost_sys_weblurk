@@ -31,6 +31,7 @@ class WebviewWidget extends StatelessWidget {
       },
       onLoadError: (controller, url, code, message) {
         logger?.error('Erro ao carregar $url: $message');
+        logger?.error('Código do erro: $code');
       },
     );
   }
