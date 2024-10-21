@@ -62,7 +62,8 @@ class UserRepositoryImpl implements UserRepository {
 
       final data = {
         if (kIsWeb) 'web_token': deviceToken,
-        if (!kIsWeb && Platform.isWindows) 'windows_token': deviceToken,
+        if (!kIsWeb && Platform.isWindows || Platform.isAndroid)
+          'windows_token': deviceToken,
       };
 
       final result = await _restClient.auth().patch(
