@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -7,7 +9,11 @@ class ApplicationConfig {
   Future<void> consfigureApp() async {
     await _loadEnvs();
 
-    await _configureWindowManager();
+    Platform.isWindows
+        ? await _configureWindowManager()
+        : WidgetsFlutterBinding.ensureInitialized();
+
+    // await _configureWindowManager();
   }
 
   Future<void> _loadEnvs() => Environments.loadEnvs();
