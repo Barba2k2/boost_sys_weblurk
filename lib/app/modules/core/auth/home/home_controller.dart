@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
-import 'package:webview_windows/webview_windows.dart';
 import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/ui/widgets/messages.dart';
@@ -38,10 +38,14 @@ abstract class HomeControllerBase with Store {
   @observable
   String? currentChannel;
 
-  final webViewController = WebviewController();
+  @observable
+  InAppWebViewController? webViewController;
+
   bool isWebViewInitialized = false;
 
   final Completer<void> _webViewInitialized = Completer<void>();
+
+  final webViewControllerCompleter = Completer<InAppWebViewController>();
 
   @action
   Future<void> loadSchedules() async {
@@ -55,62 +59,21 @@ abstract class HomeControllerBase with Store {
   }
 
   @action
-  Future<void> initializeWebView() async {
-    if (!isWebViewInitialized) {
-      try {
-        await webViewController.initialize();
+  Future<void> initializeWebView(InAppWebViewController controller) async {
+    webViewController = controller;
+    isWebViewInitialized = true;
 
-        // Configurar cache e zoom
-        await webViewController.setCacheDisabled(false);
-        await webViewController.setZoomFactor(1.0);
+    if (!_webViewInitialized.isCompleted) {
+      _webViewInitialized.complete();
+    }
 
-        // Monitorar estado de carregamento
-        webViewController.loadingState.listen((loadingState) {
-          if (loadingState == LoadingState.loading) {
-            _logger.info("Página está carregando...");
-          } else if (loadingState == LoadingState.navigationCompleted) {
-            _logger.info("Navegação completada.");
-          } else {
-            _logger.info("Nenhuma navegação ativa.");
-          }
-        });
-
-        // Monitorar erros de navegação
-        webViewController.onLoadError.listen((errorStatus) {
-          switch (errorStatus) {
-            case WebErrorStatus.WebErrorStatusServerUnreachable:
-              _logger.error("Erro: Servidor inalcançável.");
-              break;
-            case WebErrorStatus.WebErrorStatusTimeout:
-              _logger.error("Erro: Tempo de carregamento excedido.");
-              break;
-            default:
-              _logger.error("Erro inesperado no WebView: $errorStatus");
-          }
-        });
-
-        // Configurar política de pop-up
-        await webViewController
-            .setPopupWindowPolicy(WebviewPopupWindowPolicy.sameWindow);
-
-        // Monitorar mudanças de URL
-        webViewController.url.listen((url) {
-          _logger.info("Página carregada: $url");
-        });
-
-        isWebViewInitialized = true;
-
-        if (!_webViewInitialized.isCompleted) {
-          _webViewInitialized.complete();
-        }
-
-        await _loadInitialChannel(); // Carregar canal inicial
-      } catch (e, s) {
-        if (!_webViewInitialized.isCompleted) {
-          _webViewInitialized.completeError(e);
-        }
-        _logger.error('Error initializing webview', e, s);
+    try {
+      await _loadInitialChannel();
+    } catch (e, s) {
+      if (!_webViewInitialized.isCompleted) {
+        _webViewInitialized.completeError(e);
       }
+      _logger.error('Error initializing webview', e, s);
     }
   }
 
@@ -118,11 +81,23 @@ abstract class HomeControllerBase with Store {
   Future<void> _loadInitialChannel() async {
     try {
       final correctUrl = await _homeService.fetchCurrentChannel();
-      await webViewController.loadUrl(correctUrl ?? '$correctUrl');
+      if (correctUrl != null) {
+        await webViewController!.loadUrl(
+          urlRequest: URLRequest(url: WebUri(correctUrl)),
+        );
+      } else {
+        throw Failure(message: 'URL não encontrada');
+      }
     } catch (e, s) {
       _logger.error('Error loading initial channel URL', e, s);
       Messages.warning('Erro ao carregar o canal inicial');
       throw Failure(message: 'Erro ao carregar o canal inicial');
+    }
+  }
+
+  void onWebViewCreated(InAppWebViewController controller) {
+    if (!webViewControllerCompleter.isCompleted) {
+      webViewControllerCompleter.complete(controller);
     }
   }
 
@@ -132,8 +107,12 @@ abstract class HomeControllerBase with Store {
       final newChannel = await _homeService.fetchCurrentChannel();
       currentChannel = newChannel ?? 'https://twitch.tv/BoostTeam_';
 
-      if (isWebViewInitialized) {
-        await webViewController.loadUrl(currentChannel!);
+      if (isWebViewInitialized &&
+          webViewController != null &&
+          currentChannel != null) {
+        await webViewController!.loadUrl(
+          urlRequest: URLRequest(url: WebUri(currentChannel!)),
+        );
         _logger.info('Current Channel: $currentChannel');
       }
     } catch (e, s) {
@@ -231,13 +210,15 @@ abstract class HomeControllerBase with Store {
         _authStore.userLogged!.nickname.isEmpty) {
       Modular.to.navigate('/auth/login/');
     } else {
-      initializationFuture = initializeWebView().then((_) {
-        loadSchedules();
-        startPollingForUpdates();
-        startCheckingScores();
-      }).catchError((error) {
-        _logger.error('Falha na inicialização', error);
-        Messages.warning('Erro na inicialização.');
+      webViewControllerCompleter.future.then((controller) {
+        initializeWebView(controller).then((_) {
+          loadSchedules();
+          startPollingForUpdates();
+          startCheckingScores();
+        }).catchError((error) {
+          _logger.error('Falha na inicialização', error);
+          Messages.warning('Erro na inicialização.');
+        });
       });
     }
   }
