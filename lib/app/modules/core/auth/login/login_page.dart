@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Agendamento BoostTeam',
+                      'BoostTeam SysWebLurk',
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontSize: 24,
@@ -86,10 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                     BoostTextFormField(
                       controller: _passwordEC,
                       label: 'Password',
-                      validator: Validatorless.multiple([
-                        Validatorless.required('Senha obrigatória'),
-                        Validatorless.min(6, 'Senha muito curta'),
-                      ]),
+                      validator: Validatorless.required('Senha obrigatória'),
                       obscureText: true,
                     ),
                     const SizedBox(
