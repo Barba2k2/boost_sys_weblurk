@@ -47,6 +47,8 @@ abstract class HomeControllerBase with Store {
 
   final webViewControllerCompleter = Completer<InAppWebViewController>();
 
+  Timer? _pollingTimer;
+
   @action
   Future<void> loadSchedules() async {
     try {
@@ -126,11 +128,13 @@ abstract class HomeControllerBase with Store {
   Future<void> startPollingForUpdates() async {
     const pollingInterval = Duration(minutes: 6);
 
-    while (true) {
-      await Future.delayed(pollingInterval);
-
-      await loadCurrentChannel();
-    }
+    _pollingTimer = Timer.periodic(pollingInterval, (timer) async {
+      try {
+        await loadCurrentChannel();
+      } catch (e, s) {
+        _logger.error('Error while polling for live updates', e, s);
+      }
+    });
   }
 
   // @action
