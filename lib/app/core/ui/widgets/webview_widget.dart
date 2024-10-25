@@ -17,10 +17,13 @@ class WebviewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InAppWebView(
-      initialUrlRequest: URLRequest(url: WebUri(initialUrl)),
-      initialSettings: InAppWebViewSettings(),
+      initialUrlRequest: URLRequest(
+        url: WebUri(initialUrl),
+      ),
+      initialSettings: InAppWebViewSettings(
+        javaScriptEnabled: true,
+      ),
       onWebViewCreated: (controller) {
-        // Passa o controller de volta para onde é necessário
         onWebViewCreated(controller);
       },
       onLoadStart: (controller, url) {
@@ -32,6 +35,19 @@ class WebviewWidget extends StatelessWidget {
       onLoadError: (controller, url, code, message) {
         logger?.error('Erro ao carregar $url: $message');
         logger?.error('Código do erro: $code');
+      },
+      onPermissionRequest: (controller, request) async {
+        logger?.info('Solicitação de permissão de: ${request.origin}');
+        return PermissionResponse(
+          resources: request.resources,
+          action: PermissionResponseAction.GRANT,
+        );
+      },
+      onConsoleMessage: (controller, consoleMessage) {
+        logger?.info('Console message: ${consoleMessage.message}');
+        if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
+          logger?.error('Erro do console detectado: ${consoleMessage.message}');
+        }
       },
     );
   }
