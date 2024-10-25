@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:validatorless/validatorless.dart';
 import '../../../../core/ui/widgets/boost_text_form_field.dart';
 import 'login_controller.dart';
+import 'dart:developer';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,6 +24,30 @@ class _LoginPageState extends State<LoginPage> {
     _nicknameEC.dispose();
     _passwordEC.dispose();
     super.dispose();
+  }
+
+  void _handleLogin() {
+    final formValid = _formKey.currentState?.validate() ?? false;
+    if (formValid) {
+      final nickname = _nicknameEC.text.trim();
+      final password = _passwordEC.text.trim();
+      controller
+          .login(
+        nickname: nickname,
+        password: password,
+      )
+          .then((_) {
+        if (mounted) {
+          log('Login efetuado com sucesso');
+          setState(() {
+            // Aqui pode fazer qualquer atualização de UI, se necessário
+          });
+        }
+      }).catchError((error) {
+        log('Erro ao efetuar login: $error');
+        // Lida com o erro, se necessário
+      });
+    }
   }
 
   @override
@@ -96,18 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: 200,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: () {
-                          final formValid =
-                              _formKey.currentState?.validate() ?? false;
-                          if (formValid) {
-                            final nickname = _nicknameEC.text.trim();
-                            final password = _passwordEC.text.trim();
-                            controller.login(
-                              nickname: nickname,
-                              password: password,
-                            );
-                          }
-                        },
+                        onPressed: _handleLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.amber[900],
                           padding: const EdgeInsets.symmetric(
