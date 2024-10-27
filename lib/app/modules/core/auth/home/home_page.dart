@@ -24,6 +24,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void dispose() {
+    homeController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -31,38 +37,23 @@ class _HomePageState extends State<HomePage> {
           appBar: SyslurkAppBar(),
           body: Observer(
             builder: (_) {
-              return FutureBuilder(
-                future: homeController.loadCurrentChannel(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return Stack(
-                      children: [
-                        Column(
-                          children: [
-                            LiveUrlBar(
-                              currentChannel: homeController.currentChannel,
-                            ),
-                            Expanded(
-                              child: WebviewWidget(
-                                initialUrl: homeController.currentChannel ??
-                                    'https://twitch.tv/BoostTeam_',
-                                onWebViewCreated: (controller) {
-                                  homeController.webViewController = controller;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  } else {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(
-                        backgroundColor: Colors.purple,
+              return Stack(
+                children: [
+                  Column(
+                    children: [
+                      LiveUrlBar(
+                        currentChannel: homeController.currentChannel,
                       ),
-                    );
-                  }
-                },
+                      Expanded(
+                        child: WebviewWidget(
+                          initialUrl: homeController.currentChannel ??
+                              'https://twitch.tv/BoostTeam_',
+                          onWebViewCreated: homeController.onWebViewCreated,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               );
             },
           ),
