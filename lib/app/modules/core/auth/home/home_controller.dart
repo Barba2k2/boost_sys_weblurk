@@ -42,12 +42,24 @@ abstract class HomeControllerBase with Store {
   InAppWebViewController? webViewController;
 
   bool isWebViewInitialized = false;
+  bool _isPollingActive = false;
 
   final Completer<void> _webViewInitialized = Completer<void>();
 
   final webViewControllerCompleter = Completer<InAppWebViewController>();
 
   Timer? _pollingTimer;
+  Timer? _scoreCheckTimer;
+
+  @action
+  void onInit() {
+    _logger.info('Iniciando HomeController...');
+    if (_authStore.userLogged == null ||
+        _authStore.userLogged!.nickname.isEmpty) {
+      Modular.to.navigate('/auth/login/');
+      return;
+    }
+  }
 
   @action
   Future<void> loadSchedules() async {
@@ -97,9 +109,30 @@ abstract class HomeControllerBase with Store {
     }
   }
 
-  void onWebViewCreated(InAppWebViewController controller) {
-    if (!webViewControllerCompleter.isCompleted) {
-      webViewControllerCompleter.complete(controller);
+  void onWebViewCreated(InAppWebViewController controller) async {
+    _logger.info('WebView criado, configurando controller...');
+    try {
+      webViewController = controller;
+      isWebViewInitialized = true;
+
+      _logger.info('Inicializando WebView...');
+      await _loadInitialChannel();
+      _logger.info('Canal inicial carregado com sucesso');
+
+      _logger.info('Carregando schedules...');
+      await loadSchedules();
+      _logger.info('Schedules carregados com sucesso');
+
+      _logger.info('Iniciando polling...');
+      await startPollingForUpdates();
+      _logger.info('Polling iniciado com sucesso');
+
+      _logger.info('Iniciando verificação de scores...');
+      await startCheckingScores();
+      _logger.info('Verificação de scores iniciada com sucesso');
+    } catch (e, s) {
+      _logger.error('Erro durante inicialização do WebView', e, s);
+      Messages.warning('Erro na inicialização.');
     }
   }
 
@@ -126,15 +159,37 @@ abstract class HomeControllerBase with Store {
 
   @action
   Future<void> startPollingForUpdates() async {
+    _logger.info('Iniciando polling para atualizações...');
+
+    if (_isPollingActive) {
+      _logger.info('Polling já está ativo, ignorando nova chamada');
+      return;
+    }
+
+    _isPollingActive = true;
     const pollingInterval = Duration(minutes: 6);
+
+    _pollingTimer?.cancel();
+
+    try {
+      _logger.info('Executando primeira atualização do polling');
+      await loadCurrentChannel();
+    } catch (e, s) {
+      _logger.error('Erro na primeira atualização do polling', e, s);
+    }
 
     _pollingTimer = Timer.periodic(pollingInterval, (timer) async {
       try {
+        _logger.info('Executando polling periódico - ${DateTime.now()}');
         await loadCurrentChannel();
       } catch (e, s) {
-        _logger.error('Error while polling for live updates', e, s);
+        _logger.error('Erro durante polling periódico', e, s);
       }
     });
+
+    _logger.info(
+      'Polling iniciado com sucesso - Intervalo: ${pollingInterval.inSeconds}s',
+    );
   }
 
   // @action
@@ -150,35 +205,70 @@ abstract class HomeControllerBase with Store {
 
   @action
   Future<void> startCheckingScores() async {
-    const Duration interval = Duration(minutes: 6);
-    while (true) {
-      await Future.delayed(interval);
+    _logger.info('Iniciando verificação de scores...');
+
+    _scoreCheckTimer?.cancel();
+
+    const interval = Duration(minutes: 6);
+
+    try {
+      _logger.info('Executando primeira verificação de score');
       await _saveScore();
+      _logger.info('Primeira verificação de score executada com sucesso');
+    } catch (e, s) {
+      _logger.error('Erro na primeira verificação de score', e, s);
     }
+
+    _scoreCheckTimer = Timer.periodic(interval, (timer) async {
+      try {
+        _logger.info('Executando verificação periódica de score');
+        await _saveScore();
+        _logger.info('Verificação periódica de score executada com sucesso');
+      } catch (e, s) {
+        _logger.error('Erro durante verificação periódica de score', e, s);
+      }
+    });
+
+    _logger.info('Verificação de scores iniciada com sucesso');
   }
 
   Future<void> _saveScore() async {
-    try {
-      final now = DateTime.now();
-      final hour = now.hour;
-      final minute = now.minute;
-      const points = 10;
-      final streamerId = _getCurrentStreamerId();
+    _logger.info('Iniciando salvamento de score...');
 
-      if (streamerId == 0) {
-        _logger.warning('Invalid streamer ID. Aborting save score operation.');
+    try {
+      if (_authStore.userLogged == null) {
+        _logger.warning('Nenhum usuário logado para salvar score');
         return;
       }
+
+      final streamerId = _getCurrentStreamerId();
+      if (streamerId <= 0) {
+        _logger.warning('ID do streamer inválido: $streamerId');
+        return;
+      }
+
+      final now = DateTime.now();
+
+      _logger.info(
+        'Salvando score para streamer $streamerId em ${now.toString()}',
+      );
 
       await _homeService.saveScore(
         streamerId,
         DateTime(now.year, now.month, now.day),
-        hour,
-        minute,
-        points,
+        now.hour,
+        now.minute,
+        10,
       );
+
+      _logger.info('Score salvo com sucesso');
     } catch (e, s) {
-      _logger.error('Error saving score', e, s);
+      _logger.error('Erro ao salvar score', e, s);
+
+      if (e is Failure) {
+        _logger.error('Motivo do erro: ${e.message}');
+      }
+
       throw Failure(message: 'Erro ao salvar a pontuação');
     }
   }
@@ -186,44 +276,38 @@ abstract class HomeControllerBase with Store {
   int _getCurrentStreamerId() {
     try {
       if (_authStore.userLogged == null) {
-        _logger.warning('No user is currently logged in.');
-        throw Failure(message: 'Nenhum usuário está logado.');
-      }
-
-      final streamerId =
-          int.tryParse(_authStore.userLogged?.id.toString() ?? '0') ?? 0;
-
-      if (streamerId > 0) {
-        _logger.info('Streamer ID: $streamerId');
-        return streamerId;
-      } else {
-        _logger.warning('Streamer ID not found.');
+        _logger.warning('Nenhum usuário está logado');
         return 0;
       }
+
+      final userId = _authStore.userLogged?.id;
+      if (userId == null) {
+        _logger.warning('ID do usuário é null');
+        return 0;
+      }
+
+      final streamerId = int.tryParse(userId.toString());
+      if (streamerId == null || streamerId <= 0) {
+        _logger.warning('ID do streamer inválido: $streamerId');
+        return 0;
+      }
+
+      _logger.info('Streamer ID obtido com sucesso: $streamerId');
+      return streamerId;
     } catch (e, s) {
-      _logger.error('Error getting current streamer ID', e, s);
-      Messages.warning('Erro ao obter o ID do Streamer');
-      throw Failure(message: 'Erro ao obter o ID do streamer');
+      _logger.error('Erro ao obter ID do streamer', e, s);
+      return 0;
     }
   }
 
   @action
-  void onInit() {
-    _logger.info('Iniciando HomeController...');
-    if (_authStore.userLogged == null ||
-        _authStore.userLogged!.nickname.isEmpty) {
-      Modular.to.navigate('/auth/login/');
-    } else {
-      webViewControllerCompleter.future.then((controller) {
-        initializeWebView(controller).then((_) {
-          loadSchedules();
-          startPollingForUpdates();
-          startCheckingScores();
-        }).catchError((error) {
-          _logger.error('Falha na inicialização', error);
-          Messages.warning('Erro na inicialização.');
-        });
-      });
-    }
+  void dispose() {
+    _logger.info('Disposing HomeController...');
+    _pollingTimer?.cancel();
+    _scoreCheckTimer?.cancel();
+    _isPollingActive = false;
+    webViewController = null;
+    isWebViewInitialized = false;
+    _logger.info('HomeController disposed');
   }
 }

@@ -163,6 +163,17 @@ mixin _$HomeController on HomeControllerBase, Store {
   }
 
   @override
+  void dispose() {
+    final _$actionInfo = _$HomeControllerBaseActionController.startAction(
+        name: 'HomeControllerBase.dispose');
+    try {
+      return super.dispose();
+    } finally {
+      _$HomeControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 initializationFuture: ${initializationFuture},
