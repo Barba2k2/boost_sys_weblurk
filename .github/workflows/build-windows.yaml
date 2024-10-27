@@ -19,7 +19,9 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: 'stable'
+        channel: 'stable'
+        flutter-version: '3.24.3'
+        cache: true
 
     - name: Install dependencies
       run: flutter pub get
@@ -27,13 +29,17 @@ jobs:
     - name: Build Windows
       run: flutter build windows --release
 
-    # Rodar o script para determinar a próxima versão
     - name: Increment Version
-      run: bash version.sh
+      run: |
+        if [ -f "version.sh" ]; then
+          bash version.sh
+        else
+          echo "NEW_TAG=v1.0.0" >> $GITHUB_ENV
+        fi
+      shell: bash
 
-    # Usar a nova versão para nomear o artefato
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: Boost-SysWebLurk-${{ env.NEW_TAG }}
+        name: Boost-SysWebLurk-${{ env.NEW_TAG || 'latest' }}
         path: build/windows/runner/Release/
