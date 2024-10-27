@@ -78,6 +78,22 @@ mixin _$HomeController on HomeControllerBase, Store {
     });
   }
 
+  late final _$webViewControllerAtom =
+      Atom(name: 'HomeControllerBase.webViewController', context: context);
+
+  @override
+  InAppWebViewController? get webViewController {
+    _$webViewControllerAtom.reportRead();
+    return super.webViewController;
+  }
+
+  @override
+  set webViewController(InAppWebViewController? value) {
+    _$webViewControllerAtom.reportWrite(value, super.webViewController, () {
+      super.webViewController = value;
+    });
+  }
+
   late final _$loadSchedulesAsyncAction =
       AsyncAction('HomeControllerBase.loadSchedules', context: context);
 
@@ -90,8 +106,9 @@ mixin _$HomeController on HomeControllerBase, Store {
       AsyncAction('HomeControllerBase.initializeWebView', context: context);
 
   @override
-  Future<void> initializeWebView() {
-    return _$initializeWebViewAsyncAction.run(() => super.initializeWebView());
+  Future<void> initializeWebView(InAppWebViewController controller) {
+    return _$initializeWebViewAsyncAction
+        .run(() => super.initializeWebView(controller));
   }
 
   late final _$_loadInitialChannelAsyncAction =
@@ -146,12 +163,24 @@ mixin _$HomeController on HomeControllerBase, Store {
   }
 
   @override
+  void dispose() {
+    final _$actionInfo = _$HomeControllerBaseActionController.startAction(
+        name: 'HomeControllerBase.dispose');
+    try {
+      return super.dispose();
+    } finally {
+      _$HomeControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 initializationFuture: ${initializationFuture},
 isScheduleVisible: ${isScheduleVisible},
 initialChannel: ${initialChannel},
-currentChannel: ${currentChannel}
+currentChannel: ${currentChannel},
+webViewController: ${webViewController}
     ''';
   }
 }

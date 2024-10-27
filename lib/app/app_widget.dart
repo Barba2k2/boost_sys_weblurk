@@ -17,7 +17,7 @@ class AppWidget extends StatelessWidget {
     ]);
 
     return ScreenUtilInit(
-      designSize: const Size(1920, 1080),
+      designSize: const Size(1280, 720),
       builder: (_, __) => MaterialApp.router(
         title: UiConfig.title,
         debugShowCheckedModeBanner: false,

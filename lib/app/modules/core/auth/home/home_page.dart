@@ -21,7 +21,12 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     homeController.onInit();
-    homeController.loadCurrentChannel();
+  }
+
+  @override
+  void dispose() {
+    homeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -36,67 +41,16 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Column(
                     children: [
-                      FutureBuilder(
-                        future: homeController.loadCurrentChannel(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            return LiveUrlBar(
-                              currentChannel: homeController.currentChannel,
-                            );
-                          } else {
-                            return const Center(
-                              child: LinearProgressIndicator(
-                                backgroundColor: Colors.purple,
-                              ),
-                            );
-                          }
-                        },
+                      LiveUrlBar(
+                        currentChannel: homeController.currentChannel,
                       ),
-                      FutureBuilder(
-                        future: homeController.webViewController.initialize(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            return Expanded(
-                              child: WebviewWidget(
-                                webViewController:
-                                    homeController.webViewController,
-                                initializationFuture:
-                                    homeController.initializationFuture,
-                              ),
-                            );
-                          } else {
-                            return const Center(
-                              child: CircularProgressIndicator.adaptive(
-                                backgroundColor: Colors.purple,
-                              ),
-                            );
-                          }
-                        },
+                      Expanded(
+                        child: WebviewWidget(
+                          initialUrl: homeController.currentChannel ??
+                              'https://twitch.tv/BoostTeam_',
+                          onWebViewCreated: homeController.onWebViewCreated,
+                        ),
                       ),
-                      // Next Feature
-                      // Visibility(
-                      //   visible: false,
-                      //   child: Positioned(
-                      //     bottom: 0,
-                      //     left: 0,
-                      //     right: 0,
-                      //     child: Container(
-                      //       color: Colors.white.withOpacity(0.90),
-                      //       child: SizedBox(
-                      //         height: 200,
-                      //         child: Scrollbar(
-                      //           controller: scheduleScrollController,
-                      //           child: SingleChildScrollView(
-                      //             controller: scheduleScrollController,
-                      //             // child: const ScheduleTable(),
-                      //           ),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ],
