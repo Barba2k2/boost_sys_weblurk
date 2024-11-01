@@ -25,17 +25,30 @@ abstract class AuthStoreBase with Store {
 
   @action
   Future<void> loadUserLogged() async {
-    final userModelJson = await _localStorage.read<String>(
-      Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
-    );
+    try {
+      final userModelJson = await _localStorage.read<String>(
+        Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
+      );
 
-    if (userModelJson != null) {
-      _userLogged = UserModel.fromJson(json.decode(userModelJson));
-      if (_userLogged?.id == null || _userLogged!.id == 0) {
-        _logger.warning('Streamer ID is missing in the loaded user data.');
+      if (userModelJson != null) {
+        _userLogged = UserModel.fromJson(json.decode(userModelJson));
+        _logger.info('Dados do usuário carregados: ${_userLogged?.nickname}');
+
+        final token = await _localStorage.read<String>(
+          Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY,
+        );
+
+        if (token == null || token.isEmpty) {
+          _logger.warning('Token não encontrado, realizando logout');
+          await logout();
+          return;
+        }
+      } else {
+        _logger.info('Nenhum usuário encontrado no storage');
+        await logout();
       }
-    } else {
-      _userLogged = UserModel.empty();
+    } catch (e, s) {
+      _logger.error('Erro ao carregar dados do usuário', e, s);
       await logout();
     }
   }
@@ -53,8 +66,16 @@ abstract class AuthStoreBase with Store {
 
   @action
   Future<void> logout() async {
-    await _localStorage.clear();
-    _userLogged = UserModel.empty();
-    Modular.to.navigate('/auth/login/');
+    try {
+      await _localStorage.remove(Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY);
+      await _localStorage.remove(Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY);
+      await _localStorage.remove(
+        Constants.LOCAL_SOTRAGE_USER_LOGGED_STATUS_KEY,
+      );
+      _userLogged = null;
+      _logger.info('Logout realizado com sucesso');
+    } catch (e, s) {
+      _logger.error('Erro ao realizar logout', e, s);
+    }
   }
 }
