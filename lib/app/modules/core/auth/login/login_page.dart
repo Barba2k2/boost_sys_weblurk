@@ -39,15 +39,20 @@ class _LoginPageState extends State<LoginPage> {
           .then((_) {
         if (mounted) {
           log('Login efetuado com sucesso');
-          setState(() {
-            // Aqui pode fazer qualquer atualização de UI, se necessário
-          });
+          setState(() {});
         }
       }).catchError((error) {
         log('Erro ao efetuar login: $error');
-        // Lida com o erro, se necessário
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.checkUserLogged();
+    });
   }
 
   @override
