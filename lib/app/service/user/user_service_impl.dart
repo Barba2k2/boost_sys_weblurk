@@ -25,17 +25,63 @@ class UserServiceImpl implements UserService {
   Future<void> login(String nickname, String password) async {
     try {
       final accessToken = await _userRepository.login(nickname, password);
-
       await _saveAccessToken(accessToken);
 
-      await _confirmLogin();
+      final confirmLoginModel = await _userRepository.confirmLogin();
+      await _saveAccessToken(confirmLoginModel.accessToken);
+      await _localSecureStorage.write(
+        Constants.LOCAL_SOTRAGE_REFRESH_TOKEN_KEY,
+        confirmLoginModel.refreshToken,
+      );
 
-      await _getUserData();
+      final userModel = await _userRepository.getUserLogged();
+      await _localStorage.write<String>(
+        Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
+        userModel.toJson(),
+      );
 
       await _updateLoginStatus('ON');
+      _logger.info(
+        'Login completo realizado com sucesso: ${userModel.nickname}',
+      );
     } catch (e, s) {
       _logger.error('Service - Failed to login user', e, s);
+
+      await _clearAllData();
       throw Failure(message: 'Failed to login user');
+    }
+  }
+
+  Future<void> _clearAllData() async {
+    try {
+      await _localStorage.remove(Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY);
+      await _localStorage.remove(Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY);
+      await _localStorage.remove(
+        Constants.LOCAL_SOTRAGE_USER_LOGGED_STATUS_KEY,
+      );
+      await _localSecureStorage.remove(
+        Constants.LOCAL_SOTRAGE_REFRESH_TOKEN_KEY,
+      );
+    } catch (e) {
+      _logger.error('Error clearing data', e);
+    }
+  }
+
+  @override
+  Future<void> logout() async {
+    try {
+      try {
+        await _updateLoginStatus('OFF');
+        await _saveLastSeen();
+      } catch (e) {
+        _logger.warning('Error updating status during logout', e);
+      }
+
+      await _clearAllData();
+      _logger.info('Logout completed successfully');
+    } catch (e, s) {
+      _logger.error('Service - Failed to logout user', e, s);
+      throw Failure(message: 'Failed to logout user');
     }
   }
 
@@ -45,59 +91,10 @@ class UserServiceImpl implements UserService {
         Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY,
         accessToken,
       );
+      _logger.info('Access token saved successfully');
     } catch (e, s) {
       _logger.error('Failed to save access token on local storage', e, s);
-    }
-  }
-
-  Future<void> _confirmLogin() async {
-    try {
-      final confirmLoginModel = await _userRepository.confirmLogin();
-
-      await _saveAccessToken(confirmLoginModel.accessToken);
-
-      await _localSecureStorage.write(
-        Constants.LOCAL_SOTRAGE_REFRESH_TOKEN_KEY,
-        confirmLoginModel.refreshToken,
-      );
-    } catch (e, s) {
-      _logger.error('Failed to confirm login', e, s);
-      throw Failure(message: 'Failed to confirm login');
-    }
-  }
-
-  Future<void> _getUserData() async {
-    try {
-      final userModel = await _userRepository.getUserLogged();
-
-      await _localStorage.write<String>(
-        Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
-        userModel.toJson(),
-      );
-    } catch (e, s) {
-      _logger.error('Failed to get user data', e, s);
-      throw Failure(message: 'Failed to get user data');
-    }
-  }
-
-  @override
-  Future<void> logout() async {
-    try {
-      // Atualizar o status para 'OFF' e registrar o horário de logout
-      await _updateLoginStatus('OFF');
-      await _saveLastSeen();
-
-      // Limpar tokens e dados do usuário
-      await _localStorage.remove(Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY);
-      await _localSecureStorage.remove(
-        Constants.LOCAL_SOTRAGE_REFRESH_TOKEN_KEY,
-      );
-      await _localStorage.remove(
-        Constants.LOCAL_SOTRAGE_USER_LOGGED_STATUS_KEY,
-      );
-    } catch (e, s) {
-      _logger.error('Service - Failed to logout user', e, s);
-      throw Failure(message: 'Failed to logout user');
+      throw Failure(message: 'Failed to save access token');
     }
   }
 
@@ -106,6 +103,7 @@ class UserServiceImpl implements UserService {
       final userModel = await _userRepository.getUserLogged();
       await _userRepository.updateLoginStatus(userModel.id, status);
       await _saveLastSeen();
+      _logger.info('Login status updated to: $status');
     } catch (e, s) {
       _logger.error('Failed to update login status', e, s);
       throw Failure(message: 'Failed to update login status');
@@ -118,7 +116,21 @@ class UserServiceImpl implements UserService {
       final token = await _localStorage.read(
         Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY,
       );
-      return token;
+
+      if (token != null) {
+        final userData = await _localStorage.read(
+          Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
+        );
+
+        if (userData == null) {
+          _logger.warning('Token found but no user data');
+          await _clearAllData();
+          return null;
+        }
+
+        return token;
+      }
+      return null;
     } catch (e, s) {
       _logger.error('Failed to get token from local storage', e, s);
       return null;
