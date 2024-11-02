@@ -210,13 +210,13 @@ packages:
     source: hosted
     version: "1.3.1"
   ffi:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: ffi
-      sha256: "493f37e7df1804778ff3a53bd691d8692ddf69702cf4c1c1096a2e41b4779e21"
+      sha256: "16ed7b077ef01ad6170a3d0c57caa4a112a38d7a2ed5602e0aca9ca6f3d98da6"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.2"
+    version: "2.1.3"
   file:
     dependency: transitive
     description:
@@ -432,6 +432,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  fullscreen_window:
+    dependency: transitive
+    description:
+      name: fullscreen_window
+      sha256: b3502f890a875de6cd300b06cfc542e089a324faef6c4fb5d5528f9e2ea68d8d
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   get:
     dependency: "direct main"
     description:
@@ -737,7 +745,7 @@ packages:
     source: hosted
     version: "1.1.0"
   provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: provider
       sha256: c8a055ee5ce3fd98d6fc872478b03823ffdb448699c6ebdbbc71d59b596fd48c
@@ -1117,6 +1125,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.14.0"
+  webview_win_floating:
+    dependency: "direct main"
+    description:
+      name: webview_win_floating
+      sha256: "3367f40141e0175d26736210af1ff55de06624fe004cbaedf07c294c04728181"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.9"
   webview_windows:
     dependency: "direct main"
     description:
@@ -1126,13 +1142,13 @@ packages:
     source: hosted
     version: "0.4.0"
   win32:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: win32
-      sha256: "015002c060f1ae9f41a818f2d5640389cc05283e368be19dc8d77cecb43c40c9"
+      sha256: "84ba388638ed7a8cb3445a320c8273136ab2631cd5f2c57888335504ddab1bc2"
       url: "https://pub.dev"
     source: hosted
-    version: "5.5.3"
+    version: "5.8.0"
   window_manager:
     dependency: "direct main"
     description:
