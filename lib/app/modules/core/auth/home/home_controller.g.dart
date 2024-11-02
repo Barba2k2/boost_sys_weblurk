@@ -94,6 +94,14 @@ mixin _$HomeController on HomeControllerBase, Store {
     });
   }
 
+  late final _$onInitAsyncAction =
+      AsyncAction('HomeControllerBase.onInit', context: context);
+
+  @override
+  Future<void> onInit() {
+    return _$onInitAsyncAction.run(() => super.onInit());
+  }
+
   late final _$loadSchedulesAsyncAction =
       AsyncAction('HomeControllerBase.loadSchedules', context: context);
 
@@ -118,6 +126,15 @@ mixin _$HomeController on HomeControllerBase, Store {
   Future<void> _loadInitialChannel() {
     return _$_loadInitialChannelAsyncAction
         .run(() => super._loadInitialChannel());
+  }
+
+  late final _$onWebViewCreatedAsyncAction =
+      AsyncAction('HomeControllerBase.onWebViewCreated', context: context);
+
+  @override
+  Future<void> onWebViewCreated(InAppWebViewController controller) {
+    return _$onWebViewCreatedAsyncAction
+        .run(() => super.onWebViewCreated(controller));
   }
 
   late final _$loadCurrentChannelAsyncAction =
@@ -146,31 +163,6 @@ mixin _$HomeController on HomeControllerBase, Store {
   Future<void> startCheckingScores() {
     return _$startCheckingScoresAsyncAction
         .run(() => super.startCheckingScores());
-  }
-
-  late final _$HomeControllerBaseActionController =
-      ActionController(name: 'HomeControllerBase', context: context);
-
-  @override
-  void onInit() {
-    final _$actionInfo = _$HomeControllerBaseActionController.startAction(
-        name: 'HomeControllerBase.onInit');
-    try {
-      return super.onInit();
-    } finally {
-      _$HomeControllerBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void dispose() {
-    final _$actionInfo = _$HomeControllerBaseActionController.startAction(
-        name: 'HomeControllerBase.dispose');
-    try {
-      return super.dispose();
-    } finally {
-      _$HomeControllerBaseActionController.endAction(_$actionInfo);
-    }
   }
 
   @override
