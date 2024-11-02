@@ -24,6 +24,13 @@ abstract class HomeControllerBase with Store {
   late final PollingManager _pollingManager;
   late final ScoreManager _scoreManager;
 
+  int _initAttempts = 0;
+  static const int maxInitAttempts = 3;
+  static const Duration retryDelay = Duration(seconds: 2);
+
+  @observable
+  String? initializationError;
+
   HomeControllerBase({
     required HomeService homeService,
     required AppLogger logger,
@@ -59,28 +66,77 @@ abstract class HomeControllerBase with Store {
   @action
   Future<void> onInit() async {
     _logger.info('Iniciando HomeController...');
-    initializationFuture = _initialize();
-    await initializationFuture;
+    initializationFuture = _initializeWithRetry();
+    try {
+      await initializationFuture;
+    } catch (e, s) {
+      _logger.error('Erro fatal na inicialização do HomeController', e, s);
+      await _handleInitializationError(e);
+    }
+  }
+
+  Future<void> _initializeWithRetry() async {
+    while (_initAttempts < maxInitAttempts) {
+      try {
+        await _initialize();
+        _logger.info(
+          'HomeController inicializado com sucesso na tentativa ${_initAttempts + 1}',
+        );
+        initializationError = null;
+        return;
+      } catch (e, s) {
+        _initAttempts++;
+        _logger.error(
+          'Falha na tentativa $_initAttempts de $maxInitAttempts de inicialização',
+          e,
+          s,
+        );
+
+        if (_initAttempts >= maxInitAttempts) {
+          initializationError =
+              'Falha na inicialização após $_initAttempts tentativas';
+          rethrow;
+        }
+
+        await _cleanup();
+        await Future.delayed(retryDelay);
+      }
+    }
   }
 
   Future<void> _initialize() async {
     try {
-      _logger.info('Iniciando HomeController...');
-
+      _logger.info('Iniciando carregamento do usuário...');
       await _authStore.loadUserLogged();
       if (_authStore.userLogged == null || _authStore.userLogged?.id == null) {
         throw Failure(message: 'Usuário não autenticado');
       }
 
+      _logger.info('Iniciando WebView...');
       await _webViewManager.initialize();
+
+      _logger.info('Iniciando Polling...');
       await _pollingManager.start();
+
+      _logger.info('Iniciando Score Manager...');
       await _scoreManager.startChecking();
 
-      _logger.info('HomeController inicializado com sucesso');
+      _logger.info('HomeController totalmente inicializado');
     } catch (e, s) {
-      _logger.error('Erro ao inicializar HomeController', e, s);
-      await _handleInitializationError(e);
+      _logger.error('Erro durante inicialização', e, s);
+      await _cleanup();
       rethrow;
+    }
+  }
+
+  Future<void> _cleanup() async {
+    _logger.info('Realizando cleanup após falha...');
+    try {
+      _webViewManager.dispose();
+      _pollingManager.dispose();
+      _scoreManager.dispose();
+    } catch (e, s) {
+      _logger.error('Erro durante cleanup', e, s);
     }
   }
 

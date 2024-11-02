@@ -38,6 +38,22 @@ mixin _$HomeController on HomeControllerBase, Store {
               name: 'HomeControllerBase.isWebViewInitialized'))
       .value;
 
+  late final _$initializationErrorAtom =
+      Atom(name: 'HomeControllerBase.initializationError', context: context);
+
+  @override
+  String? get initializationError {
+    _$initializationErrorAtom.reportRead();
+    return super.initializationError;
+  }
+
+  @override
+  set initializationError(String? value) {
+    _$initializationErrorAtom.reportWrite(value, super.initializationError, () {
+      super.initializationError = value;
+    });
+  }
+
   late final _$initializationFutureAtom =
       Atom(name: 'HomeControllerBase.initializationFuture', context: context);
 
@@ -125,6 +141,7 @@ mixin _$HomeController on HomeControllerBase, Store {
   @override
   String toString() {
     return '''
+initializationError: ${initializationError},
 initializationFuture: ${initializationFuture},
 isScheduleVisible: ${isScheduleVisible},
 webViewController: ${webViewController},
