@@ -1,53 +1,129 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import '../../logger/app_logger.dart';
+import '../../adapters/web_view_adapter.dart';
 
-class WebviewWidget extends StatelessWidget {
-  final String initialUrl;
-  final void Function(InAppWebViewController) onWebViewCreated;
-  final AppLogger? logger;
+class WebviewWidget extends StatefulWidget {
+  final WebViewAdapter webViewController;
+  final Future<void> initializationFuture;
 
   const WebviewWidget({
-    required this.initialUrl,
-    required this.onWebViewCreated,
-    this.logger,
+    required this.webViewController,
+    required this.initializationFuture,
     super.key,
   });
 
   @override
+  State<WebviewWidget> createState() => _WebviewWidgetState();
+}
+
+class _WebviewWidgetState extends State<WebviewWidget> {
+  @override
   Widget build(BuildContext context) {
-    return InAppWebView(
-      initialUrlRequest: URLRequest(
-        url: WebUri(initialUrl),
-      ),
-      initialSettings: InAppWebViewSettings(
-        javaScriptEnabled: true,
-      ),
-      onWebViewCreated: (controller) {
-        onWebViewCreated(controller);
-      },
-      onLoadStart: (controller, url) {
-        logger?.info('Carregando: $url');
-      },
-      onLoadStop: (controller, url) {
-        logger?.info('Navegação completada: $url');
-      },
-      onLoadError: (controller, url, code, message) {
-        logger?.error('Erro ao carregar $url: $message');
-        logger?.error('Código do erro: $code');
-      },
-      onPermissionRequest: (controller, request) async {
-        logger?.info('Solicitação de permissão de: ${request.origin}');
-        return PermissionResponse(
-          resources: request.resources,
-          action: PermissionResponseAction.GRANT,
-        );
-      },
-      onConsoleMessage: (controller, consoleMessage) {
-        logger?.info('Console message: ${consoleMessage.message}');
-        if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
-          logger?.error('Erro do console detectado: ${consoleMessage.message}');
+    if (!Platform.isWindows) {
+      return const Center(
+        child: Text(
+          'WebView só está disponível no Windows',
+          style: TextStyle(color: Colors.white),
+        ),
+      );
+    }
+
+    return FutureBuilder<void>(
+      future: widget.initializationFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'Erro ao carregar WebView: ${snapshot.error}',
+                  style: const TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {});
+                  },
+                  child: const Text('Tentar Novamente'),
+                ),
+              ],
+            ),
+          );
         }
+
+        if (snapshot.connectionState == ConnectionState.done) {
+          return ListenableBuilder(
+            listenable: widget.webViewController.stateController,
+            builder: (context, _) {
+              if (widget.webViewController.stateController.error != null) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline,
+                          color: Colors.red, size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Erro no WebView: ${widget.webViewController.stateController.error}',
+                        style: const TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          widget.webViewController.initialize();
+                        },
+                        child: const Text('Tentar Novamente'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Stack(
+                children: [
+                  const SizedBox.expand(),
+                  if (widget.webViewController.stateController.isLoading)
+                    const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator.adaptive(
+                            backgroundColor: Colors.purple,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Carregando...',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
+          );
+        }
+
+        return const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator.adaptive(
+                backgroundColor: Colors.purple,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Inicializando WebView...',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
