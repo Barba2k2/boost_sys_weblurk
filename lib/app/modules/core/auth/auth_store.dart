@@ -16,6 +16,8 @@ abstract class AuthStoreBase with Store {
   final LocalStorage _localStorage;
   final _logger = Modular.get<AppLogger>();
 
+  static bool _hasInitialized = false;
+
   @readonly
   UserModel? _userLogged;
 
@@ -26,22 +28,31 @@ abstract class AuthStoreBase with Store {
   @action
   Future<void> loadUserLogged() async {
     try {
+      // Garante que o logout seja feito apenas na primeira inicialização
+      if (!_hasInitialized) {
+        _hasInitialized = true;
+        _logger.info('Primeira inicialização, realizando logout...');
+        await logout();
+        return;
+      }
+
+      _logger.info('Carregando dados do usuário...');
+
       final userModelJson = await _localStorage.read<String>(
         Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
       );
 
       if (userModelJson != null) {
-        _userLogged = UserModel.fromJson(json.decode(userModelJson));
-        _logger.info('Dados do usuário carregados: ${_userLogged?.nickname}');
-
         final token = await _localStorage.read<String>(
           Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY,
         );
 
-        if (token == null || token.isEmpty) {
-          _logger.warning('Token não encontrado, realizando logout');
+        if (token != null && token.isNotEmpty) {
+          _userLogged = UserModel.fromJson(json.decode(userModelJson));
+          _logger.info('Dados do usuário carregados: ${_userLogged?.nickname}');
+        } else {
+          _logger.warning('Token não encontrado');
           await logout();
-          return;
         }
       } else {
         _logger.info('Nenhum usuário encontrado no storage');
