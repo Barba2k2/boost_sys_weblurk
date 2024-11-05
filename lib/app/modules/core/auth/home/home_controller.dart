@@ -431,6 +431,30 @@ abstract class HomeControllerBase with Store {
     }
   }
 
+  @action
+  Future<void> reloadWebView() async {
+    _logger.info('Recarregando página...');
+    try {
+      _showLoader();
+
+      if (webViewController == null) {
+        throw Failure(message: 'WebViewController não inicializado');
+      }
+
+      await webViewController!.reload();
+
+      // Após recarregar, verifica se está na URL correta
+      await _loadInitialChannel();
+
+      _hideLoader();
+      _logger.info('Página recarregada com sucesso');
+    } catch (e, s) {
+      _hideLoader();
+      _logger.error('Erro ao recarregar página', e, s);
+      Messages.warning('Erro ao atualizar a página');
+    }
+  }
+
   void dispose() {
     _logger.info('Disposing HomeController...');
     _loaderTimer?.cancel();

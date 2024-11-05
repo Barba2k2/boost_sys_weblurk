@@ -165,6 +165,14 @@ mixin _$HomeController on HomeControllerBase, Store {
         .run(() => super.startCheckingScores());
   }
 
+  late final _$reloadWebViewAsyncAction =
+      AsyncAction('HomeControllerBase.reloadWebView', context: context);
+
+  @override
+  Future<void> reloadWebView() {
+    return _$reloadWebViewAsyncAction.run(() => super.reloadWebView());
+  }
+
   @override
   String toString() {
     return '''
