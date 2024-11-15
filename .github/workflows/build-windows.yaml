@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'v*'  # Adiciona trigger para tags
   pull_request:
     branches:
       - master
@@ -15,6 +17,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Necessário para histórico completo das tags
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
@@ -30,10 +34,35 @@ jobs:
     # Rodar o script para determinar a próxima versão
     - name: Increment Version
       run: bash version.sh
+      id: version
 
-    # Usar a nova versão para nomear o artefato
+    # Criar ZIP do build
+    - name: Create Release ZIP
+      run: |
+        cd build/windows/runner/Release
+        7z a -tzip ../../../../../Boost-SysWebLurk-${{ env.NEW_TAG }}.zip *
+
+    # Upload do artefato para o workflow
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
         name: Boost-SysWebLurk-${{ env.NEW_TAG }}
         path: build/windows/runner/Release/
+
+    # Criar Release no GitHub (só executa na branch master)
+    - name: Create GitHub Release
+      if: github.ref == 'refs/heads/master'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: Boost-SysWebLurk-${{ env.NEW_TAG }}.zip
+        tag_name: v${{ env.NEW_TAG }}
+        name: Boost-SysWebLurk v${{ env.NEW_TAG }}
+        draft: false
+        prerelease: false
+        body: |
+          Release automática da versão ${{ env.NEW_TAG }}
+          
+          ### Mudanças nesta versão
+          - Novo build automático via GitHub Actions
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
