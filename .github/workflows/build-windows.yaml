@@ -1,5 +1,10 @@
 name: Build Flutter Windows App
 
+permissions:
+  contents: write
+  discussions: write
+  pull-requests: write
+
 on:
   push:
     branches:
