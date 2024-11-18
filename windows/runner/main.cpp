@@ -33,7 +33,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   int workAreaHeight = workArea.bottom - workArea.top;
 
   // Define o tamanho da sua janela
-  Win32Window::Size size(1280, 720);
+  Win32Window::Size size(1014, 624);
 
   // Calcula o ponto central (origin)
   Win32Window::Point origin(
