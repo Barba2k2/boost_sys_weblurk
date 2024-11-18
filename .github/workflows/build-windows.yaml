@@ -55,10 +55,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: Boost-SysWebLurk-${{ env.NEW_TAG }}.zip
-        tag_name: v${{ env.NEW_TAG }}
-        name: Boost-SysWebLurk v${{ env.NEW_TAG }}
-        draft: false
-        prerelease: false
+        tag_name: ${{ env.NEW_TAG }}
+        name: Boost-SysWebLurk ${{ env.NEW_TAG }}
         body: |
           Release automática da versão ${{ env.NEW_TAG }}
           
