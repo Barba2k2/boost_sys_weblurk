@@ -9,6 +9,7 @@ class LoginModule extends Module {
         Bind.lazySingleton(
           (i) => LoginController(
             userService: i(),
+            localStorage: i(),
             logger: i(),
           ),
         ),

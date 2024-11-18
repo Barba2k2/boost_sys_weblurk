@@ -16,6 +16,8 @@ abstract class AuthStoreBase with Store {
   final LocalStorage _localStorage;
   final _logger = Modular.get<AppLogger>();
 
+  static bool _hasInitialized = false;
+
   @readonly
   UserModel? _userLogged;
 
@@ -25,17 +27,39 @@ abstract class AuthStoreBase with Store {
 
   @action
   Future<void> loadUserLogged() async {
-    final userModelJson = await _localStorage.read<String>(
-      Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
-    );
-
-    if (userModelJson != null) {
-      _userLogged = UserModel.fromJson(json.decode(userModelJson));
-      if (_userLogged?.id == null || _userLogged!.id == 0) {
-        _logger.warning('Streamer ID is missing in the loaded user data.');
+    try {
+      // Garante que o logout seja feito apenas na primeira inicialização
+      if (!_hasInitialized) {
+        _hasInitialized = true;
+        _logger.info('Primeira inicialização, realizando logout...');
+        await logout();
+        return;
       }
-    } else {
-      _userLogged = UserModel.empty();
+
+      _logger.info('Carregando dados do usuário...');
+
+      final userModelJson = await _localStorage.read<String>(
+        Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
+      );
+
+      if (userModelJson != null) {
+        final token = await _localStorage.read<String>(
+          Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY,
+        );
+
+        if (token != null && token.isNotEmpty) {
+          _userLogged = UserModel.fromJson(json.decode(userModelJson));
+          _logger.info('Dados do usuário carregados: ${_userLogged?.nickname}');
+        } else {
+          _logger.warning('Token não encontrado');
+          await logout();
+        }
+      } else {
+        _logger.info('Nenhum usuário encontrado no storage');
+        await logout();
+      }
+    } catch (e, s) {
+      _logger.error('Erro ao carregar dados do usuário', e, s);
       await logout();
     }
   }
@@ -53,8 +77,16 @@ abstract class AuthStoreBase with Store {
 
   @action
   Future<void> logout() async {
-    await _localStorage.clear();
-    _userLogged = UserModel.empty();
-    Modular.to.navigate('/auth/login/');
+    try {
+      await _localStorage.remove(Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY);
+      await _localStorage.remove(Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY);
+      await _localStorage.remove(
+        Constants.LOCAL_SOTRAGE_USER_LOGGED_STATUS_KEY,
+      );
+      _userLogged = null;
+      _logger.info('Logout realizado com sucesso');
+    } catch (e, s) {
+      _logger.error('Erro ao realizar logout', e, s);
+    }
   }
 }

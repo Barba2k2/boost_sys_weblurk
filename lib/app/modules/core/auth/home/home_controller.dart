@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
+
 import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
+import '../../../../core/ui/widgets/loader.dart';
 import '../../../../core/ui/widgets/messages.dart';
 import '../../../../service/home/home_service.dart';
 import '../auth_store.dart';
@@ -50,15 +52,72 @@ abstract class HomeControllerBase with Store {
 
   Timer? _pollingTimer;
   Timer? _scoreCheckTimer;
+  Timer? _loaderTimer;
 
   @action
-  void onInit() {
+  Future<void> onInit() async {
     _logger.info('Iniciando HomeController...');
-    if (_authStore.userLogged == null ||
-        _authStore.userLogged!.nickname.isEmpty) {
-      Modular.to.navigate('/auth/login/');
-      return;
+    try {
+      await _authStore.loadUserLogged();
+
+      if (_authStore.userLogged == null) {
+        _logger.info('Nenhum usuário logado, redirecionando para login...');
+        if (!Modular.to.path.contains('/auth/login')) {
+          Modular.to.navigate('/auth/login/');
+        }
+        return;
+      }
+
+      _logger.info(
+        'Usuário logado: ${_authStore.userLogged?.nickname}, inicializando WebView...',
+      );
+      if (webViewController != null) {
+        await _initializeWebView();
+      }
+    } catch (e, s) {
+      _logger.error("Erro ao inicializar HomeController", e, s);
+      Messages.warning('Erro ao inicializar a aplicação');
+      if (!Modular.to.path.contains('/auth/login')) {
+        await _authStore.logout();
+        Modular.to.navigate('/auth/login/');
+      }
     }
+  }
+
+  Future<void> _initializeWebView() async {
+    try {
+      await _loadInitialChannel();
+      await loadSchedules();
+      await startPollingForUpdates();
+      await startCheckingScores();
+    } catch (e, s) {
+      _logger.error("Erro ao inicializar WebView", e, s);
+      Messages.warning('Erro ao inicializar WebView');
+
+      // Se o erro for de autenticação, faz logout e redireciona
+      if (e.toString().contains('Expire token') ||
+          e.toString().contains('authentication') ||
+          e.toString().contains('autenticação')) {
+        if (!Modular.to.path.contains('/auth/login')) {
+          await _authStore.logout();
+          Modular.to.navigate('/auth/login/');
+        }
+      }
+    }
+  }
+
+  void _showLoader() {
+    Loader.show();
+    _loaderTimer?.cancel();
+    _loaderTimer = Timer(Duration(seconds: 10), () {
+      Loader.hide();
+      Messages.warning('Operação demorou mais que o esperado');
+    });
+  }
+
+  void _hideLoader() {
+    _loaderTimer?.cancel();
+    Loader.hide();
   }
 
   @action
@@ -91,14 +150,32 @@ abstract class HomeControllerBase with Store {
     }
   }
 
+  Future<bool> _checkAuthentication() async {
+    if (_authStore.userLogged == null || _authStore.userLogged?.id == null) {
+      _logger.warning('Usuário não está autenticado');
+      await _authStore.logout();
+      Modular.to.navigate('/auth/login/');
+      return false;
+    }
+    return true;
+  }
+
   @action
   Future<void> _loadInitialChannel() async {
     try {
+      if (!await _checkAuthentication()) return;
+
       final correctUrl = await _homeService.fetchCurrentChannel();
       if (correctUrl != null) {
+        if (webViewController == null) {
+          throw Failure(message: 'WebViewController não inicializado');
+        }
+
         await webViewController!.loadUrl(
           urlRequest: URLRequest(url: WebUri(correctUrl)),
         );
+
+        _logger.info('Canal carregado com sucesso: $correctUrl');
       } else {
         throw Failure(message: 'URL não encontrada');
       }
@@ -109,30 +186,84 @@ abstract class HomeControllerBase with Store {
     }
   }
 
-  void onWebViewCreated(InAppWebViewController controller) async {
+  @action
+  Future<void> onWebViewCreated(InAppWebViewController controller) async {
     _logger.info('WebView criado, configurando controller...');
     try {
+      // Primeiro verifica se o usuário ainda está logado
+      if (_authStore.userLogged == null) {
+        throw Failure(message: 'Usuário não está autenticado');
+      }
+
       webViewController = controller;
       isWebViewInitialized = true;
 
       _logger.info('Inicializando WebView...');
-      await _loadInitialChannel();
+
+      // Tenta inicializar com retry
+      await _loadInitialChannelWithRetry();
+
+      // Se chegou aqui, o canal foi carregado com sucesso
       _logger.info('Canal inicial carregado com sucesso');
 
-      _logger.info('Carregando schedules...');
-      await loadSchedules();
-      _logger.info('Schedules carregados com sucesso');
-
-      _logger.info('Iniciando polling...');
-      await startPollingForUpdates();
-      _logger.info('Polling iniciado com sucesso');
-
-      _logger.info('Iniciando verificação de scores...');
-      await startCheckingScores();
-      _logger.info('Verificação de scores iniciada com sucesso');
+      try {
+        await loadSchedules();
+        await startPollingForUpdates();
+        await startCheckingScores();
+      } catch (e, s) {
+        _logger.error('Erro ao carregar dados complementares', e, s);
+        Messages.warning('Alguns dados podem não estar disponíveis');
+        // Não redireciona para login por erros nos dados complementares
+      }
     } catch (e, s) {
+      _hideLoader();
       _logger.error('Erro durante inicialização do WebView', e, s);
-      Messages.warning('Erro na inicialização.');
+
+      // Se for erro de autenticação, redireciona para login
+      if (e.toString().contains('autenticação') ||
+          e.toString().contains('Expire token')) {
+        if (!Modular.to.path.contains('/auth/login')) {
+          await _authStore.logout();
+          Modular.to.navigate('/auth/login/');
+        }
+      } else {
+        Messages.warning('Erro na inicialização.');
+      }
+    }
+  }
+
+  Future<void> _loadInitialChannelWithRetry() async {
+    int attempts = 0;
+    const maxAttempts = 3;
+    const retryDelay = Duration(seconds: 1);
+
+    while (attempts < maxAttempts) {
+      try {
+        _logger.info(
+          'Tentativa ${attempts + 1} de $maxAttempts para carregar canal inicial',
+        );
+        await _loadInitialChannel();
+        _logger.info(
+          'Canal inicial carregado com sucesso na tentativa ${attempts + 1}',
+        );
+        return;
+      } catch (e, s) {
+        attempts++;
+        _logger.warning(
+          'Falha ao carregar canal inicial (tentativa $attempts de $maxAttempts): ${e.toString()}',
+        );
+
+        if (attempts == maxAttempts) {
+          _logger.error(
+            'Todas as tentativas de carregar canal inicial falharam',
+            e,
+            s,
+          );
+          rethrow;
+        }
+
+        await Future.delayed(retryDelay);
+      }
     }
   }
 
@@ -258,7 +389,7 @@ abstract class HomeControllerBase with Store {
         DateTime(now.year, now.month, now.day),
         now.hour,
         now.minute,
-        10,
+        1,
       );
 
       _logger.info('Score salvo com sucesso');
@@ -301,8 +432,32 @@ abstract class HomeControllerBase with Store {
   }
 
   @action
+  Future<void> reloadWebView() async {
+    _logger.info('Recarregando página...');
+    try {
+      _showLoader();
+
+      if (webViewController == null) {
+        throw Failure(message: 'WebViewController não inicializado');
+      }
+
+      await webViewController!.reload();
+
+      // Após recarregar, verifica se está na URL correta
+      await _loadInitialChannel();
+
+      _hideLoader();
+      _logger.info('Página recarregada com sucesso');
+    } catch (e, s) {
+      _hideLoader();
+      _logger.error('Erro ao recarregar página', e, s);
+      Messages.warning('Erro ao atualizar a página');
+    }
+  }
+
   void dispose() {
     _logger.info('Disposing HomeController...');
+    _loaderTimer?.cancel();
     _pollingTimer?.cancel();
     _scoreCheckTimer?.cancel();
     _isPollingActive = false;
