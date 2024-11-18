@@ -39,7 +39,7 @@ jobs:
     # Criar ZIP do build
     - name: Create Release ZIP
       run: |
-        cd build/windows/runner/Release
+        cd build/windows/x64/runner/Release
         7z a -tzip ../../../../../Boost-SysWebLurk-${{ env.NEW_TAG }}.zip *
 
     # Upload do artefato para o workflow
@@ -47,7 +47,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: Boost-SysWebLurk-${{ env.NEW_TAG }}
-        path: build/windows/runner/Release/
+        path: build/windows/x64/runner/Release/
 
     # Criar Release no GitHub (só executa na branch master)
     - name: Create GitHub Release
