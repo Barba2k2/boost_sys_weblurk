@@ -62,10 +62,17 @@ jobs:
         files: Boost-SysWebLurk-${{ env.NEW_TAG }}.zip
         tag_name: ${{ env.NEW_TAG }}
         name: Boost-SysWebLurk ${{ env.NEW_TAG }}
+        generate_release_notes: true
+        draft: false
+        prerelease: false
         body: |
-          Release automática da versão ${{ env.NEW_TAG }}
+          Versão ${{ env.NEW_TAG }}
           
           ### Mudanças nesta versão
-          - Novo build automático via GitHub Actions
+          - Correção do login na Twitch
+
+          - Correção de bugs
+
+          - Melhorias de performance
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

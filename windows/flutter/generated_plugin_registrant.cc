@@ -6,6 +6,7 @@
 
 #include "generated_plugin_registrant.h"
 
+#include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <flutter_inappwebview_windows/flutter_inappwebview_windows_plugin_c_api.h>
 #include <flutter_secure_storage_windows/flutter_secure_storage_windows_plugin.h>
 #include <flutter_volume_controller/flutter_volume_controller_plugin_c_api.h>
@@ -13,10 +14,11 @@
 #include <screen_retriever/screen_retriever_plugin.h>
 #include <url_launcher_windows/url_launcher_windows.h>
 #include <webview_win_floating/webview_win_floating_plugin_c_api.h>
-#include <webview_windows/webview_windows_plugin.h>
 #include <window_manager/window_manager_plugin.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
+  DesktopWebviewWindowPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("DesktopWebviewWindowPlugin"));
   FlutterInappwebviewWindowsPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterInappwebviewWindowsPluginCApi"));
   FlutterSecureStorageWindowsPluginRegisterWithRegistrar(
@@ -31,8 +33,6 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("UrlLauncherWindows"));
   WebviewWinFloatingPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("WebviewWinFloatingPluginCApi"));
-  WebviewWindowsPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("WebviewWindowsPlugin"));
   WindowManagerPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("WindowManagerPlugin"));
 }
