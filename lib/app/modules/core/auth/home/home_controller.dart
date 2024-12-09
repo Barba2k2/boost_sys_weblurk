@@ -1,8 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+// import 'package:desktop_webview_window/desktop_webview_window.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
@@ -41,14 +43,14 @@ abstract class HomeControllerBase with Store {
   String? currentChannel;
 
   @observable
-  InAppWebViewController? webViewController;
+  WebViewController? webViewController;
 
   bool isWebViewInitialized = false;
   bool _isPollingActive = false;
 
   final Completer<void> _webViewInitialized = Completer<void>();
 
-  final webViewControllerCompleter = Completer<InAppWebViewController>();
+  // final webViewControllerCompleter = Completer<InAppWebViewController>();
 
   Timer? _pollingTimer;
   Timer? _scoreCheckTimer;
@@ -132,7 +134,7 @@ abstract class HomeControllerBase with Store {
   }
 
   @action
-  Future<void> initializeWebView(InAppWebViewController controller) async {
+  Future<void> initializeWebView(WebViewController controller) async {
     webViewController = controller;
     isWebViewInitialized = true;
 
@@ -166,28 +168,20 @@ abstract class HomeControllerBase with Store {
       if (!await _checkAuthentication()) return;
 
       final correctUrl = await _homeService.fetchCurrentChannel();
-      if (correctUrl != null) {
-        if (webViewController == null) {
-          throw Failure(message: 'WebViewController não inicializado');
-        }
-
-        await webViewController!.loadUrl(
-          urlRequest: URLRequest(url: WebUri(correctUrl)),
-        );
-
-        _logger.info('Canal carregado com sucesso: $correctUrl');
-      } else {
-        throw Failure(message: 'URL não encontrada');
+      if (correctUrl == null) {
+        throw Failure(message: 'Nenhuma URL encontrada para o canal inicial.');
       }
+
+      await webViewController!.loadRequest(Uri.parse(correctUrl));
+      _logger.info('Canal inicial carregado com sucesso: $correctUrl');
     } catch (e, s) {
-      _logger.error('Error loading initial channel URL', e, s);
-      Messages.warning('Erro ao carregar o canal inicial');
-      throw Failure(message: 'Erro ao carregar o canal inicial');
+      _logger.error('Erro ao carregar canal inicial.', e, s);
+      throw Failure(message: 'Erro ao carregar o canal inicial.');
     }
   }
 
   @action
-  Future<void> onWebViewCreated(InAppWebViewController controller) async {
+  Future<void> onWebViewCreated(WebViewController controller) async {
     _logger.info('WebView criado, configurando controller...');
     try {
       // Primeiro verifica se o usuário ainda está logado
@@ -198,13 +192,7 @@ abstract class HomeControllerBase with Store {
       webViewController = controller;
       isWebViewInitialized = true;
 
-      _logger.info('Inicializando WebView...');
-
-      // Tenta inicializar com retry
       await _loadInitialChannelWithRetry();
-
-      // Se chegou aqui, o canal foi carregado com sucesso
-      _logger.info('Canal inicial carregado com sucesso');
 
       try {
         await loadSchedules();
@@ -212,10 +200,13 @@ abstract class HomeControllerBase with Store {
         await startCheckingScores();
       } catch (e, s) {
         _logger.error('Erro ao carregar dados complementares', e, s);
-        Messages.warning('Alguns dados podem não estar disponíveis');
-        // Não redireciona para login por erros nos dados complementares
       }
     } catch (e, s) {
+      if (e is Failure) {
+        _logger.error('Erro de negócio: ${e.message}', e, s);
+      } else {
+        _logger.error('Erro inesperado: $e', e, s);
+      }
       _hideLoader();
       _logger.error('Erro durante inicialização do WebView', e, s);
 
@@ -233,36 +224,31 @@ abstract class HomeControllerBase with Store {
   }
 
   Future<void> _loadInitialChannelWithRetry() async {
-    int attempts = 0;
     const maxAttempts = 3;
-    const retryDelay = Duration(seconds: 1);
+    int attempts = 0;
 
     while (attempts < maxAttempts) {
       try {
         _logger.info(
-          'Tentativa ${attempts + 1} de $maxAttempts para carregar canal inicial',
+          'Tentativa ${attempts + 1} de $maxAttempts para carregar canal inicial.',
         );
         await _loadInitialChannel();
-        _logger.info(
-          'Canal inicial carregado com sucesso na tentativa ${attempts + 1}',
-        );
         return;
       } catch (e, s) {
         attempts++;
-        _logger.warning(
-          'Falha ao carregar canal inicial (tentativa $attempts de $maxAttempts): ${e.toString()}',
-        );
-
-        if (attempts == maxAttempts) {
+        if (attempts >= maxAttempts) {
           _logger.error(
-            'Todas as tentativas de carregar canal inicial falharam',
+            'Erro ao carregar canal inicial após $attempts tentativas.',
             e,
             s,
           );
-          rethrow;
+          throw Failure(message: 'Não foi possível carregar o canal inicial.');
         }
 
-        await Future.delayed(retryDelay);
+        _logger.warning(
+          'Falha na tentativa ${attempts + 1}, tentando novamente...',
+        );
+        await Future.delayed(const Duration(seconds: 1));
       }
     }
   }
@@ -276,9 +262,10 @@ abstract class HomeControllerBase with Store {
       if (isWebViewInitialized &&
           webViewController != null &&
           currentChannel != null) {
-        await webViewController!.loadUrl(
-          urlRequest: URLRequest(url: WebUri(currentChannel!)),
+        await webViewController!.loadRequest(
+          Uri.parse(currentChannel!),
         );
+
         _logger.info('Current Channel: $currentChannel');
       }
     } catch (e, s) {

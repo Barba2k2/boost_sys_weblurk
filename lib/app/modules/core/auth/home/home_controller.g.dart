@@ -82,13 +82,13 @@ mixin _$HomeController on HomeControllerBase, Store {
       Atom(name: 'HomeControllerBase.webViewController', context: context);
 
   @override
-  InAppWebViewController? get webViewController {
+  WebViewController? get webViewController {
     _$webViewControllerAtom.reportRead();
     return super.webViewController;
   }
 
   @override
-  set webViewController(InAppWebViewController? value) {
+  set webViewController(WebViewController? value) {
     _$webViewControllerAtom.reportWrite(value, super.webViewController, () {
       super.webViewController = value;
     });
@@ -114,7 +114,7 @@ mixin _$HomeController on HomeControllerBase, Store {
       AsyncAction('HomeControllerBase.initializeWebView', context: context);
 
   @override
-  Future<void> initializeWebView(InAppWebViewController controller) {
+  Future<void> initializeWebView(WebViewController controller) {
     return _$initializeWebViewAsyncAction
         .run(() => super.initializeWebView(controller));
   }
@@ -132,7 +132,7 @@ mixin _$HomeController on HomeControllerBase, Store {
       AsyncAction('HomeControllerBase.onWebViewCreated', context: context);
 
   @override
-  Future<void> onWebViewCreated(InAppWebViewController controller) {
+  Future<void> onWebViewCreated(WebViewController controller) {
     return _$onWebViewCreatedAsyncAction
         .run(() => super.onWebViewCreated(controller));
   }

@@ -37,23 +37,21 @@ class _HomePageState extends State<HomePage> {
           appBar: SyslurkAppBar(),
           body: Observer(
             builder: (_) {
-              return Stack(
-                children: [
-                  Column(
-                    children: [
-                      LiveUrlBar(
-                        currentChannel: homeController.currentChannel,
+              return SafeArea(
+                child: Column(
+                  children: [
+                    LiveUrlBar(
+                      currentChannel: homeController.currentChannel,
+                    ),
+                    Expanded(
+                      child: WebviewWidget(
+                        initialUrl: homeController.currentChannel ??
+                            'https://twitch.tv/BoostTeam_',
+                        onWebViewCreated: homeController.onWebViewCreated,
                       ),
-                      Expanded(
-                        child: WebviewWidget(
-                          initialUrl: homeController.currentChannel ??
-                              'https://twitch.tv/BoostTeam_',
-                          onWebViewCreated: homeController.onWebViewCreated,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               );
             },
           ),
