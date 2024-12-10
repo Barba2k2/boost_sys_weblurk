@@ -16,11 +16,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final homeController = Modular.get<HomeController>();
+  bool _isWebViewReady = false;
 
   @override
   void initState() {
     super.initState();
-    homeController.onInit();
+    _initializeController();
+  }
+
+  Future<void> _initializeController() async {
+    await homeController.onInit();
+    if (mounted) {
+      setState(() {
+        _isWebViewReady = true;
+      });
+    }
   }
 
   @override
@@ -35,25 +45,35 @@ class _HomePageState extends State<HomePage> {
       builder: (context, constraints) {
         return Scaffold(
           appBar: SyslurkAppBar(),
-          body: Observer(
-            builder: (_) {
-              return SafeArea(
-                child: Column(
-                  children: [
-                    LiveUrlBar(
-                      currentChannel: homeController.currentChannel,
+          body: IndexedStack(
+            children: [
+              Observer(
+                builder: (_) {
+                  if (!_isWebViewReady) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  return SafeArea(
+                    child: Column(
+                      children: [
+                        LiveUrlBar(
+                          currentChannel: homeController.currentChannel,
+                        ),
+                        Expanded(
+                          child: WebviewWidget(
+                            initialUrl: homeController.currentChannel ??
+                                'https://twitch.tv/BoostTeam_',
+                            onWebViewCreated: homeController.onWebViewCreated,
+                          ),
+                        ),
+                      ],
                     ),
-                    Expanded(
-                      child: WebviewWidget(
-                        initialUrl: homeController.currentChannel ??
-                            'https://twitch.tv/BoostTeam_',
-                        onWebViewCreated: homeController.onWebViewCreated,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ],
           ),
           // floatingActionButton: Observer(
           //   builder: (_) => FloatingActionButton.extended(
