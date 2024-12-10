@@ -45,35 +45,27 @@ class _HomePageState extends State<HomePage> {
       builder: (context, constraints) {
         return Scaffold(
           appBar: SyslurkAppBar(),
-          body: IndexedStack(
-            children: [
-              Observer(
-                builder: (_) {
-                  if (!_isWebViewReady) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
+          body: Observer(
+            builder: (_) {
+              if (!_isWebViewReady) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-                  return SafeArea(
-                    child: Column(
-                      children: [
-                        LiveUrlBar(
-                          currentChannel: homeController.currentChannel,
-                        ),
-                        Expanded(
-                          child: WebviewWidget(
-                            initialUrl: homeController.currentChannel ??
-                                'https://twitch.tv/BoostTeam_',
-                            onWebViewCreated: homeController.onWebViewCreated,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ],
+              return Column(
+                children: [
+                  LiveUrlBar(
+                    currentChannel: homeController.currentChannel,
+                  ),
+                  WebviewWidget(
+                    initialUrl: homeController.currentChannel ??
+                        'https://twitch.tv/BoostTeam_',
+                    onWebViewCreated: homeController.onWebViewCreated,
+                  ),
+                ],
+              );
+            },
           ),
           // floatingActionButton: Observer(
           //   builder: (_) => FloatingActionButton.extended(
