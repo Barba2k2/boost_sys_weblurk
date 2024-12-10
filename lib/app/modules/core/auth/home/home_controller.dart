@@ -1,14 +1,11 @@
 import 'dart:async';
 
-// import 'package:desktop_webview_window/desktop_webview_window.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
-import '../../../../core/ui/widgets/loader.dart';
 import '../../../../core/ui/widgets/messages.dart';
 import '../../../../service/home/home_service.dart';
 import '../auth_store.dart';
@@ -22,6 +19,26 @@ abstract class HomeControllerBase with Store {
   final AppLogger _logger;
   final AuthStore _authStore;
 
+  // Controle de estado
+  @observable
+  bool isInitialized = false;
+
+  @observable
+  bool isLoading = false;
+
+  @observable
+  String? currentChannel;
+
+  @observable
+  WebViewController? webViewController;
+
+  // Controles internos
+  final _initLock = Lock();
+  bool _isPollingActive = false;
+  Timer? _pollingTimer;
+  Timer? _scoreCheckTimer;
+  Timer? _loaderTimer;
+
   HomeControllerBase({
     required HomeService homeService,
     required AppLogger logger,
@@ -30,347 +47,161 @@ abstract class HomeControllerBase with Store {
         _logger = logger,
         _authStore = authStore;
 
-  @observable
-  late Future<void> initializationFuture;
-
-  @observable
-  var isScheduleVisible = false;
-
-  @observable
-  String initialChannel = 'BoostTeam_';
-
-  @observable
-  String? currentChannel;
-
-  @observable
-  WebViewController? webViewController;
-
-  bool isWebViewInitialized = false;
-  bool _isPollingActive = false;
-
-  final Completer<void> _webViewInitialized = Completer<void>();
-
-  // final webViewControllerCompleter = Completer<InAppWebViewController>();
-
-  Timer? _pollingTimer;
-  Timer? _scoreCheckTimer;
-  Timer? _loaderTimer;
-
   @action
   Future<void> onInit() async {
-    _logger.info('Iniciando HomeController...');
-    try {
-      await _authStore.loadUserLogged();
-
-      if (_authStore.userLogged == null) {
-        _logger.info('Nenhum usuário logado, redirecionando para login...');
-        if (!Modular.to.path.contains('/auth/login')) {
-          Modular.to.navigate('/auth/login/');
-        }
-        return;
-      }
-
-      _logger.info(
-        'Usuário logado: ${_authStore.userLogged?.nickname}, inicializando WebView...',
-      );
-      if (webViewController != null) {
-        await _initializeWebView();
-      }
-    } catch (e, s) {
-      _logger.error("Erro ao inicializar HomeController", e, s);
-      Messages.warning('Erro ao inicializar a aplicação');
-      if (!Modular.to.path.contains('/auth/login')) {
-        await _authStore.logout();
-        Modular.to.navigate('/auth/login/');
-      }
+    // Evita inicialização múltipla
+    if (isInitialized) {
+      _logger.info('HomeController já inicializado');
+      return;
     }
-  }
 
-  Future<void> _initializeWebView() async {
-    try {
-      await _loadInitialChannel();
-      await loadSchedules();
-      await startPollingForUpdates();
-      await startCheckingScores();
-    } catch (e, s) {
-      _logger.error("Erro ao inicializar WebView", e, s);
-      Messages.warning('Erro ao inicializar WebView');
+    // Usa um lock para garantir inicialização única
+    await _initLock.synchronized(() async {
+      if (isInitialized) return;
 
-      // Se o erro for de autenticação, faz logout e redireciona
-      if (e.toString().contains('Expire token') ||
-          e.toString().contains('authentication') ||
-          e.toString().contains('autenticação')) {
-        if (!Modular.to.path.contains('/auth/login')) {
-          await _authStore.logout();
-          Modular.to.navigate('/auth/login/');
-        }
+      _logger.info('Iniciando HomeController...');
+      try {
+        await _checkAuthentication();
+        isInitialized = true;
+      } catch (e, s) {
+        _logger.error("Erro ao inicializar HomeController", e, s);
+        await _handleAuthError();
       }
-    }
-  }
-
-  void _showLoader() {
-    Loader.show();
-    _loaderTimer?.cancel();
-    _loaderTimer = Timer(Duration(seconds: 10), () {
-      Loader.hide();
-      Messages.warning('Operação demorou mais que o esperado');
     });
   }
 
-  void _hideLoader() {
-    _loaderTimer?.cancel();
-    Loader.hide();
-  }
+  Future<void> _checkAuthentication() async {
+    await _authStore.loadUserLogged();
+    final user = _authStore.userLogged;
 
-  @action
-  Future<void> loadSchedules() async {
-    try {
-      await _homeService.fetchSchedules();
-    } catch (e, s) {
-      _logger.error('Error on load schedules', e, s);
-      Messages.warning('Erro ao carregar os agendamentos');
-      throw Failure(message: 'Erro ao carregar os agendamentos');
+    if (user == null) {
+      _logger.info('Nenhum usuário logado, redirecionando para login...');
+      throw Failure(message: 'Usuário não autenticado');
     }
-  }
-
-  @action
-  Future<void> initializeWebView(WebViewController controller) async {
-    webViewController = controller;
-    isWebViewInitialized = true;
-
-    if (!_webViewInitialized.isCompleted) {
-      _webViewInitialized.complete();
-    }
-
-    try {
-      await _loadInitialChannel();
-    } catch (e, s) {
-      if (!_webViewInitialized.isCompleted) {
-        _webViewInitialized.completeError(e);
-      }
-      _logger.error('Error initializing webview', e, s);
-    }
-  }
-
-  Future<bool> _checkAuthentication() async {
-    if (_authStore.userLogged == null || _authStore.userLogged?.id == null) {
-      _logger.warning('Usuário não está autenticado');
-      await _authStore.logout();
-      Modular.to.navigate('/auth/login/');
-      return false;
-    }
-    return true;
-  }
-
-  @action
-  Future<void> _loadInitialChannel() async {
-    try {
-      if (!await _checkAuthentication()) return;
-
-      final correctUrl = await _homeService.fetchCurrentChannel();
-      if (correctUrl == null) {
-        throw Failure(message: 'Nenhuma URL encontrada para o canal inicial.');
-      }
-
-      await webViewController!.loadRequest(Uri.parse(correctUrl));
-      _logger.info('Canal inicial carregado com sucesso: $correctUrl');
-    } catch (e, s) {
-      _logger.error('Erro ao carregar canal inicial.', e, s);
-      throw Failure(message: 'Erro ao carregar o canal inicial.');
-    }
+    _logger.info('Usuário logado: ${user.nickname}');
   }
 
   @action
   Future<void> onWebViewCreated(WebViewController controller) async {
-    _logger.info('WebView criado, configurando controller...');
-    try {
-      // Primeiro verifica se o usuário ainda está logado
-      if (_authStore.userLogged == null) {
-        throw Failure(message: 'Usuário não está autenticado');
-      }
-
-      webViewController = controller;
-      isWebViewInitialized = true;
-
-      await _loadInitialChannelWithRetry();
-
-      try {
-        await loadSchedules();
-        await startPollingForUpdates();
-        await startCheckingScores();
-      } catch (e, s) {
-        _logger.error('Erro ao carregar dados complementares', e, s);
-      }
-    } catch (e, s) {
-      if (e is Failure) {
-        _logger.error('Erro de negócio: ${e.message}', e, s);
-      } else {
-        _logger.error('Erro inesperado: $e', e, s);
-      }
-      _hideLoader();
-      _logger.error('Erro durante inicialização do WebView', e, s);
-
-      // Se for erro de autenticação, redireciona para login
-      if (e.toString().contains('autenticação') ||
-          e.toString().contains('Expire token')) {
-        if (!Modular.to.path.contains('/auth/login')) {
-          await _authStore.logout();
-          Modular.to.navigate('/auth/login/');
-        }
-      } else {
-        Messages.warning('Erro na inicialização.');
-      }
-    }
-  }
-
-  Future<void> _loadInitialChannelWithRetry() async {
-    const maxAttempts = 3;
-    int attempts = 0;
-
-    while (attempts < maxAttempts) {
-      try {
-        _logger.info(
-          'Tentativa ${attempts + 1} de $maxAttempts para carregar canal inicial.',
-        );
-        await _loadInitialChannel();
-        return;
-      } catch (e, s) {
-        attempts++;
-        if (attempts >= maxAttempts) {
-          _logger.error(
-            'Erro ao carregar canal inicial após $attempts tentativas.',
-            e,
-            s,
-          );
-          throw Failure(message: 'Não foi possível carregar o canal inicial.');
-        }
-
-        _logger.warning(
-          'Falha na tentativa ${attempts + 1}, tentando novamente...',
-        );
-        await Future.delayed(const Duration(seconds: 1));
-      }
-    }
-  }
-
-  @action
-  Future<void> loadCurrentChannel() async {
-    try {
-      final newChannel = await _homeService.fetchCurrentChannel();
-      currentChannel = newChannel ?? 'https://twitch.tv/BoostTeam_';
-
-      if (isWebViewInitialized &&
-          webViewController != null &&
-          currentChannel != null) {
-        await webViewController!.loadRequest(
-          Uri.parse(currentChannel!),
-        );
-
-        _logger.info('Current Channel: $currentChannel');
-      }
-    } catch (e, s) {
-      _logger.error('Error loading current channel URL', e, s);
-      Messages.warning('Erro ao carregar o canal atual');
-      throw Failure(message: 'Erro ao carregar o canal atual');
-    }
-  }
-
-  @action
-  Future<void> startPollingForUpdates() async {
-    _logger.info('Iniciando polling para atualizações...');
-
-    if (_isPollingActive) {
-      _logger.info('Polling já está ativo, ignorando nova chamada');
+    // Evita recriação do WebView
+    if (webViewController != null) {
+      _logger.info('WebView já criado');
       return;
     }
 
-    _isPollingActive = true;
-    const pollingInterval = Duration(minutes: 6);
-
-    _pollingTimer?.cancel();
+    _logger.info('WebView criado, configurando controller...');
 
     try {
-      _logger.info('Executando primeira atualização do polling');
-      await loadCurrentChannel();
+      webViewController = controller;
+      await _initializeWebViewFeatures();
     } catch (e, s) {
-      _logger.error('Erro na primeira atualização do polling', e, s);
+      _logger.error('Erro durante inicialização do WebView', e, s);
+      await _handleError(e);
     }
-
-    _pollingTimer = Timer.periodic(pollingInterval, (timer) async {
-      try {
-        _logger.info('Executando polling periódico - ${DateTime.now()}');
-        await loadCurrentChannel();
-      } catch (e, s) {
-        _logger.error('Erro durante polling periódico', e, s);
-      }
-    });
-
-    _logger.info(
-      'Polling iniciado com sucesso - Intervalo: ${pollingInterval.inSeconds}s',
-    );
   }
 
-  // @action
-  // Future<void> forceUpdateLive() async {
-  //   try {
-  //     await _homeService.forceUpdateLive();
-  //     await loadCurrentChannel();
-  //   } catch (e, s) {
-  //     _logger.error('Error on force update', e, s);
-  //     throw Failure(message: 'Erro ao forçar a atualização da live');
-  //   }
-  // }
+  Future<void> _initializeWebViewFeatures() async {
+    if (!isInitialized) {
+      _logger.warning(
+          'Tentativa de inicializar features sem controller inicializado');
+      return;
+    }
+
+    try {
+      await _loadInitialChannel();
+      await _startServices();
+    } catch (e, s) {
+      _logger.error('Erro ao inicializar features do WebView', e, s);
+      throw Failure(message: 'Erro ao inicializar recursos do WebView');
+    }
+  }
+
+  Future<void> _startServices() async {
+    await loadSchedules();
+    await _startPolling();
+    await _startScoreChecking();
+  }
+
+  Future<void> _loadInitialChannel() async {
+    try {
+      final url = await _homeService.fetchCurrentChannel();
+      if (url == null || webViewController == null) {
+        throw Failure(message: 'Erro ao carregar canal inicial');
+      }
+
+      await webViewController!.loadRequest(Uri.parse(url));
+      runInAction(() => currentChannel = url);
+      _logger.info('Canal inicial carregado: $url');
+    } catch (e, s) {
+      _logger.error('Erro ao carregar canal inicial', e, s);
+      throw Failure(message: 'Erro ao carregar canal inicial');
+    }
+  }
 
   @action
-  Future<void> startCheckingScores() async {
-    _logger.info('Iniciando verificação de scores...');
+  Future<void> loadSchedules() async {
+    if (!isInitialized) return;
 
-    _scoreCheckTimer?.cancel();
+    try {
+      runInAction(() => isLoading = true);
+      await _homeService.fetchSchedules();
+    } catch (e, s) {
+      _logger.error('Erro ao carregar agendamentos', e, s);
+      throw Failure(message: 'Erro ao carregar agendamentos');
+    } finally {
+      runInAction(() => isLoading = false);
+    }
+  }
 
+  Future<void> _startPolling() async {
+    if (_isPollingActive) return;
+
+    _isPollingActive = true;
     const interval = Duration(minutes: 6);
 
     try {
-      _logger.info('Executando primeira verificação de score');
-      await _saveScore();
-      _logger.info('Primeira verificação de score executada com sucesso');
+      await _updateChannel();
+      _pollingTimer = Timer.periodic(interval, (_) => _updateChannel());
     } catch (e, s) {
-      _logger.error('Erro na primeira verificação de score', e, s);
+      _logger.error('Erro ao iniciar polling', e, s);
+      _isPollingActive = false;
     }
+  }
 
-    _scoreCheckTimer = Timer.periodic(interval, (timer) async {
-      try {
-        _logger.info('Executando verificação periódica de score');
-        await _saveScore();
-        _logger.info('Verificação periódica de score executada com sucesso');
-      } catch (e, s) {
-        _logger.error('Erro durante verificação periódica de score', e, s);
+  Future<void> _updateChannel() async {
+    if (!isInitialized) return;
+
+    try {
+      final newChannel = await _homeService.fetchCurrentChannel();
+      if (newChannel != null && newChannel != currentChannel) {
+        await webViewController?.loadRequest(Uri.parse(newChannel));
+        runInAction(() => currentChannel = newChannel);
       }
-    });
+    } catch (e, s) {
+      _logger.error('Erro ao atualizar canal', e, s);
+    }
+  }
 
-    _logger.info('Verificação de scores iniciada com sucesso');
+  Future<void> _startScoreChecking() async {
+    if (!isInitialized) return;
+
+    const interval = Duration(minutes: 6);
+    try {
+      await _saveScore();
+      _scoreCheckTimer = Timer.periodic(interval, (_) => _saveScore());
+    } catch (e, s) {
+      _logger.error('Erro ao iniciar verificação de scores', e, s);
+    }
   }
 
   Future<void> _saveScore() async {
-    _logger.info('Iniciando salvamento de score...');
+    if (!isInitialized) return;
 
     try {
-      if (_authStore.userLogged == null) {
-        _logger.warning('Nenhum usuário logado para salvar score');
-        return;
-      }
-
       final streamerId = _getCurrentStreamerId();
-      if (streamerId <= 0) {
-        _logger.warning('ID do streamer inválido: $streamerId');
-        return;
-      }
+      if (streamerId <= 0) return;
 
       final now = DateTime.now();
-
-      _logger.info(
-        'Salvando score para streamer $streamerId em ${now.toString()}',
-      );
-
       await _homeService.saveScore(
         streamerId,
         DateTime(now.year, now.month, now.day),
@@ -378,70 +209,62 @@ abstract class HomeControllerBase with Store {
         now.minute,
         1,
       );
-
-      _logger.info('Score salvo com sucesso');
     } catch (e, s) {
       _logger.error('Erro ao salvar score', e, s);
-
-      if (e is Failure) {
-        _logger.error('Motivo do erro: ${e.message}');
-      }
-
-      throw Failure(message: 'Erro ao salvar a pontuação');
     }
   }
 
   int _getCurrentStreamerId() {
-    try {
-      if (_authStore.userLogged == null) {
-        _logger.warning('Nenhum usuário está logado');
-        return 0;
-      }
+    final user = _authStore.userLogged;
+    if (user?.id == null) return 0;
+    return int.tryParse(user!.id.toString()) ?? 0;
+  }
 
-      final userId = _authStore.userLogged?.id;
-      if (userId == null) {
-        _logger.warning('ID do usuário é null');
-        return 0;
-      }
+  Future<void> _handleError(dynamic error) async {
+    if (error.toString().contains('autenticação') ||
+        error.toString().contains('Expire token')) {
+      await _handleAuthError();
+    } else {
+      await Future.microtask(() {
+        Messages.warning('Erro na inicialização');
+      });
+    }
+  }
 
-      final streamerId = int.tryParse(userId.toString());
-      if (streamerId == null || streamerId <= 0) {
-        _logger.warning('ID do streamer inválido: $streamerId');
-        return 0;
-      }
-
-      _logger.info('Streamer ID obtido com sucesso: $streamerId');
-      return streamerId;
-    } catch (e, s) {
-      _logger.error('Erro ao obter ID do streamer', e, s);
-      return 0;
+  Future<void> _handleAuthError() async {
+    if (!Modular.to.path.contains('/auth/login')) {
+      await _authStore.logout();
+      Modular.to.navigate('/auth/login/');
     }
   }
 
   @action
   Future<void> reloadWebView() async {
-    _logger.info('Recarregando página...');
-    try {
-      _showLoader();
+    if (!isInitialized || webViewController == null) {
+      _logger.warning('Tentativa de reload sem WebView inicializado');
+      return;
+    }
 
-      if (webViewController == null) {
-        throw Failure(message: 'WebViewController não inicializado');
-      }
+    _logger.info('Recarregando WebView...');
+
+    try {
+      runInAction(() => isLoading = true);
 
       await webViewController!.reload();
-
-      // Após recarregar, verifica se está na URL correta
       await _loadInitialChannel();
 
-      _hideLoader();
-      _logger.info('Página recarregada com sucesso');
+      _logger.info('WebView recarregado com sucesso');
     } catch (e, s) {
-      _hideLoader();
-      _logger.error('Erro ao recarregar página', e, s);
-      Messages.warning('Erro ao atualizar a página');
+      _logger.error('Erro ao recarregar WebView', e, s);
+      await Future.microtask(() {
+        Messages.warning('Erro ao recarregar a página');
+      });
+    } finally {
+      runInAction(() => isLoading = false);
     }
   }
 
+  @action
   void dispose() {
     _logger.info('Disposing HomeController...');
     _loaderTimer?.cancel();
@@ -449,7 +272,29 @@ abstract class HomeControllerBase with Store {
     _scoreCheckTimer?.cancel();
     _isPollingActive = false;
     webViewController = null;
-    isWebViewInitialized = false;
-    _logger.info('HomeController disposed');
+    isInitialized = false;
+  }
+}
+
+class Lock {
+  Completer<void>? _completer;
+
+  Future<T> synchronized<T>(Future<T> Function() fn) async {
+    if (_completer != null) {
+      await _completer!.future;
+      return await fn();
+    }
+
+    _completer = Completer<void>();
+    try {
+      final result = await fn();
+      _completer!.complete();
+      return result;
+    } catch (e) {
+      _completer!.complete();
+      rethrow;
+    } finally {
+      _completer = null;
+    }
   }
 }

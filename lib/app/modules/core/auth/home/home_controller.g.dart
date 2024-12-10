@@ -9,56 +9,35 @@ part of 'home_controller.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$HomeController on HomeControllerBase, Store {
-  late final _$initializationFutureAtom =
-      Atom(name: 'HomeControllerBase.initializationFuture', context: context);
+  late final _$isInitializedAtom =
+      Atom(name: 'HomeControllerBase.isInitialized', context: context);
 
   @override
-  Future<void> get initializationFuture {
-    _$initializationFutureAtom.reportRead();
-    return super.initializationFuture;
+  bool get isInitialized {
+    _$isInitializedAtom.reportRead();
+    return super.isInitialized;
   }
 
-  bool _initializationFutureIsInitialized = false;
-
   @override
-  set initializationFuture(Future<void> value) {
-    _$initializationFutureAtom.reportWrite(value,
-        _initializationFutureIsInitialized ? super.initializationFuture : null,
-        () {
-      super.initializationFuture = value;
-      _initializationFutureIsInitialized = true;
+  set isInitialized(bool value) {
+    _$isInitializedAtom.reportWrite(value, super.isInitialized, () {
+      super.isInitialized = value;
     });
   }
 
-  late final _$isScheduleVisibleAtom =
-      Atom(name: 'HomeControllerBase.isScheduleVisible', context: context);
+  late final _$isLoadingAtom =
+      Atom(name: 'HomeControllerBase.isLoading', context: context);
 
   @override
-  bool get isScheduleVisible {
-    _$isScheduleVisibleAtom.reportRead();
-    return super.isScheduleVisible;
+  bool get isLoading {
+    _$isLoadingAtom.reportRead();
+    return super.isLoading;
   }
 
   @override
-  set isScheduleVisible(bool value) {
-    _$isScheduleVisibleAtom.reportWrite(value, super.isScheduleVisible, () {
-      super.isScheduleVisible = value;
-    });
-  }
-
-  late final _$initialChannelAtom =
-      Atom(name: 'HomeControllerBase.initialChannel', context: context);
-
-  @override
-  String get initialChannel {
-    _$initialChannelAtom.reportRead();
-    return super.initialChannel;
-  }
-
-  @override
-  set initialChannel(String value) {
-    _$initialChannelAtom.reportWrite(value, super.initialChannel, () {
-      super.initialChannel = value;
+  set isLoading(bool value) {
+    _$isLoadingAtom.reportWrite(value, super.isLoading, () {
+      super.isLoading = value;
     });
   }
 
@@ -102,32 +81,6 @@ mixin _$HomeController on HomeControllerBase, Store {
     return _$onInitAsyncAction.run(() => super.onInit());
   }
 
-  late final _$loadSchedulesAsyncAction =
-      AsyncAction('HomeControllerBase.loadSchedules', context: context);
-
-  @override
-  Future<void> loadSchedules() {
-    return _$loadSchedulesAsyncAction.run(() => super.loadSchedules());
-  }
-
-  late final _$initializeWebViewAsyncAction =
-      AsyncAction('HomeControllerBase.initializeWebView', context: context);
-
-  @override
-  Future<void> initializeWebView(WebViewController controller) {
-    return _$initializeWebViewAsyncAction
-        .run(() => super.initializeWebView(controller));
-  }
-
-  late final _$_loadInitialChannelAsyncAction =
-      AsyncAction('HomeControllerBase._loadInitialChannel', context: context);
-
-  @override
-  Future<void> _loadInitialChannel() {
-    return _$_loadInitialChannelAsyncAction
-        .run(() => super._loadInitialChannel());
-  }
-
   late final _$onWebViewCreatedAsyncAction =
       AsyncAction('HomeControllerBase.onWebViewCreated', context: context);
 
@@ -137,32 +90,12 @@ mixin _$HomeController on HomeControllerBase, Store {
         .run(() => super.onWebViewCreated(controller));
   }
 
-  late final _$loadCurrentChannelAsyncAction =
-      AsyncAction('HomeControllerBase.loadCurrentChannel', context: context);
+  late final _$loadSchedulesAsyncAction =
+      AsyncAction('HomeControllerBase.loadSchedules', context: context);
 
   @override
-  Future<void> loadCurrentChannel() {
-    return _$loadCurrentChannelAsyncAction
-        .run(() => super.loadCurrentChannel());
-  }
-
-  late final _$startPollingForUpdatesAsyncAction = AsyncAction(
-      'HomeControllerBase.startPollingForUpdates',
-      context: context);
-
-  @override
-  Future<void> startPollingForUpdates() {
-    return _$startPollingForUpdatesAsyncAction
-        .run(() => super.startPollingForUpdates());
-  }
-
-  late final _$startCheckingScoresAsyncAction =
-      AsyncAction('HomeControllerBase.startCheckingScores', context: context);
-
-  @override
-  Future<void> startCheckingScores() {
-    return _$startCheckingScoresAsyncAction
-        .run(() => super.startCheckingScores());
+  Future<void> loadSchedules() {
+    return _$loadSchedulesAsyncAction.run(() => super.loadSchedules());
   }
 
   late final _$reloadWebViewAsyncAction =
@@ -173,12 +106,25 @@ mixin _$HomeController on HomeControllerBase, Store {
     return _$reloadWebViewAsyncAction.run(() => super.reloadWebView());
   }
 
+  late final _$HomeControllerBaseActionController =
+      ActionController(name: 'HomeControllerBase', context: context);
+
+  @override
+  void dispose() {
+    final _$actionInfo = _$HomeControllerBaseActionController.startAction(
+        name: 'HomeControllerBase.dispose');
+    try {
+      return super.dispose();
+    } finally {
+      _$HomeControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''
-initializationFuture: ${initializationFuture},
-isScheduleVisible: ${isScheduleVisible},
-initialChannel: ${initialChannel},
+isInitialized: ${isInitialized},
+isLoading: ${isLoading},
 currentChannel: ${currentChannel},
 webViewController: ${webViewController}
     ''';
