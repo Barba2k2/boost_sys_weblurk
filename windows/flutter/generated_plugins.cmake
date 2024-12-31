@@ -6,10 +6,8 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_inappwebview_windows
   flutter_secure_storage_windows
   flutter_volume_controller
-  fullscreen_window
-  screen_retriever
+  screen_retriever_windows
   url_launcher_windows
-  webview_win_floating
   webview_windows
   window_manager
 )
