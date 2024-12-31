@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import '../../logger/app_logger.dart';
 
-class WebviewWidget extends StatelessWidget {
+class MyWebviewWidget extends StatelessWidget {
   final String initialUrl;
   final void Function(InAppWebViewController) onWebViewCreated;
   final AppLogger? logger;
 
-  const WebviewWidget({
+  const MyWebviewWidget({
     required this.initialUrl,
     required this.onWebViewCreated,
     this.logger,
@@ -23,7 +23,8 @@ class WebviewWidget extends StatelessWidget {
       initialSettings: InAppWebViewSettings(
         javaScriptEnabled: true,
         userAgent:
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582",
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edge/131.0.0.0',
+        applicationNameForUserAgent: 'Edge/131.0.0.0',
         preferredContentMode: UserPreferredContentMode.DESKTOP,
         mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
         cacheMode: CacheMode.LOAD_DEFAULT,
