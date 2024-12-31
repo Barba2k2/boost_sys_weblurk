@@ -45,9 +45,9 @@ class _HomePageState extends State<HomePage> {
                         currentChannel: homeController.currentChannel,
                       ),
                       Expanded(
-                        child: WebviewWidget(
-                          initialUrl: homeController.currentChannel ??
-                              'https://twitch.tv/BoostTeam_',
+                        child: MyWebviewWidget(
+                          initialUrl:
+                              homeController.currentChannel ?? 'https://twitch.tv/BoostTeam_',
                           onWebViewCreated: homeController.onWebViewCreated,
                         ),
                       ),
