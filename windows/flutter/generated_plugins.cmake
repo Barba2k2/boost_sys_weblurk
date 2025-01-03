@@ -3,12 +3,11 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  flutter_inappwebview_windows
+  desktop_webview_window
   flutter_secure_storage_windows
   flutter_volume_controller
   screen_retriever_windows
   url_launcher_windows
-  webview_windows
   window_manager
 )
 
