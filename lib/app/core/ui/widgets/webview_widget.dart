@@ -36,8 +36,8 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
         configuration: CreateConfiguration(
           title: "Boost Team SysLurk",
           titleBarHeight: 0,
-          windowWidth: 1014,
-          windowHeight: 624,
+          windowWidth: 1100,
+          windowHeight: 670,
         ),
       );
 
