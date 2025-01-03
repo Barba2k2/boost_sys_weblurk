@@ -54,8 +54,13 @@ class HomeServiceImpl implements HomeService {
 
       final currentSchedule = schedules.firstWhere(
         (schedule) {
-          final startTimeParts = schedule['start_time'].split(':');
-          final endTimeParts = schedule['end_time'].split(':');
+          final startTimeStr =
+              schedule['start_time'].toString().replaceAll('Time(', '').replaceAll(')', '');
+          final endTimeStr =
+              schedule['end_time'].toString().replaceAll('Time(', '').replaceAll(')', '');
+
+          final startTimeParts = startTimeStr.split(':');
+          final endTimeParts = endTimeStr.split(':');
 
           final startDateTime = DateTime(
             now.year,
@@ -76,14 +81,10 @@ class HomeServiceImpl implements HomeService {
 
           return now.isAfter(startDateTime) && now.isBefore(endDateTime);
         },
+        orElse: () => {'streamer_url': 'https://twitch.tv/BoostTeam_'},
       );
 
-      if (currentSchedule.isNotEmpty) {
-        return currentSchedule['streamer_url'] as String?;
-      } else {
-        _logger.warning('Nenhuma live correspondente ao horário atual');
-        return 'https://twitch.tv/BoostTeam_';
-      }
+      return currentSchedule['streamer_url'] as String?;
     } catch (e, s) {
       _logger.error('Erro ao buscar o canal atual', e, s);
       throw Failure(message: 'Erro ao buscar o canal atual');
