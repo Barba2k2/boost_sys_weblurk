@@ -12,7 +12,6 @@ dependencies:
     sdk: flutter
   
   cupertino_icons: ^1.0.8
-  get: ^4.6.6
   http: ^1.2.2
   google_fonts: ^6.2.1
   validatorless: ^1.2.3
