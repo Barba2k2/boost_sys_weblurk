@@ -37,7 +37,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
         title: Row(
           children: [
             Image.asset(
-              'assets/images/logo-cla-boost.png', // Adicione o logo do BoostTeam
+              'assets/images/logo-cla-boost.png',
               height: 32,
             ),
             const SizedBox(width: 16),
@@ -49,7 +49,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                   'Atualizar Listas',
                   Icons.refresh,
                   () {
-                    homeController.loadSchedules();
+                    // homeController.loadSchedules();
                     homeController.reloadWebView();
                   },
                 ),
