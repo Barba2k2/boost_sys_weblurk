@@ -1,63 +1,110 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import '../../logger/app_logger.dart';
 
-class MyWebviewWidget extends StatelessWidget {
+class MyWebviewWidget extends StatefulWidget {
   final String initialUrl;
-  final void Function(InAppWebViewController) onWebViewCreated;
+  final void Function(Webview)? onWebViewCreated;
   final AppLogger? logger;
 
   const MyWebviewWidget({
     required this.initialUrl,
-    required this.onWebViewCreated,
+    this.onWebViewCreated,
     this.logger,
     super.key,
   });
 
   @override
+  State<MyWebviewWidget> createState() => _MyWebviewWidgetState();
+}
+
+class _MyWebviewWidgetState extends State<MyWebviewWidget> {
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWebView();
+  }
+
+  Future<void> _initializeWebView() async {
+    try {
+      widget.logger?.info('Initializing WebView Window');
+
+      final webview = await WebviewWindow.create(
+        configuration: CreateConfiguration(
+          title: "Boost Team SysLurk",
+          titleBarHeight: 0,
+          windowWidth: 1014,
+          windowHeight: 624,
+        ),
+      );
+
+      // Carregar URL
+      webview.launch(widget.initialUrl);
+
+      // Callback de criação
+      if (widget.onWebViewCreated != null) {
+        widget.onWebViewCreated!(webview);
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e, s) {
+      widget.logger?.error('WebView initialization error:', e, s);
+      setState(() {
+        _errorMessage = '''
+            Erro ao inicializar WebView:
+            ${e.toString()}
+            
+            Stack Trace:
+            $s
+          ''';
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return InAppWebView(
-      initialUrlRequest: URLRequest(
-        url: WebUri(initialUrl),
+    if (_errorMessage != null) {
+      return Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red),
+                const SizedBox(height: 8),
+                SelectableText(_errorMessage!),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _initializeWebView,
+                  child: const Text('Tentar Novamente'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Container(
+      color: Colors.black87,
+      child: Center(
+        child: Text(
+          'As Lives estão sendo exibidas em uma janela separada',
+          style: TextStyle(
+            fontSize: 28,
+            color: Colors.white,
+          ),
+        ),
       ),
-      initialSettings: InAppWebViewSettings(
-        javaScriptEnabled: true,
-        userAgent:
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edge/131.0.0.0',
-        applicationNameForUserAgent: 'Edge/131.0.0.0',
-        preferredContentMode: UserPreferredContentMode.DESKTOP,
-        mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
-        cacheMode: CacheMode.LOAD_DEFAULT,
-        cacheEnabled: true,
-        javaScriptCanOpenWindowsAutomatically: true,
-        supportMultipleWindows: true,
-      ),
-      onWebViewCreated: (controller) {
-        onWebViewCreated(controller);
-      },
-      onLoadStart: (controller, url) {
-        logger?.info('Carregando: $url');
-      },
-      onLoadStop: (controller, url) {
-        logger?.info('Navegação completada: $url');
-      },
-      onLoadError: (controller, url, code, message) {
-        logger?.error('Erro ao carregar $url: $message');
-        logger?.error('Código do erro: $code');
-      },
-      onPermissionRequest: (controller, request) async {
-        logger?.info('Solicitação de permissão de: ${request.origin}');
-        return PermissionResponse(
-          resources: request.resources,
-          action: PermissionResponseAction.GRANT,
-        );
-      },
-      onConsoleMessage: (controller, consoleMessage) {
-        logger?.info('Console message: ${consoleMessage.message}');
-        if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
-          logger?.error('Erro do console detectado: ${consoleMessage.message}');
-        }
-      },
     );
   }
 }
