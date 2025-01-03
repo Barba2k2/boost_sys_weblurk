@@ -236,7 +236,11 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
       onTap: onTap,
       child: Row(
         children: [
-          Icon(icon, size: 20),
+          Icon(
+            icon,
+            size: 20,
+            color: Colors.black,
+          ),
           const SizedBox(width: 10),
           Text(label),
         ],
