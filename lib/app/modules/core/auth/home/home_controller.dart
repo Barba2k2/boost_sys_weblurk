@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
@@ -41,14 +41,14 @@ abstract class HomeControllerBase with Store {
   String? currentChannel;
 
   @observable
-  InAppWebViewController? webViewController;
+  Webview? webViewController;
 
   bool isWebViewInitialized = false;
   bool _isPollingActive = false;
 
   final Completer<void> _webViewInitialized = Completer<void>();
 
-  final webViewControllerCompleter = Completer<InAppWebViewController>();
+  final webViewControllerCompleter = Completer<Webview>();
 
   Timer? _pollingTimer;
   Timer? _scoreCheckTimer;
@@ -132,7 +132,7 @@ abstract class HomeControllerBase with Store {
   }
 
   @action
-  Future<void> initializeWebView(InAppWebViewController controller) async {
+  Future<void> initializeWebView(Webview controller) async {
     webViewController = controller;
     isWebViewInitialized = true;
 
@@ -167,14 +167,7 @@ abstract class HomeControllerBase with Store {
 
       final correctUrl = await _homeService.fetchCurrentChannel();
       if (correctUrl != null) {
-        if (webViewController == null) {
-          throw Failure(message: 'WebViewController não inicializado');
-        }
-
-        await webViewController!.loadUrl(
-          urlRequest: URLRequest(url: WebUri(correctUrl)),
-        );
-
+        currentChannel = correctUrl;
         _logger.info('Canal carregado com sucesso: $correctUrl');
       } else {
         throw Failure(message: 'URL não encontrada');
@@ -187,7 +180,7 @@ abstract class HomeControllerBase with Store {
   }
 
   @action
-  Future<void> onWebViewCreated(InAppWebViewController controller) async {
+  Future<void> onWebViewCreated(Webview controller) async {
     _logger.info('WebView criado, configurando controller...');
     try {
       // Primeiro verifica se o usuário ainda está logado
@@ -273,14 +266,7 @@ abstract class HomeControllerBase with Store {
       final newChannel = await _homeService.fetchCurrentChannel();
       currentChannel = newChannel ?? 'https://twitch.tv/BoostTeam_';
 
-      if (isWebViewInitialized &&
-          webViewController != null &&
-          currentChannel != null) {
-        await webViewController!.loadUrl(
-          urlRequest: URLRequest(url: WebUri(currentChannel!)),
-        );
-        _logger.info('Current Channel: $currentChannel');
-      }
+      _logger.info('Current Channel: $currentChannel');
     } catch (e, s) {
       _logger.error('Error loading current channel URL', e, s);
       Messages.warning('Erro ao carregar o canal atual');
@@ -436,16 +422,7 @@ abstract class HomeControllerBase with Store {
     _logger.info('Recarregando página...');
     try {
       _showLoader();
-
-      if (webViewController == null) {
-        throw Failure(message: 'WebViewController não inicializado');
-      }
-
-      await webViewController!.reload();
-
-      // Após recarregar, verifica se está na URL correta
-      await _loadInitialChannel();
-
+      await loadCurrentChannel();
       _hideLoader();
       _logger.info('Página recarregada com sucesso');
     } catch (e, s) {
