@@ -60,9 +60,16 @@ jobs:
         draft: false
         prerelease: false
         body: |
-          Release automática da versão ${{ env.NEW_TAG }}
+          Release automático da versão ${{ env.NEW_TAG }}
           
           ### Mudanças nesta versão
-          - Novo build automático via GitHub Actions
+          - Correção de bug de login na Twitch
+          - Mudanca na interface do usuario
+            - Abertura de uma nova janela com a live do momento
+          
+          ### Screenshots
+          ![Screenshot 1](https://raw.githubusercontent.com/barba2k2/boost_sys_weblurk/master/assets/screenshots/img1.png)
+          ![Screenshot 2](https://raw.githubusercontent.com/barba2k2/boost_sys_weblurk/master/assets/screenshots/img2.png)
+
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
