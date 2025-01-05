@@ -39,7 +39,7 @@ jobs:
     # Criar ZIP do build
     - name: Create Release ZIP
       run: |
-        cd build/windows/runner/Release
+        cd build\windows\x64\runner\Release
         7z a -tzip ../../../../../Boost-SysWebLurk-${{ env.NEW_TAG }}.zip *
 
     # Upload do artefato para o workflow
