@@ -1,10 +1,5 @@
 name: Build Flutter Windows App
 
-permissions:
-  contents: write
-  discussions: write
-  pull-requests: write
-
 on:
   push:
     branches:
@@ -28,7 +23,7 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.3'
+        flutter-version: 'stable'
 
     - name: Install dependencies
       run: flutter pub get
@@ -44,7 +39,7 @@ jobs:
     # Criar ZIP do build
     - name: Create Release ZIP
       run: |
-        cd build/windows/x64/runner/Release
+        cd build/windows/runner/Release
         7z a -tzip ../../../../../Boost-SysWebLurk-${{ env.NEW_TAG }}.zip *
 
     # Upload do artefato para o workflow
@@ -52,7 +47,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: Boost-SysWebLurk-${{ env.NEW_TAG }}
-        path: build/windows/x64/runner/Release/
+        path: build/windows/runner/Release/
 
     # Criar Release no GitHub (só executa na branch master)
     - name: Create GitHub Release
@@ -60,19 +55,21 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: Boost-SysWebLurk-${{ env.NEW_TAG }}.zip
-        tag_name: ${{ env.NEW_TAG }}
-        name: Boost-SysWebLurk ${{ env.NEW_TAG }}
-        generate_release_notes: true
+        tag_name: v${{ env.NEW_TAG }}
+        name: Boost-SysWebLurk v${{ env.NEW_TAG }}
         draft: false
         prerelease: false
         body: |
-          Versão ${{ env.NEW_TAG }}
+          Release automático da versão ${{ env.NEW_TAG }}
           
           ### Mudanças nesta versão
-          - Correção do login na Twitch
+          - Correção de bug de login na Twitch
+          - Mudanca na interface do usuario
+            - Abertura de uma nova janela com a live do momento
+          
+          ### Screenshots
+          ![Screenshot 1](https://raw.githubusercontent.com/barba2k2/boost_sys_weblurk/master/assets/screenshots/img1.png)
+          ![Screenshot 2](https://raw.githubusercontent.com/barba2k2/boost_sys_weblurk/master/assets/screenshots/img2.png)
 
-          - Correção de bugs
-
-          - Melhorias de performance
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

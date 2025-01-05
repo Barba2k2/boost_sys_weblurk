@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:get/get_connect/http/src/status/http_status.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/exceptions/failure.dart';

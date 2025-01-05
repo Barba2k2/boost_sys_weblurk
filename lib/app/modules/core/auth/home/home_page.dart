@@ -16,21 +16,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final homeController = Modular.get<HomeController>();
-  bool _isWebViewReady = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeController();
-  }
-
-  Future<void> _initializeController() async {
-    await homeController.onInit();
-    if (mounted) {
-      setState(() {
-        _isWebViewReady = true;
-      });
-    }
+    homeController.onInit();
   }
 
   @override
@@ -47,21 +37,21 @@ class _HomePageState extends State<HomePage> {
           appBar: SyslurkAppBar(),
           body: Observer(
             builder: (_) {
-              if (!_isWebViewReady) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              return Column(
+              return Stack(
                 children: [
-                  LiveUrlBar(
-                    currentChannel: homeController.currentChannel,
-                  ),
-                  WebviewWidget(
-                    initialUrl: homeController.currentChannel ??
-                        'https://twitch.tv/BoostTeam_',
-                    onWebViewCreated: homeController.onWebViewCreated,
+                  Column(
+                    children: [
+                      LiveUrlBar(
+                        currentChannel: homeController.currentChannel,
+                      ),
+                      Expanded(
+                        child: MyWebviewWidget(
+                          initialUrl:
+                              homeController.currentChannel ?? 'https://twitch.tv/BoostTeam_',
+                          onWebViewCreated: homeController.onWebViewCreated,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               );
