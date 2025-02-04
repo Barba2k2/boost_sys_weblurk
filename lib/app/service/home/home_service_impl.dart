@@ -100,8 +100,13 @@ class HomeServiceImpl implements HomeService {
     int points,
   ) async {
     try {
+      // Input validation
+      if (streamerId <= 0) throw Failure(message: 'ID do streamer inválido');
+      if (hour < 0 || hour > 23) throw Failure(message: 'Hora inválida');
+      if (minute < 0 || minute > 59) throw Failure(message: 'Minuto inválido');
+      if (points < 0) throw Failure(message: 'Pontuação inválida');
+
       final score = ScoreModel(
-        // id: 0,
         streamerId: streamerId,
         date: date,
         hour: hour,
@@ -109,10 +114,30 @@ class HomeServiceImpl implements HomeService {
         points: points,
       );
 
-      await _homeRepository.saveScore(score);
+      // Add retry logic
+      int retryCount = 0;
+      const maxRetries = 3;
+
+      while (retryCount < maxRetries) {
+        try {
+          await _homeRepository.saveScore(score);
+          _logger.info('Score saved successfully after ${retryCount + 1} attempts');
+          return;
+        } catch (e) {
+          retryCount++;
+          if (retryCount == maxRetries) {
+            rethrow;
+          }
+          _logger.warning('Retry attempt $retryCount after error: $e');
+          await Future.delayed(Duration(seconds: 1 * retryCount));
+        }
+      }
     } catch (e, s) {
-      _logger.error('Error saving score', e, s);
-      throw Failure(message: 'Erro ao salvar a pontuação');
+      _logger.error('Error in saveScore service', e, s);
+      if (e is Failure) {
+        rethrow;
+      }
+      throw Failure(message: 'Erro ao salvar a pontuação: ${e.toString()}');
     }
   }
 }
