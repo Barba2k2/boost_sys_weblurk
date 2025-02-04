@@ -15,8 +15,14 @@ class PollingServiceImpl implements PollingService {
   final AppLogger _logger;
   Timer? _channelTimer;
   Timer? _scoreTimer;
+  Timer? _watchdogTimer;
+  DateTime? _lastChannelUpdate;
+  DateTime? _lastScoreUpdate;
 
-  static const _pollingInterval = Duration(minutes: 6);
+  static const _pollingInterval = Duration(minutes: 80);
+  static const _channelCheckInterval = Duration(minutes: 6);
+  static const _watchdogInterval = Duration(minutes: 5);
+  static const _maxTimeSinceLastUpdate = Duration(minutes: 10);
 
   PollingServiceImpl({
     required HomeService homeService,
@@ -29,20 +35,9 @@ class PollingServiceImpl implements PollingService {
     _logger.info('Iniciando polling services...');
 
     try {
-      await checkAndUpdateChannel();
-      await checkAndUpdateScore(streamerId);
+      _startTimers(streamerId);
 
-      _channelTimer?.cancel();
-      _scoreTimer?.cancel();
-
-      _channelTimer = Timer.periodic(
-        _pollingInterval,
-        (_) => checkAndUpdateChannel(),
-      );
-      _scoreTimer = Timer.periodic(
-        _pollingInterval,
-        (_) => checkAndUpdateScore(streamerId),
-      );
+      _startWatchdog(streamerId);
 
       _logger.info('Polling services iniciados com sucesso');
     } catch (e, s) {
@@ -52,21 +47,56 @@ class PollingServiceImpl implements PollingService {
     }
   }
 
-  @override
-  Future<void> stopPolling() async {
+  void _startTimers(int streamerId) {
     _channelTimer?.cancel();
     _scoreTimer?.cancel();
-    _logger.info('Polling services parados');
+
+    checkAndUpdateChannel();
+    checkAndUpdateScore(streamerId);
+
+    _channelTimer = Timer.periodic(
+      _channelCheckInterval,
+      (_) => checkAndUpdateChannel(),
+    );
+
+    _scoreTimer = Timer.periodic(
+      _pollingInterval,
+      (_) => checkAndUpdateScore(streamerId),
+    );
+  }
+
+  void _startWatchdog(int streamerId) {
+    _watchdogTimer?.cancel();
+    _watchdogTimer = Timer.periodic(_watchdogInterval, (_) {
+      _checkAndRestartIfNeeded(streamerId);
+    });
+  }
+
+  void _checkAndRestartIfNeeded(int streamerId) {
+    final now = DateTime.now();
+
+    if (_lastChannelUpdate != null &&
+        now.difference(_lastChannelUpdate!) > _maxTimeSinceLastUpdate) {
+      _logger.warning('Watchdog: Channel updates stopped, restarting polling...');
+      _startTimers(streamerId);
+    }
+
+    if (_lastScoreUpdate != null && now.difference(_lastScoreUpdate!) > _maxTimeSinceLastUpdate) {
+      _logger.warning('Watchdog: Score updates stopped, restarting polling...');
+      _startTimers(streamerId);
+    }
   }
 
   @override
   Future<void> checkAndUpdateChannel() async {
     try {
       await _homeService.fetchCurrentChannel();
+      _lastChannelUpdate = DateTime.now();
       _logger.info('Canal verificado e atualizado com sucesso');
     } catch (e, s) {
       _logger.error('Erro ao verificar e atualizar canal', e, s);
-      rethrow;
+
+      _lastChannelUpdate = DateTime.now();
     }
   }
 
@@ -81,10 +111,26 @@ class PollingServiceImpl implements PollingService {
         now.minute,
         1,
       );
+      _lastScoreUpdate = now;
       _logger.info('Score atualizado com sucesso');
     } catch (e, s) {
       _logger.error('Erro ao atualizar score', e, s);
-      rethrow;
+
+      _lastScoreUpdate = DateTime.now();
     }
+  }
+
+  @override
+  Future<void> stopPolling() async {
+    _channelTimer?.cancel();
+    _scoreTimer?.cancel();
+    _watchdogTimer?.cancel();
+    _logger.info('Polling services parados');
+  }
+
+  bool isPollingActive() {
+    return _channelTimer?.isActive == true &&
+        _scoreTimer?.isActive == true &&
+        _watchdogTimer?.isActive == true;
   }
 }
