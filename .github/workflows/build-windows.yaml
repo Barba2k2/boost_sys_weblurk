@@ -26,16 +26,30 @@ jobs:
         flutter-version: '3.27.1'
         cache: true
 
+    # Passo para gerar a versão
+    - name: Generate Version
+      id: version
+      shell: bash
+      run: |
+        # Pegar a última tag
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        
+        # Incrementar a versão patch
+        MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
+        MINOR=$(echo $LATEST_TAG | cut -d. -f2)
+        PATCH=$(echo $LATEST_TAG | cut -d. -f3)
+        NEW_PATCH=$((PATCH + 1))
+        NEW_TAG="${MAJOR}.${MINOR}.${NEW_PATCH}"
+        
+        # Definir as variáveis para uso posterior
+        echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
+        echo "::set-output name=version::${NEW_TAG}"
+
     - name: Install dependencies
       run: flutter pub get
 
     - name: Build Windows
       run: flutter build windows --release
-
-    - name: List Build Directory
-      run: |
-        dir build\windows\x64\runner\Release
-      shell: cmd
 
     - name: Create Release ZIP
       run: |
@@ -49,13 +63,21 @@ jobs:
         path: build/windows/x64/runner/Release/
         retention-days: 90
 
+    - name: Create Tag
+      if: github.ref == 'refs/heads/master'
+      run: |
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
+        git tag -a ${{ env.NEW_TAG }} -m "Release ${{ env.NEW_TAG }}"
+        git push origin ${{ env.NEW_TAG }}
+
     - name: Create GitHub Release
       if: github.ref == 'refs/heads/master'
       uses: softprops/action-gh-release@v1
       with:
         files: Boost-SysWebLurk-${{ env.NEW_TAG }}.zip
         tag_name: ${{ env.NEW_TAG }}
-        name: Boost-SysWebLurk v${{ env.NEW_TAG }}
+        name: Boost-SysWebLurk ${{ env.NEW_TAG }}
         draft: false
         prerelease: false
         body: |
