@@ -5,7 +5,7 @@ on:
     branches:
       - master
     tags:
-      - 'v*'  # Adiciona trigger para tags
+      - 'v*'
   pull_request:
     branches:
       - master
@@ -16,14 +16,15 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Necessário para histórico completo das tags
+        fetch-depth: 0
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.27.1'
+        cache: true
 
     - name: Install dependencies
       run: flutter pub get
@@ -31,25 +32,22 @@ jobs:
     - name: Build Windows
       run: flutter build windows --release
 
-    # Rodar o script para determinar a próxima versão
     - name: Increment Version
       run: bash version.sh
       id: version
 
-    # Criar ZIP do build
     - name: Create Release ZIP
       run: |
         cd build\windows\x64\runner\Release
         7z a -tzip ../../../../../Boost-SysWebLurk-${{ env.NEW_TAG }}.zip *
 
-    # Upload do artefato para o workflow
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Boost-SysWebLurk-${{ env.NEW_TAG }}
         path: build/windows/runner/Release/
+        retention-days: 90
 
-    # Criar Release no GitHub (só executa na branch master)
     - name: Create GitHub Release
       if: github.ref == 'refs/heads/master'
       uses: softprops/action-gh-release@v1
@@ -63,13 +61,11 @@ jobs:
           Release automático da versão ${{ env.NEW_TAG }}
           
           ### Mudanças nesta versão
-          - Correção de bug de login na Twitch
-          - Mudanca na interface do usuario
-            - Abertura de uma nova janela com a live do momento
+          - Mudanças no salvamento do score
+          - Correção do pooling de troca de canais
           
           ### Screenshots
           ![Screenshot 1](https://raw.githubusercontent.com/barba2k2/boost_sys_weblurk/master/assets/screenshots/img1.png)
           ![Screenshot 2](https://raw.githubusercontent.com/barba2k2/boost_sys_weblurk/master/assets/screenshots/img2.png)
-
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
