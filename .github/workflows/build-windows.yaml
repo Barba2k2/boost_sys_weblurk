@@ -32,9 +32,10 @@ jobs:
     - name: Build Windows
       run: flutter build windows --release
 
-    - name: Increment Version
-      run: bash version.sh
-      id: version
+    - name: List Build Directory
+      run: |
+        dir build\windows\x64\runner\Release
+      shell: cmd
 
     - name: Create Release ZIP
       run: |
@@ -45,7 +46,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Boost-SysWebLurk-${{ env.NEW_TAG }}
-        path: build/windows/runner/Release/
+        path: build/windows/x64/runner/Release/
         retention-days: 90
 
     - name: Create GitHub Release
