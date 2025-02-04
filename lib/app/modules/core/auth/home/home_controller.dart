@@ -170,10 +170,10 @@ abstract class HomeControllerBase with Store {
     }
   }
 
-  void dispose() {
-    _logger.info('Disposing HomeController...');
-    _pollingService.stopPolling();
-    _webViewService.dispose();
-    _logger.info('HomeController disposed');
-  }
+  // void dispose() {
+  //   _logger.info('Disposing HomeController...');
+  //   _pollingService.stopPolling();
+  //   _webViewService.dispose();
+  //   _logger.info('HomeController disposed');
+  // }
 }
