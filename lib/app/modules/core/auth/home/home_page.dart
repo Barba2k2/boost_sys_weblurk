@@ -23,11 +23,11 @@ class _HomePageState extends State<HomePage> {
     homeController.onInit();
   }
 
-  @override
-  void dispose() {
-    homeController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   homeController.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
