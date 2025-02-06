@@ -32,16 +32,16 @@ class PollingServiceImpl implements PollingService {
 
   @override
   Future<void> startPolling(int streamerId) async {
-    _logger.info('Iniciando polling services...');
+    _logger.info('Iniciando polling services... ${DateTime.now()}');
 
     try {
       _startTimers(streamerId);
 
       _startWatchdog(streamerId);
 
-      _logger.info('Polling services iniciados com sucesso');
+      _logger.info('Polling services iniciados com sucesso ${DateTime.now()}');
     } catch (e, s) {
-      _logger.error('Erro ao iniciar polling services', e, s);
+      _logger.error('Erro ao iniciar polling services ${DateTime.now()}', e, s);
       stopPolling();
       rethrow;
     }
@@ -68,6 +68,7 @@ class PollingServiceImpl implements PollingService {
   void _startWatchdog(int streamerId) {
     _watchdogTimer?.cancel();
     _watchdogTimer = Timer.periodic(_watchdogInterval, (_) {
+      _logger.info('Watchdog: Verificando se o polling deve ser reiniciado... ${DateTime.now()}');
       _checkAndRestartIfNeeded(streamerId);
     });
   }
@@ -77,12 +78,12 @@ class PollingServiceImpl implements PollingService {
 
     if (_lastChannelUpdate != null &&
         now.difference(_lastChannelUpdate!) > _maxTimeSinceLastUpdate) {
-      _logger.warning('Watchdog: Channel updates stopped, restarting polling...');
+      _logger.warning('Watchdog: Channel updates stopped, restarting polling... ${DateTime.now()}');
       _startTimers(streamerId);
     }
 
     if (_lastScoreUpdate != null && now.difference(_lastScoreUpdate!) > _maxTimeSinceLastUpdate) {
-      _logger.warning('Watchdog: Score updates stopped, restarting polling...');
+      _logger.warning('Watchdog: Score updates stopped, restarting polling... ${DateTime.now()}');
       _startTimers(streamerId);
     }
   }
@@ -92,9 +93,9 @@ class PollingServiceImpl implements PollingService {
     try {
       await _homeService.fetchCurrentChannel();
       _lastChannelUpdate = DateTime.now();
-      _logger.info('Canal verificado e atualizado com sucesso');
+      _logger.info('Canal verificado e atualizado com sucesso ${DateTime.now()}');
     } catch (e, s) {
-      _logger.error('Erro ao verificar e atualizar canal', e, s);
+      _logger.error('Erro ao verificar e atualizar canal ${DateTime.now()}', e, s);
 
       _lastChannelUpdate = DateTime.now();
     }
@@ -112,9 +113,9 @@ class PollingServiceImpl implements PollingService {
         1,
       );
       _lastScoreUpdate = now;
-      _logger.info('Score atualizado com sucesso');
+      _logger.info('Score atualizado com sucesso $now');
     } catch (e, s) {
-      _logger.error('Erro ao atualizar score', e, s);
+      _logger.error('Erro ao atualizar score ${DateTime.now()}', e, s);
 
       _lastScoreUpdate = DateTime.now();
     }
@@ -125,7 +126,7 @@ class PollingServiceImpl implements PollingService {
     _channelTimer?.cancel();
     _scoreTimer?.cancel();
     _watchdogTimer?.cancel();
-    _logger.info('Polling services parados');
+    _logger.info('Polling services parados ${DateTime.now()}');
   }
 
   bool isPollingActive() {
