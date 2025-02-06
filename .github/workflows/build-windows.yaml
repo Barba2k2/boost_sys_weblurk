@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - master
@@ -14,12 +16,34 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: 'stable'
+        flutter-version: '3.27.1'
+        cache: true
+
+    # Passo para gerar a versão
+    - name: Generate Version
+      id: version
+      shell: bash
+      run: |
+        # Pegar a última tag
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        
+        # Incrementar a versão patch
+        MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
+        MINOR=$(echo $LATEST_TAG | cut -d. -f2)
+        PATCH=$(echo $LATEST_TAG | cut -d. -f3)
+        NEW_PATCH=$((PATCH + 1))
+        NEW_TAG="${MAJOR}.${MINOR}.${NEW_PATCH}"
+        
+        # Definir as variáveis para uso posterior
+        echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
+        echo "::set-output name=version::${NEW_TAG}"
 
     - name: Install dependencies
       run: flutter pub get
@@ -27,13 +51,44 @@ jobs:
     - name: Build Windows
       run: flutter build windows --release
 
-    # Rodar o script para determinar a próxima versão
-    - name: Increment Version
-      run: bash version.sh
+    - name: Create Release ZIP
+      run: |
+        cd build\windows\x64\runner\Release
+        7z a -tzip ../../../../../Boost-SysWebLurk-${{ env.NEW_TAG }}.zip *
 
-    # Usar a nova versão para nomear o artefato
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Boost-SysWebLurk-${{ env.NEW_TAG }}
-        path: build/windows/runner/Release/
+        path: build/windows/x64/runner/Release/
+        retention-days: 90
+
+    - name: Create Tag
+      if: github.ref == 'refs/heads/master'
+      run: |
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
+        git tag -a ${{ env.NEW_TAG }} -m "Release ${{ env.NEW_TAG }}"
+        git push origin ${{ env.NEW_TAG }}
+
+    - name: Create GitHub Release
+      if: github.ref == 'refs/heads/master'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: Boost-SysWebLurk-${{ env.NEW_TAG }}.zip
+        tag_name: ${{ env.NEW_TAG }}
+        name: Boost-SysWebLurk ${{ env.NEW_TAG }}
+        draft: false
+        prerelease: false
+        body: |
+          Release automático da versão ${{ env.NEW_TAG }}
+          
+          ### Mudanças nesta versão
+          - Mudanças no salvamento do score
+          - Correção do pooling de troca de canais
+          
+          ### Screenshots
+          ![Screenshot 1](https://raw.githubusercontent.com/barba2k2/boost_sys_weblurk/master/assets/screenshots/img1.png)
+          ![Screenshot 2](https://raw.githubusercontent.com/barba2k2/boost_sys_weblurk/master/assets/screenshots/img2.png)
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

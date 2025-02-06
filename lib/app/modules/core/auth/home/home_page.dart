@@ -23,11 +23,11 @@ class _HomePageState extends State<HomePage> {
     homeController.onInit();
   }
 
-  @override
-  void dispose() {
-    homeController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   homeController.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +45,9 @@ class _HomePageState extends State<HomePage> {
                         currentChannel: homeController.currentChannel,
                       ),
                       Expanded(
-                        child: WebviewWidget(
-                          initialUrl: homeController.currentChannel ??
-                              'https://twitch.tv/BoostTeam_',
+                        child: MyWebviewWidget(
+                          initialUrl:
+                              homeController.currentChannel ?? 'https://twitch.tv/BoostTeam_',
                           onWebViewCreated: homeController.onWebViewCreated,
                         ),
                       ),

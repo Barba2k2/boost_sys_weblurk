@@ -107,17 +107,23 @@ class HomeRepositoryImpl implements HomeRepository {
             data: data,
           );
 
-      if (response.statusCode != 200) {
-        _logger.error('Failed to save score: ${response.statusCode}');
-        throw Failure(message: 'Erro ao salvar a pontuação');
-      } else {
-        _logger.info(
-          'Score saved successfully for streamer ${score.streamerId}',
-        );
+      if (response.statusCode == 200) {
+        if (response.data != null) {
+          _logger.info('Score saved successfully for streamer ${score.streamerId}');
+          return;
+        }
+        throw Failure(message: 'Response data is null');
       }
+    } on RestClientException catch (e, s) {
+      _logger.error('RestClient error saving score', e, s);
+      throw Failure(
+        message: 'Erro de conexão ao salvar a pontuação: ${e.message}',
+      );
     } catch (e, s) {
-      _logger.error('Error saving score', e, s);
-      throw Failure(message: 'Erro ao salvar a pontuação');
+      _logger.error('Unexpected error saving score', e, s);
+      throw Failure(
+        message: 'Erro inesperado ao salvar a pontuação',
+      );
     }
   }
 }

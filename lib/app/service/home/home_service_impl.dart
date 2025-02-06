@@ -54,8 +54,13 @@ class HomeServiceImpl implements HomeService {
 
       final currentSchedule = schedules.firstWhere(
         (schedule) {
-          final startTimeParts = schedule['start_time'].split(':');
-          final endTimeParts = schedule['end_time'].split(':');
+          final startTimeStr =
+              schedule['start_time'].toString().replaceAll('Time(', '').replaceAll(')', '');
+          final endTimeStr =
+              schedule['end_time'].toString().replaceAll('Time(', '').replaceAll(')', '');
+
+          final startTimeParts = startTimeStr.split(':');
+          final endTimeParts = endTimeStr.split(':');
 
           final startDateTime = DateTime(
             now.year,
@@ -76,14 +81,10 @@ class HomeServiceImpl implements HomeService {
 
           return now.isAfter(startDateTime) && now.isBefore(endDateTime);
         },
+        orElse: () => {'streamer_url': 'https://twitch.tv/BoostTeam_'},
       );
 
-      if (currentSchedule.isNotEmpty) {
-        return currentSchedule['streamer_url'] as String?;
-      } else {
-        _logger.warning('Nenhuma live correspondente ao horário atual');
-        return 'https://twitch.tv/BoostTeam_';
-      }
+      return currentSchedule['streamer_url'] as String?;
     } catch (e, s) {
       _logger.error('Erro ao buscar o canal atual', e, s);
       throw Failure(message: 'Erro ao buscar o canal atual');
@@ -99,8 +100,13 @@ class HomeServiceImpl implements HomeService {
     int points,
   ) async {
     try {
+      // Input validation
+      if (streamerId <= 0) throw Failure(message: 'ID do streamer inválido');
+      if (hour < 0 || hour > 23) throw Failure(message: 'Hora inválida');
+      if (minute < 0 || minute > 59) throw Failure(message: 'Minuto inválido');
+      if (points < 0) throw Failure(message: 'Pontuação inválida');
+
       final score = ScoreModel(
-        // id: 0,
         streamerId: streamerId,
         date: date,
         hour: hour,
@@ -108,10 +114,30 @@ class HomeServiceImpl implements HomeService {
         points: points,
       );
 
-      await _homeRepository.saveScore(score);
+      // Add retry logic
+      int retryCount = 0;
+      const maxRetries = 3;
+
+      while (retryCount < maxRetries) {
+        try {
+          await _homeRepository.saveScore(score);
+          _logger.info('Score saved successfully after ${retryCount + 1} attempts');
+          return;
+        } catch (e) {
+          retryCount++;
+          if (retryCount == maxRetries) {
+            rethrow;
+          }
+          _logger.warning('Retry attempt $retryCount after error: $e');
+          await Future.delayed(Duration(seconds: 1 * retryCount));
+        }
+      }
     } catch (e, s) {
-      _logger.error('Error saving score', e, s);
-      throw Failure(message: 'Erro ao salvar a pontuação');
+      _logger.error('Error in saveScore service', e, s);
+      if (e is Failure) {
+        rethrow;
+      }
+      throw Failure(message: 'Erro ao salvar a pontuação: ${e.toString()}');
     }
   }
 }

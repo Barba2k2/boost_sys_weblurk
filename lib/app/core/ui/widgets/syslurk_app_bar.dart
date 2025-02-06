@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../modules/core/auth/auth_store.dart';
 import '../../../modules/core/auth/home/home_controller.dart';
 import '../../controllers/settings_controller.dart';
 import '../../controllers/url_launch_controller.dart';
@@ -11,171 +13,241 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
   final urlController = Modular.get<UrlLaunchController>();
   final homeController = Modular.get<HomeController>();
   final settingsController = Modular.get<SettingsController>();
+  final authStore = Modular.get<AuthStore>();
 
   SyslurkAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.grey[200],
-      iconTheme: const IconThemeData(
-        color: Colors.black,
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF2C1F4A),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      elevation: 0,
-      automaticallyImplyLeading: false,
-      title: Row(
-        children: [
-          PopupMenuButton<String>(
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem<String>(
-                  child: const Text('Atualizar Listas'),
-                  onTap: () {
-                    homeController.loadSchedules();
+      child: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/logo-cla-boost.png',
+              height: 32,
+            ),
+            const SizedBox(width: 16),
+            _buildMenuButton(
+              'Opções',
+              Icons.menu,
+              [
+                _buildMenuItem(
+                  'Atualizar Listas',
+                  Icons.refresh,
+                  () {
+                    // homeController.loadSchedules();
+                    homeController.reloadWebView();
                   },
                 ),
-                PopupMenuItem<String>(
-                  child: const Text('Encerrar'),
-                  onTap: () {
+                _buildMenuItem(
+                  'Encerrar',
+                  Icons.power_settings_new,
+                  () {
                     settingsController.terminateApp();
                   },
                 ),
-                PopupMenuItem<String>(
-                  child: const Text('Audio'),
-                  onTap: () {
+                _buildMenuItem(
+                  'Audio',
+                  Icons.volume_up,
+                  () {
                     settingsController.muteAppAudio();
                   },
                 ),
-                PopupMenuItem<String>(
-                  value: 'timezone',
-                  child: const Text('Fuso Horário'),
-                  onTap: () {
+                _buildMenuItem(
+                  'Fuso Horário',
+                  Icons.schedule,
+                  () {
                     Messages.info('Funcionalidade ainda não funcional');
                   },
                 ),
-              ];
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Opções',
-                  style: GoogleFonts.inter(
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(
-                  width: 2,
-                ),
-                const Icon(Icons.more_vert),
               ],
             ),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
-          PopupMenuButton<String>(
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem<String>(
-                  value: 'score',
-                  child: const Text('Pontuação'),
-                  onTap: () async {
+            const SizedBox(width: 8),
+            _buildMenuButton(
+              'Links',
+              Icons.link,
+              [
+                _buildMenuItem(
+                  'Pontuação',
+                  Icons.leaderboard,
+                  () async {
                     await urlController.launchURL(
                       'https://docs.google.com/spreadsheets/d/1kh4zc2INhLEOGbLqqte8NnP4NsNRvFTgSWvKNKKM9qk/edit?usp=sharing',
                     );
                   },
                 ),
-                PopupMenuItem<String>(
-                  value: 'discord',
-                  child: const Text('Discord'),
-                  onTap: () async {
+                _buildMenuItem(
+                  'Discord',
+                  Icons.discord,
+                  () async {
                     await urlController.launchURL(
                       'https://discord.gg/udteYpaGuB',
                     );
                   },
                 ),
-                PopupMenuItem<String>(
-                  value: 'social_media',
-                  child: const Text('Redes Sociais'),
-                  onTap: () async {
+                _buildMenuItem(
+                  'Redes Sociais',
+                  Icons.live_tv_rounded,
+                  () async {
                     await urlController.launchURL(
                       'https://www.twitch.com/BoostTeam_',
                     );
                   },
                 ),
-                PopupMenuItem<String>(
-                  value: 'schedule_form',
-                  child: const Text('Formulário de horários'),
-                  onTap: () async {
+                _buildMenuItem(
+                  'Formulário de horários',
+                  Icons.edit_document,
+                  () async {
                     await urlController.launchURL(
                       'https://forms.gle/RN4NGWm8Qvi1daqp7',
                     );
                   },
                 ),
-                PopupMenuItem<String>(
-                  value: 'weblurk',
-                  child: const Text('WebLurk'),
-                  onTap: () async {
+                _buildMenuItem(
+                  'BoostTeam SysWeblurk',
+                  Icons.edit_document,
+                  () async {
                     await urlController.launchURL(
                       'https://drive.google.com/drive/folders/1XsmNh_gpKYLEkMSaBPFLuT3Y5vDmeWC3?usp=sharing',
                     );
                   },
                 ),
-              ];
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Links',
-                  style: GoogleFonts.inter(
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(
-                  width: 2,
-                ),
-                const Icon(Icons.link),
               ],
             ),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
-          PopupMenuButton<String>(
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem<String>(
-                  value: 'about',
-                  child: const Text('Sobre o WebLurk'),
-                  onTap: () async {
-                    await urlController.launchURL('https://www.google.com');
+            const SizedBox(width: 8),
+            _buildMenuButton(
+              'Sobre',
+              Icons.info_outline_rounded,
+              [
+                _buildMenuItem(
+                  'Sobre o Weblurk',
+                  Icons.leaderboard,
+                  () async {
+                    // await urlController.launchURL(
+                    //   'https://docs.google.com/spreadsheets/d/1kh4zc2INhLEOGbLqqte8NnP4NsNRvFTgSWvKNKKM9qk/edit?usp=sharing',
+                    // );
+                    Messages.info('Em breve!');
                   },
                 ),
-              ];
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Sobre',
-                  style: GoogleFonts.inter(
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                const Icon(Icons.info),
               ],
             ),
+          ],
+        ),
+        actions: [
+          Observer(
+            builder: (_) {
+              final username = authStore.userLogged?.nickname;
+              if (username != null) {
+                return Container(
+                  margin: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFA162FF),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.account_circle,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        username,
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
         ],
       ),
     );
   }
 
+  Widget _buildMenuButton(
+    String label,
+    IconData icon,
+    List<PopupMenuItem<String>> items,
+  ) {
+    return PopupMenuButton<String>(
+      offset: const Offset(0, 40),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      itemBuilder: (context) => items,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Icon(
+              icon,
+              size: 20,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _buildMenuItem(
+    String label,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return PopupMenuItem<String>(
+      value: label,
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 20,
+            color: Colors.black,
+          ),
+          const SizedBox(width: 10),
+          Text(label),
+        ],
+      ),
+    );
+  }
+
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight - 20);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

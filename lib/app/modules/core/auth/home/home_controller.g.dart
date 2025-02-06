@@ -9,24 +9,35 @@ part of 'home_controller.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$HomeController on HomeControllerBase, Store {
-  late final _$initializationFutureAtom =
-      Atom(name: 'HomeControllerBase.initializationFuture', context: context);
+  late final _$isWebViewHealthyAtom =
+      Atom(name: 'HomeControllerBase.isWebViewHealthy', context: context);
 
   @override
-  Future<void> get initializationFuture {
-    _$initializationFutureAtom.reportRead();
-    return super.initializationFuture;
+  bool get isWebViewHealthy {
+    _$isWebViewHealthyAtom.reportRead();
+    return super.isWebViewHealthy;
   }
 
-  bool _initializationFutureIsInitialized = false;
+  @override
+  set isWebViewHealthy(bool value) {
+    _$isWebViewHealthyAtom.reportWrite(value, super.isWebViewHealthy, () {
+      super.isWebViewHealthy = value;
+    });
+  }
+
+  late final _$currentChannelAtom =
+      Atom(name: 'HomeControllerBase.currentChannel', context: context);
 
   @override
-  set initializationFuture(Future<void> value) {
-    _$initializationFutureAtom.reportWrite(value,
-        _initializationFutureIsInitialized ? super.initializationFuture : null,
-        () {
-      super.initializationFuture = value;
-      _initializationFutureIsInitialized = true;
+  String? get currentChannel {
+    _$currentChannelAtom.reportRead();
+    return super.currentChannel;
+  }
+
+  @override
+  set currentChannel(String? value) {
+    _$currentChannelAtom.reportWrite(value, super.currentChannel, () {
+      super.currentChannel = value;
     });
   }
 
@@ -62,62 +73,21 @@ mixin _$HomeController on HomeControllerBase, Store {
     });
   }
 
-  late final _$currentChannelAtom =
-      Atom(name: 'HomeControllerBase.currentChannel', context: context);
+  late final _$onInitAsyncAction =
+      AsyncAction('HomeControllerBase.onInit', context: context);
 
   @override
-  String? get currentChannel {
-    _$currentChannelAtom.reportRead();
-    return super.currentChannel;
+  Future<void> onInit() {
+    return _$onInitAsyncAction.run(() => super.onInit());
   }
 
-  @override
-  set currentChannel(String? value) {
-    _$currentChannelAtom.reportWrite(value, super.currentChannel, () {
-      super.currentChannel = value;
-    });
-  }
-
-  late final _$webViewControllerAtom =
-      Atom(name: 'HomeControllerBase.webViewController', context: context);
+  late final _$onWebViewCreatedAsyncAction =
+      AsyncAction('HomeControllerBase.onWebViewCreated', context: context);
 
   @override
-  InAppWebViewController? get webViewController {
-    _$webViewControllerAtom.reportRead();
-    return super.webViewController;
-  }
-
-  @override
-  set webViewController(InAppWebViewController? value) {
-    _$webViewControllerAtom.reportWrite(value, super.webViewController, () {
-      super.webViewController = value;
-    });
-  }
-
-  late final _$loadSchedulesAsyncAction =
-      AsyncAction('HomeControllerBase.loadSchedules', context: context);
-
-  @override
-  Future<void> loadSchedules() {
-    return _$loadSchedulesAsyncAction.run(() => super.loadSchedules());
-  }
-
-  late final _$initializeWebViewAsyncAction =
-      AsyncAction('HomeControllerBase.initializeWebView', context: context);
-
-  @override
-  Future<void> initializeWebView(InAppWebViewController controller) {
-    return _$initializeWebViewAsyncAction
-        .run(() => super.initializeWebView(controller));
-  }
-
-  late final _$_loadInitialChannelAsyncAction =
-      AsyncAction('HomeControllerBase._loadInitialChannel', context: context);
-
-  @override
-  Future<void> _loadInitialChannel() {
-    return _$_loadInitialChannelAsyncAction
-        .run(() => super._loadInitialChannel());
+  Future<void> onWebViewCreated(Webview controller) {
+    return _$onWebViewCreatedAsyncAction
+        .run(() => super.onWebViewCreated(controller));
   }
 
   late final _$loadCurrentChannelAsyncAction =
@@ -129,58 +99,21 @@ mixin _$HomeController on HomeControllerBase, Store {
         .run(() => super.loadCurrentChannel());
   }
 
-  late final _$startPollingForUpdatesAsyncAction = AsyncAction(
-      'HomeControllerBase.startPollingForUpdates',
-      context: context);
+  late final _$reloadWebViewAsyncAction =
+      AsyncAction('HomeControllerBase.reloadWebView', context: context);
 
   @override
-  Future<void> startPollingForUpdates() {
-    return _$startPollingForUpdatesAsyncAction
-        .run(() => super.startPollingForUpdates());
-  }
-
-  late final _$startCheckingScoresAsyncAction =
-      AsyncAction('HomeControllerBase.startCheckingScores', context: context);
-
-  @override
-  Future<void> startCheckingScores() {
-    return _$startCheckingScoresAsyncAction
-        .run(() => super.startCheckingScores());
-  }
-
-  late final _$HomeControllerBaseActionController =
-      ActionController(name: 'HomeControllerBase', context: context);
-
-  @override
-  void onInit() {
-    final _$actionInfo = _$HomeControllerBaseActionController.startAction(
-        name: 'HomeControllerBase.onInit');
-    try {
-      return super.onInit();
-    } finally {
-      _$HomeControllerBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void dispose() {
-    final _$actionInfo = _$HomeControllerBaseActionController.startAction(
-        name: 'HomeControllerBase.dispose');
-    try {
-      return super.dispose();
-    } finally {
-      _$HomeControllerBaseActionController.endAction(_$actionInfo);
-    }
+  Future<void> reloadWebView() {
+    return _$reloadWebViewAsyncAction.run(() => super.reloadWebView());
   }
 
   @override
   String toString() {
     return '''
-initializationFuture: ${initializationFuture},
-isScheduleVisible: ${isScheduleVisible},
-initialChannel: ${initialChannel},
+isWebViewHealthy: ${isWebViewHealthy},
 currentChannel: ${currentChannel},
-webViewController: ${webViewController}
+isScheduleVisible: ${isScheduleVisible},
+initialChannel: ${initialChannel}
     ''';
   }
 }
