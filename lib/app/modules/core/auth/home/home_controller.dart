@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
@@ -34,6 +36,12 @@ abstract class HomeControllerBase with Store {
         _webViewService = webViewService,
         _pollingService = pollingService;
 
+  Timer? _webViewHealthTimer;
+  bool _isDisposed = false;
+
+  @observable
+  bool isWebViewHealthy = true;
+
   @observable
   String? currentChannel;
 
@@ -47,6 +55,8 @@ abstract class HomeControllerBase with Store {
   Future<void> onInit() async {
     _logger.info('Iniciando HomeController...');
     try {
+      _setupWebViewMonitoring();
+
       await _authStore.loadUserLogged();
       if (_authStore.userLogged == null) {
         await _handleNotLoggedIn();
@@ -58,6 +68,69 @@ abstract class HomeControllerBase with Store {
       }
     } catch (e, s) {
       await _handleError(e, s);
+    }
+  }
+
+  void _setupWebViewMonitoring() {
+    _webViewHealthTimer?.cancel();
+    _webViewHealthTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+      if (!_isDisposed) {
+        _checkWebViewHealth();
+      }
+    });
+  }
+
+  Future<void> _checkWebViewHealth() async {
+    try {
+      if (!_webViewService.isInitialized || _webViewService.controller == null) {
+        _logger.warning('WebView não está inicializado');
+        isWebViewHealthy = false;
+        return;
+      }
+
+      // Verifica se o WebView está responsivo
+      isWebViewHealthy = await _webViewService.isResponding();
+
+      if (!isWebViewHealthy) {
+        _logger.warning('WebView não está respondendo, tentando recuperar...');
+        await _recoverWebView();
+      }
+    } catch (e, s) {
+      _logger.error('Erro ao verificar saúde do WebView', e, s);
+      isWebViewHealthy = false;
+      await _recoverWebView();
+    }
+  }
+
+  Future<void> _recoverWebView() async {
+    try {
+      _logger.info('Tentando recuperar WebView...');
+
+      // Para o polling antes de reiniciar
+      await _pollingService.stopPolling();
+
+      // Tenta recarregar primeiro
+      await reloadWebView();
+
+      // Se ainda não está saudável, reinicializa completamente
+      if (!isWebViewHealthy) {
+        _webViewService.dispose();
+        if (_webViewService.controller != null) {
+          await _webViewService.initializeWebView(_webViewService.controller!);
+          await _initializeServices();
+        }
+      }
+
+      // Reinicia o polling
+      final streamerId = _getCurrentStreamerId();
+      if (streamerId > 0) {
+        await _pollingService.startPolling(streamerId);
+      }
+
+      _logger.info('WebView recuperado com sucesso');
+    } catch (e, s) {
+      _logger.error('Falha ao recuperar WebView', e, s);
+      Messages.warning('Erro ao recuperar aplicação. Tente reiniciar o programa.');
     }
   }
 
@@ -170,10 +243,11 @@ abstract class HomeControllerBase with Store {
     }
   }
 
-  // void dispose() {
-  //   _logger.info('Disposing HomeController...');
-  //   _pollingService.stopPolling();
-  //   _webViewService.dispose();
-  //   _logger.info('HomeController disposed');
-  // }
+  void dispose() {
+    _isDisposed = true;
+    _webViewHealthTimer?.cancel();
+    _pollingService.stopPolling();
+    _webViewService.dispose();
+    _logger.info('HomeController disposed');
+  }
 }
