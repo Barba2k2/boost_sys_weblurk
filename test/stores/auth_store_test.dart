@@ -11,19 +11,23 @@ class TestLocalStorage implements LocalStorage {
   final Map<String, dynamic> storage = {};
   final List<String> removedKeys = [];
 
+  @override
   Future<T?> read<T>(String key) async {
     return storage[key] as T?;
   }
 
+  @override
   Future<void> write<T>(String key, T value) async {
     storage[key] = value;
   }
 
+  @override
   Future<void> remove(String key) async {
     storage.remove(key);
     removedKeys.add(key);
   }
 
+  @override
   Future<bool> contains(String key) async {
     return storage.containsKey(key);
   }
@@ -32,6 +36,7 @@ class TestLocalStorage implements LocalStorage {
     storage.clear();
   }
   
+  @override
   Future<void> clear() async {
     storage.clear();
   }
@@ -41,30 +46,37 @@ class TestLocalStorage implements LocalStorage {
 class TestAppLogger implements AppLogger {
   final List<String> logs = [];
   
+  @override
   void debug(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     logs.add("DEBUG: $message");
   }
   
+  @override
   void error(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     logs.add("ERROR: $message");
   }
   
+  @override
   void warning(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     logs.add("WARNING: $message");
   }
   
+  @override
   void info(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     logs.add("INFO: $message");
   }
   
+  @override
   void append(dynamic message) {
     logs.add("APPEND: $message");
   }
   
+  @override
   void closeAppend() {
     logs.add("CLOSE_APPEND");
   }
   
+  @override
   void fatal(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     logs.add("FATAL: $message");
   }
