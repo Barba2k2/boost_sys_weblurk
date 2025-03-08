@@ -24,7 +24,7 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<String> login(String nickname, String password) async {
     try {
-      final result = await _restClient.unAuht().post(
+      final result = await _restClient.unAuth().post(
         '/auth/login',
         data: {
           'nickname': nickname,
