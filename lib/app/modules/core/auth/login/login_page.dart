@@ -61,7 +61,6 @@ class _LoginPageState extends State<LoginPage> {
       body: Stack(
         children: [
           Align(
-            alignment: Alignment.center,
             child: Image.asset(
               'assets/images/background.png',
               scale: 2,
@@ -71,7 +70,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           Align(
-            alignment: Alignment.center,
             child: Container(
               decoration: BoxDecoration(
                 boxShadow: [

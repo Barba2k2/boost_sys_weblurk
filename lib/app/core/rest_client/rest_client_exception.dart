@@ -1,17 +1,17 @@
 import 'rest_client_response.dart';
 
 class RestClientException implements Exception {
-  String? message;
-  int? statusCode;
-  dynamic error;
-  RestClientResponse response;
-  
   RestClientException({
     this.message,
     this.statusCode,
     required this.error,
     required this.response,
   });
+
+  String? message;
+  int? statusCode;
+  dynamic error;
+  RestClientResponse response;
 
   @override
   String toString() {

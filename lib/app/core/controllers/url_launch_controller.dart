@@ -11,11 +11,11 @@ part 'url_launch_controller.g.dart';
 class UrlLaunchController = UrlLaunchControllerBase with _$UrlLaunchController;
 
 abstract class UrlLaunchControllerBase with Store {
-  final AppLogger _logger;
-
   UrlLaunchControllerBase({
     required AppLogger logger,
   }) : _logger = logger;
+
+  final AppLogger _logger;
 
   @action
   Future<void> launchURL(String url) async {

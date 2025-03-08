@@ -82,7 +82,8 @@ abstract class HomeControllerBase with Store {
 
   Future<void> _checkWebViewHealth() async {
     try {
-      if (!_webViewService.isInitialized || _webViewService.controller == null) {
+      if (!_webViewService.isInitialized ||
+          _webViewService.controller == null) {
         _logger.warning('WebView não está inicializado');
         isWebViewHealthy = false;
         return;
@@ -130,7 +131,8 @@ abstract class HomeControllerBase with Store {
       _logger.info('WebView recuperado com sucesso');
     } catch (e, s) {
       _logger.error('Falha ao recuperar WebView', e, s);
-      Messages.warning('Erro ao recuperar aplicação. Tente reiniciar o programa.');
+      Messages.warning(
+          'Erro ao recuperar aplicação. Tente reiniciar o programa.');
     }
   }
 
@@ -233,7 +235,8 @@ abstract class HomeControllerBase with Store {
   Future<void> _handleError(Object error, StackTrace stackTrace) async {
     _logger.error('Error in HomeController', error, stackTrace);
 
-    if (error.toString().contains('autenticação') || error.toString().contains('Expire token')) {
+    if (error.toString().contains('autenticação') ||
+        error.toString().contains('Expire token')) {
       await _authStore.logout();
       if (!Modular.to.path.contains('/auth/login')) {
         Modular.to.navigate('/auth/login/');

@@ -16,15 +16,15 @@ abstract class WebViewService {
 }
 
 class WebViewServiceImpl implements WebViewService {
+  WebViewServiceImpl({
+    required AppLogger logger,
+  }) : _logger = logger;
   final AppLogger _logger;
+
   Webview? _controller;
   DateTime? _lastReload;
   static const _minReloadInterval = Duration(seconds: 30);
   static const _operationTimeout = Duration(seconds: 30);
-
-  WebViewServiceImpl({
-    required AppLogger logger,
-  }) : _logger = logger;
 
   @override
   Webview? get controller => _controller;

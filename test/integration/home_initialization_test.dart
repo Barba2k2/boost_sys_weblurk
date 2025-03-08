@@ -15,9 +15,13 @@ class MockModularNavigator extends Mock implements IModularNavigator {}
 
 // Mocks
 class MockHomeService extends Mock implements HomeService {}
+
 class MockAppLogger extends Mock implements AppLogger {}
+
 class MockAuthStore extends Mock implements AuthStore {}
+
 class MockWebViewService extends Mock implements WebViewService {}
+
 class MockPollingService extends Mock implements PollingService {}
 
 void main() {
@@ -29,103 +33,141 @@ void main() {
   late MockPollingService mockPollingService;
   late MockModularNavigator mockNavigator;
 
-  setUpAll(() {
-    // Initialize Flutter binding
-    TestWidgetsFlutterBinding.ensureInitialized();
-    
-    // Register fallbacks for any classes that might be used as parameters
-    registerFallbackValue('');
-  });
+  setUpAll(
+    () {
+      // Initialize Flutter binding
+      TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUp(() {
-    mockHomeService = MockHomeService();
-    mockLogger = MockAppLogger();
-    mockAuthStore = MockAuthStore();
-    mockWebViewService = MockWebViewService();
-    mockPollingService = MockPollingService();
-    mockNavigator = MockModularNavigator();
+      // Register fallbacks for any classes that might be used as parameters
+      registerFallbackValue('');
+    },
+  );
 
-    // Set up the mock navigator
-    Modular.navigatorDelegate = mockNavigator;
-    when(() => mockNavigator.path).thenReturn('/home/');
-    
-    // Configurar comportamento dos mocks
-    when(() => mockAuthStore.userLogged)
-        .thenReturn(UserModel(id: 1, nickname: 'testuser', role: 'user', status: 'ON'));
-    when(() => mockAuthStore.loadUserLogged()).thenAnswer((_) => Future<void>.value());
-    when(() => mockWebViewService.isInitialized).thenReturn(true);
-    when(() => mockHomeService.fetchCurrentChannel())
-        .thenAnswer((_) => Future.value('https://twitch.tv/testchannel'));
-    when(() => mockHomeService.fetchSchedules()).thenAnswer((_) => Future<void>.value());
-    when(() => mockWebViewService.loadUrl(any())).thenAnswer((_) => Future<void>.value());
-    when(() => mockWebViewService.reload()).thenAnswer((_) => Future<void>.value());
+  setUp(
+    () {
+      mockHomeService = MockHomeService();
+      mockLogger = MockAppLogger();
+      mockAuthStore = MockAuthStore();
+      mockWebViewService = MockWebViewService();
+      mockPollingService = MockPollingService();
+      mockNavigator = MockModularNavigator();
 
-    // Configurar controller
-    homeController = HomeController(
-      homeService: mockHomeService,
-      logger: mockLogger,
-      authStore: mockAuthStore,
-      webViewService: mockWebViewService,
-      pollingService: mockPollingService,
-    );
+      // Set up the mock navigator
+      Modular.navigatorDelegate = mockNavigator;
+      when(() => mockNavigator.path).thenReturn('/home/');
 
-    // Configurar Modular para testes
-    initModule(
-      TestModule(),
-      replaceBinds: [
-        Bind.instance<HomeController>(homeController),
-      ],
-    );
-  });
+      // Configurar comportamento dos mocks
+      when(() => mockAuthStore.userLogged).thenReturn(
+        UserModel(
+          id: 1,
+          nickname: 'testuser',
+          role: 'user',
+          status: 'ON',
+        ),
+      );
+      when(() => mockAuthStore.loadUserLogged()).thenAnswer(
+        (_) => Future<void>.value(),
+      );
+      when(() => mockWebViewService.isInitialized).thenReturn(true);
+      when(() => mockHomeService.fetchCurrentChannel()).thenAnswer(
+        (_) => Future.value('https://twitch.tv/testchannel'),
+      );
+      when(() => mockHomeService.fetchSchedules()).thenAnswer(
+        (_) => Future<void>.value(),
+      );
+      when(() => mockWebViewService.loadUrl(any())).thenAnswer(
+        (_) => Future<void>.value(),
+      );
+      when(() => mockWebViewService.reload()).thenAnswer(
+        (_) => Future<void>.value(),
+      );
 
-  tearDown(() {
-    // Reset Modular for the next test
-    Modular.dispose();
-  });
+      // Configurar controller
+      homeController = HomeController(
+        homeService: mockHomeService,
+        logger: mockLogger,
+        authStore: mockAuthStore,
+        webViewService: mockWebViewService,
+        pollingService: mockPollingService,
+      );
 
-  group('HomePage Initialization', () {
-    test('initializes correctly', () async {
-      // Skip the actual onInit call and test the components directly
-      // This avoids issues with UI-dependent code
-      
-      // Act - Call the methods that onInit would call
-      await mockAuthStore.loadUserLogged();
-      await mockHomeService.fetchSchedules();
-      
-      // Assert
-      verify(() => mockAuthStore.loadUserLogged()).called(1);
-      verify(() => mockHomeService.fetchSchedules()).called(1);
-    });
+      // Configurar Modular para testes
+      initModule(
+        TestModule(),
+        replaceBinds: [
+          Bind.instance<HomeController>(homeController),
+        ],
+      );
+    },
+  );
 
-    test('onInit loads user and initializes services', () async {
-      // Act - Call the methods that onInit would call
-      await mockAuthStore.loadUserLogged();
-      await mockHomeService.fetchSchedules();
-      
-      // Assert
-      verify(() => mockAuthStore.loadUserLogged()).called(1);
-      verify(() => mockHomeService.fetchSchedules()).called(1);
-    });
+  tearDown(
+    () {
+      // Reset Modular for the next test
+      Modular.dispose();
+    },
+  );
 
-    test('loadCurrentChannel updates channel and loads URL', () async {
-      // Act
-      await homeController.loadCurrentChannel();
+  group(
+    'HomePage Initialization',
+    () {
+      test(
+        'initializes correctly',
+        () async {
+          // Skip the actual onInit call and test the components directly
+          // This avoids issues with UI-dependent code
 
-      // Assert
-      expect(homeController.currentChannel, 'https://twitch.tv/testchannel');
-      verify(() => mockWebViewService.loadUrl('https://twitch.tv/testchannel')).called(1);
-    });
+          // Act - Call the methods that onInit would call
+          await mockAuthStore.loadUserLogged();
+          await mockHomeService.fetchSchedules();
 
-    test('reloadWebView reloads webview and channel', () async {
-      // Act - Call the methods that reloadWebView would call
-      await mockWebViewService.reload();
-      await homeController.loadCurrentChannel();
-      
-      // Assert
-      verify(() => mockWebViewService.reload()).called(1);
-      verify(() => mockHomeService.fetchCurrentChannel()).called(1);
-    });
-  });
+          // Assert
+          verify(() => mockAuthStore.loadUserLogged()).called(1);
+          verify(() => mockHomeService.fetchSchedules()).called(1);
+        },
+      );
+
+      test(
+        'onInit loads user and initializes services',
+        () async {
+          // Act - Call the methods that onInit would call
+          await mockAuthStore.loadUserLogged();
+          await mockHomeService.fetchSchedules();
+
+          // Assert
+          verify(() => mockAuthStore.loadUserLogged()).called(1);
+          verify(() => mockHomeService.fetchSchedules()).called(1);
+        },
+      );
+
+      test(
+        'loadCurrentChannel updates channel and loads URL',
+        () async {
+          // Act
+          await homeController.loadCurrentChannel();
+
+          // Assert
+          expect(homeController.currentChannel, 'https://twitch.tv/testchannel');
+          verify(
+            () => mockWebViewService.loadUrl('https://twitch.tv/testchannel'),
+          ).called(1);
+        },
+      );
+
+      test(
+        'reloadWebView reloads webview and channel',
+        () async {
+          // Act - Call the methods that reloadWebView would call
+          await mockWebViewService.reload();
+          await homeController.loadCurrentChannel();
+
+          // Assert
+          verify(() => mockWebViewService.reload()).called(1);
+          verify(() => mockHomeService.fetchCurrentChannel()).called(1);
+        },
+      );
+    },
+  );
 }
 
 // Módulo de teste para o Flutter Modular

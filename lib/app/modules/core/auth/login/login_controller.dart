@@ -15,9 +15,6 @@ part 'login_controller.g.dart';
 class LoginController = LoginControllerBase with _$LoginController;
 
 abstract class LoginControllerBase with Store {
-  final LocalStorage _localStorage;
-  final UserService _userService;
-  final AppLogger _logger;
 
   LoginControllerBase({
     required UserService userService,
@@ -26,6 +23,9 @@ abstract class LoginControllerBase with Store {
   })  : _userService = userService,
         _localStorage = localStorage,
         _logger = logger;
+  final LocalStorage _localStorage;
+  final UserService _userService;
+  final AppLogger _logger;
 
   @action
   Future<void> checkUserLogged() async {
@@ -39,21 +39,21 @@ abstract class LoginControllerBase with Store {
         try {
           final userData = UserModel.fromJson(json.decode(userJson));
           if (userData.id != 0) {
-            _logger.info("Usuário autenticado, navegando para home");
+            _logger.info('Usuário autenticado, navegando para home');
             Loader.show();
-            await Future.delayed(Duration(milliseconds: 200));
+            await Future.delayed(const Duration(milliseconds: 200));
             Modular.to.navigate('/home/');
             Loader.hide();
             return;
           }
         } catch (e) {
-          _logger.error("Erro ao decodificar dados do usuário", e);
+          _logger.error('Erro ao decodificar dados do usuário', e);
         }
       }
 
-      _logger.info("Permanece na tela de login");
+      _logger.info('Permanece na tela de login');
     } catch (e, s) {
-      _logger.error("Erro ao verificar login", e, s);
+      _logger.error('Erro ao verificar login', e, s);
       await _userService.logout();
     }
   }
@@ -72,7 +72,7 @@ abstract class LoginControllerBase with Store {
       );
 
       if (token != null && userJson != null) {
-        await Future.delayed(Duration(milliseconds: 200));
+        await Future.delayed(const Duration(milliseconds: 200));
         Modular.to.navigate('/home/');
       } else {
         Messages.alert('Erro ao realizar login');

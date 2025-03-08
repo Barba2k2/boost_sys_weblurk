@@ -10,12 +10,12 @@ import '../../controllers/url_launch_controller.dart';
 import 'messages.dart';
 
 class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
+  SyslurkAppBar({super.key});
+  
   final urlController = Modular.get<UrlLaunchController>();
   final homeController = Modular.get<HomeController>();
   final settingsController = Modular.get<SettingsController>();
   final authStore = Modular.get<AuthStore>();
-
-  SyslurkAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {

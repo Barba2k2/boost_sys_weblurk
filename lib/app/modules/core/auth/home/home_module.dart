@@ -12,7 +12,6 @@ import '../auth_store.dart';
 import 'home_controller.dart';
 import 'home_page.dart';
 
-
 class HomeModule extends Module {
   @override
   List<Bind> get binds => [

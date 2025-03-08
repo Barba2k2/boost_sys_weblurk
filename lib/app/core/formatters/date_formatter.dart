@@ -1,4 +1,3 @@
-
 class DateFormatter {
   DateFormatter._();
 

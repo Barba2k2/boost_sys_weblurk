@@ -11,13 +11,6 @@ import '../rest_client_response.dart';
 import 'interceptors/auth_interceptors.dart';
 
 class DioRestClient implements RestClient {
-  late final Dio _dio;
-
-  final _defaultOptions = BaseOptions(
-    baseUrl: Environments.param(Constants.ENV_BASE_URL_KEY) ?? '',
-    connectTimeout: const Duration(milliseconds: 60000),
-    receiveTimeout: const Duration(milliseconds: 60000),
-  );
 
   DioRestClient({
     required LocalStorage localStorage,
@@ -40,6 +33,13 @@ class DioRestClient implements RestClient {
       ],
     );
   }
+  late final Dio _dio;
+
+  final _defaultOptions = BaseOptions(
+    baseUrl: Environments.param(Constants.ENV_BASE_URL_KEY) ?? '',
+    connectTimeout: const Duration(milliseconds: 60000),
+    receiveTimeout: const Duration(milliseconds: 60000),
+  );
 
   @override
   RestClient auth() {

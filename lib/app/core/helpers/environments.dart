@@ -8,6 +8,6 @@ class Environments {
   }
 
   static Future<void> loadEnvs() async {
-    await dotenv.load(fileName: '.env');
+    await dotenv.load();
   }
 }

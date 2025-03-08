@@ -6,10 +6,10 @@ import 'package:shorebird_code_push/shorebird_code_push.dart';
 import 'navigation_service.dart';
 
 class UpdateService {
+  UpdateService._();
+  
   static final UpdateService instance = UpdateService._();
   final _shorebird = ShorebirdCodePush();
-
-  UpdateService._();
 
   Future<void> initialize() async {
     // Primeira verificação ao iniciar
@@ -34,8 +34,7 @@ class UpdateService {
       }
 
       // Verifica se há nova atualização disponível para download
-      final isUpdateAvailable =
-          await _shorebird.isNewPatchAvailableForDownload();
+      final isUpdateAvailable = await _shorebird.isNewPatchAvailableForDownload();
 
       if (isUpdateAvailable) {
         // Baixa a atualização
@@ -92,13 +91,12 @@ class UpdateService {
 }
 
 class _UpdateDialog extends StatelessWidget {
-  final VoidCallback onCancel;
-  final VoidCallback onConfirm;
-
   const _UpdateDialog({
     required this.onConfirm,
     required this.onCancel,
   });
+  final VoidCallback onCancel;
+  final VoidCallback onConfirm;
 
   @override
   Widget build(BuildContext context) {

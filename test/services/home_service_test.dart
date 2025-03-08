@@ -172,13 +172,15 @@ void main() {
       final startHour = now.hour - 1;
       final endHour = now.hour + 1;
 
-      when(() => mockHomeRepository.loadSchedules(any())).thenAnswer((_) async => [
-            {
-              'start_time': 'Time($startHour:00:00)',
-              'end_time': 'Time($endHour:00:00)',
-              'streamer_url': 'https://twitch.tv/channel1',
-            },
-          ]);
+      when(() => mockHomeRepository.loadSchedules(any())).thenAnswer(
+        (_) async => [
+          {
+            'start_time': 'Time($startHour:00:00)',
+            'end_time': 'Time($endHour:00:00)',
+            'streamer_url': 'https://twitch.tv/channel1',
+          },
+        ],
+      );
 
       // Act
       final result = await homeService.fetchCurrentChannel();
@@ -194,13 +196,15 @@ void main() {
       final pastStartHour = now.hour - 3;
       final pastEndHour = now.hour - 2;
 
-      when(() => mockHomeRepository.loadSchedules(any())).thenAnswer((_) async => [
-            {
-              'start_time': 'Time($pastStartHour:00:00)',
-              'end_time': 'Time($pastEndHour:00:00)',
-              'streamer_url': 'https://twitch.tv/channel1',
-            },
-          ]);
+      when(() => mockHomeRepository.loadSchedules(any())).thenAnswer(
+        (_) async => [
+          {
+            'start_time': 'Time($pastStartHour:00:00)',
+            'end_time': 'Time($pastEndHour:00:00)',
+            'streamer_url': 'https://twitch.tv/channel1',
+          },
+        ],
+      );
 
       // Act
       final result = await homeService.fetchCurrentChannel();

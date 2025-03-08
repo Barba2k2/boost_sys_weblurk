@@ -3,12 +3,6 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 
 class ScoreModel {
-  final int streamerId;
-  final DateTime date;
-  final int hour;
-  final int minute;
-  final int points;
-
   ScoreModel({
     required this.streamerId,
     required this.date,
@@ -16,16 +10,6 @@ class ScoreModel {
     required this.minute,
     required this.points,
   });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'streamerId': streamerId,
-      'date': DateFormat('yyyy-MM-dd').format(date),
-      'hour': hour,
-      'minute': minute,
-      'points': points,
-    };
-  }
 
   factory ScoreModel.fromMap(Map<String, dynamic> map) {
     return ScoreModel(
@@ -37,8 +21,25 @@ class ScoreModel {
     );
   }
 
-  String toJson() => json.encode(toMap());
+  factory ScoreModel.fromJson(String source) => ScoreModel.fromMap(
+        json.decode(source),
+      );
 
-  factory ScoreModel.fromJson(String source) =>
-      ScoreModel.fromMap(json.decode(source));
+  final int streamerId;
+  final DateTime date;
+  final int hour;
+  final int minute;
+  final int points;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'streamerId': streamerId,
+      'date': DateFormat('yyyy-MM-dd').format(date),
+      'hour': hour,
+      'minute': minute,
+      'points': points,
+    };
+  }
+
+  String toJson() => json.encode(toMap());
 }

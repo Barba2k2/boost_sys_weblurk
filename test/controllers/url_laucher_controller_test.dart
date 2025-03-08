@@ -8,11 +8,10 @@ class MockAppLogger extends Mock implements AppLogger {}
 
 // Create a custom UrlLaunchController for testing
 class TestUrlLaunchController extends UrlLaunchController {
+  TestUrlLaunchController({required super.logger});
   bool launchCalled = false;
   String? lastLaunchedUrl;
-  
-  TestUrlLaunchController({required AppLogger logger}) : super(logger: logger);
-  
+
   @override
   Future<void> launchURL(String url) async {
     launchCalled = true;
@@ -23,36 +22,50 @@ class TestUrlLaunchController extends UrlLaunchController {
 }
 
 void main() {
-  group('UrlLaunchController', () {
-    late MockAppLogger mockLogger;
-    late TestUrlLaunchController controller;
-    
-    setUp(() {
-      mockLogger = MockAppLogger();
-      controller = TestUrlLaunchController(logger: mockLogger);
-    });
+  group(
+    'UrlLaunchController',
+    () {
+      late MockAppLogger mockLogger;
+      late TestUrlLaunchController controller;
 
-    test('can be instantiated', () {
-      expect(controller, isNotNull);
-    });
-    
-    test('launchURL sets launchCalled flag', () async {
-      // Act - Call the method
-      await controller.launchURL('https://google.com');
-      
-      // Assert - Check that the launch was called
-      expect(controller.launchCalled, isTrue);
-    });
-    
-    test('launchURL stores the URL correctly', () async {
-      // Arrange
-      const testUrl = 'https://example.com';
-      
-      // Act
-      await controller.launchURL(testUrl);
-      
-      // Assert
-      expect(controller.lastLaunchedUrl, equals(testUrl));
-    });
-  });
+      setUp(
+        () {
+          mockLogger = MockAppLogger();
+          controller = TestUrlLaunchController(logger: mockLogger);
+        },
+      );
+
+      test(
+        'can be instantiated',
+        () {
+          expect(controller, isNotNull);
+        },
+      );
+
+      test(
+        'launchURL sets launchCalled flag',
+        () async {
+          // Act - Call the method
+          await controller.launchURL('https://google.com');
+
+          // Assert - Check that the launch was called
+          expect(controller.launchCalled, isTrue);
+        },
+      );
+
+      test(
+        'launchURL stores the URL correctly',
+        () async {
+          // Arrange
+          const testUrl = 'https://example.com';
+
+          // Act
+          await controller.launchURL(testUrl);
+
+          // Assert
+          expect(controller.lastLaunchedUrl, equals(testUrl));
+        },
+      );
+    },
+  );
 }

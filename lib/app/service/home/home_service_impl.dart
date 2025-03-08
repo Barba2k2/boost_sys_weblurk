@@ -6,14 +6,14 @@ import '../../repositories/home/home_repository.dart';
 import 'home_service.dart';
 
 class HomeServiceImpl implements HomeService {
-  final HomeRepository _homeRepository;
-  final AppLogger _logger;
-
   HomeServiceImpl({
     required HomeRepository homeRepository,
     required AppLogger logger,
   })  : _homeRepository = homeRepository,
         _logger = logger;
+
+  final HomeRepository _homeRepository;
+  final AppLogger _logger;
 
   @override
   Future<void> fetchSchedules() async {

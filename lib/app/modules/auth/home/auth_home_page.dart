@@ -7,12 +7,12 @@ import '../../../core/ui/extensions/size_screen_extension.dart';
 import '../../core/auth/auth_store.dart';
 
 class AuthHomePage extends StatefulWidget {
-  final AuthStore _authStore;
-
   const AuthHomePage({
     required AuthStore authStore,
     super.key,
   }) : _authStore = authStore;
+
+  final AuthStore _authStore;
 
   @override
   State<AuthHomePage> createState() => _AuthHomePageState();
@@ -44,9 +44,7 @@ class _AuthHomePageState extends State<AuthHomePage> {
 
       final userLogged = widget._authStore.userLogged;
 
-      if (userLogged != null &&
-          userLogged.id != 0 &&
-          userLogged.nickname.isNotEmpty) {
+      if (userLogged != null && userLogged.id != 0 && userLogged.nickname.isNotEmpty) {
         Modular.to.navigate('/home/');
       } else {
         Modular.to.navigate('/auth/login/');

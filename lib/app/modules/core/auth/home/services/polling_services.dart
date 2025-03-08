@@ -11,6 +11,12 @@ abstract class PollingService {
 }
 
 class PollingServiceImpl implements PollingService {
+  PollingServiceImpl({
+    required HomeService homeService,
+    required AppLogger logger,
+  })  : _homeService = homeService,
+        _logger = logger;
+
   final HomeService _homeService;
   final AppLogger _logger;
   Timer? _channelTimer;
@@ -23,12 +29,6 @@ class PollingServiceImpl implements PollingService {
   static const _channelCheckInterval = Duration(minutes: 6);
   static const _watchdogInterval = Duration(minutes: 5);
   static const _maxTimeSinceLastUpdate = Duration(minutes: 10);
-
-  PollingServiceImpl({
-    required HomeService homeService,
-    required AppLogger logger,
-  })  : _homeService = homeService,
-        _logger = logger;
 
   @override
   Future<void> startPolling(int streamerId) async {

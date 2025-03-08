@@ -34,7 +34,7 @@ class MockLocalStorage extends Mock implements LocalStorage {
   Future<T?> read<T>(String key) async {
     return super.noSuchMethod(
       Invocation.method(#read, [key], {#T: T}),
-      returnValue: Future.value(null),
+      returnValue: Future.value(),
     );
   }
 }
@@ -64,11 +64,13 @@ class TestModule extends Module {
         Bind.instance<UserService>(MockUserService()),
         Bind.instance<LocalStorage>(MockLocalStorage()),
         Bind.instance<AppLogger>(MockAppLogger()),
-        Bind.factory<LoginController>((i) => LoginController(
-              userService: i.get<UserService>(),
-              localStorage: i.get<LocalStorage>(),
-              logger: i.get<AppLogger>(),
-            )),
+        Bind.factory<LoginController>(
+          (i) => LoginController(
+            userService: i.get<UserService>(),
+            localStorage: i.get<LocalStorage>(),
+            logger: i.get<AppLogger>(),
+          ),
+        ),
       ];
 }
 
@@ -81,7 +83,7 @@ void main() {
     () {
       // Initialize modular for testing
       initModule(TestModule());
-      
+
       mockUserService = Modular.get<UserService>() as MockUserService;
       mockLocalStorage = Modular.get<LocalStorage>() as MockLocalStorage;
       mockModularNavigate = MockModularNavigate();
@@ -98,15 +100,21 @@ void main() {
         'complete login flow with success',
         (WidgetTester tester) async {
           // Arrange
-          when(mockUserService.login('testuser', 'password123'))
-              .thenAnswer((_) async => {});
-          when(mockUserService.getToken()).thenAnswer((_) async => 'valid_token');
-          when(mockLocalStorage.read<String>(Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY))
-              .thenAnswer((_) async => '{"id":1,"nickname":"test"}');
+          when(mockUserService.login('testuser', 'password123')).thenAnswer(
+            (_) async => {},
+          );
+          when(mockUserService.getToken()).thenAnswer(
+            (_) async => 'valid_token',
+          );
+          when(
+            mockLocalStorage.read<String>(Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY),
+          ).thenAnswer(
+            (_) async => '{"id":1,"nickname":"test"}',
+          );
 
           // Act - Renderizar a página de login
           await tester.pumpWidget(
-            MaterialApp(
+            const MaterialApp(
               home: LoginPage(),
             ),
           );
@@ -140,7 +148,7 @@ void main() {
 
           // Act - Renderizar a página de login
           await tester.pumpWidget(
-            MaterialApp(
+            const MaterialApp(
               home: LoginPage(),
             ),
           );

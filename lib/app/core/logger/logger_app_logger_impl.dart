@@ -5,14 +5,14 @@ import 'package:logger/logger.dart';
 import 'app_logger.dart';
 
 class LoggerAppLoggerImpl implements AppLogger {
+  LoggerAppLoggerImpl() {
+    _initializeLogger();
+  }
+
   final logger = Logger();
   var messages = <String>[];
   final _logFile = File('logs/app.log');
   final _maxLogSize = 10 * 1024 * 1024;
-
-  LoggerAppLoggerImpl() {
-    _initializeLogger();
-  }
 
   Future<void> _initializeLogger() async {
     try {

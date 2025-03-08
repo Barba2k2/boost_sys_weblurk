@@ -8,14 +8,14 @@ import '../../models/score_model.dart';
 import './home_repository.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
-  final RestClient _restClient;
-  final AppLogger _logger;
-
   HomeRepositoryImpl({
     required RestClient restClient,
     required AppLogger logger,
   })  : _restClient = restClient,
         _logger = logger;
+
+  final RestClient _restClient;
+  final AppLogger _logger;
 
   @override
   Future<List<Map<String, dynamic>>> loadSchedules(DateTime date) async {

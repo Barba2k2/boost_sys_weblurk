@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LiveUrlBar extends StatelessWidget {
-  final String? currentChannel;
-
   const LiveUrlBar({
     required this.currentChannel,
     super.key,
   });
+
+  final String? currentChannel;
 
   @override
   Widget build(BuildContext context) {
