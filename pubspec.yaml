@@ -39,6 +39,10 @@ dependencies:
   provider: ^6.1.2
   desktop_webview_window: ^0.2.3
   web_socket_channel: ^3.0.1
+  mockito: ^5.4.5
+  mocktail: ^1.0.4
+  network_image_mock: ^2.1.1
+  modular_test: ^2.0.0
   # firebase_core: ^3.3.0
   # firebase_remote_config: ^5.0.4
   # firebase_analytics: ^11.2.1
