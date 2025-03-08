@@ -18,12 +18,6 @@ part 'home_controller.g.dart';
 class HomeController = HomeControllerBase with _$HomeController;
 
 abstract class HomeControllerBase with Store {
-  final HomeService _homeService;
-  final AppLogger _logger;
-  final AuthStore _authStore;
-  final WebViewService _webViewService;
-  final PollingService _pollingService;
-
   HomeControllerBase({
     required HomeService homeService,
     required AppLogger logger,
@@ -35,6 +29,12 @@ abstract class HomeControllerBase with Store {
         _authStore = authStore,
         _webViewService = webViewService,
         _pollingService = pollingService;
+
+  final HomeService _homeService;
+  final AppLogger _logger;
+  final AuthStore _authStore;
+  final WebViewService _webViewService;
+  final PollingService _pollingService;
 
   Timer? _webViewHealthTimer;
   bool _isDisposed = false;
