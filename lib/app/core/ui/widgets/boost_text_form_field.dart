@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class BoostTextFormField extends StatefulWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? Function(String?) validator;
-  final bool obscureText;
-
   const BoostTextFormField({
     super.key,
     required this.controller,
@@ -14,6 +9,11 @@ class BoostTextFormField extends StatefulWidget {
     required this.validator,
     this.obscureText = false,
   });
+
+  final TextEditingController controller;
+  final String label;
+  final String? Function(String?) validator;
+  final bool obscureText;
 
   @override
   State<BoostTextFormField> createState() => _BoostTextFormFieldState();
@@ -52,9 +52,7 @@ class _BoostTextFormFieldState extends State<BoostTextFormField> {
                   });
                 },
                 icon: Icon(
-                  _obscureText
-                      ? Icons.visibility_rounded
-                      : Icons.visibility_off_rounded,
+                  _obscureText ? Icons.visibility_rounded : Icons.visibility_off_rounded,
                   color: Colors.white,
                 ),
               )
@@ -63,14 +61,12 @@ class _BoostTextFormFieldState extends State<BoostTextFormField> {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
             color: Colors.white,
-            width: 1,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
             color: Colors.white,
-            width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(

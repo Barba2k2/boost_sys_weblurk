@@ -12,19 +12,19 @@ import '../../models/user_model.dart';
 import 'user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {
-  final RestClient _restClient;
-  final AppLogger _logger;
-
   UserRepositoryImpl({
     required AppLogger logger,
     required RestClient restClient,
   })  : _restClient = restClient,
         _logger = logger;
 
+  final RestClient _restClient;
+  final AppLogger _logger;
+
   @override
   Future<String> login(String nickname, String password) async {
     try {
-      final result = await _restClient.unAuht().post(
+      final result = await _restClient.unAuth().post(
         '/auth/login',
         data: {
           'nickname': nickname,
@@ -61,8 +61,7 @@ class UserRepositoryImpl implements UserRepository {
 
       final data = {
         if (kIsWeb) 'web_token': deviceToken,
-        if (!kIsWeb && Platform.isWindows || Platform.isAndroid)
-          'windows_token': deviceToken,
+        if (!kIsWeb && Platform.isWindows || Platform.isAndroid) 'windows_token': deviceToken,
       };
 
       final result = await _restClient.auth().patch(

@@ -6,9 +6,6 @@ import '../../../local_storage/local_storage.dart';
 import '../../../logger/app_logger.dart';
 
 class AuthInterceptors extends Interceptor {
-  final LocalStorage _localStorage;
-  final AppLogger _logger;
-  final AuthStore _authStore;
 
   AuthInterceptors({
     required LocalStorage localStorage,
@@ -17,6 +14,9 @@ class AuthInterceptors extends Interceptor {
   })  : _localStorage = localStorage,
         _logger = logger,
         _authStore = authStore;
+  final LocalStorage _localStorage;
+  final AppLogger _logger;
+  final AuthStore _authStore;
 
   @override
   Future<void> onRequest(
@@ -34,7 +34,7 @@ class AuthInterceptors extends Interceptor {
 
         if (accessToken == null) {
           _authStore.logout();
-          
+
           return handler.reject(
             DioException(
               requestOptions: options,

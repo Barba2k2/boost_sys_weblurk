@@ -3,16 +3,16 @@ import 'package:desktop_webview_window/desktop_webview_window.dart';
 import '../../logger/app_logger.dart';
 
 class MyWebviewWidget extends StatefulWidget {
-  final String initialUrl;
-  final void Function(Webview)? onWebViewCreated;
-  final AppLogger? logger;
-
   const MyWebviewWidget({
     required this.initialUrl,
     this.onWebViewCreated,
     this.logger,
     super.key,
   });
+  
+  final String initialUrl;
+  final void Function(Webview)? onWebViewCreated;
+  final AppLogger? logger;
 
   @override
   State<MyWebviewWidget> createState() => _MyWebviewWidgetState();
@@ -33,8 +33,8 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
       widget.logger?.info('Initializing WebView Window');
 
       final webview = await WebviewWindow.create(
-        configuration: CreateConfiguration(
-          title: "Boost Team SysLurk",
+        configuration: const CreateConfiguration(
+          title: 'Boost Team SysLurk',
           titleBarHeight: 0,
           windowWidth: 1100,
           windowHeight: 670,
@@ -96,7 +96,7 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
 
     return Container(
       color: Colors.black87,
-      child: Center(
+      child: const Center(
         child: Text(
           'As Lives estão sendo exibidas em uma janela separada',
           style: TextStyle(

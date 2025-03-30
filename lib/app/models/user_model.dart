@@ -3,12 +3,6 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 
 class UserModel {
-  final int id;
-  final String nickname;
-  final String? password;
-  final String role;
-  final String status;
-
   UserModel({
     required this.id,
     required this.nickname,
@@ -24,6 +18,26 @@ class UserModel {
         role = '',
         status = 'OFF';
 
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
+      id: map['id'] ?? 0,
+      nickname: map['nickname'] ?? '',
+      password: map['password'],
+      role: map['role'] ?? '',
+      status: map['status'] ?? 'OFF',
+    );
+  }
+
+  factory UserModel.fromJson(Map<String, dynamic> map) {
+    return UserModel.fromMap(map);
+  }
+  
+  final int id;
+  final String nickname;
+  final String? password;
+  final String role;
+  final String status;
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -34,21 +48,7 @@ class UserModel {
     };
   }
 
-  factory UserModel.fromMap(Map<String, dynamic> map) {
-    return UserModel(
-      id: map['id'] ?? 0,
-      nickname: map['nickname'] ?? '',
-      password: map['password'],
-      role: map['role'] ?? '',
-      status: map['status'] ?? 'OFF'
-    );
-  }
-
   String toJson() => json.encode(toMap());
-
-  factory UserModel.fromJson(Map<String, dynamic> map) {
-    return UserModel.fromMap(map);
-  }
 
   UserModel copyWith({
     int? id,

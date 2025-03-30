@@ -8,11 +8,11 @@ part 'settings_controller.g.dart';
 class SettingsController = SettingsControllerBase with _$SettingsController;
 
 abstract class SettingsControllerBase with Store {
-  final AppLogger _logger;
-
   SettingsControllerBase({
     required AppLogger logger,
-  })  : _logger = logger;
+  }) : _logger = logger;
+
+  final AppLogger _logger;
 
   // Método para encerrar o aplicativo
   @action

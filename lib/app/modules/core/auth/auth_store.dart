@@ -13,6 +13,10 @@ part 'auth_store.g.dart';
 class AuthStore = AuthStoreBase with _$AuthStore;
 
 abstract class AuthStoreBase with Store {
+  AuthStoreBase({
+    required LocalStorage localStorage,
+  }) : _localStorage = localStorage;
+
   final LocalStorage _localStorage;
   final _logger = Modular.get<AppLogger>();
 
@@ -20,10 +24,6 @@ abstract class AuthStoreBase with Store {
 
   @readonly
   UserModel? _userLogged;
-
-  AuthStoreBase({
-    required LocalStorage localStorage,
-  }) : _localStorage = localStorage;
 
   @action
   Future<void> loadUserLogged() async {

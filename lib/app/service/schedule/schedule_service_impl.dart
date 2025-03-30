@@ -4,14 +4,14 @@ import '../../repositories/schedule/schedule_repository.dart';
 import 'schedule_service.dart';
 
 class StreamerServiceImpl implements ScheduleService {
-  final SchedulesRepository _streamerRepository;
-  final AppLogger _logger;
-
   StreamerServiceImpl({
     required AppLogger logger,
     required SchedulesRepository streamerRepository,
   })  : _logger = logger,
         _streamerRepository = streamerRepository;
+
+  final SchedulesRepository _streamerRepository;
+  final AppLogger _logger;
 
   @override
   Future<List> fetchSchedule() async {

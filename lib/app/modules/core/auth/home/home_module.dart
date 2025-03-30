@@ -6,12 +6,12 @@ import '../../../../repositories/home/home_repository.dart';
 import '../../../../repositories/home/home_repository_impl.dart';
 import '../../../../service/home/home_service.dart';
 import '../../../../service/home/home_service_impl.dart';
+import '../../../../service/webview/windows_web_view_service.dart';
+import '../../../../service/webview/windows_web_view_service_impl.dart';
 import 'services/polling_services.dart';
-import 'services/webview_service.dart';
 import '../auth_store.dart';
 import 'home_controller.dart';
 import 'home_page.dart';
-
 
 class HomeModule extends Module {
   @override
@@ -28,8 +28,8 @@ class HomeModule extends Module {
             logger: i<AppLogger>(),
           ),
         ),
-        Bind.lazySingleton<WebViewService>(
-          (i) => WebViewServiceImpl(
+        Bind.lazySingleton<WindowsWebViewService>(
+          (i) => WindowsWebViewServiceImpl(
             logger: i<AppLogger>(),
           ),
         ),
@@ -44,7 +44,7 @@ class HomeModule extends Module {
             homeService: i<HomeService>(),
             authStore: i<AuthStore>(),
             logger: i<AppLogger>(),
-            webViewService: i<WebViewService>(),
+            webViewService: i<WindowsWebViewService>(),
             pollingService: i<PollingService>(),
           ),
         ),

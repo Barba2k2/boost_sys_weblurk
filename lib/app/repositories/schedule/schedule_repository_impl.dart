@@ -4,14 +4,14 @@ import '../../core/rest_client/rest_client.dart';
 import 'schedule_repository.dart';
 
 class ScheduleRepositoryImpl implements SchedulesRepository {
-  final RestClient _restClient;
-  final AppLogger _logger;
-
   ScheduleRepositoryImpl({
     required RestClient restClient,
     required AppLogger logger,
   })  : _restClient = restClient,
         _logger = logger;
+
+  final RestClient _restClient;
+  final AppLogger _logger;
 
   @override
   Future<List> fetchSchedule() async {

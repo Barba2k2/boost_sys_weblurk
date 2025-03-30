@@ -2,42 +2,50 @@ import 'dart:async';
 
 import 'package:mobx/mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:desktop_webview_window/desktop_webview_window.dart';
+import 'package:webview_windows/webview_windows.dart';
 
 import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/ui/widgets/loader.dart';
 import '../../../../core/ui/widgets/messages.dart';
 import '../../../../service/home/home_service.dart';
+import '../../../../service/webview/windows_web_view_service.dart';
 import '../auth_store.dart';
 import 'services/polling_services.dart';
-import 'services/webview_service.dart';
 
 part 'home_controller.g.dart';
 
 class HomeController = HomeControllerBase with _$HomeController;
 
 abstract class HomeControllerBase with Store {
-  final HomeService _homeService;
-  final AppLogger _logger;
-  final AuthStore _authStore;
-  final WebViewService _webViewService;
-  final PollingService _pollingService;
-
   HomeControllerBase({
     required HomeService homeService,
     required AppLogger logger,
     required AuthStore authStore,
-    required WebViewService webViewService,
+    required WindowsWebViewService webViewService,
     required PollingService pollingService,
   })  : _homeService = homeService,
         _logger = logger,
         _authStore = authStore,
         _webViewService = webViewService,
-        _pollingService = pollingService;
+        _pollingService = pollingService {
+    // Observa o status de saúde do WebView e do Polling
+    _subscribeToHealthEvents();
+  }
+
+  final HomeService _homeService;
+  final AppLogger _logger;
+  final AuthStore _authStore;
+  final WindowsWebViewService _webViewService;
+  final PollingService _pollingService;
+
+  late StreamSubscription _webViewHealthSubscription;
+  late StreamSubscription _pollingHealthSubscription;
+  late StreamSubscription _channelUpdateSubscription;
 
   Timer? _webViewHealthTimer;
   bool _isDisposed = false;
+  bool _recoveryInProgress = false;
 
   @observable
   bool isWebViewHealthy = true;
@@ -49,7 +57,32 @@ abstract class HomeControllerBase with Store {
   bool isScheduleVisible = false;
 
   @observable
-  String initialChannel = 'BoostTeam_';
+  String initialChannel = 'https://twitch.tv/BoostTeam_';
+
+  @observable
+  bool isRecovering = false;
+
+  void _subscribeToHealthEvents() {
+    _webViewHealthSubscription = _webViewService.healthStatus.listen((isHealthy) {
+      isWebViewHealthy = isHealthy;
+      if (!isHealthy && !_recoveryInProgress) {
+        _logger.warning('Problema de saúde do WebView detectado, iniciando recuperação...');
+        _recoverWebView();
+      }
+    });
+
+    _pollingHealthSubscription = _pollingService.healthStatus.listen((isHealthy) {
+      if (!isHealthy) {
+        _logger.warning('Problema de saúde do Polling detectado');
+        _ensurePollingActive();
+      }
+    });
+
+    // Subscribe to channel updates from polling service
+    _channelUpdateSubscription = _pollingService.channelUpdates.listen((channelUrl) {
+      _handleChannelUpdate(channelUrl);
+    });
+  }
 
   @action
   Future<void> onInit() async {
@@ -73,7 +106,7 @@ abstract class HomeControllerBase with Store {
 
   void _setupWebViewMonitoring() {
     _webViewHealthTimer?.cancel();
-    _webViewHealthTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+    _webViewHealthTimer = Timer.periodic(const Duration(minutes: 2), (_) {
       if (!_isDisposed) {
         _checkWebViewHealth();
       }
@@ -102,8 +135,17 @@ abstract class HomeControllerBase with Store {
     }
   }
 
+  @action
   Future<void> _recoverWebView() async {
+    // Evita múltiplas recuperações simultâneas
+    if (_recoveryInProgress) {
+      _logger.info('Recuperação já em andamento, ignorando...');
+      return;
+    }
+
     try {
+      _recoveryInProgress = true;
+      isRecovering = true;
       _logger.info('Tentando recuperar WebView...');
 
       // Para o polling antes de reiniciar
@@ -112,25 +154,41 @@ abstract class HomeControllerBase with Store {
       // Tenta recarregar primeiro
       await reloadWebView();
 
-      // Se ainda não está saudável, reinicializa completamente
-      if (!isWebViewHealthy) {
-        _webViewService.dispose();
-        if (_webViewService.controller != null) {
-          await _webViewService.initializeWebView(_webViewService.controller!);
-          await _initializeServices();
-        }
+      // Aguarda um momento para verificar se o reload resolveu
+      await Future.delayed(const Duration(seconds: 3));
+
+      // Verifica novamente o status de saúde
+      final isResponding = await _webViewService.isResponding();
+
+      // Se ainda não está saudável, notifica o problema
+      if (!isResponding) {
+        _logger.warning('Reload não resolveu o problema, notificando usuário...');
+        Messages.warning(
+            'Problema detectado no navegador. Tente reiniciar o aplicativo se o problema persistir.');
       }
 
       // Reinicia o polling
-      final streamerId = _getCurrentStreamerId();
-      if (streamerId > 0) {
-        await _pollingService.startPolling(streamerId);
-      }
+      await _ensurePollingActive();
 
       _logger.info('WebView recuperado com sucesso');
+      isWebViewHealthy = true;
     } catch (e, s) {
       _logger.error('Falha ao recuperar WebView', e, s);
       Messages.warning('Erro ao recuperar aplicação. Tente reiniciar o programa.');
+      isWebViewHealthy = false;
+    } finally {
+      isRecovering = false;
+      _recoveryInProgress = false;
+    }
+  }
+
+  Future<void> _ensurePollingActive() async {
+    final streamerId = _getCurrentStreamerId();
+    if (streamerId > 0) {
+      _logger.info('Reiniciando polling com streamerId: $streamerId');
+      await _pollingService.startPolling(streamerId);
+    } else {
+      _logger.warning('Não foi possível obter ID válido para polling');
     }
   }
 
@@ -140,10 +198,7 @@ abstract class HomeControllerBase with Store {
       await loadCurrentChannel();
       await _homeService.fetchSchedules();
 
-      final streamerId = _getCurrentStreamerId();
-      if (streamerId > 0) {
-        await _pollingService.startPolling(streamerId);
-      }
+      await _ensurePollingActive();
 
       _logger.info('Serviços inicializados com sucesso');
     } catch (e, s) {
@@ -154,7 +209,7 @@ abstract class HomeControllerBase with Store {
   }
 
   @action
-  Future<void> onWebViewCreated(Webview controller) async {
+  Future<void> onWebViewCreated(WebviewController controller) async {
     _logger.info('WebView criado, iniciando configuração...');
     try {
       if (_authStore.userLogged == null) {
@@ -174,10 +229,18 @@ abstract class HomeControllerBase with Store {
   @action
   Future<void> loadCurrentChannel() async {
     try {
+      // Armazena o canal atual para comparação
+      final previousChannel = currentChannel;
+
+      // Busca o novo canal
       currentChannel = await _homeService.fetchCurrentChannel();
-      if (currentChannel != null) {
+
+      // Se mudou de canal, carrega a nova URL
+      if (currentChannel != null && currentChannel != previousChannel) {
+        _logger.info('Canal alterado de $previousChannel para $currentChannel');
         await _webViewService.loadUrl(currentChannel!);
       }
+
       _logger.info('Canal atual carregado: $currentChannel');
     } catch (e, s) {
       _logger.error('Error loading current channel', e, s);
@@ -243,9 +306,32 @@ abstract class HomeControllerBase with Store {
     }
   }
 
+  @action
+  Future<void> _handleChannelUpdate(String channelUrl) async {
+    try {
+      _logger.info('Recebido update de canal do polling: $channelUrl');
+
+      // Update the current channel
+      currentChannel = channelUrl;
+
+      // Load the new URL in the webview
+      if (_webViewService.isInitialized) {
+        _logger.info('Carregando novo canal no WebView: $channelUrl');
+        await _webViewService.loadUrl(channelUrl);
+      } else {
+        _logger.warning('WebView não inicializado, não foi possível carregar o canal: $channelUrl');
+      }
+    } catch (e, s) {
+      _logger.error('Erro ao processar atualização de canal', e, s);
+    }
+  }
+
   void dispose() {
     _isDisposed = true;
     _webViewHealthTimer?.cancel();
+    _webViewHealthSubscription.cancel();
+    _pollingHealthSubscription.cancel();
+    _channelUpdateSubscription.cancel();
     _pollingService.stopPolling();
     _webViewService.dispose();
     _logger.info('HomeController disposed');

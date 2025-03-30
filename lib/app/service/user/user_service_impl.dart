@@ -6,11 +6,6 @@ import '../../repositories/user/user_repository.dart';
 import 'user_service.dart';
 
 class UserServiceImpl implements UserService {
-  final UserRepository _userRepository;
-  final AppLogger _logger;
-  final LocalStorage _localStorage;
-  final LocalSecureStorage _localSecureStorage;
-
   UserServiceImpl({
     required UserRepository userRepository,
     required AppLogger logger,
@@ -20,6 +15,11 @@ class UserServiceImpl implements UserService {
         _userRepository = userRepository,
         _localStorage = localStorage,
         _localSecureStorage = localSecureStorage;
+
+  final UserRepository _userRepository;
+  final AppLogger _logger;
+  final LocalStorage _localStorage;
+  final LocalSecureStorage _localSecureStorage;
 
   @override
   Future<void> login(String nickname, String password) async {

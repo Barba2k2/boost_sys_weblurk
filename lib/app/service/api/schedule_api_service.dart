@@ -5,13 +5,13 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../core/logger/logger_app_logger_impl.dart';
 
 class ScheduleWebSocketService {
-  late WebSocketChannel _channel;
-  final String _wsUrl;
-  final LoggerAppLoggerImpl _logger;
-
   ScheduleWebSocketService(String baseUrl)
       : _wsUrl = '${baseUrl.replaceFirst('http', 'ws')}/schedules/ws/streamer',
         _logger = LoggerAppLoggerImpl();
+
+  late WebSocketChannel _channel;
+  final String _wsUrl;
+  final LoggerAppLoggerImpl _logger;
 
   void connect() {
     _channel = WebSocketChannel.connect(Uri.parse(_wsUrl));
