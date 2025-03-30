@@ -73,6 +73,22 @@ mixin _$HomeController on HomeControllerBase, Store {
     });
   }
 
+  late final _$isRecoveringAtom =
+      Atom(name: 'HomeControllerBase.isRecovering', context: context);
+
+  @override
+  bool get isRecovering {
+    _$isRecoveringAtom.reportRead();
+    return super.isRecovering;
+  }
+
+  @override
+  set isRecovering(bool value) {
+    _$isRecoveringAtom.reportWrite(value, super.isRecovering, () {
+      super.isRecovering = value;
+    });
+  }
+
   late final _$onInitAsyncAction =
       AsyncAction('HomeControllerBase.onInit', context: context);
 
@@ -81,11 +97,19 @@ mixin _$HomeController on HomeControllerBase, Store {
     return _$onInitAsyncAction.run(() => super.onInit());
   }
 
+  late final _$_recoverWebViewAsyncAction =
+      AsyncAction('HomeControllerBase._recoverWebView', context: context);
+
+  @override
+  Future<void> _recoverWebView() {
+    return _$_recoverWebViewAsyncAction.run(() => super._recoverWebView());
+  }
+
   late final _$onWebViewCreatedAsyncAction =
       AsyncAction('HomeControllerBase.onWebViewCreated', context: context);
 
   @override
-  Future<void> onWebViewCreated(Webview controller) {
+  Future<void> onWebViewCreated(WebviewController controller) {
     return _$onWebViewCreatedAsyncAction
         .run(() => super.onWebViewCreated(controller));
   }
@@ -113,7 +137,8 @@ mixin _$HomeController on HomeControllerBase, Store {
 isWebViewHealthy: ${isWebViewHealthy},
 currentChannel: ${currentChannel},
 isScheduleVisible: ${isScheduleVisible},
-initialChannel: ${initialChannel}
+initialChannel: ${initialChannel},
+isRecovering: ${isRecovering}
     ''';
   }
 }
