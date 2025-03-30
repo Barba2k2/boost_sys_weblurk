@@ -41,6 +41,7 @@ abstract class HomeControllerBase with Store {
 
   late StreamSubscription _webViewHealthSubscription;
   late StreamSubscription _pollingHealthSubscription;
+  late StreamSubscription _channelUpdateSubscription;
 
   Timer? _webViewHealthTimer;
   bool _isDisposed = false;
@@ -75,6 +76,11 @@ abstract class HomeControllerBase with Store {
         _logger.warning('Problema de saúde do Polling detectado');
         _ensurePollingActive();
       }
+    });
+
+    // Subscribe to channel updates from polling service
+    _channelUpdateSubscription = _pollingService.channelUpdates.listen((channelUrl) {
+      _handleChannelUpdate(channelUrl);
     });
   }
 
@@ -300,11 +306,32 @@ abstract class HomeControllerBase with Store {
     }
   }
 
+  @action
+  Future<void> _handleChannelUpdate(String channelUrl) async {
+    try {
+      _logger.info('Recebido update de canal do polling: $channelUrl');
+
+      // Update the current channel
+      currentChannel = channelUrl;
+
+      // Load the new URL in the webview
+      if (_webViewService.isInitialized) {
+        _logger.info('Carregando novo canal no WebView: $channelUrl');
+        await _webViewService.loadUrl(channelUrl);
+      } else {
+        _logger.warning('WebView não inicializado, não foi possível carregar o canal: $channelUrl');
+      }
+    } catch (e, s) {
+      _logger.error('Erro ao processar atualização de canal', e, s);
+    }
+  }
+
   void dispose() {
     _isDisposed = true;
     _webViewHealthTimer?.cancel();
     _webViewHealthSubscription.cancel();
     _pollingHealthSubscription.cancel();
+    _channelUpdateSubscription.cancel();
     _pollingService.stopPolling();
     _webViewService.dispose();
     _logger.info('HomeController disposed');
