@@ -4,7 +4,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 
 import '../../../../core/ui/widgets/live_url_bar.dart';
 import '../../../../core/ui/widgets/syslurk_app_bar.dart';
-import '../../../../core/ui/widgets/webview_widget.dart';
+import '../../../../core/ui/widgets/windows_web_view_widget.dart';
 import 'home_controller.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,13 +23,13 @@ class _HomePageState extends State<HomePage> {
     homeController.onInit();
   }
 
-  // @override
-  // void dispose() {
-  //   homeController.dispose();
-  //   super.dispose();
-  // }
-
   @override
+  void dispose() {
+    homeController.dispose();
+    super.dispose();
+  }
+
+   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -45,32 +45,36 @@ class _HomePageState extends State<HomePage> {
                         currentChannel: homeController.currentChannel,
                       ),
                       Expanded(
-                        child: MyWebviewWidget(
-                          initialUrl: homeController.currentChannel ??
-                              'https://twitch.tv/BoostTeam_',
+                        child: WindowsWebViewWidget(
+                          initialUrl:
+                              homeController.currentChannel ?? 'https://twitch.tv/BoostTeam_',
                           onWebViewCreated: homeController.onWebViewCreated,
+                          logger: Modular.get(), // Injetando o logger
                         ),
                       ),
                     ],
                   ),
+                  // Indicador de recuperação
+                  if (homeController.isRecovering)
+                    Container(
+                      color: Colors.black54,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.purple,
+                        ),
+                      ),
+                    ),
                 ],
               );
             },
           ),
-          // floatingActionButton: Observer(
-          //   builder: (_) => FloatingActionButton.extended(
-          //     onPressed: () {
-          //       // controller.isScheduleVisible.toggle();
-          //     },
-          //     label: const Text(
-          //       // controller.isScheduleVisible.value ? 'Esconder' : 'Mostrar',
-          //       'Mostrar',
-          //     ),
-          //     icon: const Icon(
-          //       Icons.arrow_upward_rounded,
-          //     ),
-          //   ),
-          // ),
+          floatingActionButton: Observer(
+            builder: (_) => FloatingActionButton.extended(
+              onPressed: homeController.reloadWebView,
+              label: const Text('Recarregar'),
+              icon: const Icon(Icons.refresh),
+            ),
+          ),
         );
       },
     );
