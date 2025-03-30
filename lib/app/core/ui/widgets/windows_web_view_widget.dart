@@ -1,5 +1,3 @@
-// lib/app/core/ui/widgets/windows_webview_widget.dart
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart';
@@ -33,10 +31,10 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
   Timer? _progressTimer;
   StreamSubscription? _loadingStateSubscription;
   StreamSubscription? _webMessageSubscription;
-  
+
   // Flag para evitar múltiplas operações simultâneas
   bool _isOperationInProgress = false;
-  
+
   // Obter serviço através do Modular para comunicar atividade
   WindowsWebViewService get _webViewService => Modular.get<WindowsWebViewService>();
 
@@ -52,7 +50,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       widget.logger?.warning('Operação já em andamento, ignorando inicialização');
       return;
     }
-    
+
     try {
       _isOperationInProgress = true;
       widget.logger?.info('Inicializando WebView Windows');
@@ -64,13 +62,13 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
 
       // Configurações do WebView - CRÍTICO PARA PREVENIR DIÁLOGOS EXTERNOS
       await _controller.setBackgroundColor(Colors.transparent);
-      
+
       // Impede que o WebView abra janelas popup (importante para evitar diálogos fora da tela)
       await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
-      
+
       // Desabilita diálogos JavaScript como alert, confirm e prompt - MUITO IMPORTANTE
       await _disableJavaScriptDialogs();
-      
+
       // Configurando os listeners de eventos apenas no widget
       _setupEventListeners();
 
@@ -98,7 +96,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       _isOperationInProgress = false;
     }
   }
-  
+
   // Método específico para desabilitar diálogos JavaScript
   Future<void> _disableJavaScriptDialogs() async {
     try {
@@ -137,7 +135,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
           console.error("Erro ao substituir window.open:", e);
         }
       ''');
-      
+
       widget.logger?.info('Diálogos JavaScript desabilitados com sucesso');
     } catch (e) {
       widget.logger?.error('Erro ao desabilitar diálogos JavaScript: $e');
@@ -149,18 +147,18 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
     _loadingStateSubscription?.cancel();
     _webMessageSubscription?.cancel();
     _progressTimer?.cancel();
-    
+
     // Monitorar estados de carregamento
     _loadingStateSubscription = _controller.loadingState.listen((state) {
       if (!mounted) return;
-      
+
       setState(() {
         // A API correta usa enum para estado de carregamento em vez de isLoading
         _isLoading = state != LoadingState.navigationCompleted;
       });
-      
+
       widget.logger?.info('Estado de carregamento: $state');
-      
+
       if (state == LoadingState.navigationCompleted) {
         _notifyServiceOfActivity();
         _captureCurrentUrl();
@@ -171,7 +169,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
     _webMessageSubscription = _controller.webMessage.listen((message) {
       widget.logger?.info('Mensagem recebida da WebView: $message');
       _notifyServiceOfActivity();
-      
+
       if (message.startsWith('current_url:')) {
         try {
           final url = message.split('current_url:')[1].trim();
@@ -197,12 +195,12 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       }
     });
   }
-  
+
   // Método para lidar com diálogos detectados
   Future<void> _handleDetectedDialog() async {
     try {
       widget.logger?.warning('Diálogo detectado, tentando lidar com ele automaticamente');
-      
+
       // Executamos um script que tenta fechar diálogos ou confirmar ações
       await _controller.executeScript('''
         try {
@@ -241,7 +239,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       widget.logger?.error('Erro ao tentar lidar com diálogo: $e');
     }
   }
-  
+
   Future<void> _captureCurrentUrl() async {
     try {
       // Executar um script para obter a URL atual
@@ -252,7 +250,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       widget.logger?.error('Erro ao capturar URL atual: $e');
     }
   }
-  
+
   void _notifyServiceOfActivity() {
     try {
       // Informamos ao serviço que o WebView está ativo
@@ -269,28 +267,28 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       widget.logger?.warning('Operação já em andamento, ignorando refresh');
       return;
     }
-    
+
     try {
       _isOperationInProgress = true;
       widget.logger?.info('Iniciando refresh seguro...');
-      
+
       // Desabilitar diálogos JavaScript novamente antes de recarregar
       await _disableJavaScriptDialogs();
-      
+
       if (_currentUrl.isEmpty) {
         await _captureCurrentUrl();
         await Future.delayed(const Duration(milliseconds: 500));
       }
-      
+
       if (_currentUrl.isNotEmpty) {
         widget.logger?.info('Recarregando pela URL atual: $_currentUrl');
-        
+
         // Mostramos o indicador de carregamento
         setState(() {
           _isLoading = true;
           _loadingProgress.value = 0.0;
         });
-        
+
         // Recomeçamos o timer de progresso
         _progressTimer?.cancel();
         _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
@@ -301,7 +299,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
             timer.cancel();
           }
         });
-        
+
         // Em vez de reload(), que pode travar, carregamos a URL atual novamente
         await _controller.loadUrl(_currentUrl);
         widget.logger?.info('URL recarregada com sucesso');
@@ -310,7 +308,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
         try {
           // Pré-configuramos para evitar diálogos
           await _disableJavaScriptDialogs();
-          
+
           // Fallback para reload padrão com timeout
           final completer = Completer<void>();
           Timer(const Duration(seconds: 5), () {
@@ -318,11 +316,11 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
               completer.completeError('Timeout no reload');
             }
           });
-          
+
           // Tentativa de reload padrão
           await _controller.reload();
           if (!completer.isCompleted) completer.complete();
-          
+
           await completer.future;
           widget.logger?.info('Reload padrão concluído com sucesso');
         } catch (e) {
@@ -333,69 +331,69 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       }
     } catch (e, s) {
       widget.logger?.error('Erro no refresh seguro: $e', s);
-      
+
       // Em caso de erro, tentamos reinicializar o WebView
       await _resetWebView();
     } finally {
       _isOperationInProgress = false;
     }
   }
-  
+
   // Método para reinicializar o WebView completamente em caso de problemas graves
   Future<void> _resetWebView() async {
     try {
       widget.logger?.warning('Reinicializando WebView completamente...');
-      
+
       // Limpamos todas as subscriptions e timers
       _loadingStateSubscription?.cancel();
       _webMessageSubscription?.cancel();
       _progressTimer?.cancel();
-      
+
       // Destruímos o controlador atual
       await _controller.dispose();
-      
+
       // Indicamos para o usuário que estamos recarregando
       setState(() {
         _isLoading = true;
         _loadingProgress.value = 0.1;
       });
-      
+
       // Criamos um novo controlador
       final newController = WebviewController();
-      
+
       // Inicializamos e configuramos o novo controlador
       await newController.initialize();
       await newController.setBackgroundColor(Colors.transparent);
       await newController.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
-      
+
       // Inicializa o novo controller no serviço
       await _webViewService.initializeWebView(newController);
-      
+
       // Substituímos o controlador
       _controller = newController;
-      
+
       // Desabilitamos diálogos JavaScript
       await _disableJavaScriptDialogs();
-      
+
       // Reconfiguramos os listeners
       _setupEventListeners();
-      
+
       // Carregamos a URL
       if (_currentUrl.isNotEmpty) {
         await _controller.loadUrl(_currentUrl);
       } else {
         await _controller.loadUrl(widget.initialUrl);
       }
-      
+
       // Notificamos o callback
       if (widget.onWebViewCreated != null) {
         widget.onWebViewCreated!(_controller);
       }
-      
+
       widget.logger?.info('WebView reinicializado com sucesso');
     } catch (e, s) {
       widget.logger?.error('Erro fatal ao reinicializar WebView: $e', s);
-      
+
       // Se até a reinicialização falhar, mostramos um erro para o usuário
       setState(() {
         _errorMessage = '''
@@ -453,9 +451,9 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
         Positioned(
           top: 10,
           right: 10,
-          child: _isOperationInProgress 
-            ? const CircularProgressIndicator.adaptive(strokeWidth: 2)
-            : Container(),
+          child: _isOperationInProgress
+              ? const CircularProgressIndicator.adaptive(strokeWidth: 2)
+              : Container(),
         ),
       ],
     );
