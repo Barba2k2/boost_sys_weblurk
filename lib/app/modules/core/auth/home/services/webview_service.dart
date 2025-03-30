@@ -12,19 +12,61 @@ abstract class WebViewService {
   Future<bool> isResponding();
   bool get isInitialized;
   Webview? get controller;
+  Stream<bool> get healthStatus;
   void dispose();
 }
 
 class WebViewServiceImpl implements WebViewService {
   WebViewServiceImpl({
     required AppLogger logger,
-  }) : _logger = logger;
-  final AppLogger _logger;
+  }) : _logger = logger {
+    _startActivityMonitoring();
+  }
 
+  final AppLogger _logger;
   Webview? _controller;
   DateTime? _lastReload;
+  DateTime? _lastActivity;
+  final _healthController = StreamController<bool>.broadcast();
+  Timer? _activityCheckTimer;
+
   static const _minReloadInterval = Duration(seconds: 30);
-  static const _operationTimeout = Duration(seconds: 30);
+  static const _operationTimeout = Duration(seconds: 15);
+  static const _inactivityThreshold = Duration(minutes: 10);
+
+  @override
+  Stream<bool> get healthStatus => _healthController.stream;
+
+  void _startActivityMonitoring() {
+    _activityCheckTimer?.cancel();
+    _activityCheckTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      _checkActivity();
+    });
+  }
+
+  void _checkActivity() async {
+    final now = DateTime.now();
+    if (_lastActivity != null) {
+      final inactiveTime = now.difference(_lastActivity!);
+      _logger.info('WebView inativo por: ${inactiveTime.inMinutes} minutos');
+
+      if (inactiveTime > _inactivityThreshold) {
+        _logger.warning('WebView inativo por muito tempo, verificando responsividade...');
+        final isAlive = await isResponding();
+
+        if (!isAlive) {
+          _logger.warning('WebView não está respondendo, sinalizando problema...');
+          _healthController.add(false);
+        } else {
+          _logger.info('WebView está respondendo mesmo após inatividade');
+          _lastActivity = now;
+          _healthController.add(true);
+        }
+      }
+    } else {
+      _lastActivity = now;
+    }
+  }
 
   @override
   Webview? get controller => _controller;
@@ -37,17 +79,26 @@ class WebViewServiceImpl implements WebViewService {
     try {
       _controller = controller;
 
-      // Configurações otimizadas para Windows
+      // Configurações otimizadas para WebView
       _controller?.addScriptToExecuteOnDocumentCreated('''
+        // Impedir diálogos de confirmação de saída
         window.addEventListener('beforeunload', function(e) {
           e.preventDefault();
           e.returnValue = '';
         });
+        
+        // Script para manter a conexão ativa
+        setInterval(function() {
+          console.log('Heartbeat: ' + new Date().toISOString());
+        }, 60000);
       ''');
 
+      _lastActivity = DateTime.now();
+      _healthController.add(true);
       _logger.info('WebView initialized successfully');
     } catch (e, s) {
       _logger.error('Error initializing WebView', e, s);
+      _healthController.add(false);
       _controller = null;
       throw Failure(message: 'Erro ao inicializar WebView');
     }
@@ -56,6 +107,7 @@ class WebViewServiceImpl implements WebViewService {
   @override
   Future<void> loadUrl(String url) async {
     if (_controller == null) {
+      _healthController.add(false);
       throw Failure(message: 'WebView não inicializado');
     }
 
@@ -66,6 +118,7 @@ class WebViewServiceImpl implements WebViewService {
       // Timer para timeout
       final timer = Timer(_operationTimeout, () {
         if (!completer.isCompleted) {
+          _logger.warning('Timeout ao carregar URL: $url');
           completer.completeError(Failure(message: 'Timeout ao carregar URL'));
         }
       });
@@ -80,9 +133,12 @@ class WebViewServiceImpl implements WebViewService {
       }
 
       await completer.future;
+      _lastActivity = DateTime.now();
+      _healthController.add(true);
       _logger.info('URL carregada com sucesso: $url');
     } catch (e, s) {
       _logger.error('Error loading URL: $url', e, s);
+      _healthController.add(false);
       if (e is Failure) rethrow;
       throw Failure(message: 'Erro ao carregar URL');
     }
@@ -91,6 +147,7 @@ class WebViewServiceImpl implements WebViewService {
   @override
   Future<void> reload() async {
     if (_controller == null) {
+      _healthController.add(false);
       throw Failure(message: 'WebView não inicializado');
     }
 
@@ -107,6 +164,7 @@ class WebViewServiceImpl implements WebViewService {
 
       final timer = Timer(_operationTimeout, () {
         if (!completer.isCompleted) {
+          _logger.warning('Timeout ao recarregar página');
           completer.completeError(Failure(message: 'Timeout ao recarregar página'));
         }
       });
@@ -120,9 +178,12 @@ class WebViewServiceImpl implements WebViewService {
 
       await completer.future;
       _lastReload = DateTime.now();
+      _lastActivity = DateTime.now();
+      _healthController.add(true);
       _logger.info('WebView recarregado com sucesso');
     } catch (e, s) {
       _logger.error('Error reloading WebView', e, s);
+      _healthController.add(false);
       if (e is Failure) rethrow;
       throw Failure(message: 'Erro ao recarregar página');
     }
@@ -130,33 +191,55 @@ class WebViewServiceImpl implements WebViewService {
 
   @override
   Future<bool> isResponding() async {
-    if (_controller == null) return false;
+    if (_controller == null) {
+      _healthController.add(false);
+      return false;
+    }
 
     try {
       final completer = Completer<bool>();
 
       final timer = Timer(_operationTimeout, () {
         if (!completer.isCompleted) {
+          _logger.warning('Timeout na verificação de resposta do WebView');
           completer.complete(false);
         }
       });
 
-      await _controller!.evaluateJavaScript('1 + 1');
-
-      timer.cancel();
-      if (!completer.isCompleted) {
-        completer.complete(true);
+      // Tentativa de executar JavaScript simples para verificar se o webview responde
+      try {
+        await _controller!.evaluateJavaScript('1 + 1');
+        timer.cancel();
+        if (!completer.isCompleted) {
+          completer.complete(true);
+        }
+      } catch (e) {
+        _logger.warning('Erro ao executar JavaScript no WebView: $e');
+        timer.cancel();
+        if (!completer.isCompleted) {
+          completer.complete(false);
+        }
       }
 
-      return await completer.future;
+      final result = await completer.future;
+      _healthController.add(result);
+
+      if (result) {
+        _lastActivity = DateTime.now();
+      }
+
+      return result;
     } catch (e) {
-      _logger.warning('WebView não está respondendo: ${e.toString()}');
+      _logger.warning('WebView não está respondendo: $e');
+      _healthController.add(false);
       return false;
     }
   }
 
   @override
   void dispose() {
+    _activityCheckTimer?.cancel();
+
     try {
       _controller?.close();
       _controller = null;
@@ -166,6 +249,7 @@ class WebViewServiceImpl implements WebViewService {
       // Não relança o erro no dispose para evitar crashes
     } finally {
       _controller = null;
+      _healthController.close();
     }
   }
 }
