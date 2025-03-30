@@ -20,7 +20,7 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.27.1'
+        flutter-version: '3.29.2'  # Updated to 3.29.2 which includes Dart SDK 3.7.0+
         cache: true
 
     # Passo para gerar a versão
@@ -31,16 +31,20 @@ jobs:
         # Pegar a última tag
         LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
         
+        # Remove 'v' prefix if present for calculations
+        VERSION=${LATEST_TAG#v}
+        
         # Incrementar a versão patch
-        MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
-        MINOR=$(echo $LATEST_TAG | cut -d. -f2)
-        PATCH=$(echo $LATEST_TAG | cut -d. -f3)
+        MAJOR=$(echo $VERSION | cut -d. -f1)
+        MINOR=$(echo $VERSION | cut -d. -f2)
+        PATCH=$(echo $VERSION | cut -d. -f3)
         NEW_PATCH=$((PATCH + 1))
-        NEW_TAG="${MAJOR}.${MINOR}.${NEW_PATCH}"
+        NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
+        NEW_TAG="v${NEW_VERSION}"  # Ensure only one 'v' prefix
         
         # Definir as variáveis para uso posterior
         echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
-        echo "::set-output name=version::${NEW_TAG}"
+        echo "::set-output name=version::${NEW_VERSION}"
 
     - name: Install dependencies
       run: flutter pub get
