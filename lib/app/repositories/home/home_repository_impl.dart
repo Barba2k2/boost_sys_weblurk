@@ -29,14 +29,16 @@ class HomeRepositoryImpl implements HomeRepository {
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data);
       } else {
-        throw Failure(message: 'Erro ao carregar os agendamentos');
+        throw Failure(message: 'Erro ao carregar os agendamentos (código ${response.statusCode})');
       }
     } on RestClientException catch (e, s) {
-      _logger.error('Error on load schedules', e, s);
-      throw Failure(message: 'Erro do RestClient ao carregar o agendamento');
+      _logger.error('Error on load schedules (status code: ${e.statusCode})', e, s);
+      throw Failure(
+        message: 'Erro do RestClient ao carregar o agendamento: ${e.message ?? e.statusCode}',
+      );
     } catch (e, s) {
       _logger.error('Error on load schedules', e, s);
-      throw Failure(message: 'Erro genérico ao carregar o agendamento');
+      throw Failure(message: 'Erro genérico ao carregar o agendamento: ${e.toString()}');
     }
   }
 
@@ -83,11 +85,11 @@ class HomeRepositoryImpl implements HomeRepository {
           return null;
         }
       } else {
-        throw Failure(message: 'Erro ao buscar a URL do canal');
+        throw Failure(message: 'Erro ao buscar a URL do canal (código ${response.statusCode})');
       }
     } catch (e, s) {
       _logger.error('Error fetching channel URL', e, s);
-      throw Failure(message: 'Erro ao buscar a URL do canal');
+      throw Failure(message: 'Erro ao buscar a URL do canal: ${e.toString()}');
     }
   }
 
@@ -102,6 +104,8 @@ class HomeRepositoryImpl implements HomeRepository {
         'points': score.points,
       };
 
+      _logger.info('Enviando score para o servidor: ${data.toString()}');
+
       final response = await _restClient.auth().post(
             '/score/save',
             data: data,
@@ -113,16 +117,29 @@ class HomeRepositoryImpl implements HomeRepository {
           return;
         }
         throw Failure(message: 'Response data is null');
+      } else {
+        _logger.warning('Erro ao salvar score: código ${response.statusCode}');
+        throw Failure(message: 'Erro ao salvar score: código ${response.statusCode}');
       }
     } on RestClientException catch (e, s) {
-      _logger.error('RestClient error saving score', e, s);
-      throw Failure(
-        message: 'Erro de conexão ao salvar a pontuação: ${e.message}',
-      );
+      // Código 500 indica erro do servidor que pode ser temporário
+      if (e.statusCode == 500) {
+        _logger.warning(
+          'Erro 500 do servidor ao salvar score: ${e.message ?? "Internal Server Error"}',
+        );
+        throw Failure(
+          message: 'Erro temporário do servidor ao salvar a pontuação (500)',
+        );
+      } else {
+        _logger.error('RestClient error saving score (código ${e.statusCode})', e, s);
+        throw Failure(
+          message: 'Erro de conexão ao salvar a pontuação: ${e.message ?? e.statusCode}',
+        );
+      }
     } catch (e, s) {
       _logger.error('Unexpected error saving score', e, s);
       throw Failure(
-        message: 'Erro inesperado ao salvar a pontuação',
+        message: 'Erro inesperado ao salvar a pontuação: ${e.toString()}',
       );
     }
   }
