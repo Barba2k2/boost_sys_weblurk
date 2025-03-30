@@ -21,7 +21,6 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
   Timer? _activityCheckTimer;
 
   static const _minReloadInterval = Duration(seconds: 30);
-  static const _operationTimeout = Duration(seconds: 15);
   static const _inactivityThreshold = Duration(minutes: 10);
 
   @override
