@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 import 'dart:math';
 
 import '../../../../../core/logger/app_logger.dart';
@@ -11,6 +10,7 @@ abstract class PollingService {
   Future<void> checkAndUpdateChannel();
   Future<void> checkAndUpdateScore(int streamerId);
   Stream<bool> get healthStatus;
+  Stream<String> get channelUpdates;
 }
 
 class PollingServiceImpl implements PollingService {
@@ -19,7 +19,6 @@ class PollingServiceImpl implements PollingService {
     required AppLogger logger,
   })  : _homeService = homeService,
         _logger = logger {
-    // Adicionar detecção de suspensão/retomada do sistema
     _setupSystemLifecycleDetection();
   }
 
@@ -33,29 +32,36 @@ class PollingServiceImpl implements PollingService {
   DateTime? _lastScoreUpdate;
   DateTime? _lastSuspensionResume;
 
+  // Canal atual e canal base
+  String? _currentChannel;
+  final String _baseChannel = 'https://twitch.tv/BoostTeam_';
+
+  // Controllers para notificações
   final _healthController = StreamController<bool>.broadcast();
+  final _channelController = StreamController<String>.broadcast();
 
   // Ajuste os intervalos conforme necessário
-  static const _pollingInterval = Duration(minutes: 80);
+  static const _pollingInterval = Duration(minutes: 6);
   static const _channelCheckInterval = Duration(minutes: 6);
-  static const _watchdogInterval = Duration(minutes: 2); // Reduzido para 2 minutos
-  static const _maxTimeSinceLastUpdate = Duration(minutes: 15); // Aumentado para 15 minutos
+  static const _watchdogInterval = Duration(minutes: 2);
+  static const _maxTimeSinceLastUpdate = Duration(minutes: 15);
 
   // Parâmetros de backoff para erros do servidor
   int _scoreErrorCount = 0;
-  static const _maxBackoffMinutes = 30; // Tempo máximo de backoff em minutos
+  static const _maxBackoffMinutes = 30;
   static const _initialBackoffSeconds = 30;
 
   @override
   Stream<bool> get healthStatus => _healthController.stream;
 
+  @override
+  Stream<String> get channelUpdates => _channelController.stream;
+
   void _setupSystemLifecycleDetection() {
-    // Uma abordagem simplificada com verificações periódicas de tempo
     Timer.periodic(const Duration(seconds: 30), (timer) {
       final now = DateTime.now();
       if (_lastSuspensionResume != null) {
         final diff = now.difference(_lastSuspensionResume!);
-        // Se a última verificação foi há mais de 2 minutos, provavelmente o sistema estava suspenso
         if (diff.inMinutes > 2) {
           _logger.info('Possível retorno de suspensão do sistema detectado');
           _onSystemResume();
@@ -67,7 +73,6 @@ class PollingServiceImpl implements PollingService {
 
   void _onSystemResume() {
     _logger.info('Sistema retomado de suspensão ${DateTime.now()}');
-    // Forçar uma verificação imediata do canal atual
     _forceChannelCheck();
   }
 
@@ -85,11 +90,13 @@ class PollingServiceImpl implements PollingService {
     _logger.info('Iniciando polling services... ${DateTime.now()}');
 
     try {
+      // Verificação imediata do canal correto
+      await checkAndUpdateChannel();
+
       _startTimers(streamerId);
       _startWatchdog(streamerId);
       _healthController.add(true);
 
-      // Iniciar verificador de background adicional
       _startBackgroundWatcher(streamerId);
 
       _logger.info('Polling services iniciados com sucesso ${DateTime.now()}');
@@ -102,16 +109,17 @@ class PollingServiceImpl implements PollingService {
   }
 
   void _startBackgroundWatcher(int streamerId) {
-    // Cancelar timer existente se houver
     _backgroundWatcherTimer?.cancel();
 
-    // Criar novo timer para verificação periódica em background
     _backgroundWatcherTimer = Timer.periodic(const Duration(minutes: 10), (timer) {
-      developer.log('Background watcher verificando saúde do polling');
+      _logger.info('Background watcher verificando saúde do polling');
       if (!isPollingActive()) {
-        developer.log('Polling inativo detectado pelo background watcher, reiniciando...');
+        _logger.info('Polling inativo detectado pelo background watcher, reiniciando...');
         _startTimers(streamerId);
       }
+
+      // Verificar também se estamos no canal correto
+      _verifyCorrectChannel();
     });
   }
 
@@ -186,34 +194,74 @@ class PollingServiceImpl implements PollingService {
 
     if (needsRestart) {
       _startTimers(streamerId);
-      _healthController.add(false); // Notificar problema
+      _healthController.add(false);
 
-      // Após reiniciar, notificar recuperação
       Timer(const Duration(seconds: 5), () {
         _healthController.add(true);
       });
     } else {
       _healthController.add(true);
     }
+
+    // Sempre verificar se estamos no canal correto
+    _verifyCorrectChannel();
+  }
+
+  // Verificar se estamos exibindo o canal correto
+  Future<void> _verifyCorrectChannel() async {
+    try {
+      final correctChannel = await _homeService.fetchCurrentChannel();
+      final channelToShow = correctChannel ?? _baseChannel;
+
+      // Se o canal atual é diferente do que deveria ser mostrado
+      if (_currentChannel != channelToShow) {
+        _logger.warning(
+          'Canal incorreto detectado! Atual: $_currentChannel, Correto: $channelToShow',
+        );
+
+        // Notificar para forçar a troca de canal
+        _channelController.add(channelToShow);
+        _currentChannel = channelToShow;
+      }
+    } catch (e) {
+      _logger.error('Erro ao verificar canal correto: $e');
+    }
   }
 
   @override
   Future<void> checkAndUpdateChannel() async {
     try {
-      final currentChannel = await _homeService.fetchCurrentChannel();
+      // Buscar o canal atual que deve ser exibido
+      final correctChannel = await _homeService.fetchCurrentChannel();
+
+      // Se não houver canal, usamos o canal base
+      final channelToShow = correctChannel ?? _baseChannel;
+
+      _logger.info('Canal verificado: $channelToShow em ${DateTime.now()}');
+
+      // Sempre notificamos para atualização a cada 6 minutos, mesmo que o canal não tenha mudado
+      // Isso garante que o webview esteja sempre mostrando o canal correto
+      _logger.info('Forçando atualização de canal para: $channelToShow');
+      _channelController.add(channelToShow);
+      _currentChannel = channelToShow;
+
       _lastChannelUpdate = DateTime.now();
-      _logger.info('Canal verificado: $currentChannel em $_lastChannelUpdate');
     } catch (e, s) {
       _logger.error('Erro ao verificar canal ${DateTime.now()}', e, s);
-      // Ainda atualizamos o timestamp para evitar tentativas excessivas
       _lastChannelUpdate = DateTime.now();
+
+      // Em caso de erro, tentamos usar o canal base como fallback
+      if (_currentChannel != _baseChannel) {
+        _logger.warning('Erro ao buscar canal atual, voltando para canal base');
+        _channelController.add(_baseChannel);
+        _currentChannel = _baseChannel;
+      }
     }
   }
 
   @override
   Future<void> checkAndUpdateScore(int streamerId) async {
     try {
-      // Se tivermos muitos erros recentes, aplicamos backoff exponencial
       if (_scoreErrorCount > 0) {
         final backoffTime = _calculateBackoffTime(_scoreErrorCount);
         _logger.warning(
@@ -231,12 +279,10 @@ class PollingServiceImpl implements PollingService {
         1,
       );
 
-      // Sucesso - resetamos o contador de erros
       _scoreErrorCount = 0;
       _lastScoreUpdate = now;
       _logger.info('Score atualizado com sucesso $now');
     } catch (e, s) {
-      // Incrementa o contador de erros para backoff exponencial
       _scoreErrorCount++;
 
       if (e.toString().contains('500') || e.toString().contains('Internal Server Error')) {
@@ -247,19 +293,17 @@ class PollingServiceImpl implements PollingService {
         _logger.error('Erro ao atualizar score ${DateTime.now()}', e, s);
       }
 
-      // Ainda atualizamos o timestamp para evitar tentativas excessivas do watchdog
       _lastScoreUpdate = DateTime.now();
     }
   }
 
   Duration _calculateBackoffTime(int errorCount) {
-    // Backoff exponencial com jitter
-    // Formula: min(maxBackoff, initialBackoff * 2^(errorCount-1)) + random jitter
     final maxBackoffSeconds = _maxBackoffMinutes * 60;
-    final baseSeconds =
-        min(maxBackoffSeconds, _initialBackoffSeconds * pow(2, errorCount - 1).toInt());
+    final baseSeconds = min(
+      maxBackoffSeconds,
+      _initialBackoffSeconds * pow(2, errorCount - 1).toInt(),
+    );
 
-    // Adiciona até 25% de jitter para evitar "tempestade de reconexão"
     final jitterSeconds = (baseSeconds * 0.25 * Random().nextDouble()).toInt();
 
     return Duration(seconds: baseSeconds + jitterSeconds);
@@ -283,5 +327,6 @@ class PollingServiceImpl implements PollingService {
   void dispose() {
     stopPolling();
     _healthController.close();
+    _channelController.close();
   }
 }
