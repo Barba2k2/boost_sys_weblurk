@@ -6,9 +6,10 @@ import 'package:boost_sys_weblurk/app/modules/core/auth/home/home_controller.dar
 import 'package:boost_sys_weblurk/app/service/home/home_service.dart';
 import 'package:boost_sys_weblurk/app/core/logger/app_logger.dart';
 import 'package:boost_sys_weblurk/app/modules/core/auth/auth_store.dart';
-import 'package:boost_sys_weblurk/app/modules/core/auth/home/services/webview_service.dart';
+import 'package:boost_sys_weblurk/app/service/webview/windows_web_view_service.dart';
 import 'package:boost_sys_weblurk/app/modules/core/auth/home/services/polling_services.dart';
 import 'package:boost_sys_weblurk/app/models/user_model.dart';
+import 'dart:async';
 
 // Create a test implementation of Modular.to
 class MockModularNavigator extends Mock implements IModularNavigator {}
@@ -20,7 +21,7 @@ class MockAppLogger extends Mock implements AppLogger {}
 
 class MockAuthStore extends Mock implements AuthStore {}
 
-class MockWebViewService extends Mock implements WebViewService {}
+class MockWebViewService extends Mock implements WindowsWebViewService {}
 
 class MockPollingService extends Mock implements PollingService {}
 
@@ -80,6 +81,15 @@ void main() {
       );
       when(() => mockWebViewService.reload()).thenAnswer(
         (_) => Future<void>.value(),
+      );
+      when(() => mockWebViewService.healthStatus).thenAnswer(
+        (_) => Stream.value(true),
+      );
+      when(() => mockPollingService.healthStatus).thenAnswer(
+        (_) => Stream.value(true),
+      );
+      when(() => mockPollingService.channelUpdates).thenAnswer(
+        (_) => const Stream<String>.empty(),
       );
 
       // Configurar controller
