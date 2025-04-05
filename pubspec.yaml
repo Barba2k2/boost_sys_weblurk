@@ -48,6 +48,7 @@ dependencies:
   # firebase_analytics: ^11.2.1
   # firebase_messaging: ^15.0.4
   webview_windows: ^0.4.0
+  webview_cef: ^0.2.2
 
 dev_dependencies:
   flutter_test:
