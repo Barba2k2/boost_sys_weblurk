@@ -57,6 +57,9 @@ jobs:
         cd build\windows\x64\runner\Release
         7z a -tzip ../../../../../Boost-SysWebLurk-${{ env.NEW_TAG }}.zip *
 
+    - name: Create Installer ZIP
+      run: 7z a -tzip installers/boost_sys_weblurk-${{ env.NEW_TAG }}.zip installers/boost_sys_weblurk.exe
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
@@ -76,20 +79,22 @@ jobs:
       if: github.ref == 'refs/heads/master'
       uses: softprops/action-gh-release@v1
       with:
-        files: Boost-SysWebLurk-${{ env.NEW_TAG }}.zip
+        files: |
+          Boost-SysWebLurk-${{ env.NEW_TAG }}.zip
+          installers/boost_sys_weblurk-${{ env.NEW_TAG }}.zip
         tag_name: ${{ env.NEW_TAG }}
         name: Boost-SysWebLurk ${{ env.NEW_TAG }}
         draft: false
         prerelease: false
         body: |
-          Release automático da versão ${{ env.NEW_TAG }}
+          # SysBrowser Weblurk Versão ${{ env.NEW_TAG }}
           
           ### Mudanças nesta versão
-          - Mudanças no salvamento do score
-          - Correção do pooling de troca de canais
+          - Ajustes no salvamento do score
+          - Retirada de janela adicional exibindo as lives
+          - Adicionado botao de recarregar, diremante na tela principal do sistema
           
           ### Screenshots
-          ![Screenshot 1](https://raw.githubusercontent.com/barba2k2/boost_sys_weblurk/master/assets/screenshots/img1.png)
-          ![Screenshot 2](https://raw.githubusercontent.com/barba2k2/boost_sys_weblurk/master/assets/screenshots/img2.png)
+          ![Screenshot 2025-03-30 135502](https://github.com/user-attachments/assets/f2411a33-c5fa-43db-bd4f-1f1e3f0c191f)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
