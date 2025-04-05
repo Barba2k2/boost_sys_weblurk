@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:desktop_webview_window/desktop_webview_window.dart';
+import 'package:webview_windows/webview_windows.dart';
 import 'package:boost_sys_weblurk/app/modules/core/auth/home/home_controller.dart';
 import 'package:boost_sys_weblurk/app/service/home/home_service.dart';
 import 'package:boost_sys_weblurk/app/core/logger/app_logger.dart';
 import 'package:boost_sys_weblurk/app/modules/core/auth/auth_store.dart';
-import 'package:boost_sys_weblurk/app/modules/core/auth/home/services/webview_service.dart';
+import 'package:boost_sys_weblurk/app/service/webview/windows_web_view_service.dart';
 import 'package:boost_sys_weblurk/app/modules/core/auth/home/services/polling_services.dart';
 import 'package:boost_sys_weblurk/app/models/user_model.dart';
 import 'package:asuka/asuka.dart';
@@ -18,11 +18,11 @@ class MockAppLogger extends Mock implements AppLogger {}
 
 class MockAuthStore extends Mock implements AuthStore {}
 
-class MockWebViewService extends Mock implements WebViewService {}
+class MockWebViewService extends Mock implements WindowsWebViewService {}
 
 class MockPollingService extends Mock implements PollingService {}
 
-class MockWebview extends Mock implements Webview {}
+class MockWebviewController extends Mock implements WebviewController {}
 
 // Subclasse especial para testes que evita chamadas problemáticas
 class TestableHomeController extends HomeController {
@@ -38,7 +38,7 @@ class TestableHomeController extends HomeController {
 
   // Armazenar referências locais aos objetos
   final AppLogger _testLogger;
-  final WebViewService _testWebViewService;
+  final WindowsWebViewService _testWebViewService;
   final PollingService _testPollingService;
 
   // Método público para iniciar o polling diretamente para testes
@@ -80,10 +80,12 @@ void main() {
   late MockAuthStore mockAuthStore;
   late MockWebViewService mockWebViewService;
   late MockPollingService mockPollingService;
+  late MockWebviewController mockWebviewController;
 
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     registerFallbackValue(DateTime.now());
+    registerFallbackValue(MockWebviewController());
   });
 
   setUp(() {
@@ -92,6 +94,7 @@ void main() {
     mockAuthStore = MockAuthStore();
     mockWebViewService = MockWebViewService();
     mockPollingService = MockPollingService();
+    mockWebviewController = MockWebviewController();
 
     // Configurar comportamento dos mocks
     final userModel = UserModel(id: 1, nickname: 'testuser', role: 'user', status: 'ON');
@@ -114,7 +117,7 @@ void main() {
     when(
       () => mockWebViewService.controller,
     ).thenReturn(
-      null,
+      mockWebviewController,
     );
     when(
       () => mockWebViewService.isResponding(),
@@ -138,6 +141,17 @@ void main() {
       () => mockPollingService.stopPolling(),
     ).thenAnswer(
       (_) async => {},
+    );
+
+    // Add mocks for streams required by HomeController constructor
+    when(() => mockWebViewService.healthStatus).thenAnswer(
+      (_) => Stream.value(true),
+    );
+    when(() => mockPollingService.healthStatus).thenAnswer(
+      (_) => Stream.value(true),
+    );
+    when(() => mockPollingService.channelUpdates).thenAnswer(
+      (_) => const Stream<String>.empty(),
     );
 
     // Configurar controller com nossa versão testável
@@ -250,9 +264,8 @@ void main() {
           await tester.pumpWidget(createTestApp());
 
           // Arrange - WebView não está respondendo
-          final mockWebview = MockWebview();
           when(() => mockWebViewService.isInitialized).thenReturn(true);
-          when(() => mockWebViewService.controller).thenReturn(mockWebview);
+          when(() => mockWebViewService.controller).thenReturn(mockWebviewController);
           when(() => mockWebViewService.isResponding()).thenAnswer((_) async => false);
 
           // Act
