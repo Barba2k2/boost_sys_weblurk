@@ -13,8 +13,7 @@ No entanto, se você estiver usando este projeto e estiver satisfeito com ele ou
 ## Tecnologias utilizadas:
 
 * [Flutter](https://flutter.dev/): linguagems de programação
-* [Mysql](https://dev.mysql.com/doc/): Banco de dados
-* [NET Framework 4.7.2](https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net472-web-installer): NET Framework
+* [PostgresQL](https://www.postgresql.org/): Banco de dados
 * [Microsoft WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section): Browser
 
 ## Getting Started
