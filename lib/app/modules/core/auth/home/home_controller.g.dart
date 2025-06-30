@@ -9,6 +9,14 @@ part of 'home_controller.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$HomeController on HomeControllerBase, Store {
+  Computed<String?>? _$currentChannelComputed;
+
+  @override
+  String? get currentChannel => (_$currentChannelComputed ??= Computed<String?>(
+          () => super.currentChannel,
+          name: 'HomeControllerBase.currentChannel'))
+      .value;
+
   late final _$isWebViewHealthyAtom =
       Atom(name: 'HomeControllerBase.isWebViewHealthy', context: context);
 
@@ -22,22 +30,6 @@ mixin _$HomeController on HomeControllerBase, Store {
   set isWebViewHealthy(bool value) {
     _$isWebViewHealthyAtom.reportWrite(value, super.isWebViewHealthy, () {
       super.isWebViewHealthy = value;
-    });
-  }
-
-  late final _$currentChannelAtom =
-      Atom(name: 'HomeControllerBase.currentChannel', context: context);
-
-  @override
-  String? get currentChannel {
-    _$currentChannelAtom.reportRead();
-    return super.currentChannel;
-  }
-
-  @override
-  set currentChannel(String? value) {
-    _$currentChannelAtom.reportWrite(value, super.currentChannel, () {
-      super.currentChannel = value;
     });
   }
 
@@ -89,12 +81,84 @@ mixin _$HomeController on HomeControllerBase, Store {
     });
   }
 
+  late final _$currentTabIndexAtom =
+      Atom(name: 'HomeControllerBase.currentTabIndex', context: context);
+
+  @override
+  int get currentTabIndex {
+    _$currentTabIndexAtom.reportRead();
+    return super.currentTabIndex;
+  }
+
+  @override
+  set currentTabIndex(int value) {
+    _$currentTabIndexAtom.reportWrite(value, super.currentTabIndex, () {
+      super.currentTabIndex = value;
+    });
+  }
+
+  late final _$currentChannelListAAtom =
+      Atom(name: 'HomeControllerBase.currentChannelListA', context: context);
+
+  @override
+  String? get currentChannelListA {
+    _$currentChannelListAAtom.reportRead();
+    return super.currentChannelListA;
+  }
+
+  @override
+  set currentChannelListA(String? value) {
+    _$currentChannelListAAtom.reportWrite(value, super.currentChannelListA, () {
+      super.currentChannelListA = value;
+    });
+  }
+
+  late final _$currentChannelListBAtom =
+      Atom(name: 'HomeControllerBase.currentChannelListB', context: context);
+
+  @override
+  String? get currentChannelListB {
+    _$currentChannelListBAtom.reportRead();
+    return super.currentChannelListB;
+  }
+
+  @override
+  set currentChannelListB(String? value) {
+    _$currentChannelListBAtom.reportWrite(value, super.currentChannelListB, () {
+      super.currentChannelListB = value;
+    });
+  }
+
+  late final _$isLoadingListsAtom =
+      Atom(name: 'HomeControllerBase.isLoadingLists', context: context);
+
+  @override
+  bool get isLoadingLists {
+    _$isLoadingListsAtom.reportRead();
+    return super.isLoadingLists;
+  }
+
+  @override
+  set isLoadingLists(bool value) {
+    _$isLoadingListsAtom.reportWrite(value, super.isLoadingLists, () {
+      super.isLoadingLists = value;
+    });
+  }
+
   late final _$onInitAsyncAction =
       AsyncAction('HomeControllerBase.onInit', context: context);
 
   @override
   Future<void> onInit() {
     return _$onInitAsyncAction.run(() => super.onInit());
+  }
+
+  late final _$switchTabAsyncAction =
+      AsyncAction('HomeControllerBase.switchTab', context: context);
+
+  @override
+  Future<void> switchTab(int index) {
+    return _$switchTabAsyncAction.run(() => super.switchTab(index));
   }
 
   late final _$_recoverWebViewAsyncAction =
@@ -131,14 +195,27 @@ mixin _$HomeController on HomeControllerBase, Store {
     return _$reloadWebViewAsyncAction.run(() => super.reloadWebView());
   }
 
+  late final _$_handleChannelUpdateAsyncAction =
+      AsyncAction('HomeControllerBase._handleChannelUpdate', context: context);
+
+  @override
+  Future<void> _handleChannelUpdate(String channelUrl) {
+    return _$_handleChannelUpdateAsyncAction
+        .run(() => super._handleChannelUpdate(channelUrl));
+  }
+
   @override
   String toString() {
     return '''
 isWebViewHealthy: ${isWebViewHealthy},
-currentChannel: ${currentChannel},
 isScheduleVisible: ${isScheduleVisible},
 initialChannel: ${initialChannel},
-isRecovering: ${isRecovering}
+isRecovering: ${isRecovering},
+currentTabIndex: ${currentTabIndex},
+currentChannelListA: ${currentChannelListA},
+currentChannelListB: ${currentChannelListB},
+isLoadingLists: ${isLoadingLists},
+currentChannel: ${currentChannel}
     ''';
   }
 }
