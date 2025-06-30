@@ -2,6 +2,7 @@ import '../../core/exceptions/failure.dart';
 import '../../core/logger/app_logger.dart';
 import '../../core/ui/widgets/messages.dart';
 import '../../models/score_model.dart';
+import '../../models/schedule_list_model.dart';
 import '../../repositories/home/home_repository.dart';
 import 'home_service.dart';
 
@@ -26,6 +27,40 @@ class HomeServiceImpl implements HomeService {
     }
   }
 
+  @override
+  Future<List<ScheduleListModel>> fetchScheduleLists() async {
+    try {
+      return await _homeRepository.loadScheduleLists(DateTime.now());
+    } catch (e, s) {
+      _logger.error('Error on load schedule lists', e, s);
+      Messages.warning('Erro ao carregar as listas de agendamentos');
+      throw Failure(message: 'Erro ao carregar as listas de agendamentos');
+    }
+  }
+
+  @override
+  Future<List<String>> getAvailableListNames() async {
+    try {
+      return await _homeRepository.getAvailableListNames();
+    } catch (e, s) {
+      _logger.error('Error on get available list names', e, s);
+      Messages.warning('Erro ao carregar nomes das listas');
+      throw Failure(message: 'Erro ao carregar nomes das listas');
+    }
+  }
+
+  @override
+  Future<ScheduleListModel?> fetchScheduleListByName(String listName) async {
+    try {
+      return await _homeRepository.loadScheduleListByName(
+          listName, DateTime.now());
+    } catch (e, s) {
+      _logger.error('Error on load schedule list by name', e, s);
+      Messages.warning('Erro ao carregar lista específica');
+      throw Failure(message: 'Erro ao carregar lista específica');
+    }
+  }
+
   // @override
   // Future<void> forceUpdateLive() async {
   //   try {
@@ -43,48 +78,75 @@ class HomeServiceImpl implements HomeService {
   Future<String?> fetchCurrentChannel() async {
     try {
       final now = DateTime.now();
-      final schedules = await _homeRepository.loadSchedules(now);
+      final scheduleLists = await _homeRepository.loadScheduleLists(now);
 
-      if (schedules.isEmpty) {
+      if (scheduleLists.isEmpty) {
         _logger.warning(
-          'Nenhuma live correspondente ao horário atual, carregando canal padrão',
+          'Nenhuma lista de agendamentos encontrada, carregando canal padrão',
         );
         return 'https://twitch.tv/BoostTeam_';
       }
 
-      final currentSchedule = schedules.firstWhere(
-        (schedule) {
-          final startTimeStr =
-              schedule['start_time'].toString().replaceAll('Time(', '').replaceAll(')', '');
-          final endTimeStr =
-              schedule['end_time'].toString().replaceAll('Time(', '').replaceAll(')', '');
+      // Procura em todas as listas por um agendamento atual
+      for (final scheduleList in scheduleLists) {
+        if (scheduleList.schedules.isEmpty) continue;
 
-          final startTimeParts = startTimeStr.split(':');
-          final endTimeParts = endTimeStr.split(':');
+        final currentSchedule = scheduleList.schedules.firstWhere(
+          (schedule) {
+            try {
+              final startTimeStr = schedule['start_time']?.toString() ?? '';
+              final endTimeStr = schedule['end_time']?.toString() ?? '';
 
-          final startDateTime = DateTime(
-            now.year,
-            now.month,
-            now.day,
-            int.parse(startTimeParts[0]),
-            int.parse(startTimeParts[1]),
-            int.parse(startTimeParts[2]),
-          );
-          final endDateTime = DateTime(
-            now.year,
-            now.month,
-            now.day,
-            int.parse(endTimeParts[0]),
-            int.parse(endTimeParts[1]),
-            int.parse(endTimeParts[2]),
-          );
+              // Remove o formato Time() se presente
+              final cleanStartTime =
+                  startTimeStr.replaceAll('Time(', '').replaceAll(')', '');
+              final cleanEndTime =
+                  endTimeStr.replaceAll('Time(', '').replaceAll(')', '');
 
-          return now.isAfter(startDateTime) && now.isBefore(endDateTime);
-        },
-        orElse: () => {'streamer_url': 'https://twitch.tv/BoostTeam_'},
+              if (cleanStartTime.isEmpty || cleanEndTime.isEmpty) return false;
+
+              final startTimeParts = cleanStartTime.split(':');
+              final endTimeParts = cleanEndTime.split(':');
+
+              if (startTimeParts.length < 2 || endTimeParts.length < 2)
+                return false;
+
+              final startDateTime = DateTime(
+                now.year,
+                now.month,
+                now.day,
+                int.parse(startTimeParts[0]),
+                int.parse(startTimeParts[1]),
+                startTimeParts.length > 2 ? int.parse(startTimeParts[2]) : 0,
+              );
+              final endDateTime = DateTime(
+                now.year,
+                now.month,
+                now.day,
+                int.parse(endTimeParts[0]),
+                int.parse(endTimeParts[1]),
+                endTimeParts.length > 2 ? int.parse(endTimeParts[2]) : 0,
+              );
+
+              return now.isAfter(startDateTime) && now.isBefore(endDateTime);
+            } catch (e) {
+              _logger.warning('Erro ao processar horário do agendamento: $e');
+              return false;
+            }
+          },
+          orElse: () => <String, dynamic>{},
+        );
+
+        if (currentSchedule.isNotEmpty &&
+            currentSchedule['streamer_url'] != null) {
+          return currentSchedule['streamer_url'] as String;
+        }
+      }
+
+      _logger.warning(
+        'Nenhuma live correspondente ao horário atual, carregando canal padrão',
       );
-
-      return currentSchedule['streamer_url'] as String?;
+      return 'https://twitch.tv/BoostTeam_';
     } catch (e, s) {
       _logger.error('Erro ao buscar o canal atual', e, s);
       throw Failure(message: 'Erro ao buscar o canal atual');
@@ -99,45 +161,24 @@ class HomeServiceImpl implements HomeService {
     int minute,
     int points,
   ) async {
+    // Validações
+    if (streamerId <= 0) throw Failure(message: 'ID do streamer inválido');
+    if (hour < 0 || hour > 23) throw Failure(message: 'Hora inválida');
+    if (minute < 0 || minute > 59) throw Failure(message: 'Minuto inválido');
+    if (points < 0) throw Failure(message: 'Pontuação inválida');
+
+    final score = ScoreModel(
+      streamerId: streamerId,
+      date: date,
+      hour: hour,
+      minute: minute,
+      points: points,
+    );
+
     try {
-      // Input validation
-      if (streamerId <= 0) throw Failure(message: 'ID do streamer inválido');
-      if (hour < 0 || hour > 23) throw Failure(message: 'Hora inválida');
-      if (minute < 0 || minute > 59) throw Failure(message: 'Minuto inválido');
-      if (points < 0) throw Failure(message: 'Pontuação inválida');
-
-      final score = ScoreModel(
-        streamerId: streamerId,
-        date: date,
-        hour: hour,
-        minute: minute,
-        points: points,
-      );
-
-      // Add retry logic
-      int retryCount = 0;
-      const maxRetries = 3;
-
-      while (retryCount < maxRetries) {
-        try {
-          await _homeRepository.saveScore(score);
-          _logger.info('Score saved successfully after ${retryCount + 1} attempts');
-          return;
-        } catch (e) {
-          retryCount++;
-          if (retryCount == maxRetries) {
-            rethrow;
-          }
-          _logger.warning('Retry attempt $retryCount after error: $e');
-          await Future.delayed(Duration(seconds: 1 * retryCount));
-        }
-      }
-    } catch (e, s) {
-      _logger.error('Error in saveScore service', e, s);
-      if (e is Failure) {
-        rethrow;
-      }
-      throw Failure(message: 'Erro ao salvar a pontuação: ${e.toString()}');
+      await _homeRepository.saveScore(score);
+    } catch (e) {
+      rethrow;
     }
   }
 }
