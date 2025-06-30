@@ -8,6 +8,7 @@ import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/ui/widgets/loader.dart';
 import '../../../../core/ui/widgets/messages.dart';
+import '../../../../models/schedule_list_model.dart';
 import '../../../../service/home/home_service.dart';
 import '../../../../service/webview/windows_web_view_service.dart';
 import '../auth_store.dart';
@@ -51,9 +52,6 @@ abstract class HomeControllerBase with Store {
   bool isWebViewHealthy = true;
 
   @observable
-  String? currentChannel;
-
-  @observable
   bool isScheduleVisible = false;
 
   @observable
@@ -62,16 +60,37 @@ abstract class HomeControllerBase with Store {
   @observable
   bool isRecovering = false;
 
+  @observable
+  int currentTabIndex = 0;
+
+  @observable
+  String? currentChannelListA;
+
+  @observable
+  String? currentChannelListB;
+
+  @observable
+  bool isLoadingLists = false;
+
+  @computed
+  String? get currentChannel {
+    return currentTabIndex == 0 ? currentChannelListA : currentChannelListB;
+  }
+
   void _subscribeToHealthEvents() {
-    _webViewHealthSubscription = _webViewService.healthStatus.listen((isHealthy) {
+    _webViewHealthSubscription =
+        _webViewService.healthStatus.listen((isHealthy) {
       isWebViewHealthy = isHealthy;
       if (!isHealthy && !_recoveryInProgress) {
-        _logger.warning('Problema de saúde do WebView detectado, iniciando recuperação...');
+        _logger.warning(
+          'Problema de saúde do WebView detectado, iniciando recuperação...',
+        );
         _recoverWebView();
       }
     });
 
-    _pollingHealthSubscription = _pollingService.healthStatus.listen((isHealthy) {
+    _pollingHealthSubscription =
+        _pollingService.healthStatus.listen((isHealthy) {
       if (!isHealthy) {
         _logger.warning('Problema de saúde do Polling detectado');
         _ensurePollingActive();
@@ -79,7 +98,8 @@ abstract class HomeControllerBase with Store {
     });
 
     // Subscribe to channel updates from polling service
-    _channelUpdateSubscription = _pollingService.channelUpdates.listen((channelUrl) {
+    _channelUpdateSubscription =
+        _pollingService.channelUpdates.listen((channelUrl) {
       _handleChannelUpdate(channelUrl);
     });
   }
@@ -104,6 +124,20 @@ abstract class HomeControllerBase with Store {
     }
   }
 
+  @action
+  Future<void> switchTab(int index) async {
+    if (index < 0 || index > 1) {
+      _logger.warning('Índice de aba inválido: $index');
+      return;
+    }
+
+    currentTabIndex = index;
+    _logger.info('Alternando para aba: ${index == 0 ? "Lista A" : "Lista B"}');
+
+    // Recarrega o canal atual baseado na nova aba
+    await loadCurrentChannel();
+  }
+
   void _setupWebViewMonitoring() {
     _webViewHealthTimer?.cancel();
     _webViewHealthTimer = Timer.periodic(const Duration(minutes: 2), (_) {
@@ -115,7 +149,8 @@ abstract class HomeControllerBase with Store {
 
   Future<void> _checkWebViewHealth() async {
     try {
-      if (!_webViewService.isInitialized || _webViewService.controller == null) {
+      if (!_webViewService.isInitialized ||
+          _webViewService.controller == null) {
         _logger.warning('WebView não está inicializado');
         isWebViewHealthy = false;
         return;
@@ -162,9 +197,12 @@ abstract class HomeControllerBase with Store {
 
       // Se ainda não está saudável, notifica o problema
       if (!isResponding) {
-        _logger.warning('Reload não resolveu o problema, notificando usuário...');
+        _logger.warning(
+          'Reload não resolveu o problema, notificando usuário...',
+        );
         Messages.warning(
-            'Problema detectado no navegador. Tente reiniciar o aplicativo se o problema persistir.');
+          'Problema detectado no navegador. Tente reiniciar o aplicativo se o problema persistir.',
+        );
       }
 
       // Reinicia o polling
@@ -174,7 +212,9 @@ abstract class HomeControllerBase with Store {
       isWebViewHealthy = true;
     } catch (e, s) {
       _logger.error('Falha ao recuperar WebView', e, s);
-      Messages.warning('Erro ao recuperar aplicação. Tente reiniciar o programa.');
+      Messages.warning(
+        'Erro ao recuperar aplicação. Tente reiniciar o programa.',
+      );
       isWebViewHealthy = false;
     } finally {
       isRecovering = false;
@@ -230,18 +270,33 @@ abstract class HomeControllerBase with Store {
   Future<void> loadCurrentChannel() async {
     try {
       // Armazena o canal atual para comparação
-      final previousChannel = currentChannel;
+      final previousChannelA = currentChannelListA;
+      final previousChannelB = currentChannelListB;
 
-      // Busca o novo canal
-      currentChannel = await _homeService.fetchCurrentChannel();
+      // Busca o novo canal baseado na lista atual
+      final newChannel = await _homeService.fetchCurrentChannel();
 
-      // Se mudou de canal, carrega a nova URL
-      if (currentChannel != null && currentChannel != previousChannel) {
-        _logger.info('Canal alterado de $previousChannel para $currentChannel');
-        await _webViewService.loadUrl(currentChannel!);
+      if (currentTabIndex == 0) {
+        currentChannelListA = newChannel;
+        // Se mudou de canal na Lista A, carrega a nova URL
+        if (currentChannelListA != null &&
+            currentChannelListA != previousChannelA) {
+          _logger.info(
+              'Canal da Lista A alterado de $previousChannelA para $currentChannelListA');
+          await _webViewService.loadUrl(currentChannelListA!);
+        }
+      } else {
+        currentChannelListB = newChannel;
+        // Se mudou de canal na Lista B, carrega a nova URL
+        if (currentChannelListB != null &&
+            currentChannelListB != previousChannelB) {
+          _logger.info(
+              'Canal da Lista B alterado de $previousChannelB para $currentChannelListB');
+          await _webViewService.loadUrl(currentChannelListB!);
+        }
       }
 
-      _logger.info('Canal atual carregado: $currentChannel');
+      _logger.info('Canal atual carregado: ${currentChannel}');
     } catch (e, s) {
       _logger.error('Error loading current channel', e, s);
       Messages.warning('Erro ao carregar canal atual');
@@ -296,7 +351,8 @@ abstract class HomeControllerBase with Store {
   Future<void> _handleError(Object error, StackTrace stackTrace) async {
     _logger.error('Error in HomeController', error, stackTrace);
 
-    if (error.toString().contains('autenticação') || error.toString().contains('Expire token')) {
+    if (error.toString().contains('autenticação') ||
+        error.toString().contains('Expire token')) {
       await _authStore.logout();
       if (!Modular.to.path.contains('/auth/login')) {
         Modular.to.navigate('/auth/login/');
@@ -311,15 +367,20 @@ abstract class HomeControllerBase with Store {
     try {
       _logger.info('Recebido update de canal do polling: $channelUrl');
 
-      // Update the current channel
-      currentChannel = channelUrl;
+      // Update the current channel based on current tab
+      if (currentTabIndex == 0) {
+        currentChannelListA = channelUrl;
+      } else {
+        currentChannelListB = channelUrl;
+      }
 
       // Load the new URL in the webview
       if (_webViewService.isInitialized) {
         _logger.info('Carregando novo canal no WebView: $channelUrl');
         await _webViewService.loadUrl(channelUrl);
       } else {
-        _logger.warning('WebView não inicializado, não foi possível carregar o canal: $channelUrl');
+        _logger.warning(
+            'WebView não inicializado, não foi possível carregar o canal: $channelUrl');
       }
     } catch (e, s) {
       _logger.error('Erro ao processar atualização de canal', e, s);
