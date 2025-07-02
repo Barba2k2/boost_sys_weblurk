@@ -8,6 +8,7 @@ abstract class HomeService {
   // Future<void> forceUpdateLive();
   Future<void> updateLists();
   Future<String?> fetchCurrentChannel();
+  Future<String?> fetchCurrentChannelForList(String listName);
   Future<void> saveScore(
     int streamerId,
     DateTime date,
