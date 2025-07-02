@@ -14,8 +14,8 @@
    - [Gerenciamento de Streamers](#gerenciamento-de-streamers)
 5. [Modelos de Dados](#modelos-de-dados)
 6. [Códigos de Status HTTP](#códigos-de-status-http)
-7. [WebSockets](#websockets)
-8. [Exemplos de Uso](#exemplos-de-uso)
+7. [Exemplos de Uso](#exemplos-de-uso)
+8. [Estrutura do Projeto](#estrutura-do-projeto)
 
 ---
 
@@ -29,9 +29,8 @@ A API BoostTwitch é uma aplicação backend desenvolvida em Dart utilizando o f
 - **Gerenciamento de Usuários**: CRUD completo para usuários e streamers
 - **Sistema de Agendamentos**: Gerenciamento de horários de stream
 - **Sistema de Pontuação**: Controle de pontuações por streamer
-- **WebSockets**: Comunicação em tempo real
 - **Autorização Baseada em Roles**: Controle de acesso por perfil
-- **Docker**: Containerização completa da aplicação
+- **Arquitetura Modular**: Separação clara de responsabilidades
 
 ---
 
@@ -41,7 +40,7 @@ A API BoostTwitch é uma aplicação backend desenvolvida em Dart utilizando o f
 
 - Dart SDK ^3.4.0
 - PostgreSQL
-- Docker (opcional)
+- Git
 
 ### Variáveis de Ambiente
 
@@ -56,8 +55,12 @@ DATABASE_NAME=boost_twitch
 DATABASE_PORT=5432
 DATABASE_SSL=false
 
-# JWT Configuration
-JWT_SECRET=your_jwt_secret_key
+# Alternative database variable names (also supported)
+databaseHost=localhost
+databaseUser=your_user
+databasePassword=your_password
+databaseName=boost_twitch
+databasePort=5432
 ```
 
 ### Executando com Dart
@@ -66,18 +69,21 @@ JWT_SECRET=your_jwt_secret_key
 # Instalar dependências
 dart pub get
 
+# Gerar código (se necessário)
+dart run build_runner build
+
 # Executar a aplicação
 dart run bin/server.dart
 ```
 
-### Executando com Docker
+### Executando Testes
 
 ```bash
-# Construir a imagem
-docker build . -t boost-api
+# Executar todos os testes
+dart test
 
-# Executar o container
-docker run -it -p 8080:8080 boost-api
+# Executar testes com cobertura
+dart test --coverage=coverage
 ```
 
 ---
@@ -88,24 +94,75 @@ A API utiliza autenticação JWT (JSON Web Token) com sistema de refresh tokens.
 
 ### Fluxo de Autenticação
 
-1. **Login**: POST `/auth/login`
-2. **Confirmação**: PATCH `/auth/confirm`
-3. **Refresh**: PUT `/auth/refresh`
-
-### Headers de Autenticação
-
-```http
-Authorization: Bearer <jwt_token>
-id: <user_id>
-streamerId: <streamer_id>
-role: <user_role>
-```
+1. **Registro**: POST `/auth/register`
+2. **Login**: POST `/auth/login`
+3. **Confirmação**: PATCH `/auth/confirm`
+4. **Refresh**: PUT `/auth/refresh`
 
 ### Roles Disponíveis
 
 - `admin`: Acesso completo a todos os endpoints
-- `streamer`: Acesso limitado a funcionalidades de streamer
 - `user`: Acesso básico
+
+### PATCH `/auth/confirm`
+
+Confirma o login e gera refresh token.
+
+**Headers Obrigatórios:**
+
+```http
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+  "web_token": "web_token_here"
+}
+```
+
+ou
+
+```json
+{
+  "windows_token": "windows_token_here"
+}
+```
+
+**Response:**
+
+```json
+{
+  "access_token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "refresh_token_here"
+}
+```
+
+> O backend extrai automaticamente o userId, streamerId e role do JWT enviado no header Authorization. Não envie esses dados em headers separados.
+
+---
+
+### Exemplo de uso
+
+```bash
+# Confirmar login (web)
+curl -X PATCH http://localhost:8000/auth/confirm \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <access_token>" \
+  -d '{
+    "web_token": "web_token_here"
+  }'
+
+# Confirmar login (windows)
+curl -X PATCH http://localhost:8000/auth/confirm \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <access_token>" \
+  -d '{
+    "windows_token": "windows_token_here"
+  }'
+```
 
 ---
 
@@ -123,9 +180,8 @@ Registra um novo usuário no sistema.
 {
   "nickname": "usuario123",
   "password": "senha123",
-  "fullName": "Nome Completo",
-  "email": "email@exemplo.com",
-  "phone": "11999999999"
+  "role": "user"
+  // "role": "admin" // para criar um admin
 }
 ```
 
@@ -158,45 +214,13 @@ Realiza login do usuário e retorna um token de acesso.
 }
 ```
 
-#### PATCH `/auth/confirm`
-
-Confirma o login e gera refresh token.
-
-**Headers:**
-
-```http
-id: 123
-streamerId: 456
-role: user
-```
-
-**Request Body:**
-
-```json
-{
-  "webToken": "web_token_here",
-  "windowsToken": "windows_token_here"
-}
-```
-
-**Response:**
-
-```json
-{
-  "access_token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refresh_token": "refresh_token_here"
-}
-```
-
 #### PUT `/auth/refresh`
 
 Renova o token de acesso usando o refresh token.
 
-**Headers:**
+**Headers Obrigatórios:**
 
-```http
-id: 123
-streamerId: 456
+```
 access_token: current_access_token
 ```
 
@@ -223,11 +247,10 @@ access_token: current_access_token
 
 Obtém informações do usuário autenticado.
 
-**Headers:**
+**Headers Obrigatórios:**
 
 ```http
-Authorization: Bearer <token>
-id: 123
+Authorization: access_token
 ```
 
 **Response:**
@@ -242,140 +265,187 @@ id: 123
 
 ### 📅 Agendamentos
 
-#### POST `/schedules/save`
+Agora os agendamentos estão separados em duas listas, cada uma com sua própria tabela e endpoints:
 
-Cria um novo agendamento.
+### Lista A
 
-**Request Body (Agendamento Único):**
+#### POST `/list-a/save`
 
-```json
-{
-  "streamerUrl": "https://twitch.tv/streamer123",
-  "date": "2024-01-15T00:00:00.000Z",
-  "startTime": "20:00",
-  "endTime": "22:00"
-}
-```
-
-**Request Body (Múltiplos Agendamentos):**
-
-```json
-[
-  {
-    "streamerUrl": "https://twitch.tv/streamer123",
-    "date": "2024-01-15T00:00:00.000Z",
-    "startTime": "20:00",
-    "endTime": "22:00"
-  },
-  {
-    "streamerUrl": "https://twitch.tv/streamer456",
-    "date": "2024-01-15T00:00:00.000Z",
-    "startTime": "21:00",
-    "endTime": "23:00"
-  }
-]
-```
-
-**Response:**
-
-```json
-{
-  "message": "Schedule created successfully"
-}
-```
-
-#### POST `/schedules/save-list`
-
-Cria uma lista de agendamentos.
+Cria ou atualiza todos os agendamentos da Lista A.
 
 **Request Body:**
 
 ```json
 {
-  "listName": "Agenda Semanal",
+  "list_name": "lista_a",
   "schedules": [
     {
-      "streamerUrl": "https://twitch.tv/streamer123",
-      "date": "2024-01-15T00:00:00.000Z",
-      "startTime": "20:00",
-      "endTime": "22:00"
+      "streamer_url": "https://twitch.tv/streamer1",
+      "date": "2024-01-15",
+      "start_time": "21:00",
+      "end_time": "22:00"
     }
   ]
 }
 ```
 
-#### GET `/schedules/`
-
-Lista todos os agendamentos.
-
-**Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "streamer_url": "https://twitch.tv/streamer123",
-    "date": "2024-01-15T00:00:00.000Z",
-    "start_time": "20:00",
-    "end_time": "22:00"
-  }
-]
-```
-
-#### GET `/schedules/get?date=2024-01-15`
-
-Obtém agendamentos por data específica.
+> **Observação:**
+>
+> - O campo `date` aceita tanto o formato `"yyyy-MM-dd"` quanto o formato ISO 8601 completo (`"2024-01-15T00:00:00.000Z"`).
+> - O campo `list_name` **só é aceito como `lista_a` (sem espaços, minúsculo e com underscore)**. Qualquer outro valor (incluindo `Lista A`, `lista a`, etc.) será rejeitado com erro.
+> - **O backend sempre salva e retorna o nome da lista como `lista_a`, independentemente do valor enviado pelo front.**
 
 **Response:**
 
 ```json
-[
-  {
-    "list_name": "Agenda Semanal",
-    "schedules": [
-      {
-        "id": 1,
-        "streamer_url": "https://twitch.tv/streamer123",
-        "date": "2024-01-15T00:00:00.000Z",
-        "start_time": "20:00",
-        "end_time": "22:00"
-      }
-    ]
-  }
-]
+{
+  "message": "Lista A saved successfully"
+}
 ```
 
-#### GET `/schedules/list?name=Agenda Semanal`
+#### GET `/list-a/`
 
-Obtém agendamentos por nome da lista.
-
-#### GET `/schedules/lists`
-
-Lista todos os nomes de listas de agendamentos.
+Retorna todos os agendamentos da Lista A.
 
 **Response:**
 
 ```json
-["Agenda Semanal", "Agenda Mensal"]
+{
+  "list_name": "lista_a",
+  "schedules": [
+    {
+      "id": 1,
+      "streamer_url": "https://twitch.tv/streamer1",
+      "date": "2024-01-15T00:00:00.000Z",
+      "start_time": "21:00",
+      "end_time": "22:00"
+    }
+  ]
+}
 ```
 
-#### POST `/schedules/update`
+#### GET `/list-a/get?date=2024-01-15`
 
-Atualiza agendamentos existentes.
+Retorna agendamentos da Lista A para uma data específica.
 
-#### POST `/schedules/update-list`
+**Response:**
 
-Atualiza uma lista de agendamentos.
+```json
+{
+  "list_name": "lista_a",
+  "schedules": [
+    {
+      "id": 1,
+      "streamer_url": "https://twitch.tv/streamer1",
+      "date": "2024-01-15T00:00:00.000Z",
+      "start_time": "21:00",
+      "end_time": "22:00"
+    }
+  ]
+}
+```
 
-#### POST `/schedules/force-update`
+### Lista B
 
-Força atualização via WebSocket para todos os clientes conectados.
+#### POST `/list-b/save`
+
+Cria ou atualiza todos os agendamentos da Lista B.
+
+**Request Body:**
+
+```json
+{
+  "list_name": "lista_b",
+  "schedules": [
+    {
+      "streamer_url": "https://twitch.tv/streamer2",
+      "date": "2024-01-15T00:00:00.000Z",
+      "start_time": "22:00",
+      "end_time": "23:00"
+    }
+  ]
+}
+```
+
+> **Observação:**
+>
+> - O campo `date` aceita tanto o formato `"yyyy-MM-dd"` quanto o formato ISO 8601 completo (`"2024-01-15T00:00:00.000Z"`).
+> - O campo `list_name` **só é aceito como `lista_b` (sem espaços, minúsculo e com underscore)**. Qualquer outro valor (incluindo `Lista B`, `lista b`, etc.) será rejeitado com erro.
+> - **O backend sempre salva e retorna o nome da lista como `lista_b`, independentemente do valor enviado pelo front.**
+
+**Response:**
+
+```json
+{
+  "message": "Lista B saved successfully"
+}
+```
+
+#### GET `/list-b/`
+
+Retorna todos os agendamentos da Lista B.
+
+**Response:**
+
+```json
+{
+  "list_name": "lista_b",
+  "schedules": [
+    {
+      "id": 1,
+      "streamer_url": "https://twitch.tv/streamer2",
+      "date": "2024-01-15T00:00:00.000Z",
+      "start_time": "22:00",
+      "end_time": "23:00"
+    }
+  ]
+}
+```
+
+#### GET `/list-b/get?date=2024-01-15`
+
+Retorna agendamentos da Lista B para uma data específica.
+
+**Response:**
+
+```json
+{
+  "list_name": "lista_b",
+  "schedules": [
+    {
+      "id": 1,
+      "streamer_url": "https://twitch.tv/streamer2",
+      "date": "2024-01-15T00:00:00.000Z",
+      "start_time": "22:00",
+      "end_time": "23:00"
+    }
+  ]
+}
+```
+
+#### GET `/list-a/lists` ou `/list-b/lists`
+
+Retorna os nomes das listas disponíveis:
+
+**Response:**
+
+```json
+{
+  "list_names": ["Lista A", "Lista B"]
+}
+```
 
 ### 🏆 Pontuações
 
 #### GET `/score/`
 
 Obtém pontuações (requer autenticação).
+
+**Headers Obrigatórios:**
+
+```http
+Authorization: Bearer <token>
+```
 
 **Query Parameters:**
 
@@ -401,6 +471,12 @@ Obtém pontuações (requer autenticação).
 
 Salva uma nova pontuação (requer autenticação).
 
+**Headers Obrigatórios:**
+
+```http
+Authorization: Bearer <token>
+```
+
 **Request Body:**
 
 ```json
@@ -409,14 +485,19 @@ Salva uma nova pontuação (requer autenticação).
   "date": "2024-01-15T00:00:00.000Z",
   "hour": 20,
   "minute": 30,
-  "points": 150,
-  "nickname": "streamer123"
+  "points": 150
 }
 ```
 
 #### DELETE `/score/delete/<streamerId>`
 
 Deleta uma pontuação (requer autenticação).
+
+**Headers Obrigatórios:**
+
+```http
+Authorization: Bearer <token>
+```
 
 **Request Body:**
 
@@ -462,6 +543,11 @@ Atualiza o status de um streamer.
 }
 ```
 
+**Valores de Status:**
+
+- `"ON"`: Streamer online
+- `"OFF"`: Streamer offline
+
 **Response:**
 
 ```json
@@ -479,10 +565,12 @@ Obtém o status atual de todos os streamers.
 ```json
 [
   {
-    "id": 101,
+    "streamerId": 101,
     "nickname": "streamer123",
-    "status": true,
-    "lastLogin": "2024-01-15T20:00:00.000Z"
+    "status": "online",
+    "last_login": "2024-01-15T20:00:00.000Z",
+    "last_login_date": "15/01/2024",
+    "last_login_time": "20:00"
   }
 ]
 ```
@@ -493,25 +581,44 @@ Obtém o status atual de todos os streamers.
 
 Cria um novo streamer (requer role admin).
 
+**Headers Obrigatórios:**
+
+```http
+Authorization: Bearer <admin_token>
+```
+
 **Request Body:**
 
 ```json
 {
   "nickname": "streamer123",
   "password": "senha123",
+  "role": "user", // "admin" para criar um admin
+  // Campos opcionais:
   "fullName": "Nome do Streamer",
   "email": "streamer@exemplo.com",
   "phone": "11999999999",
   "platforms": ["twitch", "youtube"],
   "usualStartTime": "20:00",
   "usualEndTime": "22:00",
-  "streamDays": ["segunda", "terça", "quarta"]
+  "streamDays": ["segunda", "terça", "quarta"],
+  "twitchChannel": "streamer123",
+  "youtubeChannel": "streamer123",
+  "instagramHandle": "@streamer123",
+  "tiktokHandle": "@streamer123",
+  "facebookPage": "streamer123"
 }
 ```
 
 #### GET `/streamers/`
 
 Lista todos os streamers (requer role admin).
+
+**Headers Obrigatórios:**
+
+```http
+Authorization: Bearer <admin_token>
+```
 
 **Response:**
 
@@ -531,9 +638,21 @@ Lista todos os streamers (requer role admin).
 
 Atualiza dados de um streamer (requer role admin).
 
+**Headers Obrigatórios:**
+
+```http
+Authorization: Bearer <admin_token>
+```
+
 #### DELETE `/streamers/delete/<id>`
 
 Remove um streamer (requer role admin).
+
+**Headers Obrigatórios:**
+
+```http
+Authorization: Bearer <admin_token>
+```
 
 ---
 
@@ -566,7 +685,7 @@ Remove um streamer (requer role admin).
   "date": "2024-01-15T00:00:00.000Z",
   "startTime": "20:00",
   "endTime": "22:00",
-  "listName": "Agenda Semanal"
+  "listName": "Lista A"
 }
 ```
 
@@ -621,42 +740,13 @@ Remove um streamer (requer role admin).
 
 ---
 
-## 🔌 WebSockets
-
-A API suporta WebSockets para comunicação em tempo real, especialmente para notificações de atualizações de agendamentos.
-
-### Endpoint WebSocket
-
-```
-ws://localhost:8080/ws
-```
-
-### Eventos Disponíveis
-
-#### `schedule_update`
-
-Notifica sobre atualizações de agendamentos.
-
-**Payload:**
-
-```json
-{
-  "type": "schedule_update",
-  "data": {
-    "schedules": [...]
-  }
-}
-```
-
----
-
 ## 💡 Exemplos de Uso
 
 ### Exemplo Completo de Autenticação
 
 ```bash
 # 1. Registrar usuário
-curl -X POST http://localhost:8080/auth/register \
+curl -X POST http://localhost:8000/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "nickname": "usuario123",
@@ -666,28 +756,34 @@ curl -X POST http://localhost:8080/auth/register \
   }'
 
 # 2. Fazer login
-curl -X POST http://localhost:8080/auth/login \
+curl -X POST http://localhost:8000/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "nickname": "usuario123",
     "password": "senha123"
   }'
 
-# 3. Confirmar login
-curl -X PATCH http://localhost:8080/auth/confirm \
+# 3. Confirmar login (web)
+curl -X PATCH http://localhost:8000/auth/confirm \
   -H "Content-Type: application/json" \
-  -H "id: 123" \
-  -H "streamerId: 456" \
-  -H "role: user" \
+  -H "Authorization: Bearer <access_token>" \
   -d '{
-    "webToken": "web_token_here"
+    "web_token": "web_token_here"
+  }'
+
+# 3b. Confirmar login (windows)
+curl -X PATCH http://localhost:8000/auth/confirm \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <access_token>" \
+  -d '{
+    "windows_token": "windows_token_here"
   }'
 ```
 
 ### Exemplo de Criação de Agendamento
 
 ```bash
-curl -X POST http://localhost:8080/schedules/save \
+curl -X POST http://localhost:8000/schedules/save \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '{
@@ -702,10 +798,10 @@ curl -X POST http://localhost:8080/schedules/save \
 
 ```bash
 # Pontuações públicas com filtros
-curl "http://localhost:8080/public/score/?nickname=streamer123&startDate=2024-01-01&endDate=2024-01-31"
+curl "http://localhost:8000/public/score/?nickname=streamer123&startDate=2024-01-01&endDate=2024-01-31"
 
 # Pontuações autenticadas
-curl -X GET http://localhost:8080/score/ \
+curl -X GET http://localhost:8000/score/ \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -713,7 +809,7 @@ curl -X GET http://localhost:8080/score/ \
 
 ```bash
 # Criar streamer (requer admin)
-curl -X POST http://localhost:8080/streamers/save \
+curl -X POST http://localhost:8000/streamers/save \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <admin_token>" \
   -d '{
@@ -725,51 +821,65 @@ curl -X POST http://localhost:8080/streamers/save \
   }'
 ```
 
+### Exemplo de Atualização de Status
+
+```bash
+curl -X POST http://localhost:8000/streamer/status/update \
+  -H "Content-Type: application/json" \
+  -d '{
+    "streamerId": 101,
+    "status": "ON"
+  }'
+```
+
 ---
 
-## 🛠️ Desenvolvimento
-
-### Estrutura do Projeto
+## 🛠️ Estrutura do Projeto
 
 ```
 lib/
-├── app/
-│   ├── config/          # Configurações da aplicação
-│   ├── database/        # Conexão com banco de dados
-│   ├── exceptions/      # Exceções customizadas
-│   ├── helpers/         # Utilitários
-│   ├── logger/          # Sistema de logs
-│   ├── middlewares/     # Middlewares da aplicação
-│   ├── routers/         # Configuração de rotas
-│   ├── utils/           # Utilitários gerais
-│   └── websockets/      # Gerenciamento de WebSockets
-├── entities/            # Entidades do banco de dados
-└── modules/             # Módulos da aplicação
-    ├── user/            # Módulo de usuários
-    ├── schedules/       # Módulo de agendamentos
-    ├── score/           # Módulo de pontuações
-    ├── streamer_status/ # Módulo de status de streamers
-    └── fetch_users/     # Módulo de gerenciamento de streamers
+├── core/                    # Núcleo da aplicação
+│   ├── config/             # Configurações da aplicação
+│   ├── database/           # Conexão com banco de dados
+│   ├── exceptions/         # Exceções customizadas
+│   ├── helpers/            # Utilitários
+│   ├── logger/             # Sistema de logs
+│   ├── middlewares/        # Middlewares da aplicação
+│   ├── routers/            # Configuração de rotas
+│   ├── utils/              # Utilitários gerais
+│   └── websockets/         # Gerenciamento de WebSockets
+├── entities/               # Entidades do banco de dados
+└── modules/                # Módulos da aplicação
+    ├── user/               # Módulo de usuários
+    ├── schedules/          # Módulo de agendamentos
+    ├── score/              # Módulo de pontuações
+    ├── streamer_status/    # Módulo de status de streamers
+    └── fetch_users/        # Módulo de gerenciamento de streamers
 ```
 
-### Executando Testes
+### Tecnologias Utilizadas
+
+- **Backend**: Dart + Shelf Framework
+- **Banco de Dados**: PostgreSQL
+- **Autenticação**: JWT (jaguar_jwt)
+- **Injeção de Dependência**: GetIt + Injectable
+- **Logs**: Logger package
+- **Testes**: Dart Test Framework
+
+### Executando o Projeto
 
 ```bash
-# Executar todos os testes
-dart test
+# Instalar dependências
+dart pub get
 
-# Executar testes com cobertura
-dart test --coverage=coverage
-```
-
-### Build e Deploy
-
-```bash
 # Gerar código
 dart run build_runner build
 
-# Executar com Docker
-docker-compose up -d
+# Executar testes
+dart test
+
+# Executar a aplicação
+dart run bin/server.dart
 ```
 
 ---
@@ -781,4 +891,5 @@ Para dúvidas, sugestões ou problemas, entre em contato através dos canais ofi
 ---
 
 **Versão da API:** 1.0.0  
+**Porta Padrão:** 8000  
 **Última atualização:** Janeiro 2024
