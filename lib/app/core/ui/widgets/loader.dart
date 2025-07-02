@@ -31,4 +31,21 @@ class Loader {
       _entry?.remove();
     }
   }
+
+  // Loaders específicos para diferentes operações
+  static void showLoadingSchedules() {
+    show();
+  }
+
+  static void showLoadingChannel() {
+    show();
+  }
+
+  static void showReloading() {
+    show();
+  }
+
+  static void showAuthenticating() {
+    show();
+  }
 }
