@@ -16,13 +16,27 @@ class ScheduleRepositoryImpl implements SchedulesRepository {
   @override
   Future<List> fetchSchedule() async {
     try {
-      final response = await _restClient.auth().get('/schedule/');
+      // Busca ambas as listas A e B
+      final responseListA = await _restClient.auth().get('/list-a/');
+      final responseListB = await _restClient.auth().get('/list-b/');
 
-      if (response.statusCode == 200) {
-        return response.data as List;
-      } else {
-        throw Failure(message: 'Erro ao buscar os agendamentos');
+      final List<dynamic> allSchedules = [];
+
+      if (responseListA.statusCode == 200) {
+        final dataA = responseListA.data;
+        if (dataA is Map<String, dynamic> && dataA['schedules'] != null) {
+          allSchedules.addAll(dataA['schedules'] as List);
+        }
       }
+
+      if (responseListB.statusCode == 200) {
+        final dataB = responseListB.data;
+        if (dataB is Map<String, dynamic> && dataB['schedules'] != null) {
+          allSchedules.addAll(dataB['schedules'] as List);
+        }
+      }
+
+      return allSchedules;
     } catch (e, s) {
       _logger.error('Error on fetch schedule', e, s);
       throw Failure(message: 'Erro ao buscar os agendamentos');
