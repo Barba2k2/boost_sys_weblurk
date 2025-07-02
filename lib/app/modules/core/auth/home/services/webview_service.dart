@@ -48,17 +48,13 @@ class WebViewServiceImpl implements WebViewService {
     final now = DateTime.now();
     if (_lastActivity != null) {
       final inactiveTime = now.difference(_lastActivity!);
-      _logger.info('WebView inativo por: ${inactiveTime.inMinutes} minutos');
 
       if (inactiveTime > _inactivityThreshold) {
-        _logger.warning('WebView inativo por muito tempo, verificando responsividade...');
         final isAlive = await isResponding();
 
         if (!isAlive) {
-          _logger.warning('WebView não está respondendo, sinalizando problema...');
           _healthController.add(false);
         } else {
-          _logger.info('WebView está respondendo mesmo após inatividade');
           _lastActivity = now;
           _healthController.add(true);
         }
@@ -153,7 +149,8 @@ class WebViewServiceImpl implements WebViewService {
 
     try {
       final now = DateTime.now();
-      if (_lastReload != null && now.difference(_lastReload!) < _minReloadInterval) {
+      if (_lastReload != null &&
+          now.difference(_lastReload!) < _minReloadInterval) {
         _logger.warning('Recarregamento muito frequente, aguardando...');
         await Future.delayed(
           _minReloadInterval - now.difference(_lastReload!),
@@ -165,7 +162,8 @@ class WebViewServiceImpl implements WebViewService {
       final timer = Timer(_operationTimeout, () {
         if (!completer.isCompleted) {
           _logger.warning('Timeout ao recarregar página');
-          completer.completeError(Failure(message: 'Timeout ao recarregar página'));
+          completer
+              .completeError(Failure(message: 'Timeout ao recarregar página'));
         }
       });
 
