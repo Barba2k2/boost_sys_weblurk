@@ -9,12 +9,14 @@ import '../../../service/webview/windows_web_view_service_impl.dart';
 class WindowsWebViewWidget extends StatefulWidget {
   const WindowsWebViewWidget({
     required this.initialUrl,
+    this.currentUrl,
     this.onWebViewCreated,
     this.logger,
     super.key,
   });
 
   final String initialUrl;
+  final String? currentUrl;
   final void Function(WebviewController)? onWebViewCreated;
   final AppLogger? logger;
 
@@ -36,18 +38,47 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
   bool _isOperationInProgress = false;
 
   // Obter serviço através do Modular para comunicar atividade
-  WindowsWebViewService get _webViewService => Modular.get<WindowsWebViewService>();
+  WindowsWebViewService get _webViewService =>
+      Modular.get<WindowsWebViewService>();
 
   @override
   void initState() {
     super.initState();
-    _currentUrl = widget.initialUrl;
+    _currentUrl = widget.currentUrl ?? widget.initialUrl;
     _initPlatformState();
+  }
+
+  @override
+  void didUpdateWidget(WindowsWebViewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final newUrl = widget.currentUrl ?? widget.initialUrl;
+    if (newUrl != _currentUrl && newUrl.isNotEmpty) {
+      _currentUrl = newUrl;
+      _loadNewUrl(newUrl);
+    }
+  }
+
+  /// Carrega uma nova URL no WebView
+  Future<void> _loadNewUrl(String url) async {
+    if (_isOperationInProgress) {
+      widget.logger?.warning(
+          'Operação em andamento, aguardando para carregar nova URL: $url');
+      return;
+    }
+
+    try {
+      widget.logger?.info('Carregando nova URL: $url');
+      await _controller.loadUrl(url);
+    } catch (e, s) {
+      widget.logger?.error('Erro ao carregar nova URL: $url', e, s);
+    }
   }
 
   Future<void> _initPlatformState() async {
     if (_isOperationInProgress) {
-      widget.logger?.warning('Operação já em andamento, ignorando inicialização');
+      widget.logger
+          ?.warning('Operação já em andamento, ignorando inicialização');
       return;
     }
 
@@ -188,7 +219,8 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
     // então vamos simular isso com alguns valores para a UI
     _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (_isLoading) {
-        _loadingProgress.value = (_loadingProgress.value + 0.02).clamp(0.0, 0.95);
+        _loadingProgress.value =
+            (_loadingProgress.value + 0.02).clamp(0.0, 0.95);
       } else {
         _loadingProgress.value = 1.0;
         timer.cancel();
@@ -199,7 +231,8 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
   // Método para lidar com diálogos detectados
   Future<void> _handleDetectedDialog() async {
     try {
-      widget.logger?.warning('Diálogo detectado, tentando lidar com ele automaticamente');
+      widget.logger?.warning(
+          'Diálogo detectado, tentando lidar com ele automaticamente');
 
       // Executamos um script que tenta fechar diálogos ou confirmar ações
       await _controller.executeScript('''
@@ -291,9 +324,11 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
 
         // Recomeçamos o timer de progresso
         _progressTimer?.cancel();
-        _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+        _progressTimer =
+            Timer.periodic(const Duration(milliseconds: 100), (timer) {
           if (_isLoading) {
-            _loadingProgress.value = (_loadingProgress.value + 0.02).clamp(0.0, 0.95);
+            _loadingProgress.value =
+                (_loadingProgress.value + 0.02).clamp(0.0, 0.95);
           } else {
             _loadingProgress.value = 1.0;
             timer.cancel();
@@ -304,7 +339,8 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
         await _controller.loadUrl(_currentUrl);
         widget.logger?.info('URL recarregada com sucesso');
       } else {
-        widget.logger?.warning('URL atual não disponível, tentando reload padrão');
+        widget.logger
+            ?.warning('URL atual não disponível, tentando reload padrão');
         try {
           // Pré-configuramos para evitar diálogos
           await _disableJavaScriptDialogs();
