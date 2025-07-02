@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../modules/core/auth/home/home_controller.dart';
+import '../../../models/schedule_model.dart';
 
 class ScheduleTable extends StatelessWidget {
   const ScheduleTable({
@@ -11,23 +10,21 @@ class ScheduleTable extends StatelessWidget {
     required this.listName,
   });
 
-  final List<Map<String, dynamic>> schedules;
+  final List<ScheduleModel> schedules;
   final String listName;
 
   @override
   Widget build(BuildContext context) {
-    final homeController = Modular.get<HomeController>();
-
     return Observer(
       builder: (_) => Center(
         child: Container(
           width: MediaQuery.of(context).size.width * 0.9,
-          color: Colors.white.withOpacity(0.8),
+          color: Colors.white.withValues(alpha: 0.8),
           child: Column(
             children: [
               // Header da lista
               Container(
-                padding: const EdgeInsets.all(16),
+                // padding: const EdgeInsets.all(16),
                 decoration: const BoxDecoration(
                   color: Color(0xFF2C1F4A),
                   borderRadius: BorderRadius.only(
@@ -91,7 +88,7 @@ class ScheduleTable extends StatelessWidget {
                         columns: [
                           DataColumn(
                             label: Text(
-                              'Seq.',
+                              'ID',
                               style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14.0,
@@ -101,17 +98,7 @@ class ScheduleTable extends StatelessWidget {
                           ),
                           DataColumn(
                             label: Text(
-                              'Nome do Streamer',
-                              style: GoogleFonts.inter(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14.0,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Horário',
+                              'Streamer',
                               style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14.0,
@@ -131,7 +118,7 @@ class ScheduleTable extends StatelessWidget {
                           ),
                           DataColumn(
                             label: Text(
-                              'Link do Canal',
+                              'Início',
                               style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14.0,
@@ -141,7 +128,17 @@ class ScheduleTable extends StatelessWidget {
                           ),
                           DataColumn(
                             label: Text(
-                              'Status',
+                              'Fim',
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14.0,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Link',
                               style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14.0,
@@ -152,69 +149,25 @@ class ScheduleTable extends StatelessWidget {
                         ],
                         rows: schedules
                             .map(
-                              (streamer) => DataRow(
-                                color: WidgetStateProperty.resolveWith<Color?>(
-                                  (Set<WidgetState> states) =>
-                                      _getRowColor(streamer),
-                                ),
+                              (schedule) => DataRow(
                                 cells: [
+                                  DataCell(Text(schedule.id?.toString() ?? '')),
+                                  DataCell(Text(schedule.streamerUrl)),
                                   DataCell(
-                                    Text(
-                                      streamer['seq']?.toString() ?? '',
-                                      style: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 12.0,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
+                                      Text(schedule.date.toIso8601String())),
+                                  DataCell(Text(schedule.startTime)),
+                                  DataCell(Text(schedule.endTime)),
                                   DataCell(
-                                    Text(
-                                      streamer['nome_do_streamer'] ?? '',
-                                      style: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 12.0,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                  DataCell(
-                                    Text(
-                                      streamer['horario'] ?? '',
-                                      style: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 12.0,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                  DataCell(
-                                    Text(
-                                      streamer['data'] ?? '',
-                                      style: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 12.0,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                  DataCell(
-                                    Text(
-                                      streamer['link_do_canal'] ?? '',
-                                      style: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 12.0,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                  DataCell(
-                                    Text(
-                                      _getStatusText(streamer['status'] ?? 0),
-                                      style: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 12.0,
-                                        color: Colors.black,
+                                    InkWell(
+                                      onTap: () {
+                                        // abrir link
+                                      },
+                                      child: Text(
+                                        schedule.streamerUrl,
+                                        style: const TextStyle(
+                                          color: Colors.blue,
+                                          decoration: TextDecoration.underline,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -229,34 +182,5 @@ class ScheduleTable extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color? _getRowColor(Map<String, dynamic> streamer) {
-    // Implementar lógica de cor baseada no status ou outros critérios
-    final status = streamer['status'] ?? 0;
-
-    switch (status) {
-      case 1: // Ativo
-        return Colors.green.withOpacity(0.1);
-      case 2: // Pendente
-        return Colors.orange.withOpacity(0.1);
-      case 3: // Cancelado
-        return Colors.red.withOpacity(0.1);
-      default:
-        return null;
-    }
-  }
-
-  String _getStatusText(int status) {
-    switch (status) {
-      case 1:
-        return 'Ativo';
-      case 2:
-        return 'Pendente';
-      case 3:
-        return 'Cancelado';
-      default:
-        return 'Desconhecido';
-    }
   }
 }
