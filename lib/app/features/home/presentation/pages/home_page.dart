@@ -5,7 +5,10 @@ import '../../../../core/controllers/url_launch_controller.dart';
 import '../../../../core/di/di.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/ui/widgets/syslurk_app_bar.dart';
+import '../../../auth/domain/entities/auth_store.dart';
 import '../viewmodels/home_viewmodel.dart';
+import '../widgets/universal_webview_widget.dart';
+import '../widgets/live_url_bar/live_url_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,11 +22,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late final SettingsController _settingsController;
   late final UrlLaunchController _urlController;
   late final AppLogger _logger;
+  late final AuthStore _authStore;
+  bool _isWebViewMuted = false;
 
   @override
   void initState() {
     super.initState();
     _logger = di.get<AppLogger>();
+    _authStore = di.get<AuthStore>();
     _viewModel = HomeViewModel();
     _settingsController = SettingsController(logger: _logger);
     _urlController = UrlLaunchController(logger: _logger);
@@ -36,6 +42,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  void _toggleWebViewMute() {
+    setState(() {
+      _isWebViewMuted = !_isWebViewMuted;
+    });
+    _logger.info('WebView mute ${_isWebViewMuted ? 'ativado' : 'desativado'}');
+  }
+
+  String _getUsername() {
+    final user = _authStore.userLogged;
+    if (user != null && user.nickname.isNotEmpty) {
+      return user.nickname;
+    }
+    return 'Convidado';
+  }
+
   @override
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.textScaleFactorOf(context);
@@ -43,16 +64,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Scaffold(
-          appBar: SyslurkAppBar(
-            username: 'Usuário', // TODO: Get from auth store
-            onReloadWebView: () {
-              // TODO: Implement reload functionality
-              _logger.info('Reload requested');
+          appBar: ListenableBuilder(
+            listenable: _authStore,
+            builder: (context, child) {
+              return SyslurkAppBar(
+                username: _getUsername(),
+                onReloadWebView: () {
+                  // TODO: Implement reload functionality
+                  _logger.info('Reload requested');
+                },
+                onTerminateApp: _settingsController.terminateApp,
+                onToggleMute: _toggleWebViewMute,
+                isMuted: _isWebViewMuted,
+                urlController: _urlController,
+                settingsController: _settingsController,
+              );
             },
-            onTerminateApp: _settingsController.terminateApp,
-            onMuteAppAudio: _settingsController.muteAppAudio,
-            urlController: _urlController,
-            settingsController: _settingsController,
           ),
           body: Column(
             children: [
@@ -64,20 +91,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   child: Text('Schedule Tabs - TODO'),
                 ),
               ),
-              // TODO: Add live URL bar
-              Container(
-                height: 30,
-                color: Colors.blue[100],
-                child: const Center(
-                  child: Text('Live URL Bar - TODO'),
+              // Live URL bar
+              ListenableBuilder(
+                listenable: _viewModel,
+                builder: (_, __) => LiveUrlBar(
+                  currentChannel: _viewModel.currentChannel,
                 ),
               ),
               Expanded(
-                child: Container(
-                  color: Colors.grey[100],
-                  child: const Center(
-                    child: Text('WebView Content - TODO'),
-                  ),
+                child: UniversalWebViewWidget(
+                  initialUrl: 'https://www.google.com',
+                  logger: _logger,
+                  isMuted: _isWebViewMuted,
+                  onWebViewCreated: (controller) {
+                    _logger.info('WebView criado com sucesso');
+                  },
                 ),
               ),
               ListenableBuilder(
