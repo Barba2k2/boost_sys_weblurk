@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/controllers/settings_controller.dart';
 import '../../../../core/controllers/url_launch_controller.dart';
-import '../../../../core/di/di.dart';
+import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/ui/widgets/syslurk_app_bar.dart';
 import '../../../auth/domain/entities/auth_store.dart';
+import '../../domain/repositories/home_repository.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../widgets/universal_webview_widget.dart';
 import '../widgets/live_url_bar/live_url_bar.dart';
+
+import 'package:boost_sys_weblurk/app/core/di/dependency_injection.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,12 +31,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _logger = di.get<AppLogger>();
-    _authStore = di.get<AuthStore>();
-    _viewModel = HomeViewModel();
+    _logger = getIt<AppLogger>();
+    _authStore = getIt<AuthStore>();
+    _viewModel = HomeViewModel(repository: getIt<HomeRepository>());
     _settingsController = SettingsController(logger: _logger);
     _urlController = UrlLaunchController(logger: _logger);
-    _viewModel.initializeHome();
+    _viewModel.initializeHome.execute();
+    
+    // Inicia o polling automaticamente após a inicialização
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.startPolling.execute(0);
+    });
   }
 
   @override
@@ -64,22 +72,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Scaffold(
-          appBar: ListenableBuilder(
-            listenable: _authStore,
-            builder: (context, child) {
-              return SyslurkAppBar(
-                username: _getUsername(),
-                onReloadWebView: () {
-                  // TODO: Implement reload functionality
-                  _logger.info('Reload requested');
-                },
-                onTerminateApp: _settingsController.terminateApp,
-                onToggleMute: _toggleWebViewMute,
-                isMuted: _isWebViewMuted,
-                urlController: _urlController,
-                settingsController: _settingsController,
-              );
+          appBar: SyslurkAppBar(
+            username: _getUsername(),
+            onReloadWebView: () {
+              // TODO: Implement reload functionality
+              _logger.info('Reload requested');
             },
+            onTerminateApp: _settingsController.terminateApp,
+            onMuteAppAudio: _toggleWebViewMute,
+            urlController: _urlController,
+            settingsController: _settingsController,
           ),
           body: Column(
             children: [
@@ -99,13 +101,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ),
               Expanded(
-                child: UniversalWebViewWidget(
-                  initialUrl: 'https://www.google.com',
-                  logger: _logger,
-                  isMuted: _isWebViewMuted,
-                  onWebViewCreated: (controller) {
-                    _logger.info('WebView criado com sucesso');
-                  },
+                child: ListenableBuilder(
+                  listenable: _viewModel,
+                  builder: (_, __) => UniversalWebViewWidget(
+                    initialUrl: _viewModel.initialUrl ?? 'https://www.twitch.tv/BootTeam_',
+                    logger: _logger,
+                    isMuted: _isWebViewMuted,
+                    onWebViewCreated: (controller) {
+                      _logger.info('WebView criado com sucesso');
+                    },
+                  ),
                 ),
               ),
               ListenableBuilder(
@@ -124,23 +129,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       )
                     : const SizedBox.shrink(),
               ),
+
             ],
-          ),
-          floatingActionButton: ListenableBuilder(
-            listenable: _viewModel,
-            builder: (_, __) => Semantics(
-              label: 'Iniciar polling',
-              button: true,
-              child: FloatingActionButton.extended(
-                onPressed: _viewModel.startPolling,
-                label: Text(
-                  'Iniciar Polling',
-                  style: TextStyle(fontSize: 14 * textScaleFactor),
-                ),
-                icon: const Icon(Icons.play_arrow),
-                heroTag: 'start_polling',
-              ),
-            ),
           ),
         );
       },
