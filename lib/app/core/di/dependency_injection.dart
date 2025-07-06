@@ -1,3 +1,4 @@
+import 'package:get_it/get_it.dart';
 import '../../features/auth/domain/entities/auth_store.dart';
 import '../../repositories/home/home_repository.dart';
 import '../../repositories/home/home_repository_impl.dart';
@@ -28,87 +29,89 @@ class DependencyInjection {
   factory DependencyInjection() => _instance;
   static final DependencyInjection _instance = DependencyInjection._internal();
 
-  final Map<Type, dynamic> _dependencies = {};
+  final GetIt _getIt = GetIt.instance;
 
   void initialize() {
     // Core services
-    _dependencies[AppLogger] = LoggerAppLoggerImpl();
-    _dependencies[LocalStorage] = SharedPreferencesLocalStorageImpl();
-    _dependencies[LocalSecureStorage] = FlutterSecureStorageLocalStorageImpl();
+    _getIt.registerSingleton<AppLogger>(LoggerAppLoggerImpl());
+    _getIt.registerSingleton<LocalStorage>(SharedPreferencesLocalStorageImpl());
+    _getIt.registerSingleton<LocalSecureStorage>(
+        FlutterSecureStorageLocalStorageImpl());
 
     // Auth store
-    _dependencies[AuthStore] = AuthStore(
+    _getIt.registerSingleton<AuthStore>(AuthStore(
       localStorage: get<LocalStorage>(),
       logger: get<AppLogger>(),
-    );
+    ));
 
     // Rest client
-    _dependencies[RestClient] = DioRestClient(
+    _getIt.registerSingleton<RestClient>(DioRestClient(
       localStorage: get<LocalStorage>(),
       logger: get<AppLogger>(),
       authStore: get<AuthStore>(),
-    );
+    ));
 
     // Repositories
-    _dependencies[UserRepository] = UserRepositoryImpl(
+    _getIt.registerSingleton<UserRepository>(UserRepositoryImpl(
       logger: get<AppLogger>(),
       restClient: get<RestClient>(),
-    );
+    ));
 
-    _dependencies[HomeRepository] = HomeRepositoryImpl(
+    _getIt.registerSingleton<HomeRepository>(HomeRepositoryImpl(
       restClient: get<RestClient>(),
       logger: get<AppLogger>(),
-    );
+    ));
 
-    _dependencies[SchedulesRepository] = ScheduleRepositoryImpl(
+    _getIt.registerSingleton<SchedulesRepository>(ScheduleRepositoryImpl(
       restClient: get<RestClient>(),
       logger: get<AppLogger>(),
-    );
+    ));
 
     // Services
-    _dependencies[UserService] = UserServiceImpl(
+    _getIt.registerSingleton<UserService>(UserServiceImpl(
       logger: get<AppLogger>(),
       userRepository: get<UserRepository>(),
       localStorage: get<LocalStorage>(),
       localSecureStorage: get<LocalSecureStorage>(),
-    );
+    ));
 
-    _dependencies[HomeService] = HomeServiceImpl(
+    _getIt.registerSingleton<HomeService>(HomeServiceImpl(
       homeRepository: get<HomeRepository>(),
       logger: get<AppLogger>(),
-    );
+    ));
 
-    _dependencies[ScheduleService] = StreamerServiceImpl(
+    _getIt.registerSingleton<ScheduleService>(StreamerServiceImpl(
       streamerRepository: get<SchedulesRepository>(),
       logger: get<AppLogger>(),
-    );
+    ));
 
-    _dependencies[WindowsWebViewService] = WindowsWebViewServiceImpl(
+    _getIt.registerSingleton<WindowsWebViewService>(WindowsWebViewServiceImpl(
       logger: get<AppLogger>(),
-    );
+    ));
 
     // Controllers
-    _dependencies[UrlLaunchController] = UrlLaunchController(
+    _getIt.registerSingleton<UrlLaunchController>(UrlLaunchController(
       logger: get<AppLogger>(),
-    );
+    ));
 
-    _dependencies[SettingsController] = SettingsController(
+    _getIt.registerSingleton<SettingsController>(SettingsController(
       logger: get<AppLogger>(),
-    );
+    ));
 
     // Initialize auth store
     get<AuthStore>().loadUserLogged();
   }
 
-  T get<T>() {
-    if (_dependencies.containsKey(T)) {
-      return _dependencies[T] as T;
-    }
-    throw Exception('Dependency $T not found');
+  T get<T extends Object>() {
+    return _getIt<T>();
   }
 
-  void register<T>(T instance) {
-    _dependencies[T] = instance;
+  void register<T extends Object>(T instance) {
+    _getIt.registerSingleton<T>(instance);
+  }
+
+  void reset() {
+    _getIt.reset();
   }
 }
 
