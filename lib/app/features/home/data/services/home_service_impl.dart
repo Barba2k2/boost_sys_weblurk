@@ -1,3 +1,4 @@
+import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/rest_client/rest_client.dart';
 import '../../domain/entities/schedule_list_entity.dart';
@@ -14,89 +15,54 @@ class HomeServiceImpl implements HomeService {
   final AppLogger _logger;
 
   @override
-  Future<void> fetchSchedules() async {
-    try {
-      _logger.info('Buscando schedules');
-      // Implementação da busca de schedules
-      await Future.delayed(const Duration(milliseconds: 100));
-      _logger.info('Schedules buscados com sucesso');
-    } catch (e, s) {
-      _logger.error('Erro ao buscar schedules', e, s);
-      rethrow;
-    }
+  Future<List<dynamic>> fetchSchedules() async {
+    _logger.info('Buscando schedules');
+    final response = await _restClient.get('/schedules');
+    return response.data as List<dynamic>;
   }
 
   @override
   Future<List<ScheduleListEntity>> fetchScheduleLists() async {
-    try {
-      _logger.info('Buscando listas de schedules');
-      // Implementação da busca de listas
-      await Future.delayed(const Duration(milliseconds: 100));
-      return [];
-    } catch (e, s) {
-      _logger.error('Erro ao buscar listas de schedules', e, s);
-      rethrow;
-    }
+    _logger.info('Buscando listas de schedules');
+    final response = await _restClient.get('/schedule-lists');
+    final List<dynamic> data = response.data as List<dynamic>;
+    return data.map((json) => ScheduleListEntity.fromJson(json)).toList();
   }
 
   @override
   Future<List<String>> getAvailableListNames() async {
-    try {
-      _logger.info('Buscando nomes das listas disponíveis');
-      await Future.delayed(const Duration(milliseconds: 100));
-      return ['Lista 1', 'Lista 2', 'Lista 3'];
-    } catch (e, s) {
-      _logger.error('Erro ao buscar nomes das listas', e, s);
-      rethrow;
-    }
+    _logger.info('Buscando nomes das listas disponíveis');
+    final response = await _restClient.get('/available-list-names');
+    final List<dynamic> data = response.data as List<dynamic>;
+    return data.map((item) => item.toString()).toList();
   }
 
   @override
   Future<ScheduleListEntity?> fetchScheduleListByName(String listName) async {
-    try {
-      _logger.info('Buscando lista por nome: $listName');
-      await Future.delayed(const Duration(milliseconds: 100));
-      return null;
-    } catch (e, s) {
-      _logger.error('Erro ao buscar lista por nome: $listName', e, s);
-      rethrow;
-    }
+    _logger.info('Buscando lista por nome: $listName');
+    final response = await _restClient.get('/schedule-list/$listName');
+    if (response.data == null) return null;
+    return ScheduleListEntity.fromJson(response.data);
   }
 
   @override
   Future<void> updateLists() async {
-    try {
-      _logger.info('Atualizando listas');
-      await Future.delayed(const Duration(milliseconds: 100));
-      _logger.info('Listas atualizadas com sucesso');
-    } catch (e, s) {
-      _logger.error('Erro ao atualizar listas', e, s);
-      rethrow;
-    }
+    _logger.info('Atualizando listas');
+    await _restClient.post('/update-lists');
   }
 
   @override
   Future<String?> fetchCurrentChannel() async {
-    try {
-      _logger.info('Buscando canal atual');
-      await Future.delayed(const Duration(milliseconds: 100));
-      return 'https://twitch.tv/BoostTeam_123';
-    } catch (e, s) {
-      _logger.error('Erro ao buscar canal atual', e, s);
-      rethrow;
-    }
+    _logger.info('Buscando canal atual');
+    final response = await _restClient.get('/current-channel');
+    return response.data as String?;
   }
 
   @override
   Future<String?> fetchCurrentChannelForList(String listName) async {
-    try {
-      _logger.info('Buscando canal atual para lista: $listName');
-      await Future.delayed(const Duration(milliseconds: 100));
-      return 'https://twitch.tv/BoostTeam_$listName';
-    } catch (e, s) {
-      _logger.error('Erro ao buscar canal atual para lista: $listName', e, s);
-      rethrow;
-    }
+    _logger.info('Buscando canal atual para lista: $listName');
+    final response = await _restClient.get('/current-channel/$listName');
+    return response.data as String?;
   }
 
   @override
@@ -107,14 +73,14 @@ class HomeServiceImpl implements HomeService {
     int minute,
     int points,
   ) async {
-    try {
-      _logger.info(
-          'Salvando score para streamer ID: $streamerId, pontos: $points');
-      await Future.delayed(const Duration(milliseconds: 100));
-      _logger.info('Score salvo com sucesso');
-    } catch (e, s) {
-      _logger.error('Erro ao salvar score', e, s);
-      rethrow;
-    }
+    _logger.info(
+        'Salvando score para streamer ID: $streamerId, pontos: $points');
+    await _restClient.post('/save-score', data: {
+      'streamerId': streamerId,
+      'date': date.toIso8601String(),
+      'hour': hour,
+      'minute': minute,
+      'points': points,
+    });
   }
 }
