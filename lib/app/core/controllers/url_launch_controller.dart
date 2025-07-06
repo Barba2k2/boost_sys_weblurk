@@ -1,23 +1,18 @@
 import 'dart:io';
 
-import 'package:mobx/mobx.dart';
+import 'package:flutter/foundation.dart';
 import 'package:process_run/process_run.dart';
 
 import '../logger/app_logger.dart';
 import '../ui/widgets/messages.dart';
 
-part 'url_launch_controller.g.dart';
-
-class UrlLaunchController = UrlLaunchControllerBase with _$UrlLaunchController;
-
-abstract class UrlLaunchControllerBase with Store {
-  UrlLaunchControllerBase({
+class UrlLaunchController extends ChangeNotifier {
+  UrlLaunchController({
     required AppLogger logger,
   }) : _logger = logger;
 
   final AppLogger _logger;
 
-  @action
   Future<void> launchURL(String url) async {
     try {
       final Shell shell = Shell();

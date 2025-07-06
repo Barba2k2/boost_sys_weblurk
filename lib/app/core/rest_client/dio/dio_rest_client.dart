@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../modules/core/auth/auth_store.dart';
+import '../../../features/auth/domain/entities/auth_store.dart';
 import '../../helpers/constants.dart';
 import '../../helpers/environments.dart';
 import '../../local_storage/local_storage.dart';
@@ -11,7 +11,6 @@ import '../rest_client_response.dart';
 import 'interceptors/auth_interceptors.dart';
 
 class DioRestClient implements RestClient {
-
   DioRestClient({
     required LocalStorage localStorage,
     required AppLogger logger,

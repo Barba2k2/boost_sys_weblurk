@@ -1,21 +1,16 @@
 import 'dart:io';
-import 'package:mobx/mobx.dart';
+import 'package:flutter/foundation.dart';
 import '../logger/app_logger.dart';
 import '../ui/widgets/messages.dart';
 
-part 'settings_controller.g.dart';
-
-class SettingsController = SettingsControllerBase with _$SettingsController;
-
-abstract class SettingsControllerBase with Store {
-  SettingsControllerBase({
+class SettingsController extends ChangeNotifier {
+  SettingsController({
     required AppLogger logger,
   }) : _logger = logger;
 
   final AppLogger _logger;
 
   // Método para encerrar o aplicativo
-  @action
   Future<void> terminateApp() async {
     try {
       if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -30,7 +25,6 @@ abstract class SettingsControllerBase with Store {
   }
 
   // Método para mutar o áudio do WebView
-  @action
   Future<void> muteAppAudio() async {
     try {
       if (Platform.isWindows) {
