@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:boost_sys_weblurk/app/core/ui/widgets/live_url_bar.dart';
+import 'package:boost_sys_weblurk/app/features/home/presentation/widgets/live_url_bar.dart';
 
 void main() {
   group(
