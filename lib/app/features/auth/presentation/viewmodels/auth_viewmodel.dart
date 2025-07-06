@@ -1,14 +1,15 @@
-
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/di.dart';
 import '../../../../core/local_storage/local_storage.dart';
 import '../../../../core/logger/app_logger.dart';
+import '../../../../core/rest_client/rest_client.dart';
 import '../../../../core/ui/widgets/loader.dart';
 import '../../../../core/ui/widgets/messages.dart';
 import '../../../../utils/utils.dart';
 import '../../data/datasources/auth_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
+import '../../domain/entities/auth_store.dart';
 import '../../domain/usecases/check_login_status_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
@@ -33,33 +34,33 @@ class AuthViewModel extends ChangeNotifier {
             LoginUseCase(
               AuthRepositoryImpl(
                 dataSource: AuthDataSourceImpl(
-                  restClient: di.get(),
-                  logger: di.get(),
+                  restClient: di.get<RestClient>(),
+                  logger: di.get<AppLogger>(),
                 ),
-                logger: di.get(),
-                authStore: di.get(),
+                logger: di.get<AppLogger>(),
+                authStore: di.get<AuthStore>(),
               ),
             ),
         _logoutUseCase = logoutUseCase ??
             LogoutUseCase(
               AuthRepositoryImpl(
                 dataSource: AuthDataSourceImpl(
-                  restClient: di.get(),
-                  logger: di.get(),
+                  restClient: di.get<RestClient>(),
+                  logger: di.get<AppLogger>(),
                 ),
-                logger: di.get(),
-                authStore: di.get(),
+                logger: di.get<AppLogger>(),
+                authStore: di.get<AuthStore>(),
               ),
             ),
         _checkLoginStatusUseCase = checkLoginStatusUseCase ??
             CheckLoginStatusUseCase(
               AuthRepositoryImpl(
                 dataSource: AuthDataSourceImpl(
-                  restClient: di.get(),
-                  logger: di.get(),
+                  restClient: di.get<RestClient>(),
+                  logger: di.get<AppLogger>(),
                 ),
-                logger: di.get(),
-                authStore: di.get(),
+                logger: di.get<AppLogger>(),
+                authStore: di.get<AuthStore>(),
               ),
             ),
         _localStorage = localStorage ?? di.get<LocalStorage>(),
