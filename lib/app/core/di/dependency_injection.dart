@@ -14,6 +14,8 @@ import '../logger/logger_app_logger_impl.dart';
 import '../rest_client/dio/dio_rest_client.dart';
 import '../rest_client/rest_client.dart';
 
+final getIt = GetIt.instance;
+
 class DependencyInjection {
   DependencyInjection._internal();
   factory DependencyInjection() => _instance;
