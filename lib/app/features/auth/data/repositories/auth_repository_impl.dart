@@ -1,67 +1,98 @@
+import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../utils/utils.dart';
+import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../../domain/entities/auth_store.dart';
-import '../datasources/auth_datasource.dart';
+import '../../domain/services/auth_service.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthDataSource _dataSource;
-  final AppLogger _logger;
-  final AuthStore _authStore;
-
   AuthRepositoryImpl({
-    required AuthDataSource dataSource,
+    required AuthService authService,
     required AppLogger logger,
-    required AuthStore authStore,
-  })  : _dataSource = dataSource,
-        _logger = logger,
-        _authStore = authStore;
+  })  : _authService = authService,
+        _logger = logger;
+
+  final AuthService _authService;
+  final AppLogger _logger;
 
   @override
-  Future<Result<void>> login(String nickname, String password) async {
+  Future<Result<UserEntity>> login(String username, String password) async {
     try {
-      _logger.info('Iniciando login para usuário: $nickname');
-
-      final result = await _dataSource.login(nickname, password);
-
-      if (result.isSuccess) {
-        final user = result.asSuccess;
-        await _authStore.setUserLogged(user);
-        _logger.info('Login realizado com sucesso para: ${user.nickname}');
-        return Result.ok(null);
-      } else {
-        _logger.error('Falha no login: ${result.asErrorValue}');
-        return Result.error(result.asErrorValue);
-      }
+      _logger.info('Repository: Iniciando login para usuário: $username');
+      
+      final data = await _authService.login(username, password);
+      
+      return Result.ok(data).when(
+        success: (user) {
+          _logger.info('Repository: Login realizado com sucesso para: ${user.username}');
+          return Result.ok(user);
+        },
+        error: (failure) {
+          _logger.error('Repository: Erro no login', failure);
+          return Result.error(failure);
+        },
+        loading: () {
+          _logger.info('Repository: Fazendo login...');
+          return Result.loading();
+        },
+      );
     } catch (e, s) {
-      _logger.error('Erro inesperado no login', e, s);
-      return Result.error(e as Exception);
+      _logger.error('Repository: Erro inesperado no login', e, s);
+      return Result.error(Failure('Erro no login: $e'));
     }
   }
 
   @override
   Future<Result<void>> logout() async {
     try {
-      _logger.info('Iniciando logout');
-      await _authStore.clearUserLogged();
-      await _dataSource.logout();
-      _logger.info('Logout realizado com sucesso');
-      return Result.ok(null);
+      _logger.info('Repository: Iniciando logout');
+      
+      await _authService.logout();
+      
+      return Result.ok(null).when(
+        success: (_) {
+          _logger.info('Repository: Logout realizado com sucesso');
+          return Result.ok(null);
+        },
+        error: (failure) {
+          _logger.error('Repository: Erro no logout', failure);
+          return Result.error(failure);
+        },
+        loading: () {
+          _logger.info('Repository: Fazendo logout...');
+          return Result.loading();
+        },
+      );
     } catch (e, s) {
-      _logger.error('Erro no logout', e, s);
-      return Result.error(e as Exception);
+      _logger.error('Repository: Erro inesperado no logout', e, s);
+      return Result.error(Failure('Erro no logout: $e'));
     }
   }
 
   @override
-  Future<Result<bool>> isLoggedIn() async {
+  Future<Result<bool>> checkLoginStatus() async {
     try {
-      final isLogged = _authStore.isLoggedIn;
-      _logger.info('Verificando login: $isLogged');
-      return Result.ok(isLogged);
+      _logger.info('Repository: Verificando status do login');
+      
+      final data = await _authService.checkLoginStatus();
+      
+      return Result.ok(data).when(
+        success: (isLoggedIn) {
+          _logger.info('Repository: Status do login verificado: $isLoggedIn');
+          return Result.ok(isLoggedIn);
+        },
+        error: (failure) {
+          _logger.error('Repository: Erro ao verificar status do login', failure);
+          return Result.error(failure);
+        },
+        loading: () {
+          _logger.info('Repository: Verificando status do login...');
+          return Result.loading();
+        },
+      );
     } catch (e, s) {
-      _logger.error('Erro ao verificar login', e, s);
-      return Result.error(e as Exception);
+      _logger.error('Repository: Erro inesperado ao verificar status do login', e, s);
+      return Result.error(Failure('Erro ao verificar status do login: $e'));
     }
   }
 }
