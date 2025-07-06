@@ -267,30 +267,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
-  flutter_mobx:
-    dependency: "direct main"
-    description:
-      name: flutter_mobx
-      sha256: ba5e93467866a2991259dc51cffd41ef45f695c667c2b8e7b087bf24118b50fe
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.0"
-  flutter_modular:
-    dependency: "direct main"
-    description:
-      name: flutter_modular
-      sha256: "061f0bcc8f8c438d4c82f4ff70a9e61f109961c92b4e1eaf1bbfab75f577fe0e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.3"
-  flutter_modular_annotations:
-    dependency: transitive
-    description:
-      name: flutter_modular_annotations
-      sha256: "65971655bdd30816a6a66651c801f4ceba6c8ba265f0866cc51ad038332c9a71"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.2"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -389,6 +365,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  go_router:
+    dependency: "direct main"
+    description:
+      name: go_router
+      sha256: f02fd7d2a4dc512fec615529824fdd217fecb3a3d3de68360293a551f21634b3
+      url: "https://pub.dev"
+    source: hosted
+    version: "14.8.1"
   google_fonts:
     dependency: "direct main"
     description:
@@ -550,7 +534,7 @@ packages:
     source: hosted
     version: "2.0.0"
   mobx:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: mobx
       sha256: bf1a90e5bcfd2851fc6984e20eef69557c65d9e4d0a88f5be4cf72c9819ce6b0
