@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:process_run/process_run.dart';
 
 import '../logger/app_logger.dart';
-import '../ui/widgets/messages.dart';
+import '../ui/widgets/messages/messages.dart';
 
 class UrlLaunchController extends ChangeNotifier {
   UrlLaunchController({
