@@ -2,6 +2,7 @@ import '../../../../core/logger/app_logger.dart';
 import '../../../../utils/utils.dart';
 import '../../domain/repositories/polling_repository.dart';
 import '../datasources/polling_datasource.dart';
+import 'package:result_dart/result_dart.dart';
 
 class PollingRepositoryImpl implements PollingRepository {
   final PollingDataSource _dataSource;
@@ -14,46 +15,46 @@ class PollingRepositoryImpl implements PollingRepository {
         _logger = logger;
 
   @override
-  Future<Result<void>> startPolling(int streamerId) async {
+  Future<Result<void, Exception>> startPolling(int streamerId) async {
     try {
       _logger.info('Iniciando polling via repository');
       return await _dataSource.startPolling(streamerId);
     } catch (e, s) {
       _logger.error('Erro inesperado ao iniciar polling', e, s);
-      return Result.error(e as Exception);
+      return Failure(Exception('Erro ao iniciar polling: $e'));
     }
   }
 
   @override
-  Future<Result<void>> stopPolling() async {
+  Future<Result<void, Exception>> stopPolling() async {
     try {
       _logger.info('Parando polling via repository');
       return await _dataSource.stopPolling();
     } catch (e, s) {
       _logger.error('Erro inesperado ao parar polling', e, s);
-      return Result.error(e as Exception);
+      return Failure(Exception('Erro ao parar polling: $e'));
     }
   }
 
   @override
-  Future<Result<void>> checkAndUpdateChannel() async {
+  Future<Result<void, Exception>> checkAndUpdateChannel() async {
     try {
       _logger.info('Verificando canal via repository');
       return await _dataSource.checkAndUpdateChannel();
     } catch (e, s) {
       _logger.error('Erro inesperado ao verificar canal', e, s);
-      return Result.error(e as Exception);
+      return Failure(Exception('Erro ao verificar canal: $e'));
     }
   }
 
   @override
-  Future<Result<void>> checkAndUpdateScore(int streamerId) async {
+  Future<Result<void, Exception>> checkAndUpdateScore(int streamerId) async {
     try {
       _logger.info('Verificando score via repository');
       return await _dataSource.checkAndUpdateScore(streamerId);
     } catch (e, s) {
       _logger.error('Erro inesperado ao verificar score', e, s);
-      return Result.error(e as Exception);
+      return Failure(Exception('Erro ao verificar score: $e'));
     }
   }
 
