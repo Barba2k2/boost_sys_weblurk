@@ -90,24 +90,17 @@ class PollingServiceImpl implements PollingService {
   Future<void> startPolling(int streamerId) async {
     try {
       // Verificação imediata do canal correto
-      final channelResult = await checkAndUpdateChannel();
-      if (channelResult.isError) {
-        _logger.error('Erro ao verificar canal inicial', channelResult.asErrorValue);
-        _healthController.add(false);
-        return Result.error(Failure(message: 'Erro ao verificar canal inicial'));
-      }
+      await checkAndUpdateChannel();
 
       _startTimers(streamerId);
       _startWatchdog(streamerId);
       _healthController.add(true);
 
       _startBackgroundWatcher(streamerId);
-      return Result.ok(null);
     } catch (e, s) {
       _logger.error('Erro ao iniciar polling services ${DateTime.now()}', e, s);
       _healthController.add(false);
       stopPolling();
-      return Result.error(Failure(message: 'Erro ao iniciar polling services'));
     }
   }
 
@@ -223,10 +216,8 @@ class PollingServiceImpl implements PollingService {
 
       _healthController.add(false);
       _logger.info('Polling services parados');
-      return Result.ok(null);
     } catch (e, s) {
       _logger.error('Erro ao parar polling services', e, s);
-      return Result.error(Failure(message: 'Erro ao parar polling services'));
     }
   }
 
@@ -234,22 +225,16 @@ class PollingServiceImpl implements PollingService {
   Future<void> checkAndUpdateChannel() async {
     try {
       final result = await _homeService.fetchCurrentChannel();
-      if (result.isError) {
-        _logger.error('Erro ao buscar canal atual', result.asErrorValue);
-        return Result.error(Failure(message: 'Erro ao buscar canal atual'));
+      if (result != null) {
+        if (result != _currentChannel) {
+          _currentChannel = result;
+          _channelController.add(result ?? '');
+          _logger.info('Canal atualizado: $result');
+        }
+        _lastChannelUpdate = DateTime.now();
       }
-
-      final currentChannel = result.asSuccess;
-      if (currentChannel != _currentChannel) {
-        _currentChannel = currentChannel;
-        _channelController.add(currentChannel ?? '');
-        _logger.info('Canal atualizado: $currentChannel');
-      }
-      _lastChannelUpdate = DateTime.now();
-      return Result.ok(null);
     } catch (e, s) {
       _logger.error('Erro ao verificar canal', e, s);
-      return Result.error(Failure(message: 'Erro ao verificar canal'));
     }
   }
 
@@ -264,32 +249,13 @@ class PollingServiceImpl implements PollingService {
         100,
       );
       
-      if (result.isError) {
-        _scoreErrorCount++;
-        _logger.error(
-            'Erro ao atualizar score (tentativa $_scoreErrorCount)', result.asErrorValue);
-
-        // Implement backoff strategy
-        if (_scoreErrorCount > 3) {
-          final backoffSeconds = min(
-            _initialBackoffSeconds * pow(2, _scoreErrorCount - 1),
-            _maxBackoffMinutes * 60,
-          );
-          _logger
-              .warning('Aplicando backoff de ${backoffSeconds.toInt()} segundos');
-          await Future.delayed(Duration(seconds: backoffSeconds.toInt()));
-        }
-        return Result.error(Failure(message: 'Erro ao atualizar score'));
-      }
-      
+      // Score atualizado com sucesso
       _lastScoreUpdate = DateTime.now();
       _scoreErrorCount = 0; // Reset error count on success
-      return Result.ok(null);
     } catch (e, s) {
       _scoreErrorCount++;
       _logger.error(
           'Erro ao atualizar score (tentativa $_scoreErrorCount)', e, s);
-      return Result.error(Failure(message: 'Erro ao atualizar score'));
     }
   }
 
