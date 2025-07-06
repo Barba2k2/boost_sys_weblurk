@@ -5,9 +5,6 @@ import '../../../../core/logger/app_logger.dart';
 import '../../../../core/rest_client/rest_client.dart';
 import '../../../../core/ui/widgets/loader.dart';
 import '../../../../core/ui/widgets/messages.dart';
-import '../../../../repositories/home/home_repository.dart';
-import '../../../../service/home/home_service_impl.dart';
-import '../../../../service/webview/windows_web_view_service_impl.dart';
 import '../../../../utils/utils.dart';
 import '../../data/datasources/home_datasource.dart';
 import '../../data/datasources/polling_datasource.dart';
@@ -82,10 +79,6 @@ class HomeViewModel extends ChangeNotifier {
             StartPollingWithIdUseCase(
               PollingRepositoryImpl(
                 dataSource: PollingDataSourceImpl(
-                  homeService: HomeServiceImpl(
-                    homeRepository: di.get<HomeRepository>(),
-                    logger: di.get<AppLogger>(),
-                  ),
                   logger: di.get<AppLogger>(),
                 ),
                 logger: di.get<AppLogger>(),
