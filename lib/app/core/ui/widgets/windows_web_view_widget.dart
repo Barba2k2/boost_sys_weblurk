@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 import '../../../service/webview/windows_web_view_service.dart';
 import '../../logger/app_logger.dart';
-import '../../../service/webview/windows_web_view_service_impl.dart';
+import '../../di/di.dart';
 
 class WindowsWebViewWidget extends StatefulWidget {
   const WindowsWebViewWidget({
@@ -37,9 +36,8 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
   // Flag para evitar múltiplas operações simultâneas
   bool _isOperationInProgress = false;
 
-  // Obter serviço através do Modular para comunicar atividade
-  WindowsWebViewService get _webViewService =>
-      Modular.get<WindowsWebViewService>();
+  // Obter serviço através da injeção de dependência para comunicar atividade
+  WindowsWebViewService get _webViewService => di.get<WindowsWebViewService>();
 
   @override
   void initState() {
@@ -287,9 +285,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
   void _notifyServiceOfActivity() {
     try {
       // Informamos ao serviço que o WebView está ativo
-      if (_webViewService is WindowsWebViewServiceImpl) {
-        (_webViewService as WindowsWebViewServiceImpl).notifyActivity();
-      }
+      _webViewService.notifyActivity();
     } catch (e) {
       widget.logger?.error('Erro ao notificar serviço de atividade: $e');
     }
