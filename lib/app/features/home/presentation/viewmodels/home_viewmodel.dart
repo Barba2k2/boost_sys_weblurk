@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/di/di.dart';
 import '../../../../core/logger/app_logger.dart';
+import '../../../../core/rest_client/rest_client.dart';
 import '../../../../core/ui/widgets/loader.dart';
 import '../../../../core/ui/widgets/messages.dart';
+import '../../../../repositories/home/home_repository.dart';
 import '../../../../service/home/home_service_impl.dart';
 import '../../../../service/webview/windows_web_view_service_impl.dart';
 import '../../../../utils/utils.dart';
@@ -60,20 +62,20 @@ class HomeViewModel extends ChangeNotifier {
             InitializeHomeUseCase(
               HomeRepositoryImpl(
                 dataSource: HomeDataSourceImpl(
-                  restClient: di.get(),
-                  logger: di.get(),
+                  restClient: di.get<RestClient>(),
+                  logger: di.get<AppLogger>(),
                 ),
-                logger: di.get(),
+                logger: di.get<AppLogger>(),
               ),
             ),
         _startPollingUseCase = startPollingUseCase ??
             StartPollingUseCase(
               HomeRepositoryImpl(
                 dataSource: HomeDataSourceImpl(
-                  restClient: di.get(),
-                  logger: di.get(),
+                  restClient: di.get<RestClient>(),
+                  logger: di.get<AppLogger>(),
                 ),
-                logger: di.get(),
+                logger: di.get<AppLogger>(),
               ),
             ),
         _startPollingWithIdUseCase = startPollingWithIdUseCase ??
@@ -81,22 +83,22 @@ class HomeViewModel extends ChangeNotifier {
               PollingRepositoryImpl(
                 dataSource: PollingDataSourceImpl(
                   homeService: HomeServiceImpl(
-                    homeRepository: di.get(),
-                    logger: di.get(),
+                    homeRepository: di.get<HomeRepository>(),
+                    logger: di.get<AppLogger>(),
                   ),
-                  logger: di.get(),
+                  logger: di.get<AppLogger>(),
                 ),
-                logger: di.get(),
+                logger: di.get<AppLogger>(),
               ),
             ),
         _stopPollingUseCase = stopPollingUseCase ??
             StopPollingUseCase(
               HomeRepositoryImpl(
                 dataSource: HomeDataSourceImpl(
-                  restClient: di.get(),
-                  logger: di.get(),
+                  restClient: di.get<RestClient>(),
+                  logger: di.get<AppLogger>(),
                 ),
-                logger: di.get(),
+                logger: di.get<AppLogger>(),
               ),
             ),
         _checkAndUpdateChannelUseCase = checkAndUpdateChannelUseCase ??
@@ -104,12 +106,12 @@ class HomeViewModel extends ChangeNotifier {
               PollingRepositoryImpl(
                 dataSource: PollingDataSourceImpl(
                   homeService: HomeServiceImpl(
-                    homeRepository: di.get(),
-                    logger: di.get(),
+                    homeRepository: di.get<HomeRepository>(),
+                    logger: di.get<AppLogger>(),
                   ),
-                  logger: di.get(),
+                  logger: di.get<AppLogger>(),
                 ),
-                logger: di.get(),
+                logger: di.get<AppLogger>(),
               ),
             ),
         _checkAndUpdateScoreUseCase = checkAndUpdateScoreUseCase ??
@@ -117,42 +119,45 @@ class HomeViewModel extends ChangeNotifier {
               PollingRepositoryImpl(
                 dataSource: PollingDataSourceImpl(
                   homeService: HomeServiceImpl(
-                    homeRepository: di.get(),
-                    logger: di.get(),
+                    homeRepository: di.get<HomeRepository>(),
+                    logger: di.get<AppLogger>(),
                   ),
-                  logger: di.get(),
+                  logger: di.get<AppLogger>(),
                 ),
-                logger: di.get(),
+                logger: di.get<AppLogger>(),
               ),
             ),
         _initializeWebViewUseCase = initializeWebViewUseCase ??
             InitializeWebViewUseCase(
               WebViewRepositoryImpl(
                 dataSource: WebViewDataSourceImpl(
-                  logger: di.get(),
-                  webViewService: WindowsWebViewServiceImpl(logger: di.get()),
+                  logger: di.get<AppLogger>(),
+                  webViewService:
+                      WindowsWebViewServiceImpl(logger: di.get<AppLogger>()),
                 ),
-                logger: di.get(),
+                logger: di.get<AppLogger>(),
               ),
             ),
         _loadUrlUseCase = loadUrlUseCase ??
             LoadUrlUseCase(
               WebViewRepositoryImpl(
                 dataSource: WebViewDataSourceImpl(
-                  logger: di.get(),
-                  webViewService: WindowsWebViewServiceImpl(logger: di.get()),
+                  logger: di.get<AppLogger>(),
+                  webViewService:
+                      WindowsWebViewServiceImpl(logger: di.get<AppLogger>()),
                 ),
-                logger: di.get(),
+                logger: di.get<AppLogger>(),
               ),
             ),
         _reloadWebViewUseCase = reloadWebViewUseCase ??
             ReloadWebViewUseCase(
               WebViewRepositoryImpl(
                 dataSource: WebViewDataSourceImpl(
-                  logger: di.get(),
-                  webViewService: WindowsWebViewServiceImpl(logger: di.get()),
+                  logger: di.get<AppLogger>(),
+                  webViewService:
+                      WindowsWebViewServiceImpl(logger: di.get<AppLogger>()),
                 ),
-                logger: di.get(),
+                logger: di.get<AppLogger>(),
               ),
             ),
         _logger = logger ?? di.get<AppLogger>() {
