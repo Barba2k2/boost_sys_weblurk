@@ -8,5 +8,6 @@ abstract interface class WindowsWebViewService {
   bool get isInitialized;
   WebviewController? get controller;
   Stream<bool> get healthStatus;
+  void notifyActivity();
   void dispose();
 }
