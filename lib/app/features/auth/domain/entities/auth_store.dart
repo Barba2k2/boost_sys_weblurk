@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import '../../../../core/helpers/constants.dart';
 import '../../../../core/local_storage/local_storage.dart';
 import '../../../../core/logger/app_logger.dart';
-import '../../../../models/user_model.dart';
+import 'user_entity.dart';
 
 class AuthStore extends ChangeNotifier {
   final LocalStorage _localStorage;
   final AppLogger _logger;
 
-  UserModel? _userLogged;
+  UserEntity? _userLogged;
   bool _isLoading = false;
 
   AuthStore({
@@ -20,7 +20,7 @@ class AuthStore extends ChangeNotifier {
   })  : _localStorage = localStorage,
         _logger = logger;
 
-  UserModel? get userLogged => _userLogged;
+  UserEntity? get userLogged => _userLogged;
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _userLogged != null && _userLogged!.id != 0;
 
@@ -35,7 +35,7 @@ class AuthStore extends ChangeNotifier {
 
       if (userJson != null) {
         try {
-          final userData = UserModel.fromJson(json.decode(userJson));
+          final userData = UserEntity.fromJson(userJson);
           _userLogged = userData;
           _logger.info('Usuário carregado: ${userData.nickname}');
         } catch (e) {
@@ -55,12 +55,12 @@ class AuthStore extends ChangeNotifier {
     }
   }
 
-  Future<void> setUserLogged(UserModel user) async {
+  Future<void> setUserLogged(UserEntity user) async {
     try {
       _userLogged = user;
       await _localStorage.write(
         Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
-        json.encode(user.toJson()),
+        user.toJson(),
       );
       _logger.info('Usuário salvo: ${user.nickname}');
       notifyListeners();
