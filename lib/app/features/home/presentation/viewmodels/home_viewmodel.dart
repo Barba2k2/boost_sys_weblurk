@@ -22,6 +22,12 @@ class HomeViewModel extends ChangeNotifier {
   late Command0<void> reloadWebView;
   late Command1<void, String> loadUrl;
 
+  String? _currentChannel;
+  bool _isInitializing = false;
+
+  String? get currentChannel => _currentChannel;
+  bool get isInitializing => _isInitializing;
+
   Future<Result<List<ScheduleListEntity>>> _loadSchedules() async {
     return await _repository.fetchScheduleLists();
   }
@@ -40,5 +46,15 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<Result<void>> _loadUrl(String url) async {
     return await _repository.loadUrl(url);
+  }
+
+  void _setCurrentChannel(String? channel) {
+    _currentChannel = channel;
+    notifyListeners();
+  }
+
+  void _setInitializing(bool initializing) {
+    _isInitializing = initializing;
+    notifyListeners();
   }
 }
