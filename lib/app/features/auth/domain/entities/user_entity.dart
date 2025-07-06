@@ -6,7 +6,7 @@ class UserEntity {
   UserEntity({
     required this.id,
     required this.nickname,
-    this.username,
+    required this.username,
     this.password,
     required this.role,
     required this.status,

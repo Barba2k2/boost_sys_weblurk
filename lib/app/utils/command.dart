@@ -8,8 +8,8 @@ abstract class Command<T> extends ChangeNotifier {
 
   bool get running => _running;
   Result<T>? get result => _result;
-  bool get error => _result is ErrorResult<T>;
-  bool get completed => _result is OkResult<T>;
+  bool get error => _result?.isError ?? false;
+  bool get completed => _result != null;
 
   Future<void> _execute(Future<Result<T>> Function() action) async {
     if (_running) return;

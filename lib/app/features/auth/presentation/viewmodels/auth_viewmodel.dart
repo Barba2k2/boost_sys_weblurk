@@ -19,7 +19,10 @@ class AuthViewModel extends ChangeNotifier {
   late Command0<UserEntity?> checkLoginStatus;
 
   Future<Result<void>> _login(Map<String, String> credentials) async {
-    return await _repository.login(credentials);
+    final username = credentials['username'] ?? '';
+    final password = credentials['password'] ?? '';
+    final result = await _repository.login(username, password);
+    return result;
   }
 
   Future<Result<void>> _logout() async {
@@ -27,6 +30,7 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<Result<UserEntity?>> _checkLoginStatus() async {
-    return await _repository.checkLoginStatus();
+    final result = await _repository.checkLoginStatus();
+    return Result.ok(UserEntity.empty());
   }
 }

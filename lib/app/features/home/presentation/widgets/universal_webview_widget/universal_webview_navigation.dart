@@ -14,7 +14,7 @@ class UniversalWebViewNavigation {
       onPageStarted: onPageStarted,
       onProgress: onProgress,
       onPageFinished: onPageFinished,
-      onNavigationRequest: onNavigationRequest,
+      onNavigationRequest: (request) async => onNavigationRequest(request),
       onWebResourceError: onWebResourceError,
     );
   }

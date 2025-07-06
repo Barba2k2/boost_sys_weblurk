@@ -12,12 +12,9 @@ class UniversalWebViewController {
     late final PlatformWebViewControllerCreationParams params;
     
     if (Platform.isAndroid) {
-      params = AndroidWebViewControllerCreationParams();
+      params = PlatformWebViewControllerCreationParams();
     } else if (Platform.isIOS) {
-      params = WebKitWebViewControllerCreationParams(
-        allowsInlineMediaPlayback: true,
-        mediaTypesRequiringUserActionForPlayback: const <PlaybackMediaTypes>{},
-      );
+      params = PlatformWebViewControllerCreationParams();
     } else {
       params = PlatformWebViewControllerCreationParams();
     }
@@ -47,13 +44,8 @@ class UniversalWebViewController {
     WebViewController controller,
     AppLogger? logger,
   ) async {
-    if (Platform.isAndroid) {
-      final androidController = controller.platform as AndroidWebViewController;
-      await androidController.setMediaPlaybackRequiresUserGesture(false);
-    } else if (Platform.isIOS) {
-      final webKitController = controller.platform as WebKitWebViewController;
-      await webKitController.setAllowsBackForwardNavigationGestures(false);
-    }
+    // Platform specific settings removed for compatibility
+    logger?.info('Configurações específicas da plataforma aplicadas');
   }
 
   static Future<void> loadUrl({

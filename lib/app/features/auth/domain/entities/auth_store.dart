@@ -35,7 +35,7 @@ class AuthStore extends ChangeNotifier {
 
       if (userJson != null) {
         try {
-          final userData = UserEntity.fromJson(userJson);
+          final userData = UserEntity.fromJson(jsonDecode(userJson));
           _userLogged = userData;
           _logger.info('Usuário carregado: ${userData.nickname}');
         } catch (e) {
