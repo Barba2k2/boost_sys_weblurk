@@ -1,305 +1,120 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:boost_sys_weblurk/app/repositories/user/user_repository.dart';
 import 'package:boost_sys_weblurk/app/repositories/user/user_repository_impl.dart';
 import 'package:boost_sys_weblurk/app/core/rest_client/rest_client.dart';
 import 'package:boost_sys_weblurk/app/core/rest_client/rest_client_response.dart';
-import 'package:boost_sys_weblurk/app/core/exceptions/failure.dart';
-import '../mocks/app_logger_mock.dart';
+import 'package:boost_sys_weblurk/app/core/logger/app_logger.dart';
+import 'package:boost_sys_weblurk/app/models/user_model.dart';
+import 'package:boost_sys_weblurk/app/models/confirm_login_model.dart';
+import 'package:mockito/mockito.dart';
 
-// Custom implementation of RestClient for testing
-class TestRestClient implements RestClient {
-  final Map<String, dynamic> responses = {};
-  final Map<String, dynamic> exceptions = {};
-  final List<Map<String, dynamic>> calls = [];
-  bool _isAuthenticated = false;
+class MockRestClient extends Mock implements RestClient {}
 
-  @override
-  RestClient auth() {
-    _isAuthenticated = true;
-    return this;
-  }
-
-  @override
-  RestClient unAuth() {
-    _isAuthenticated = false;
-    return this;
-  }
-
-  void setResponse(String method, String path, RestClientResponse response) {
-    responses['$method:$path'] = response;
-  }
-
-  void setException(String method, String path, dynamic exception) {
-    exceptions['$method:$path'] = exception;
-  }
-
-  @override
-  Future<RestClientResponse<T>> post<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-  }) async {
-    calls.add(
-      {
-        'method': 'POST',
-        'path': path,
-        'data': data,
-        'isAuthenticated': _isAuthenticated,
-      },
-    );
-
-    if (exceptions.containsKey('POST:$path')) {
-      throw exceptions['POST:$path'];
-    }
-
-    return responses['POST:$path'] as RestClientResponse<T>;
-  }
-
-  @override
-  Future<RestClientResponse<T>> get<T>(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-  }) async {
-    calls.add(
-      {
-        'method': 'GET',
-        'path': path,
-        'isAuthenticated': _isAuthenticated,
-      },
-    );
-
-    if (exceptions.containsKey('GET:$path')) {
-      throw exceptions['GET:$path'];
-    }
-
-    return responses['GET:$path'] as RestClientResponse<T>;
-  }
-
-  @override
-  Future<RestClientResponse<T>> patch<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-  }) async {
-    calls.add(
-      {
-        'method': 'PATCH',
-        'path': path,
-        'data': data,
-        'isAuthenticated': _isAuthenticated,
-      },
-    );
-
-    if (exceptions.containsKey('PATCH:$path')) {
-      throw exceptions['PATCH:$path'];
-    }
-
-    return responses['PATCH:$path'] as RestClientResponse<T>;
-  }
-
-  @override
-  Future<RestClientResponse<T>> put<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-  }) async {
-    throw UnimplementedError('Not needed for these tests');
-  }
-
-  @override
-  Future<RestClientResponse<T>> delete<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-  }) async {
-    throw UnimplementedError('Not needed for these tests');
-  }
-
-  @override
-  Future<RestClientResponse<T>> request<T>(
-    String path, {
-    required String method,
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
-  }) async {
-    throw UnimplementedError('Not needed for these tests');
-  }
-
-  // Helper methods for verification
-  bool wasMethodCalled(String method, String path) {
-    return calls.any(
-      (call) => call['method'] == method && call['path'] == path,
-    );
-  }
-
-  bool wasAuthUsed(String method, String path) {
-    return calls.any(
-      (call) => call['method'] == method && call['path'] == path && call['isAuthenticated'] == true,
-    );
-  }
-
-  bool wasUnAuthUsed(String method, String path) {
-    return calls.any(
-      (call) =>
-          call['method'] == method && call['path'] == path && call['isAuthenticated'] == false,
-    );
-  }
-
-  Map<String, dynamic>? getCallData(String method, String path) {
-    final call = calls.firstWhere(
-      (call) => call['method'] == method && call['path'] == path,
-      orElse: () => {},
-    );
-    return call['data'];
-  }
-}
+class MockAppLogger extends Mock implements AppLogger {}
 
 void main() {
-  late UserRepositoryImpl userRepository;
-  late TestRestClient restClient;
-  late MockAppLogger logger;
+  group('User Repository Tests', () {
+    late UserRepository userRepository;
+    late MockRestClient mockRestClient;
+    late MockAppLogger mockLogger;
 
-  setUp(
-    () {
-      restClient = TestRestClient();
-      logger = MockAppLogger();
+    setUp(() {
+      mockRestClient = MockRestClient();
+      mockLogger = MockAppLogger();
 
       userRepository = UserRepositoryImpl(
-        restClient: restClient,
-        logger: logger,
+        restClient: mockRestClient,
+        logger: mockLogger,
       );
-    },
-  );
+    });
 
-  group(
-    'UserRepository',
-    () {
-      test(
-        'login success returns access token',
-        () async {
-          // Arrange
-          restClient.setResponse(
-            'POST',
-            '/auth/login',
-            RestClientResponse(
-              data: {'access_token': 'test_token'},
-              statusCode: 200,
-            ),
-          );
+    test('should login successfully', () async {
+      // Arrange
+      const username = 'testuser';
+      const password = 'password123';
+      const token = 'valid_token';
 
-          // Act
-          final result = await userRepository.login('testuser', 'password123');
+      when(mockRestClient.unAuth()).thenReturn(mockRestClient);
+      when(mockRestClient.post('/auth/login', data: anyNamed('data')))
+          .thenAnswer(
+              (_) async => RestClientResponse(data: {'access_token': token}));
 
-          // Assert
-          expect(result, 'test_token');
-          expect(restClient.wasUnAuthUsed('POST', '/auth/login'), true);
-          expect(
-            restClient.getCallData('POST', '/auth/login'),
-            {
-              'nickname': 'testuser',
-              'password': 'password123',
-            },
-          );
-        },
-      );
+      // Act
+      final result = await userRepository.login(username, password);
 
-      test(
-        'login failure throws exception',
-        () async {
-          // Arrange
-          restClient.setException(
-            'POST',
-            '/auth/login',
-            Exception('Failed to login'),
-          );
+      // Assert
+      expect(result, equals(token));
+      verify(mockRestClient.unAuth()).called(1);
+      verify(mockRestClient.post('/auth/login', data: {
+        'nickname': username,
+        'password': password,
+      })).called(1);
+    });
 
-          // Act & Assert
-          expect(
-            () => userRepository.login('testuser', 'password123'),
-            throwsA(isA<Failure>()),
-          );
-        },
-      );
+    test('should confirm login successfully', () async {
+      // Arrange
+      final confirmData = {
+        'access_token': 'new_token',
+        'refresh_token': 'refresh_token',
+      };
 
-      test(
-        'confirmLogin returns model with tokens',
-        () async {
-          // Arrange
-          restClient.setResponse(
-            'PATCH',
-            '/auth/confirm',
-            RestClientResponse(
-              data: {'access_token': 'new_token', 'refresh_token': 'refresh_token'},
-              statusCode: 200,
-            ),
-          );
+      when(mockRestClient.auth()).thenReturn(mockRestClient);
+      when(mockRestClient.patch('/auth/confirm', data: anyNamed('data')))
+          .thenAnswer((_) async => RestClientResponse(data: confirmData));
 
-          // Act
-          final result = await userRepository.confirmLogin();
+      // Act
+      final result = await userRepository.confirmLogin();
 
-          // Assert
-          expect(result.accessToken, 'new_token');
-          expect(result.refreshToken, 'refresh_token');
-          expect(restClient.wasAuthUsed('PATCH', '/auth/confirm'), true);
-        },
-      );
+      // Assert
+      expect(result, isA<ConfirmLoginModel>());
+      verify(mockRestClient.auth()).called(1);
+      verify(mockRestClient.patch('/auth/confirm', data: anyNamed('data')))
+          .called(1);
+    });
 
-      test(
-        'getUserLogged returns user model',
-        () async {
-          // Arrange
-          restClient.setResponse(
-            'GET',
-            '/user/',
-            RestClientResponse(
-              data: {'id': 1, 'nickname': 'testuser', 'role': 'user', 'status': 'ON'},
-              statusCode: 200,
-            ),
-          );
+    test('should get user logged successfully', () async {
+      // Arrange
+      final userData = {
+        'id': 1,
+        'nickname': 'testuser',
+        'role': 'user',
+        'status': 'ON',
+      };
 
-          // Act
-          final result = await userRepository.getUserLogged();
+      when(mockRestClient.auth()).thenReturn(mockRestClient);
+      when(mockRestClient.get('/user/'))
+          .thenAnswer((_) async => RestClientResponse(data: userData));
 
-          // Assert
-          expect(result.id, 1);
-          expect(result.nickname, 'testuser');
-          expect(result.role, 'user');
-          expect(result.status, 'ON');
-          expect(restClient.wasAuthUsed('GET', '/user/'), true);
-        },
-      );
+      // Act
+      final result = await userRepository.getUserLogged();
 
-      test(
-        'updateLoginStatus calls correct endpoint',
-        () async {
-          // Arrange
-          restClient.setResponse(
-            'POST',
-            '/streamer/status/update',
-            RestClientResponse(
-              statusCode: 200,
-            ),
-          );
+      // Assert
+      expect(result, isA<UserModel>());
+      expect(result.id, equals(1));
+      expect(result.nickname, equals('testuser'));
+      verify(mockRestClient.auth()).called(1);
+      verify(mockRestClient.get('/user/')).called(1);
+    });
 
-          // Act
-          await userRepository.updateLoginStatus(1, 'ON');
+    test('should update login status successfully', () async {
+      // Arrange
+      const userId = 1;
+      const status = 'ON';
 
-          // Assert
-          expect(restClient.wasAuthUsed('POST', '/streamer/status/update'), true);
-          expect(
-            restClient.getCallData('POST', '/streamer/status/update'),
-            {
-              'streamerId': 1,
-              'status': 'ON',
-            },
-          );
-        },
-      );
-    },
-  );
+      when(mockRestClient.auth()).thenReturn(mockRestClient);
+      when(mockRestClient.post('/streamer/status/update',
+              data: anyNamed('data')))
+          .thenAnswer((_) async => RestClientResponse(data: {}));
+
+      // Act
+      await userRepository.updateLoginStatus(userId, status);
+
+      // Assert
+      verify(mockRestClient.auth()).called(1);
+      verify(mockRestClient.post('/streamer/status/update', data: {
+        'streamerId': userId,
+        'status': status,
+      })).called(1);
+    });
+  });
 }
