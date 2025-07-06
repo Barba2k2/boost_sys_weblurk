@@ -2,6 +2,8 @@ import 'package:get_it/get_it.dart';
 import '../../features/auth/domain/entities/auth_store.dart';
 import '../../features/home/data/services/home_service_impl.dart';
 import '../../features/home/domain/services/home_service.dart';
+import '../../features/home/domain/services/polling_service.dart';
+import '../../features/home/domain/services/webview_service.dart';
 import '../controllers/settings_controller.dart';
 import '../controllers/url_launch_controller.dart';
 import '../local_storage/flutter_secure_storage/flutter_secure_storage_local_storage_impl.dart';
@@ -51,6 +53,17 @@ class DependencyInjection {
     // Home services
     _getIt.registerSingleton<HomeService>(HomeServiceImpl(
       restClient: get<RestClient>(),
+      logger: get<AppLogger>(),
+    ));
+
+    // Polling service
+    _getIt.registerSingleton<PollingService>(PollingServiceImpl(
+      homeService: get<HomeService>(),
+      logger: get<AppLogger>(),
+    ));
+
+    // WebView service
+    _getIt.registerSingleton<WebViewService>(WebViewServiceImpl(
       logger: get<AppLogger>(),
     ));
 
