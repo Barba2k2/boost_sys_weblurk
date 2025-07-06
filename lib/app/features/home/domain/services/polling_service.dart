@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 
+import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
-import '../../../../service/home/home_service.dart';
+import '../../../../utils/utils.dart';
+import 'home_service.dart';
 
 abstract class PollingService {
   Future<void> startPolling(int streamerId);
@@ -11,6 +13,8 @@ abstract class PollingService {
   Future<void> checkAndUpdateScore(int streamerId);
   Stream<bool> get healthStatus;
   Stream<String> get channelUpdates;
+  bool isPollingActive();
+  void dispose();
 }
 
 class PollingServiceImpl implements PollingService {
@@ -86,18 +90,24 @@ class PollingServiceImpl implements PollingService {
   Future<void> startPolling(int streamerId) async {
     try {
       // Verificação imediata do canal correto
-      await checkAndUpdateChannel();
+      final channelResult = await checkAndUpdateChannel();
+      if (channelResult.isError) {
+        _logger.error('Erro ao verificar canal inicial', channelResult.asErrorValue);
+        _healthController.add(false);
+        return Result.error(Failure(message: 'Erro ao verificar canal inicial'));
+      }
 
       _startTimers(streamerId);
       _startWatchdog(streamerId);
       _healthController.add(true);
 
       _startBackgroundWatcher(streamerId);
+      return Result.ok(null);
     } catch (e, s) {
       _logger.error('Erro ao iniciar polling services ${DateTime.now()}', e, s);
       _healthController.add(false);
       stopPolling();
-      rethrow;
+      return Result.error(Failure(message: 'Erro ao iniciar polling services'));
     }
   }
 
@@ -198,64 +208,88 @@ class PollingServiceImpl implements PollingService {
 
   @override
   Future<void> stopPolling() async {
-    _logger.info('Parando polling services...');
+    try {
+      _logger.info('Parando polling services...');
 
-    _channelTimer?.cancel();
-    _scoreTimer?.cancel();
-    _watchdogTimer?.cancel();
-    _backgroundWatcherTimer?.cancel();
+      _channelTimer?.cancel();
+      _scoreTimer?.cancel();
+      _watchdogTimer?.cancel();
+      _backgroundWatcherTimer?.cancel();
 
-    _channelTimer = null;
-    _scoreTimer = null;
-    _watchdogTimer = null;
-    _backgroundWatcherTimer = null;
+      _channelTimer = null;
+      _scoreTimer = null;
+      _watchdogTimer = null;
+      _backgroundWatcherTimer = null;
 
-    _healthController.add(false);
-    _logger.info('Polling services parados');
+      _healthController.add(false);
+      _logger.info('Polling services parados');
+      return Result.ok(null);
+    } catch (e, s) {
+      _logger.error('Erro ao parar polling services', e, s);
+      return Result.error(Failure(message: 'Erro ao parar polling services'));
+    }
   }
 
   @override
   Future<void> checkAndUpdateChannel() async {
     try {
-      final currentChannel = await _homeService.fetchCurrentChannel();
+      final result = await _homeService.fetchCurrentChannel();
+      if (result.isError) {
+        _logger.error('Erro ao buscar canal atual', result.asErrorValue);
+        return Result.error(Failure(message: 'Erro ao buscar canal atual'));
+      }
+
+      final currentChannel = result.asSuccess;
       if (currentChannel != _currentChannel) {
         _currentChannel = currentChannel;
         _channelController.add(currentChannel ?? '');
         _logger.info('Canal atualizado: $currentChannel');
       }
       _lastChannelUpdate = DateTime.now();
+      return Result.ok(null);
     } catch (e, s) {
       _logger.error('Erro ao verificar canal', e, s);
+      return Result.error(Failure(message: 'Erro ao verificar canal'));
     }
   }
 
   @override
   Future<void> checkAndUpdateScore(int streamerId) async {
     try {
-      await _homeService.saveScore(
+      final result = await _homeService.saveScore(
         streamerId,
         DateTime.now(),
         DateTime.now().hour,
         DateTime.now().minute,
         100,
       );
+      
+      if (result.isError) {
+        _scoreErrorCount++;
+        _logger.error(
+            'Erro ao atualizar score (tentativa $_scoreErrorCount)', result.asErrorValue);
+
+        // Implement backoff strategy
+        if (_scoreErrorCount > 3) {
+          final backoffSeconds = min(
+            _initialBackoffSeconds * pow(2, _scoreErrorCount - 1),
+            _maxBackoffMinutes * 60,
+          );
+          _logger
+              .warning('Aplicando backoff de ${backoffSeconds.toInt()} segundos');
+          await Future.delayed(Duration(seconds: backoffSeconds.toInt()));
+        }
+        return Result.error(Failure(message: 'Erro ao atualizar score'));
+      }
+      
       _lastScoreUpdate = DateTime.now();
       _scoreErrorCount = 0; // Reset error count on success
+      return Result.ok(null);
     } catch (e, s) {
       _scoreErrorCount++;
       _logger.error(
           'Erro ao atualizar score (tentativa $_scoreErrorCount)', e, s);
-
-      // Implement backoff strategy
-      if (_scoreErrorCount > 3) {
-        final backoffSeconds = min(
-          _initialBackoffSeconds * pow(2, _scoreErrorCount - 1),
-          _maxBackoffMinutes * 60,
-        );
-        _logger
-            .warning('Aplicando backoff de ${backoffSeconds.toInt()} segundos');
-        await Future.delayed(Duration(seconds: backoffSeconds.toInt()));
-      }
+      return Result.error(Failure(message: 'Erro ao atualizar score'));
     }
   }
 
@@ -266,10 +300,12 @@ class PollingServiceImpl implements PollingService {
     }
   }
 
+  @override
   bool isPollingActive() {
     return _channelTimer?.isActive == true && _scoreTimer?.isActive == true;
   }
 
+  @override
   void dispose() {
     stopPolling();
     _healthController.close();
