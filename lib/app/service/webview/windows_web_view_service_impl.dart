@@ -37,7 +37,7 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
     final now = DateTime.now();
     if (_lastActivity != null) {
       final inactiveTime = now.difference(_lastActivity!);
-      
+
       if (inactiveTime > _inactivityThreshold) {
         final isAlive = await isResponding();
 
@@ -110,7 +110,8 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
 
     try {
       final now = DateTime.now();
-      if (_lastReload != null && now.difference(_lastReload!) < _minReloadInterval) {
+      if (_lastReload != null &&
+          now.difference(_lastReload!) < _minReloadInterval) {
         _logger.warning('Recarregamento muito frequente, aguardando...');
         await Future.delayed(
           _minReloadInterval - now.difference(_lastReload!),
@@ -157,6 +158,7 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
     }
   }
 
+  @override
   void notifyActivity() {
     _lastActivity = DateTime.now();
     _healthController.add(true);
