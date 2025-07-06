@@ -13,6 +13,10 @@ import '../logger/app_logger.dart';
 import '../logger/logger_app_logger_impl.dart';
 import '../rest_client/dio/dio_rest_client.dart';
 import '../rest_client/rest_client.dart';
+import '../../features/auth/domain/services/auth_service.dart';
+import '../../features/auth/data/services/auth_service_impl.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
 
 final getIt = GetIt.instance;
 
@@ -66,6 +70,18 @@ class DependencyInjection {
 
     // WebView service
     _getIt.registerSingleton<WebViewService>(WebViewServiceImpl(
+      logger: get<AppLogger>(),
+    ));
+
+    // Auth service
+    _getIt.registerSingleton<AuthService>(AuthServiceImpl(
+      restClient: get<RestClient>(),
+      logger: get<AppLogger>(),
+    ));
+
+    // Auth repository
+    _getIt.registerSingleton<AuthRepository>(AuthRepositoryImpl(
+      authService: get<AuthService>(),
       logger: get<AppLogger>(),
     ));
 
