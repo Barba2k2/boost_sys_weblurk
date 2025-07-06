@@ -6,6 +6,7 @@ class UserEntity {
   UserEntity({
     required this.id,
     required this.nickname,
+    this.username,
     this.password,
     required this.role,
     required this.status,
@@ -14,6 +15,7 @@ class UserEntity {
   UserEntity.empty()
       : id = 0,
         nickname = '',
+        username = '',
         password = '',
         role = '',
         status = 'OFF';
@@ -22,6 +24,7 @@ class UserEntity {
     return UserEntity(
       id: map['id'] ?? 0,
       nickname: map['nickname'] ?? '',
+      username: map['username'] ?? map['nickname'] ?? '',
       password: map['password'],
       role: map['role'] ?? '',
       status: map['status'] ?? 'OFF',
@@ -34,6 +37,7 @@ class UserEntity {
 
   final int id;
   final String nickname;
+  final String username;
   final String? password;
   final String role;
   final String status;
@@ -42,6 +46,7 @@ class UserEntity {
     return {
       'id': id,
       'nickname': nickname,
+      'username': username,
       'password': password,
       'role': role,
       'status': status,
@@ -53,6 +58,7 @@ class UserEntity {
   UserEntity copyWith({
     int? id,
     String? nickname,
+    String? username,
     ValueGetter<String?>? password,
     String? role,
     ValueGetter<String?>? streamerId,
@@ -61,6 +67,7 @@ class UserEntity {
     return UserEntity(
       id: id ?? this.id,
       nickname: nickname ?? this.nickname,
+      username: username ?? this.username,
       password: password != null ? password() : this.password,
       role: role ?? this.role,
       status: status ?? this.status,
