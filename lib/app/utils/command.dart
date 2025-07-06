@@ -1,42 +1,21 @@
-import 'package:flutter/widgets.dart';
-
+import 'package:flutter/foundation.dart';
 import 'result.dart';
 
-// Command 0 dont have input parameters
-typedef CommandAction0<Output> = Future<Result<Output>> Function();
-
-// Command 1 have input parameters
-typedef CommandAction1<Output, Input> = Future<Result<Output>> Function(Input);
-
-abstract class Command<Output> extends ChangeNotifier {
-  // Verify if the command is running
+abstract class Command<T> extends ChangeNotifier {
+  Command();
   bool _running = false;
+  Result<T>? _result;
 
   bool get running => _running;
+  Result<T>? get result => _result;
+  bool get error => _result is ErrorResult<T>;
+  bool get completed => _result is OkResult<T>;
 
-  // State representation => [Ok // Error // Null]
-  Result<Output>? _result;
-
-  Result<Output>? get result => _result;
-
-  // Verify if the state is completed
-  bool get completed => _result is Ok;
-
-  // Verify if the state is in error
-  bool get error => _result is Error;
-
-  // Execute the command
-  Future<void> _execute(CommandAction0<Output> action) async {
+  Future<void> _execute(Future<Result<T>> Function() action) async {
     if (_running) return;
-
-    // Action in progress
     _running = true;
-
-    // Reset the result
     _result = null;
-
     notifyListeners();
-
     try {
       _result = await action();
     } finally {
@@ -46,20 +25,14 @@ abstract class Command<Output> extends ChangeNotifier {
   }
 }
 
-class Command0<Output> extends Command<Output> {
-  final CommandAction0<Output> action;
-  Command0(this.action);
-
-  Future<void> execute() async {
-    await _execute(() => action());
-  }
+class Command0<T> extends Command<T> {
+  Command0(this._action);
+  final Future<Result<T>> Function() _action;
+  Future<void> execute() async => _execute(_action);
 }
 
-class Command1<Output, Input> extends Command<Output> {
-  final CommandAction1<Output, Input> action;
-  Command1(this.action);
-
-  Future<void> execute(Input input) async {
-    await _execute(() => action(input));
-  }
-}
+class Command1<T, A> extends Command<T> {
+  Command1(this._action);
+  final Future<Result<T>> Function(A) _action;
+  Future<void> execute(A arg) async => _execute(() => _action(arg));
+} 
