@@ -1,4 +1,4 @@
-import 'package:webview_windows/webview_windows.dart';
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 
 import '../../../../core/logger/app_logger.dart';
 import '../../../../utils/utils.dart';
@@ -16,7 +16,7 @@ class WebViewRepositoryImpl implements WebViewRepository {
         _logger = logger;
 
   @override
-  Future<Result<void>> initializeWebView(WebviewController controller) async {
+  Future<Result<void>> initializeWebView(Webview controller) async {
     try {
       _logger.info('Inicializando WebView via repository');
       return await _dataSource.initializeWebView(controller);
@@ -63,7 +63,7 @@ class WebViewRepositoryImpl implements WebViewRepository {
   bool get isInitialized => _dataSource.isInitialized;
 
   @override
-  WebviewController? get controller => _dataSource.controller;
+  Webview? get controller => _dataSource.controller;
 
   @override
   Stream<bool> get healthStatus => _dataSource.healthStatus;
