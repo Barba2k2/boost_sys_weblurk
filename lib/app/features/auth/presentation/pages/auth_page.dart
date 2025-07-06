@@ -3,7 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:validatorless/validatorless.dart';
 
 import '../../../../core/ui/widgets/boost_text_form_field.dart';
+import '../../../../core/di/dependency_injection.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../viewmodels/auth_viewmodel.dart';
+
+import 'package:boost_sys_weblurk/app/core/di/dependency_injection.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -21,9 +25,9 @@ class _AuthPageState extends State<AuthPage> {
   @override
   void initState() {
     super.initState();
-    _viewModel = AuthViewModel();
+    _viewModel = AuthViewModel(repository: getIt<AuthRepository>());
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.checkUserLogged();
+      _viewModel.checkLoginStatus.execute();
     });
   }
 
@@ -40,7 +44,10 @@ class _AuthPageState extends State<AuthPage> {
     if (formValid) {
       final nickname = _nicknameEC.text.trim();
       final password = _passwordEC.text.trim();
-      _viewModel.login(nickname: nickname, password: password);
+      _viewModel.login.execute({
+        'username': nickname,
+        'password': password,
+      });
     }
   }
 
@@ -63,7 +70,7 @@ class _AuthPageState extends State<AuthPage> {
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Colors.black.withOpacity(0.5),
                     blurRadius: 10,
                     spreadRadius: 5,
                     offset: const Offset(0, 5),
