@@ -709,6 +709,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  result_command:
+    dependency: "direct main"
+    description:
+      name: result_command
+      sha256: cb09b81ececcf7c1f41ab51829dec20fd8dc668d3941b8bd583655fd7e2689da
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.0"
+  result_dart:
+    dependency: transitive
+    description:
+      name: result_dart
+      sha256: "0666b21fbdf697b3bdd9986348a380aa204b3ebe7c146d8e4cdaa7ce735e6054"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.1"
   screen_retriever:
     dependency: transitive
     description:
