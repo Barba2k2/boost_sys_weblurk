@@ -4,16 +4,12 @@ import 'package:desktop_webview_window/desktop_webview_window.dart';
 
 import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
+import '../../../../utils/utils.dart';
 
 abstract class WebViewService {
-  Future<void> initializeWebView(Webview controller);
+  Future<void> initializeWebView(dynamic controller);
   Future<void> loadUrl(String url);
-  Future<void> reload();
-  Future<bool> isResponding();
-  bool get isInitialized;
-  Webview? get controller;
-  Stream<bool> get healthStatus;
-  void dispose();
+  Future<void> reloadWebView();
 }
 
 class WebViewServiceImpl implements WebViewService {
@@ -50,9 +46,9 @@ class WebViewServiceImpl implements WebViewService {
       final inactiveTime = now.difference(_lastActivity!);
 
       if (inactiveTime > _inactivityThreshold) {
-        final isAlive = await isResponding();
+        final result = await isResponding();
 
-        if (!isAlive) {
+        if (result.isError || !result.asSuccess) {
           _healthController.add(false);
         } else {
           _lastActivity = now;
@@ -71,7 +67,7 @@ class WebViewServiceImpl implements WebViewService {
   bool get isInitialized => _controller != null;
 
   @override
-  Future<void> initializeWebView(Webview controller) async {
+  Future<Result<void>> initializeWebView(Webview controller) async {
     try {
       _controller = controller;
 
@@ -92,19 +88,20 @@ class WebViewServiceImpl implements WebViewService {
       _lastActivity = DateTime.now();
       _healthController.add(true);
       _logger.info('WebView initialized successfully');
+      return Result.ok(null);
     } catch (e, s) {
       _logger.error('Error initializing WebView', e, s);
       _healthController.add(false);
       _controller = null;
-      throw Failure(message: 'Erro ao inicializar WebView');
+      return Result.error(Failure(message: 'Erro ao inicializar WebView'));
     }
   }
 
   @override
-  Future<void> loadUrl(String url) async {
+  Future<Result<void>> loadUrl(String url) async {
     if (_controller == null) {
       _healthController.add(false);
-      throw Failure(message: 'WebView não inicializado');
+      return Result.error(Failure(message: 'WebView não inicializado'));
     }
 
     try {
@@ -132,19 +129,20 @@ class WebViewServiceImpl implements WebViewService {
       _lastActivity = DateTime.now();
       _healthController.add(true);
       _logger.info('URL carregada com sucesso: $url');
+      return Result.ok(null);
     } catch (e, s) {
       _logger.error('Error loading URL: $url', e, s);
       _healthController.add(false);
-      if (e is Failure) rethrow;
-      throw Failure(message: 'Erro ao carregar URL');
+      if (e is Failure) return Result.error(e);
+      return Result.error(Failure(message: 'Erro ao carregar URL'));
     }
   }
 
   @override
-  Future<void> reload() async {
+  Future<Result<void>> reload() async {
     if (_controller == null) {
       _healthController.add(false);
-      throw Failure(message: 'WebView não inicializado');
+      return Result.error(Failure(message: 'WebView não inicializado'));
     }
 
     try {
@@ -179,19 +177,20 @@ class WebViewServiceImpl implements WebViewService {
       _lastActivity = DateTime.now();
       _healthController.add(true);
       _logger.info('WebView recarregado com sucesso');
+      return Result.ok(null);
     } catch (e, s) {
       _logger.error('Error reloading WebView', e, s);
       _healthController.add(false);
-      if (e is Failure) rethrow;
-      throw Failure(message: 'Erro ao recarregar página');
+      if (e is Failure) return Result.error(e);
+      return Result.error(Failure(message: 'Erro ao recarregar página'));
     }
   }
 
   @override
-  Future<bool> isResponding() async {
+  Future<Result<bool>> isResponding() async {
     if (_controller == null) {
       _healthController.add(false);
-      return false;
+      return Result.ok(false);
     }
 
     try {
@@ -213,10 +212,11 @@ class WebViewServiceImpl implements WebViewService {
         completer.complete(true);
       }
 
-      return await completer.future;
+      final result = await completer.future;
+      return Result.ok(result);
     } catch (e, s) {
       _logger.error('Error checking WebView response', e, s);
-      return false;
+      return Result.ok(false);
     }
   }
 
