@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 
-import 'app/app_module.dart';
 import 'app/app_widget.dart';
 import 'app/core/application_config.dart';
+import 'app/core/di/di.dart';
 
 Future<void> main() async {
   await ApplicationConfig().consfigureApp();
 
-  runApp(
-    ModularApp(
-      module: AppModule(),
-      child: const AppWidget(),
-    ),
-  );
+  // Initialize dependency injection
+  di.initialize();
+
+  runApp(const AppWidget());
 }
