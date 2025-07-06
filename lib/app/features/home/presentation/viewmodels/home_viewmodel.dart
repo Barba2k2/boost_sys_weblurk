@@ -3,6 +3,7 @@ import '../../../../utils/command.dart';
 import '../../domain/entities/schedule_list_entity.dart';
 import '../../domain/repositories/home_repository.dart';
 import '../../../../utils/result.dart';
+import 'package:boost_sys_weblurk/app/utils/result.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({required HomeRepository repository})
@@ -12,6 +13,7 @@ class HomeViewModel extends ChangeNotifier {
     stopPolling = Command0<void>(_stopPolling);
     reloadWebView = Command0<void>(_reloadWebView);
     loadUrl = Command1<void, String>(_loadUrl);
+    initializeHome = Command0<void>(_initializeHome);
   }
 
   final HomeRepository _repository;
@@ -21,12 +23,15 @@ class HomeViewModel extends ChangeNotifier {
   late Command0<void> stopPolling;
   late Command0<void> reloadWebView;
   late Command1<void, String> loadUrl;
+  late Command0<void> initializeHome;
 
   String? _currentChannel;
   bool _isInitializing = false;
+  String? _initialUrl;
 
   String? get currentChannel => _currentChannel;
   bool get isInitializing => _isInitializing;
+  String? get initialUrl => _initialUrl;
 
   Future<Result<List<ScheduleListEntity>>> _loadSchedules() async {
     return await _repository.fetchScheduleLists();
@@ -48,6 +53,30 @@ class HomeViewModel extends ChangeNotifier {
     return await _repository.loadUrl(url);
   }
 
+  Future<Result<void>> _initializeHome() async {
+    _setInitializing(true);
+    try {
+      // Busca o canal atual primeiro
+      final channelResult = await _repository.fetchCurrentChannel();
+      final schedulesResult = await _repository.fetchScheduleLists();
+      
+      if (channelResult is Ok<String?>) {
+        final channel = channelResult.value;
+        _setCurrentChannel(channel);
+        _setInitialUrl(channel ?? 'https://www.twitch.tv/BootTeam_');
+      } else {
+        _setInitialUrl('https://www.twitch.tv/BootTeam_');
+      }
+      
+      // Inicia o polling automaticamente após carregar os dados
+      _startPolling(0);
+      
+      return Result.ok(null);
+    } finally {
+      _setInitializing(false);
+    }
+  }
+
   void _setCurrentChannel(String? channel) {
     _currentChannel = channel;
     notifyListeners();
@@ -55,6 +84,11 @@ class HomeViewModel extends ChangeNotifier {
 
   void _setInitializing(bool initializing) {
     _isInitializing = initializing;
+    notifyListeners();
+  }
+
+  void _setInitialUrl(String? url) {
+    _initialUrl = url;
     notifyListeners();
   }
 }
