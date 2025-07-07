@@ -42,11 +42,4 @@ class AppFailure<T> extends AppResult<T> {
 
   @override
   Exception? get error => exception;
-}
-
-/// Funções utilitárias para conversão
-extension ResultDartAdapter<T> on rd.Result<T, Exception> {
-  AppResult<T> toAppResult() {
-    return isSuccess() ? AppSuccess<T>(getOrNull() as T) : AppFailure<T>(exceptionOrNull()!);
-  }
 } 
