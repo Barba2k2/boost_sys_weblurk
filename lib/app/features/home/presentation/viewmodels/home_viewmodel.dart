@@ -1,21 +1,29 @@
 import 'package:flutter/foundation.dart';
+import '../../../../core/result/result.dart';
 import '../../../../utils/command.dart';
+import '../../../auth/domain/entities/auth_store.dart';
 import '../../domain/entities/schedule_list_entity.dart';
 import '../../domain/repositories/home_repository.dart';
-import 'package:result_dart/result_dart.dart';
 
 class HomeViewModel extends ChangeNotifier {
-  HomeViewModel({required HomeRepository repository})
-      : _repository = repository {
+  HomeViewModel({
+    required HomeRepository repository,
+    required AuthStore authStore,
+  })  : _repository = repository,
+        _authStore = authStore {
     loadSchedules = Command0<List<ScheduleListEntity>>(_loadSchedules);
     startPolling = Command1<void, int>(_startPolling);
     stopPolling = Command0<void>(_stopPolling);
     reloadWebView = Command0<void>(_reloadWebView);
     loadUrl = Command1<void, String>(_loadUrl);
     initializeHome = Command0<void>(_initializeHome);
+    
+    // Escuta mudanças no AuthStore para reiniciar o polling quando necessário
+    _authStore.addListener(_onAuthStateChanged);
   }
 
   final HomeRepository _repository;
+  final AuthStore _authStore;
 
   late Command0<List<ScheduleListEntity>> loadSchedules;
   late Command1<void, int> startPolling;
@@ -32,40 +40,55 @@ class HomeViewModel extends ChangeNotifier {
   bool get isInitializing => _isInitializing;
   String? get initialUrl => _initialUrl;
 
-  Future<Result<List<ScheduleListEntity>, Exception>> _loadSchedules() async {
+  void _onAuthStateChanged() {
+    // Se o usuário fez login, inicia o polling
+    if (_authStore.isLoggedIn) {
+      _startPolling(0);
+    } else {
+      // Se o usuário fez logout, para o polling
+      _stopPolling();
+    }
+  }
+
+  Future<AppResult<List<ScheduleListEntity>>> _loadSchedules() async {
     return await _repository.fetchScheduleLists();
   }
 
-  Future<Result<void, Exception>> _startPolling(int streamerId) async {
+  Future<AppResult<void>> _startPolling(int streamerId) async {
     return await _repository.startPolling(streamerId);
   }
 
-  Future<Result<void, Exception>> _stopPolling() async {
+  Future<AppResult<void>> _stopPolling() async {
     return await _repository.stopPolling();
   }
 
-  Future<Result<void, Exception>> _reloadWebView() async {
+  Future<AppResult<void>> _reloadWebView() async {
     return await _repository.reloadWebView();
   }
 
-  Future<Result<void, Exception>> _loadUrl(String url) async {
+  Future<AppResult<void>> _loadUrl(String url) async {
     return await _repository.loadUrl(url);
   }
 
-  Future<Result<void, Exception>> _initializeHome() async {
+  Future<AppResult<void>> _initializeHome() async {
     _setInitializing(true);
     try {
       final channelResult = await _repository.fetchCurrentChannel();
       final schedulesResult = await _repository.fetchScheduleLists();
-      if (channelResult.isSuccess()) {
-        final channel = channelResult.getOrNull();
+      if (channelResult.isSuccess) {
+        final channel = channelResult.data;
         _setCurrentChannel(channel);
         _setInitialUrl(channel ?? 'https://www.twitch.tv/BootTeam_');
       } else {
         _setInitialUrl('https://www.twitch.tv/BootTeam_');
       }
-      _startPolling(0);
-      return Success(null);
+      
+      // Só inicia o polling se o usuário estiver logado
+      if (_authStore.isLoggedIn) {
+        _startPolling(0);
+      }
+      
+      return AppSuccess(null);
     } finally {
       _setInitializing(false);
     }
@@ -84,5 +107,11 @@ class HomeViewModel extends ChangeNotifier {
   void _setInitialUrl(String? url) {
     _initialUrl = url;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _authStore.removeListener(_onAuthStateChanged);
+    super.dispose();
   }
 }
