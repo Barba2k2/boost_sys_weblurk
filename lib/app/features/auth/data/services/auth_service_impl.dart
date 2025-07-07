@@ -17,7 +17,7 @@ class AuthServiceImpl implements AuthService {
   Future<UserEntity> login(String username, String password) async {
     _logger.info('Fazendo login para usuário: $username');
     final response = await _restClient.post('/auth/login', data: {
-      'username': username,
+      'nickname': username,
       'password': password,
     });
     return UserEntity.fromJson(response.data);
