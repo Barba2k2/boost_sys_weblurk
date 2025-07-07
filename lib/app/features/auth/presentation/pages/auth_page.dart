@@ -4,6 +4,7 @@ import 'package:validatorless/validatorless.dart';
 
 import '../../../../core/ui/widgets/boost_text_form_field.dart';
 import '../../../../core/di/dependency_injection.dart';
+import '../../domain/entities/auth_store.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../viewmodels/auth_viewmodel.dart';
 
@@ -25,10 +26,10 @@ class _AuthPageState extends State<AuthPage> {
   @override
   void initState() {
     super.initState();
-    _viewModel = AuthViewModel(repository: getIt<AuthRepository>());
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.checkLoginStatus.execute();
-    });
+    _viewModel = AuthViewModel(
+      repository: getIt<AuthRepository>(),
+      authStore: getIt<AuthStore>(),
+    );
   }
 
   @override
@@ -45,7 +46,7 @@ class _AuthPageState extends State<AuthPage> {
       final nickname = _nicknameEC.text.trim();
       final password = _passwordEC.text.trim();
       _viewModel.login.execute({
-        'username': nickname,
+        'nickname': nickname,
         'password': password,
       });
     }
