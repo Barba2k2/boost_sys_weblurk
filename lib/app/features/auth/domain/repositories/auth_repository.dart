@@ -1,9 +1,8 @@
-import '../../../../utils/utils.dart';
 import '../entities/user_entity.dart';
-import 'package:result_dart/result_dart.dart';
+import '../../../../core/result/result.dart';
 
 abstract class AuthRepository {
-  Future<Result<UserEntity, Exception>> login(String username, String password);
-  Future<Result<void, Exception>> logout();
-  Future<Result<bool, Exception>> checkLoginStatus();
+  Future<AppResult<Map<String, dynamic>>> login(String nickname, String password);
+  Future<AppResult<void>> logout();
+  Future<AppResult<bool>> checkLoginStatus();
 }
