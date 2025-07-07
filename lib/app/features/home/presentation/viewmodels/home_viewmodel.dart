@@ -2,8 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../utils/command.dart';
 import '../../domain/entities/schedule_list_entity.dart';
 import '../../domain/repositories/home_repository.dart';
-import '../../../../utils/result.dart';
-import 'package:boost_sys_weblurk/app/utils/result.dart';
+import 'package:result_dart/result_dart.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({required HomeRepository repository})
@@ -33,45 +32,40 @@ class HomeViewModel extends ChangeNotifier {
   bool get isInitializing => _isInitializing;
   String? get initialUrl => _initialUrl;
 
-  Future<Result<List<ScheduleListEntity>>> _loadSchedules() async {
+  Future<Result<List<ScheduleListEntity>, Exception>> _loadSchedules() async {
     return await _repository.fetchScheduleLists();
   }
 
-  Future<Result<void>> _startPolling(int streamerId) async {
+  Future<Result<void, Exception>> _startPolling(int streamerId) async {
     return await _repository.startPolling(streamerId);
   }
 
-  Future<Result<void>> _stopPolling() async {
+  Future<Result<void, Exception>> _stopPolling() async {
     return await _repository.stopPolling();
   }
 
-  Future<Result<void>> _reloadWebView() async {
+  Future<Result<void, Exception>> _reloadWebView() async {
     return await _repository.reloadWebView();
   }
 
-  Future<Result<void>> _loadUrl(String url) async {
+  Future<Result<void, Exception>> _loadUrl(String url) async {
     return await _repository.loadUrl(url);
   }
 
-  Future<Result<void>> _initializeHome() async {
+  Future<Result<void, Exception>> _initializeHome() async {
     _setInitializing(true);
     try {
-      // Busca o canal atual primeiro
       final channelResult = await _repository.fetchCurrentChannel();
       final schedulesResult = await _repository.fetchScheduleLists();
-      
-      if (channelResult is Ok<String?>) {
-        final channel = channelResult.value;
+      if (channelResult.isSuccess()) {
+        final channel = channelResult.getOrNull();
         _setCurrentChannel(channel);
         _setInitialUrl(channel ?? 'https://www.twitch.tv/BootTeam_');
       } else {
         _setInitialUrl('https://www.twitch.tv/BootTeam_');
       }
-      
-      // Inicia o polling automaticamente após carregar os dados
       _startPolling(0);
-      
-      return Result.ok(null);
+      return Success(null);
     } finally {
       _setInitializing(false);
     }
