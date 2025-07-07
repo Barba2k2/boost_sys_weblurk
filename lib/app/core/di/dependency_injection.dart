@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import '../../features/auth/domain/entities/auth_store.dart';
 import '../../features/home/data/services/home_service_impl.dart';
+import '../../features/home/data/services/polling_service_impl.dart';
 import '../../features/home/domain/services/home_service.dart';
 import '../../features/home/domain/services/polling_service.dart';
 import '../../features/home/domain/services/webview_service.dart';
@@ -66,6 +67,7 @@ class DependencyInjection {
     _getIt.registerSingleton<PollingService>(PollingServiceImpl(
       homeService: get<HomeService>(),
       logger: get<AppLogger>(),
+      authStore: get<AuthStore>(),
     ));
 
     // WebView service
