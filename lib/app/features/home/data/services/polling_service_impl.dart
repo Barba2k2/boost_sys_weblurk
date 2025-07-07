@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import '../../../../core/logger/app_logger.dart';
+import '../../../auth/domain/entities/auth_store.dart';
 import '../../domain/services/home_service.dart';
 import '../../domain/services/polling_service.dart';
 
@@ -9,13 +10,16 @@ class PollingServiceImpl implements PollingService {
   PollingServiceImpl({
     required HomeService homeService,
     required AppLogger logger,
+    required AuthStore authStore,
   })  : _homeService = homeService,
-        _logger = logger {
+        _logger = logger,
+        _authStore = authStore {
     _setupSystemLifecycleDetection();
   }
 
   final HomeService _homeService;
   final AppLogger _logger;
+  final AuthStore _authStore;
   Timer? _channelTimer;
   Timer? _scoreTimer;
   Timer? _watchdogTimer;
@@ -76,6 +80,12 @@ class PollingServiceImpl implements PollingService {
 
   @override
   Future<void> startPolling(int streamerId) async {
+    // Verifica se o usuário está logado antes de iniciar o polling
+    if (!_authStore.isLoggedIn) {
+      _logger.info('Usuário não está logado, polling não será iniciado');
+      return;
+    }
+
     _logger.info('Iniciando polling services... ${DateTime.now()}');
 
     // Verificação imediata do canal correto
@@ -95,6 +105,13 @@ class PollingServiceImpl implements PollingService {
 
     _backgroundWatcherTimer =
         Timer.periodic(const Duration(minutes: 10), (timer) {
+      // Verifica se o usuário ainda está logado
+      if (!_authStore.isLoggedIn) {
+        _logger.info('Usuário não está mais logado, parando polling');
+        stopPolling();
+        return;
+      }
+
       if (!isPollingActive()) {
         _logger.info(
           'Polling inativo detectado pelo background watcher, reiniciando...',
@@ -135,6 +152,13 @@ class PollingServiceImpl implements PollingService {
   }
 
   void _checkAndRestartIfNeeded(int streamerId) {
+    // Verifica se o usuário ainda está logado
+    if (!_authStore.isLoggedIn) {
+      _logger.info('Usuário não está mais logado, parando polling');
+      stopPolling();
+      return;
+    }
+
     final now = DateTime.now();
     bool needsRestart = false;
 
@@ -204,6 +228,12 @@ class PollingServiceImpl implements PollingService {
 
   @override
   Future<void> checkAndUpdateChannel() async {
+    // Verifica se o usuário está logado antes de fazer a chamada
+    if (!_authStore.isLoggedIn) {
+      _logger.info('Usuário não está logado, pulando verificação de canal');
+      return;
+    }
+
     try {
       final channel = await _homeService.fetchCurrentChannel();
       
@@ -220,6 +250,12 @@ class PollingServiceImpl implements PollingService {
 
   @override
   Future<void> checkAndUpdateScore(int streamerId) async {
+    // Verifica se o usuário está logado antes de fazer a chamada
+    if (!_authStore.isLoggedIn) {
+      _logger.info('Usuário não está logado, pulando atualização de score');
+      return;
+    }
+
     try {
       final now = DateTime.now();
       await _homeService.saveScore(
