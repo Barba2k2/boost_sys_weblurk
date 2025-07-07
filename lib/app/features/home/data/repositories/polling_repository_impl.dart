@@ -2,7 +2,7 @@ import '../../../../core/logger/app_logger.dart';
 import '../../../../utils/utils.dart';
 import '../../domain/repositories/polling_repository.dart';
 import '../datasources/polling_datasource.dart';
-import 'package:result_dart/result_dart.dart';
+import '../../../../core/result/result.dart';
 
 class PollingRepositoryImpl implements PollingRepository {
   final PollingDataSource _dataSource;
@@ -15,46 +15,50 @@ class PollingRepositoryImpl implements PollingRepository {
         _logger = logger;
 
   @override
-  Future<Result<void, Exception>> startPolling(int streamerId) async {
+  Future<AppResult<void>> startPolling(int streamerId) async {
     try {
       _logger.info('Iniciando polling via repository');
-      return await _dataSource.startPolling(streamerId);
+      await _dataSource.startPolling(streamerId);
+      return AppSuccess(null);
     } catch (e, s) {
       _logger.error('Erro inesperado ao iniciar polling', e, s);
-      return Failure(Exception('Erro ao iniciar polling: $e'));
+      return AppFailure(Exception('Erro ao iniciar polling: $e'));
     }
   }
 
   @override
-  Future<Result<void, Exception>> stopPolling() async {
+  Future<AppResult<void>> stopPolling() async {
     try {
       _logger.info('Parando polling via repository');
-      return await _dataSource.stopPolling();
+      await _dataSource.stopPolling();
+      return AppSuccess(null);
     } catch (e, s) {
       _logger.error('Erro inesperado ao parar polling', e, s);
-      return Failure(Exception('Erro ao parar polling: $e'));
+      return AppFailure(Exception('Erro ao parar polling: $e'));
     }
   }
 
   @override
-  Future<Result<void, Exception>> checkAndUpdateChannel() async {
+  Future<AppResult<void>> checkAndUpdateChannel() async {
     try {
       _logger.info('Verificando canal via repository');
-      return await _dataSource.checkAndUpdateChannel();
+      await _dataSource.checkAndUpdateChannel();
+      return AppSuccess(null);
     } catch (e, s) {
       _logger.error('Erro inesperado ao verificar canal', e, s);
-      return Failure(Exception('Erro ao verificar canal: $e'));
+      return AppFailure(Exception('Erro ao verificar canal: $e'));
     }
   }
 
   @override
-  Future<Result<void, Exception>> checkAndUpdateScore(int streamerId) async {
+  Future<AppResult<void>> checkAndUpdateScore(int streamerId) async {
     try {
       _logger.info('Verificando score via repository');
-      return await _dataSource.checkAndUpdateScore(streamerId);
+      await _dataSource.checkAndUpdateScore(streamerId);
+      return AppSuccess(null);
     } catch (e, s) {
       _logger.error('Erro inesperado ao verificar score', e, s);
-      return Failure(Exception('Erro ao verificar score: $e'));
+      return AppFailure(Exception('Erro ao verificar score: $e'));
     }
   }
 
