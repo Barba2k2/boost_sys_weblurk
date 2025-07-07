@@ -33,15 +33,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     _logger = getIt<AppLogger>();
     _authStore = getIt<AuthStore>();
-    _viewModel = HomeViewModel(repository: getIt<HomeRepository>());
+    _viewModel = HomeViewModel(
+      repository: getIt<HomeRepository>(),
+      authStore: _authStore,
+    );
     _settingsController = SettingsController(logger: _logger);
     _urlController = UrlLaunchController(logger: _logger);
     _viewModel.initializeHome.execute();
     
-    // Inicia o polling automaticamente após a inicialização
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.startPolling.execute(0);
-    });
+    // Remove a inicialização automática do polling, agora é controlada pelo AuthStore
   }
 
   @override
