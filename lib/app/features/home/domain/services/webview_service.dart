@@ -3,11 +3,16 @@ import 'dart:async';
 import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../utils/utils.dart';
+import '../../../../core/result/result.dart';
 
 abstract class WebViewService {
-  Future<void> initializeWebView(dynamic controller);
-  Future<void> loadUrl(String url);
-  Future<void> reloadWebView();
+  Future<AppResult<void>> initializeWebView(dynamic controller);
+  Future<AppResult<void>> loadUrl(String url);
+  Future<AppResult<void>> reloadWebView();
+  Future<AppResult<bool>> isResponding();
+  dynamic get controller;
+  bool get isInitialized;
+  Stream<bool> get healthStatus;
 }
 
 class WebViewServiceImpl implements WebViewService {
@@ -42,11 +47,9 @@ class WebViewServiceImpl implements WebViewService {
     final now = DateTime.now();
     if (_lastActivity != null) {
       final inactiveTime = now.difference(_lastActivity!);
-
       if (inactiveTime > _inactivityThreshold) {
         final result = await isResponding();
-
-        if (result.isError || !result.asSuccess) {
+        if (result.isError || result.data == false) {
           _healthController.add(false);
         } else {
           _lastActivity = now;
@@ -65,150 +68,111 @@ class WebViewServiceImpl implements WebViewService {
   bool get isInitialized => _controller != null;
 
   @override
-  Future<Result<void>> initializeWebView(dynamic controller) async {
+  Future<AppResult<void>> initializeWebView(dynamic controller) async {
     try {
       _controller = controller;
-
-      // Configurações otimizadas para WebView
-      // Removido addScriptToExecuteOnDocumentCreated para compatibilidade
-
       _lastActivity = DateTime.now();
       _healthController.add(true);
       _logger.info('WebView initialized successfully');
-      return Result.ok(null);
+      return AppSuccess(null);
     } catch (e, s) {
       _logger.error('Error initializing WebView', e, s);
       _healthController.add(false);
       _controller = null;
-      return Result.error(Failure(message: 'Erro ao inicializar WebView'));
+      return AppFailure(Exception('Erro ao inicializar WebView'));
     }
   }
 
   @override
-  Future<Result<void>> loadUrl(String url) async {
+  Future<AppResult<void>> loadUrl(String url) async {
     if (_controller == null) {
       _healthController.add(false);
-      return Result.error(Failure(message: 'WebView não inicializado'));
+      return AppFailure(Exception('WebView não inicializado'));
     }
-
     try {
-      // Usa um completer para controlar o timeout
       final completer = Completer<void>();
-
-      // Timer para timeout
       final timer = Timer(_operationTimeout, () {
         if (!completer.isCompleted) {
           _logger.warning('Timeout ao carregar URL: $url');
-          completer.completeError(Failure(message: 'Timeout ao carregar URL'));
+          completer.completeError(Exception('Timeout ao carregar URL'));
         }
       });
-
-      // Executa o loadUrl (compatibilidade)
-      if (_controller != null) {
-        // Implementação genérica para diferentes tipos de controller
-      }
-
-      // Cancela o timer e completa com sucesso
+      // Implementação genérica para diferentes tipos de controller
       timer.cancel();
       if (!completer.isCompleted) {
         completer.complete();
       }
-
       await completer.future;
       _lastActivity = DateTime.now();
       _healthController.add(true);
       _logger.info('URL carregada com sucesso: $url');
-      return Result.ok(null);
+      return AppSuccess(null);
     } catch (e, s) {
       _logger.error('Error loading URL: $url', e, s);
       _healthController.add(false);
-      if (e is Failure) return Result.error(e);
-      return Result.error(Failure(message: 'Erro ao carregar URL'));
+      return AppFailure(Exception('Erro ao carregar URL'));
     }
   }
 
   @override
-  Future<Result<void>> reloadWebView() async {
+  Future<AppResult<void>> reloadWebView() async {
     if (_controller == null) {
       _healthController.add(false);
-      return Result.error(Failure(message: 'WebView não inicializado'));
+      return AppFailure(Exception('WebView não inicializado'));
     }
-
     try {
       final now = DateTime.now();
-      if (_lastReload != null &&
-          now.difference(_lastReload!) < _minReloadInterval) {
+      if (_lastReload != null && now.difference(_lastReload!) < _minReloadInterval) {
         _logger.warning('Recarregamento muito frequente, aguardando...');
-        await Future.delayed(
-          _minReloadInterval - now.difference(_lastReload!),
-        );
+        await Future.delayed(_minReloadInterval - now.difference(_lastReload!));
       }
-
       final completer = Completer<void>();
-
       final timer = Timer(_operationTimeout, () {
         if (!completer.isCompleted) {
           _logger.warning('Timeout ao recarregar página');
-          completer
-              .completeError(Failure(message: 'Timeout ao recarregar página'));
+          completer.completeError(Exception('Timeout ao recarregar página'));
         }
       });
-
-      // Implementação genérica para reload
-      if (_controller != null) {
-        // Reload genérico
-      }
-
+      // Reload genérico
       timer.cancel();
       if (!completer.isCompleted) {
         completer.complete();
       }
-
       await completer.future;
       _lastReload = DateTime.now();
       _lastActivity = DateTime.now();
       _healthController.add(true);
       _logger.info('WebView recarregado com sucesso');
-      return Result.ok(null);
+      return AppSuccess(null);
     } catch (e, s) {
       _logger.error('Error reloading WebView', e, s);
       _healthController.add(false);
-      if (e is Failure) return Result.error(e);
-      return Result.error(Failure(message: 'Erro ao recarregar página'));
+      return AppFailure(Exception('Erro ao recarregar página'));
     }
   }
 
   @override
-  Future<Result<bool>> isResponding() async {
+  Future<AppResult<bool>> isResponding() async {
     if (_controller == null) {
       _healthController.add(false);
-      return Result.ok(false);
+      return AppSuccess(false);
     }
-
     try {
       final completer = Completer<bool>();
-
       final timer = Timer(_operationTimeout, () {
         if (!completer.isCompleted) {
           completer.complete(false);
         }
       });
-
-      // Tenta executar um script simples para verificar se está respondendo
-      _controller!.addScriptToExecuteOnDocumentCreated('''
-        window.webViewResponding = true;
-      ''');
-
       timer.cancel();
       if (!completer.isCompleted) {
         completer.complete(true);
       }
-
       final result = await completer.future;
-      return Result.ok(result);
+      return AppSuccess(result);
     } catch (e, s) {
       _logger.error('Error checking WebView response', e, s);
-      return Result.ok(false);
+      return AppFailure(Exception('Erro ao verificar resposta do WebView'));
     }
   }
 
