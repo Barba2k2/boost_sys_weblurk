@@ -1,13 +1,11 @@
+import '../../../../core/result/result.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
-import 'package:result_dart/result_dart.dart';
-
-import '../../../../utils/utils.dart';
 
 abstract class WebViewRepository {
-  Future<Result<void, Exception>> initializeWebView(Webview controller);
-  Future<Result<void, Exception>> loadUrl(String url);
-  Future<Result<void, Exception>> reload();
-  Future<Result<bool, Exception>> isResponding();
+  Future<AppResult<void>> initializeWebView(Webview controller);
+  Future<AppResult<void>> loadUrl(String url);
+  Future<AppResult<void>> reload();
+  Future<AppResult<bool>> isResponding();
   bool get isInitialized;
   Webview? get controller;
   Stream<bool> get healthStatus;
