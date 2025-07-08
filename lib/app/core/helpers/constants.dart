@@ -18,4 +18,6 @@ class Constants {
       '/LOCAL_SOTRAGE_USER_LOGGED_STATUS_KEY/';
 
   static const REST_CLIENT_AUTH_REQUIRED_KEY = 'auth_required';
+  
+
 }

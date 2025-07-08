@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../../modules/core/auth/auth_store.dart';
-import '../../../modules/core/auth/home/home_controller.dart';
 import '../../controllers/settings_controller.dart';
 import '../../controllers/url_launch_controller.dart';
 import 'messages.dart';
 
 class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
-  SyslurkAppBar({super.key});
+  final String? username;
+  final VoidCallback onReloadWebView;
+  final VoidCallback onTerminateApp;
+  final VoidCallback onMuteAppAudio;
+  final UrlLaunchController urlController;
+  final SettingsController settingsController;
 
-  final urlController = Modular.get<UrlLaunchController>();
-  final homeController = Modular.get<HomeController>();
-  final settingsController = Modular.get<SettingsController>();
-  final authStore = Modular.get<AuthStore>();
+  const SyslurkAppBar({
+    super.key,
+    required this.username,
+    required this.onReloadWebView,
+    required this.onTerminateApp,
+    required this.onMuteAppAudio,
+    required this.urlController,
+    required this.settingsController,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,24 +53,17 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                 _buildMenuItem(
                   'Atualizar Listas',
                   Icons.refresh,
-                  () {
-                    // homeController.loadSchedules();
-                    homeController.reloadWebView();
-                  },
+                  onReloadWebView,
                 ),
                 _buildMenuItem(
                   'Encerrar',
                   Icons.power_settings_new,
-                  () {
-                    settingsController.terminateApp();
-                  },
+                  onTerminateApp,
                 ),
                 _buildMenuItem(
                   'Audio',
                   Icons.volume_up,
-                  () {
-                    settingsController.muteAppAudio();
-                  },
+                  onMuteAppAudio,
                 ),
                 _buildMenuItem(
                   'Fuso Horário',
@@ -137,9 +135,6 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                   'Sobre o Weblurk',
                   Icons.leaderboard,
                   () async {
-                    // await urlController.launchURL(
-                    //   'https://docs.google.com/spreadsheets/d/1kh4zc2INhLEOGbLqqte8NnP4NsNRvFTgSWvKNKKM9qk/edit?usp=sharing',
-                    // );
                     Messages.info('Em breve!');
                   },
                 ),
@@ -148,43 +143,36 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
           ],
         ),
         actions: [
-          Observer(
-            builder: (_) {
-              final username = authStore.userLogged?.nickname;
-              if (username != null) {
-                return Container(
-                  margin: const EdgeInsets.all(10),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+          if (username != null)
+            Container(
+              margin: const EdgeInsets.all(10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFA162FF),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.account_circle,
+                    size: 20,
+                    color: Colors.white,
                   ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFA162FF),
-                    borderRadius: BorderRadius.circular(20),
+                  const SizedBox(width: 8),
+                  Text(
+                    username!,
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.account_circle,
-                        size: 20,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        username,
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -199,29 +187,20 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
       offset: const Offset(0, 40),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       itemBuilder: (context) => items,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Icon(
-              icon,
-              size: 20,
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: GoogleFonts.inter(
               color: Colors.white,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
             ),
-          ],
-        ),
+          ),
+          const Icon(Icons.arrow_drop_down, color: Colors.white, size: 20),
+        ],
       ),
     );
   }
@@ -233,17 +212,15 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
   ) {
     return PopupMenuItem<String>(
       value: label,
-      onTap: onTap,
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 20,
-            color: Colors.black,
-          ),
-          const SizedBox(width: 10),
-          Text(label),
-        ],
+      child: Builder(
+        builder: (context) => ListTile(
+          leading: Icon(icon, color: const Color(0xFF2C1F4A)),
+          title: Text(label),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true).pop();
+            onTap();
+          },
+        ),
       ),
     );
   }
