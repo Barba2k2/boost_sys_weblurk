@@ -3,6 +3,7 @@ import '../../core/logger/app_logger.dart';
 import '../../core/ui/widgets/messages.dart';
 import '../../models/score_model.dart';
 import '../../models/schedule_list_model.dart';
+import '../../models/schedule_model.dart';
 import '../../repositories/home/home_repository.dart';
 import 'home_service.dart';
 
@@ -52,12 +53,15 @@ class HomeServiceImpl implements HomeService {
   @override
   Future<ScheduleListModel?> fetchScheduleListByName(String listName) async {
     try {
-      return await _homeRepository.loadScheduleListByName(
-          listName, DateTime.now());
+      final result = await _homeRepository.loadScheduleListByName(
+        listName,
+        DateTime.now(),
+      );
+      return result;
     } catch (e, s) {
-      _logger.error('Error on load schedule list by name', e, s);
-      Messages.warning('Erro ao carregar lista específica');
-      throw Failure(message: 'Erro ao carregar lista específica');
+      _logger.error('Erro no fetch da lista $listName', e, s);
+      Messages.warning('Erro ao buscar lista $listName');
+      throw Failure(message: 'Erro ao buscar lista $listName');
     }
   }
 
@@ -72,7 +76,9 @@ class HomeServiceImpl implements HomeService {
   // }
 
   @override
-  Future<void> updateLists() async => await fetchSchedules();
+  Future<void> updateLists() async {
+    return await fetchSchedules();
+  }
 
   @override
   Future<String?> fetchCurrentChannel() async {
@@ -94,8 +100,8 @@ class HomeServiceImpl implements HomeService {
         final currentSchedule = scheduleList.schedules.firstWhere(
           (schedule) {
             try {
-              final startTimeStr = schedule['start_time']?.toString() ?? '';
-              final endTimeStr = schedule['end_time']?.toString() ?? '';
+              final startTimeStr = schedule.startTime;
+              final endTimeStr = schedule.endTime;
 
               // Remove o formato Time() se presente
               final cleanStartTime =
@@ -108,8 +114,9 @@ class HomeServiceImpl implements HomeService {
               final startTimeParts = cleanStartTime.split(':');
               final endTimeParts = cleanEndTime.split(':');
 
-              if (startTimeParts.length < 2 || endTimeParts.length < 2)
+              if (startTimeParts.length < 2 || endTimeParts.length < 2) {
                 return false;
+              }
 
               final startDateTime = DateTime(
                 now.year,
@@ -134,12 +141,16 @@ class HomeServiceImpl implements HomeService {
               return false;
             }
           },
-          orElse: () => <String, dynamic>{},
+          orElse: () => ScheduleModel(
+            streamerUrl: '',
+            date: now,
+            startTime: '',
+            endTime: '',
+          ),
         );
 
-        if (currentSchedule.isNotEmpty &&
-            currentSchedule['streamer_url'] != null) {
-          return currentSchedule['streamer_url'] as String;
+        if (currentSchedule.streamerUrl.isNotEmpty) {
+          return currentSchedule.streamerUrl;
         }
       }
 
@@ -150,6 +161,91 @@ class HomeServiceImpl implements HomeService {
     } catch (e, s) {
       _logger.error('Erro ao buscar o canal atual', e, s);
       throw Failure(message: 'Erro ao buscar o canal atual');
+    }
+  }
+
+  @override
+  Future<String?> fetchCurrentChannelForList(String listName) async {
+    try {
+      // _logger.info('Buscando canal atual para: $listName');
+      final now = DateTime.now();
+      final scheduleList =
+          await _homeRepository.loadScheduleListByName(listName, now);
+
+      if (scheduleList == null || scheduleList.schedules.isEmpty) {
+        _logger.warning(
+          'Lista $listName não encontrada ou vazia, carregando canal padrão',
+        );
+        return 'https://twitch.tv/BoostTeam_';
+      }
+
+      // _logger.info('Lista $listName encontrada com ${scheduleList.schedules.length} agendamentos');
+
+      // Procura por um agendamento atual na lista específica
+      final currentSchedule = scheduleList.schedules.firstWhere(
+        (schedule) {
+          try {
+            final startTimeStr = schedule.startTime;
+            final endTimeStr = schedule.endTime;
+
+            // Remove o formato Time() se presente
+            final cleanStartTime =
+                startTimeStr.replaceAll('Time(', '').replaceAll(')', '');
+            final cleanEndTime =
+                endTimeStr.replaceAll('Time(', '').replaceAll(')', '');
+
+            if (cleanStartTime.isEmpty || cleanEndTime.isEmpty) return false;
+
+            final startTimeParts = cleanStartTime.split(':');
+            final endTimeParts = cleanEndTime.split(':');
+
+            if (startTimeParts.length < 2 || endTimeParts.length < 2) {
+              return false;
+            }
+
+            final startDateTime = DateTime(
+              now.year,
+              now.month,
+              now.day,
+              int.parse(startTimeParts[0]),
+              int.parse(startTimeParts[1]),
+              startTimeParts.length > 2 ? int.parse(startTimeParts[2]) : 0,
+            );
+            final endDateTime = DateTime(
+              now.year,
+              now.month,
+              now.day,
+              int.parse(endTimeParts[0]),
+              int.parse(endTimeParts[1]),
+              endTimeParts.length > 2 ? int.parse(endTimeParts[2]) : 0,
+            );
+
+            return now.isAfter(startDateTime) && now.isBefore(endDateTime);
+          } catch (e) {
+            _logger.warning('Erro ao processar horário do agendamento: $e');
+            return false;
+          }
+        },
+        orElse: () => ScheduleModel(
+          streamerUrl: '',
+          date: now,
+          startTime: '',
+          endTime: '',
+        ),
+      );
+
+      if (currentSchedule.streamerUrl.isNotEmpty) {
+        // _logger.info('Canal atual encontrado na $listName: ${currentSchedule.streamerUrl}');
+        return currentSchedule.streamerUrl;
+      }
+
+      _logger.warning(
+        'Nenhuma live correspondente ao horário atual na $listName, carregando canal padrão',
+      );
+      return 'https://twitch.tv/BoostTeam_';
+    } catch (e, s) {
+      _logger.error('Erro ao buscar o canal atual da $listName', e, s);
+      throw Failure(message: 'Erro ao buscar o canal atual da $listName');
     }
   }
 

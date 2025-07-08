@@ -5,6 +5,8 @@ import 'package:boost_sys_weblurk/app/repositories/home/home_repository.dart';
 import 'package:boost_sys_weblurk/app/core/logger/app_logger.dart';
 import 'package:boost_sys_weblurk/app/core/exceptions/failure.dart';
 import 'package:boost_sys_weblurk/app/models/score_model.dart';
+import 'package:boost_sys_weblurk/app/models/schedule_model.dart';
+import 'package:boost_sys_weblurk/app/models/schedule_list_model.dart';
 
 // Mock classes
 class MockHomeRepository extends Mock implements HomeRepository {}
@@ -54,7 +56,8 @@ class TestableHomeService implements HomeService {
     final schedules = await _homeRepository.loadSchedules(DateTime.now());
 
     if (schedules.isEmpty) {
-      _logger.warning('Nenhuma live correspondente ao horário atual, carregando canal padrão');
+      _logger.warning(
+          'Nenhuma live correspondente ao horário atual, carregando canal padrão');
       return 'https://twitch.tv/BoostTeam_';
     }
 
@@ -62,21 +65,21 @@ class TestableHomeService implements HomeService {
     final now = DateTime.now();
     for (final schedule in schedules) {
       final startTimeStr =
-          schedule['start_time'].toString().replaceAll('Time(', '').replaceAll(')', '');
+          schedule.startTime.replaceAll('Time(', '').replaceAll(')', '');
       final endTimeStr =
-          schedule['end_time'].toString().replaceAll('Time(', '').replaceAll(')', '');
+          schedule.endTime.replaceAll('Time(', '').replaceAll(')', '');
 
       final startTimeParts = startTimeStr.split(':');
       final endTimeParts = endTimeStr.split(':');
 
-      if (startTimeParts.length >= 3 && endTimeParts.length >= 3) {
+      if (startTimeParts.length >= 2 && endTimeParts.length >= 2) {
         final startDateTime = DateTime(
           now.year,
           now.month,
           now.day,
           int.parse(startTimeParts[0]),
           int.parse(startTimeParts[1]),
-          int.parse(startTimeParts[2]),
+          startTimeParts.length > 2 ? int.parse(startTimeParts[2]) : 0,
         );
 
         final endDateTime = DateTime(
@@ -85,11 +88,11 @@ class TestableHomeService implements HomeService {
           now.day,
           int.parse(endTimeParts[0]),
           int.parse(endTimeParts[1]),
-          int.parse(endTimeParts[2]),
+          endTimeParts.length > 2 ? int.parse(endTimeParts[2]) : 0,
         );
 
         if (now.isAfter(startDateTime) && now.isBefore(endDateTime)) {
-          return schedule['streamer_url'] as String?;
+          return schedule.streamerUrl;
         }
       }
     }
@@ -130,6 +133,21 @@ class TestableHomeService implements HomeService {
   Future<void> updateLists() async {
     await fetchSchedules();
   }
+
+  @override
+  Future<List<String>> getAvailableListNames() async {
+    return [];
+  }
+
+  @override
+  Future<List<ScheduleListModel>> fetchScheduleLists() async {
+    return [];
+  }
+
+  @override
+  Future<ScheduleListModel?> fetchScheduleListByName(String listName) async {
+    return null;
+  }
 }
 
 void main() {
@@ -156,8 +174,9 @@ void main() {
   group('HomeService', () {
     test('fetchSchedules calls repository', () async {
       // Arrange
-      final schedules = <Map<String, dynamic>>[];
-      when(() => mockHomeRepository.loadSchedules(any())).thenAnswer((_) async => schedules);
+      final schedules = <ScheduleModel>[];
+      when(() => mockHomeRepository.loadSchedules(any()))
+          .thenAnswer((_) async => schedules);
 
       // Act
       await homeService.fetchSchedules();
@@ -174,11 +193,12 @@ void main() {
 
       when(() => mockHomeRepository.loadSchedules(any())).thenAnswer(
         (_) async => [
-          {
-            'start_time': 'Time($startHour:00:00)',
-            'end_time': 'Time($endHour:00:00)',
-            'streamer_url': 'https://twitch.tv/channel1',
-          },
+          ScheduleModel(
+            streamerUrl: 'https://twitch.tv/channel1',
+            date: now,
+            startTime: '$startHour:00',
+            endTime: '$endHour:00',
+          ),
         ],
       );
 
@@ -190,7 +210,8 @@ void main() {
       verify(() => mockHomeRepository.loadSchedules(any())).called(1);
     });
 
-    test('fetchCurrentChannel returns default channel when no current schedule', () async {
+    test('fetchCurrentChannel returns default channel when no current schedule',
+        () async {
       // Arrange
       final now = DateTime.now();
       final pastStartHour = now.hour - 3;
@@ -198,11 +219,12 @@ void main() {
 
       when(() => mockHomeRepository.loadSchedules(any())).thenAnswer(
         (_) async => [
-          {
-            'start_time': 'Time($pastStartHour:00:00)',
-            'end_time': 'Time($pastEndHour:00:00)',
-            'streamer_url': 'https://twitch.tv/channel1',
-          },
+          ScheduleModel(
+            streamerUrl: 'https://twitch.tv/channel1',
+            date: now,
+            startTime: '$pastStartHour:00',
+            endTime: '$pastEndHour:00',
+          ),
         ],
       );
 
@@ -214,9 +236,11 @@ void main() {
       verify(() => mockHomeRepository.loadSchedules(any())).called(1);
     });
 
-    test('fetchCurrentChannel returns default channel when schedules is empty', () async {
+    test('fetchCurrentChannel returns default channel when schedules is empty',
+        () async {
       // Arrange
-      when(() => mockHomeRepository.loadSchedules(any())).thenAnswer((_) async => []);
+      when(() => mockHomeRepository.loadSchedules(any()))
+          .thenAnswer((_) async => <ScheduleModel>[]);
 
       // Act
       final result = await homeService.fetchCurrentChannel();
@@ -235,7 +259,8 @@ void main() {
       final minute = now.minute;
       final points = 100;
 
-      when(() => mockHomeRepository.saveScore(any())).thenAnswer((_) async => {});
+      when(() => mockHomeRepository.saveScore(any()))
+          .thenAnswer((_) async => {});
 
       // Act
       await homeService.saveScore(streamerId, now, hour, minute, points);
@@ -251,25 +276,29 @@ void main() {
       // Act & Assert - Invalid streamer ID
       expect(
         () => homeService.saveScore(0, now, 10, 30, 100),
-        throwsA(isA<Failure>().having((f) => f.message, 'message', 'ID do streamer inválido')),
+        throwsA(isA<Failure>()
+            .having((f) => f.message, 'message', 'ID do streamer inválido')),
       );
 
       // Act & Assert - Invalid hour
       expect(
         () => homeService.saveScore(123, now, 24, 30, 100),
-        throwsA(isA<Failure>().having((f) => f.message, 'message', 'Hora inválida')),
+        throwsA(isA<Failure>()
+            .having((f) => f.message, 'message', 'Hora inválida')),
       );
 
       // Act & Assert - Invalid minute
       expect(
         () => homeService.saveScore(123, now, 10, 60, 100),
-        throwsA(isA<Failure>().having((f) => f.message, 'message', 'Minuto inválido')),
+        throwsA(isA<Failure>()
+            .having((f) => f.message, 'message', 'Minuto inválido')),
       );
 
       // Act & Assert - Invalid points
       expect(
         () => homeService.saveScore(123, now, 10, 30, -1),
-        throwsA(isA<Failure>().having((f) => f.message, 'message', 'Pontuação inválida')),
+        throwsA(isA<Failure>()
+            .having((f) => f.message, 'message', 'Pontuação inválida')),
       );
     });
 
@@ -280,8 +309,8 @@ void main() {
       // Act & Assert
       expect(
         () => homeService.fetchSchedules(),
-        throwsA(
-            isA<Failure>().having((f) => f.message, 'message', 'Erro ao carregar os agendamentos')),
+        throwsA(isA<Failure>().having(
+            (f) => f.message, 'message', 'Erro ao carregar os agendamentos')),
       );
 
       // Verify logger was called with the error
@@ -295,7 +324,8 @@ void main() {
       // Act & Assert
       expect(
         () => homeService.fetchCurrentChannel(),
-        throwsA(isA<Failure>().having((f) => f.message, 'message', 'Erro ao buscar o canal atual')),
+        throwsA(isA<Failure>().having(
+            (f) => f.message, 'message', 'Erro ao buscar o canal atual')),
       );
 
       // Verify logger was called with the error
@@ -312,14 +342,16 @@ void main() {
       // Act & Assert
       expect(
         () => homeService.saveScore(123, now, 10, 30, 100),
-        throwsA(isA<Failure>().having((f) => f.message, 'message', 'Repository error')),
+        throwsA(isA<Failure>()
+            .having((f) => f.message, 'message', 'Repository error')),
       );
     });
 
     test('updateLists calls fetchSchedules', () async {
       // Arrange
-      final schedules = <Map<String, dynamic>>[];
-      when(() => mockHomeRepository.loadSchedules(any())).thenAnswer((_) async => schedules);
+      final schedules = <ScheduleModel>[];
+      when(() => mockHomeRepository.loadSchedules(any()))
+          .thenAnswer((_) async => schedules);
 
       // Act
       await homeService.updateLists();

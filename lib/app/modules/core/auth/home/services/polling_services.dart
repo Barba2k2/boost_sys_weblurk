@@ -63,7 +63,7 @@ class PollingServiceImpl implements PollingService {
       if (_lastSuspensionResume != null) {
         final diff = now.difference(_lastSuspensionResume!);
         if (diff.inMinutes > 2) {
-          _logger.info('Possível retorno de suspensão do sistema detectado');
+          // _logger.info('Possível retorno de suspensão do sistema detectado');
           _onSystemResume();
         }
       }
@@ -72,14 +72,14 @@ class PollingServiceImpl implements PollingService {
   }
 
   void _onSystemResume() {
-    _logger.info('Sistema retomado de suspensão ${DateTime.now()}');
+    // _logger.info('Sistema retomado de suspensão ${DateTime.now()}');
     _forceChannelCheck();
   }
 
   Future<void> _forceChannelCheck() async {
     try {
       await checkAndUpdateChannel();
-      _logger.info('Verificação forçada de canal após retomada do sistema');
+      // _logger.info('Verificação forçada de canal após retomada do sistema');
     } catch (e, s) {
       _logger.error('Erro na verificação forçada de canal', e, s);
     }
@@ -87,7 +87,7 @@ class PollingServiceImpl implements PollingService {
 
   @override
   Future<void> startPolling(int streamerId) async {
-    _logger.info('Iniciando polling services... ${DateTime.now()}');
+    // _logger.info('Iniciando polling services... ${DateTime.now()}');
 
     try {
       // Verificação imediata do canal correto
@@ -99,7 +99,7 @@ class PollingServiceImpl implements PollingService {
 
       _startBackgroundWatcher(streamerId);
 
-      _logger.info('Polling services iniciados com sucesso ${DateTime.now()}');
+      // _logger.info('Polling services iniciados com sucesso ${DateTime.now()}');
     } catch (e, s) {
       _logger.error('Erro ao iniciar polling services ${DateTime.now()}', e, s);
       _healthController.add(false);
@@ -111,10 +111,13 @@ class PollingServiceImpl implements PollingService {
   void _startBackgroundWatcher(int streamerId) {
     _backgroundWatcherTimer?.cancel();
 
-    _backgroundWatcherTimer = Timer.periodic(const Duration(minutes: 10), (timer) {
-      _logger.info('Background watcher verificando saúde do polling');
+    _backgroundWatcherTimer =
+        Timer.periodic(const Duration(minutes: 10), (timer) {
+      // _logger.info('Background watcher verificando saúde do polling');
       if (!isPollingActive()) {
-        _logger.info('Polling inativo detectado pelo background watcher, reiniciando...');
+        _logger.info(
+          'Polling inativo detectado pelo background watcher, reiniciando...',
+        );
         _startTimers(streamerId);
       }
 
@@ -142,13 +145,13 @@ class PollingServiceImpl implements PollingService {
       (_) => checkAndUpdateScore(streamerId),
     );
 
-    _logger.info('Timers reiniciados: ${DateTime.now()}');
+    // _logger.info('Timers reiniciados: ${DateTime.now()}');
   }
 
   void _startWatchdog(int streamerId) {
     _watchdogTimer?.cancel();
     _watchdogTimer = Timer.periodic(_watchdogInterval, (_) {
-      _logger.info('Watchdog: Verificando polling... ${DateTime.now()}');
+      // _logger.info('Watchdog: Verificando polling... ${DateTime.now()}');
       _checkAndRestartIfNeeded(streamerId);
     });
   }
@@ -159,27 +162,33 @@ class PollingServiceImpl implements PollingService {
 
     if (_lastChannelUpdate != null) {
       final channelUpdateDiff = now.difference(_lastChannelUpdate!);
-      _logger.info('Última atualização de canal: ${channelUpdateDiff.inMinutes} minutos atrás');
+      _logger.info(
+          'Última atualização de canal: ${channelUpdateDiff.inMinutes} minutos atrás');
 
       if (channelUpdateDiff > _maxTimeSinceLastUpdate) {
-        _logger.warning('Watchdog: Atualizações de canal paradas, reiniciando polling... $now');
+        _logger.warning(
+            'Watchdog: Atualizações de canal paradas, reiniciando polling... $now');
         needsRestart = true;
       }
     } else {
-      _logger.warning('Watchdog: Nenhuma atualização de canal registrada, reiniciando...');
+      _logger.warning(
+          'Watchdog: Nenhuma atualização de canal registrada, reiniciando...');
       needsRestart = true;
     }
 
     if (_lastScoreUpdate != null) {
       final scoreUpdateDiff = now.difference(_lastScoreUpdate!);
-      _logger.info('Última atualização de score: ${scoreUpdateDiff.inMinutes} minutos atrás');
+      _logger.info(
+          'Última atualização de score: ${scoreUpdateDiff.inMinutes} minutos atrás');
 
       if (scoreUpdateDiff > _maxTimeSinceLastUpdate) {
-        _logger.warning('Watchdog: Atualizações de score paradas, reiniciando polling... $now');
+        _logger.warning(
+            'Watchdog: Atualizações de score paradas, reiniciando polling... $now');
         needsRestart = true;
       }
     } else {
-      _logger.warning('Watchdog: Nenhuma atualização de score registrada, reiniciando...');
+      _logger.warning(
+          'Watchdog: Nenhuma atualização de score registrada, reiniciando...');
       needsRestart = true;
     }
 
@@ -188,7 +197,8 @@ class PollingServiceImpl implements PollingService {
         !_channelTimer!.isActive ||
         _scoreTimer == null ||
         !_scoreTimer!.isActive) {
-      _logger.warning('Watchdog: Timers inativos detectados, reiniciando... $now');
+      _logger
+          .warning('Watchdog: Timers inativos detectados, reiniciando... $now');
       needsRestart = true;
     }
 
@@ -210,6 +220,8 @@ class PollingServiceImpl implements PollingService {
   // Verificar se estamos exibindo o canal correto
   Future<void> _verifyCorrectChannel() async {
     try {
+      // Por enquanto, vamos usar o método genérico
+      // Idealmente, deveria considerar qual aba está ativa
       final correctChannel = await _homeService.fetchCurrentChannel();
       final channelToShow = correctChannel ?? _baseChannel;
 
@@ -232,16 +244,17 @@ class PollingServiceImpl implements PollingService {
   Future<void> checkAndUpdateChannel() async {
     try {
       // Buscar o canal atual que deve ser exibido
+      // Por enquanto, vamos usar o método genérico, mas idealmente deveria considerar a aba ativa
       final correctChannel = await _homeService.fetchCurrentChannel();
 
       // Se não houver canal, usamos o canal base
       final channelToShow = correctChannel ?? _baseChannel;
 
-      _logger.info('Canal verificado: $channelToShow em ${DateTime.now()}');
+      // _logger.info('Canal verificado: $channelToShow em ${DateTime.now()}');
 
       // Sempre notificamos para atualização a cada 6 minutos, mesmo que o canal não tenha mudado
       // Isso garante que o webview esteja sempre mostrando o canal correto
-      _logger.info('Forçando atualização de canal para: $channelToShow');
+      // _logger.info('Forçando atualização de canal para: $channelToShow');
       _channelController.add(channelToShow);
       _currentChannel = channelToShow;
 
@@ -281,11 +294,12 @@ class PollingServiceImpl implements PollingService {
 
       _scoreErrorCount = 0;
       _lastScoreUpdate = now;
-      _logger.info('Score atualizado com sucesso $now');
+      // _logger.info('Score atualizado com sucesso $now');
     } catch (e, s) {
       _scoreErrorCount++;
 
-      if (e.toString().contains('500') || e.toString().contains('Internal Server Error')) {
+      if (e.toString().contains('500') ||
+          e.toString().contains('Internal Server Error')) {
         _logger.warning(
           'Erro 500 do servidor ao atualizar score. Erro #$_scoreErrorCount. ${DateTime.now()}',
         );
@@ -315,7 +329,7 @@ class PollingServiceImpl implements PollingService {
     _scoreTimer?.cancel();
     _watchdogTimer?.cancel();
     _backgroundWatcherTimer?.cancel();
-    _logger.info('Polling services parados ${DateTime.now()}');
+    // _logger.info('Polling services parados ${DateTime.now()}');
   }
 
   bool isPollingActive() {

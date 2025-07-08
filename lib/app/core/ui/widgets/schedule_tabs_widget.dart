@@ -42,15 +42,15 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
           children: [
             // TabBar
             Container(
+              width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.8),
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(8),
                   topRight: Radius.circular(8),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -70,10 +70,13 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
                   fontWeight: FontWeight.w400,
                   fontSize: 14,
                 ),
+                isScrollable: false,
+                indicatorPadding: const EdgeInsets.symmetric(horizontal: 8.0),
                 tabs: const [
-                  Tab(text: 'Lista A'),
-                  Tab(text: 'Lista B'),
+                  Tab(text: 'Lista A', iconMargin: EdgeInsets.zero),
+                  Tab(text: 'Lista B', iconMargin: EdgeInsets.zero),
                 ],
+                labelPadding: EdgeInsets.symmetric(horizontal: 16.0),
               ),
             ),
             // TabBarView
@@ -82,14 +85,18 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
                 controller: _tabController,
                 children: [
                   // Aba Lista A
-                  const ScheduleTable(
-                    schedules: [],
-                    listName: 'Lista A',
+                  Observer(
+                    builder: (_) => ScheduleTable(
+                      schedules: homeController.listaASchedules,
+                      listName: 'Lista A',
+                    ),
                   ),
                   // Aba Lista B
-                  const ScheduleTable(
-                    schedules: [],
-                    listName: 'Lista B',
+                  Observer(
+                    builder: (_) => ScheduleTable(
+                      schedules: homeController.listaBSchedules,
+                      listName: 'Lista B',
+                    ),
                   ),
                 ],
               ),

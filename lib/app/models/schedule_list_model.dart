@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'schedule_model.dart';
 
 class ScheduleListModel {
   ScheduleListModel({
@@ -9,7 +10,9 @@ class ScheduleListModel {
   factory ScheduleListModel.fromMap(Map<String, dynamic> map) {
     return ScheduleListModel(
       listName: map['list_name'] ?? '',
-      schedules: List<Map<String, dynamic>>.from(map['schedules'] ?? []),
+      schedules: List<ScheduleModel>.from(
+        (map['schedules'] ?? []).map((x) => ScheduleModel.fromMap(x)),
+      ),
     );
   }
 
@@ -17,12 +20,12 @@ class ScheduleListModel {
       ScheduleListModel.fromMap(json.decode(source));
 
   final String listName;
-  final List<Map<String, dynamic>> schedules;
+  final List<ScheduleModel> schedules;
 
   Map<String, dynamic> toMap() {
     return {
       'list_name': listName,
-      'schedules': schedules,
+      'schedules': schedules.map((x) => x.toMap()).toList(),
     };
   }
 

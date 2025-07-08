@@ -37,17 +37,13 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
     final now = DateTime.now();
     if (_lastActivity != null) {
       final inactiveTime = now.difference(_lastActivity!);
-      _logger.info('WebView inativo por: ${inactiveTime.inMinutes} minutos');
-
+      
       if (inactiveTime > _inactivityThreshold) {
-        _logger.warning('WebView inativo por muito tempo, verificando responsividade...');
         final isAlive = await isResponding();
 
         if (!isAlive) {
-          _logger.warning('WebView não está respondendo, sinalizando problema...');
           _healthController.add(false);
         } else {
-          _logger.info('WebView está respondendo mesmo após inatividade');
           _lastActivity = now;
           _healthController.add(true);
         }
@@ -146,13 +142,13 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
 
     try {
       // Tentativa de executar JavaScript simples para verificar se o webview responde
-      _logger.info('Verificando se WebView está respondendo...');
+      // _logger.info('Verificando se WebView está respondendo...');
 
       await _controller!.executeScript('1 + 1');
 
       _lastActivity = DateTime.now();
       _healthController.add(true);
-      _logger.info('WebView está respondendo');
+      // _logger.info('WebView está respondendo');
       return true;
     } catch (e) {
       _logger.warning('WebView não está respondendo: ${e.toString()}');

@@ -24,7 +24,8 @@ class AppWidget extends StatelessWidget {
         builder: (context, child) {
           return Asuka.builder(context, child);
         },
-        theme: UiConfig.theme,
+        theme: UiConfig.lightTheme,
+        darkTheme: UiConfig.darkTheme,
         routerDelegate: Modular.routerDelegate,
         routeInformationParser: Modular.routeInformationParser,
       ),

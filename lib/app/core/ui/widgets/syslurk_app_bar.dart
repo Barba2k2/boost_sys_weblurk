@@ -11,7 +11,7 @@ import 'messages.dart';
 
 class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
   SyslurkAppBar({super.key});
-  
+
   final urlController = Modular.get<UrlLaunchController>();
   final homeController = Modular.get<HomeController>();
   final settingsController = Modular.get<SettingsController>();
@@ -202,7 +202,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.12),
+          color: Colors.white.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(

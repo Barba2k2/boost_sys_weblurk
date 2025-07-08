@@ -6,6 +6,7 @@ import '../../core/rest_client/rest_client.dart';
 import '../../core/rest_client/rest_client_exception.dart';
 import '../../models/score_model.dart';
 import '../../models/schedule_list_model.dart';
+import '../../models/schedule_model.dart';
 import './home_repository.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
@@ -19,22 +20,39 @@ class HomeRepositoryImpl implements HomeRepository {
   final AppLogger _logger;
 
   @override
-  Future<List<Map<String, dynamic>>> loadSchedules(DateTime date) async {
+  Future<List<ScheduleModel>> loadSchedules(DateTime date) async {
     try {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
-      final response = await _restClient.auth().get(
-            '/schedules/get?date=$formattedDate',
+      // Busca agendamentos de ambas as listas para a data específica
+      final responseListA = await _restClient.auth().get(
+            '/list-a/get?date=$formattedDate',
+          );
+      final responseListB = await _restClient.auth().get(
+            '/list-b/get?date=$formattedDate',
           );
 
-      if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(response.data);
-      } else {
-        throw Failure(
-          message:
-              'Erro ao carregar os agendamentos (código ${response.statusCode})',
-        );
+      final List<ScheduleModel> allSchedules = [];
+
+      if (responseListA.statusCode == 200) {
+        final dataA = responseListA.data;
+        if (dataA is Map<String, dynamic> && dataA['schedules'] != null) {
+          allSchedules.addAll(
+            (dataA['schedules'] as List).map((x) => ScheduleModel.fromMap(x)),
+          );
+        }
       }
+
+      if (responseListB.statusCode == 200) {
+        final dataB = responseListB.data;
+        if (dataB is Map<String, dynamic> && dataB['schedules'] != null) {
+          allSchedules.addAll(
+            (dataB['schedules'] as List).map((x) => ScheduleModel.fromMap(x)),
+          );
+        }
+      }
+
+      return allSchedules;
     } on RestClientException catch (e, s) {
       _logger.error(
         'Error on load schedules (status code: ${e.statusCode})',
@@ -58,28 +76,47 @@ class HomeRepositoryImpl implements HomeRepository {
     try {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
-      final response = await _restClient.auth().get(
-            '/schedules/get?date=$formattedDate',
+      // Busca ambas as listas A e B para a data específica
+      final responseListA = await _restClient.auth().get(
+            '/list-a/get?date=$formattedDate',
+          );
+      final responseListB = await _restClient.auth().get(
+            '/list-b/get?date=$formattedDate',
           );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
+      final List<ScheduleListModel> scheduleLists = [];
 
-        // A API retorna uma lista de objetos com list_name e schedules
-        return data.map((item) {
-          if (item is Map<String, dynamic>) {
-            return ScheduleListModel.fromMap(item);
-          } else {
-            _logger.warning('Formato de dados inesperado: $item');
-            return ScheduleListModel(
-                listName: 'Lista Desconhecida', schedules: []);
+      try {
+        if (responseListA.statusCode == 200) {
+          final dataA = responseListA.data;
+          if (dataA is Map<String, dynamic>) {
+            scheduleLists.add(ScheduleListModel.fromMap(dataA));
           }
-        }).toList();
-      } else {
-        throw Failure(
-            message:
-                'Erro ao carregar as listas de agendamentos (código ${response.statusCode})');
+        }
+      } catch (e) {
+        _logger.error('Erro ao fazer parse da resposta da Lista A', e);
+        _logger.error(
+          'Corpo da resposta Lista A: \n${responseListA.data.toString()}',
+        );
+        throw Failure(message: 'Erro ao processar dados da Lista A.');
       }
+
+      try {
+        if (responseListB.statusCode == 200) {
+          final dataB = responseListB.data;
+          if (dataB is Map<String, dynamic>) {
+            scheduleLists.add(ScheduleListModel.fromMap(dataB));
+          }
+        }
+      } catch (e) {
+        _logger.error('Erro ao fazer parse da resposta da Lista B', e);
+        _logger.error(
+          'Corpo da resposta Lista B: \n${responseListB.data.toString()}',
+        );
+        throw Failure(message: 'Erro ao processar dados da Lista B.');
+      }
+
+      return scheduleLists;
     } on RestClientException catch (e, s) {
       _logger.error(
         'Error on load schedule lists (status code: ${e.statusCode})',
@@ -100,11 +137,15 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<List<String>> getAvailableListNames() async {
     try {
-      final response = await _restClient.auth().get('/schedules/lists');
+      // Usa o endpoint de listas da Lista A (ambos retornam o mesmo resultado)
+      final response = await _restClient.auth().get('/list-a/lists');
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        return data.map((item) => item.toString()).toList();
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['list_names'] != null) {
+          return List<String>.from(data['list_names']);
+        }
+        return ['Lista A', 'Lista B']; // Fallback
       } else {
         throw Failure(
           message:
@@ -136,14 +177,29 @@ class HomeRepositoryImpl implements HomeRepository {
   ) async {
     try {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+      // Normaliza o nome para evitar erro de contains
+      final normalized =
+          listName.toLowerCase().replaceAll(' ', '').replaceAll('_', '');
+      String endpoint;
+      if (normalized == 'listaa') {
+        endpoint = '/list-a/get?date=$formattedDate';
+      } else if (normalized == 'listab') {
+        endpoint = '/list-b/get?date=$formattedDate';
+      } else {
+        endpoint = '/list-a/get?date=$formattedDate';
+      }
 
-      final response = await _restClient.auth().get(
-            '/schedules/list?name=$listName&date=$formattedDate',
-          );
+      _logger.info('Buscando $listName no endpoint: $endpoint');
+      final response = await _restClient.auth().get(endpoint);
+      _logger.info('Resposta $listName: status=${response.statusCode}');
 
       if (response.statusCode == 200) {
         if (response.data != null) {
-          return ScheduleListModel.fromMap(response.data);
+          final result = ScheduleListModel.fromMap(response.data);
+          _logger.info(
+            '$listName carregada com ${result.schedules.length} agendamentos',
+          );
+          return result;
         }
         return null;
       } else {
@@ -197,26 +253,43 @@ class HomeRepositoryImpl implements HomeRepository {
     try {
       final formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-      final response = await _restClient.auth().get(
-            '/schedules/get?date=$formattedDate',
+      // Busca agendamentos de ambas as listas para a data atual
+      final responseListA = await _restClient.auth().get(
+            '/list-a/get?date=$formattedDate',
+          );
+      final responseListB = await _restClient.auth().get(
+            '/list-b/get?date=$formattedDate',
           );
 
-      if (response.statusCode == 200) {
-        // Certifique-se de que a resposta é uma lista e pegue o primeiro item
-        if (response.data is List && response.data.isNotEmpty) {
-          final firstSchedule = response.data[1];
-          return firstSchedule['streamer_url'] as String?;
-        } else {
-          _logger.warning(
-            'A lista de agendamentos está vazia ou a estrutura dos dados não está correta',
+      final List<ScheduleModel> allSchedules = [];
+
+      if (responseListA.statusCode == 200) {
+        final dataA = responseListA.data;
+        if (dataA is Map<String, dynamic> && dataA['schedules'] != null) {
+          allSchedules.addAll(
+            (dataA['schedules'] as List).map((x) => ScheduleModel.fromMap(x)),
           );
-          return null;
         }
+      }
+
+      if (responseListB.statusCode == 200) {
+        final dataB = responseListB.data;
+        if (dataB is Map<String, dynamic> && dataB['schedules'] != null) {
+          allSchedules.addAll(
+            (dataB['schedules'] as List).map((x) => ScheduleModel.fromMap(x)),
+          );
+        }
+      }
+
+      // Certifique-se de que a resposta é uma lista e pegue o primeiro item
+      if (allSchedules.isNotEmpty) {
+        final firstSchedule = allSchedules.first;
+        return firstSchedule.streamerUrl;
       } else {
-        throw Failure(
-          message:
-              'Erro ao buscar a URL do canal (código ${response.statusCode})',
+        _logger.warning(
+          'A lista de agendamentos está vazia ou a estrutura dos dados não está correta',
         );
+        return null;
       }
     } catch (e, s) {
       _logger.error('Error fetching channel URL', e, s);

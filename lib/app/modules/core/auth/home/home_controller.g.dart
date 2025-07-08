@@ -16,6 +16,14 @@ mixin _$HomeController on HomeControllerBase, Store {
           () => super.currentChannel,
           name: 'HomeControllerBase.currentChannel'))
       .value;
+  Computed<List<ScheduleModel>>? _$currentListSchedulesComputed;
+
+  @override
+  List<ScheduleModel> get currentListSchedules =>
+      (_$currentListSchedulesComputed ??= Computed<List<ScheduleModel>>(
+              () => super.currentListSchedules,
+              name: 'HomeControllerBase.currentListSchedules'))
+          .value;
 
   late final _$isWebViewHealthyAtom =
       Atom(name: 'HomeControllerBase.isWebViewHealthy', context: context);
@@ -145,6 +153,38 @@ mixin _$HomeController on HomeControllerBase, Store {
     });
   }
 
+  late final _$listaASchedulesAtom =
+      Atom(name: 'HomeControllerBase.listaASchedules', context: context);
+
+  @override
+  List<ScheduleModel> get listaASchedules {
+    _$listaASchedulesAtom.reportRead();
+    return super.listaASchedules;
+  }
+
+  @override
+  set listaASchedules(List<ScheduleModel> value) {
+    _$listaASchedulesAtom.reportWrite(value, super.listaASchedules, () {
+      super.listaASchedules = value;
+    });
+  }
+
+  late final _$listaBSchedulesAtom =
+      Atom(name: 'HomeControllerBase.listaBSchedules', context: context);
+
+  @override
+  List<ScheduleModel> get listaBSchedules {
+    _$listaBSchedulesAtom.reportRead();
+    return super.listaBSchedules;
+  }
+
+  @override
+  set listaBSchedules(List<ScheduleModel> value) {
+    _$listaBSchedulesAtom.reportWrite(value, super.listaBSchedules, () {
+      super.listaBSchedules = value;
+    });
+  }
+
   late final _$onInitAsyncAction =
       AsyncAction('HomeControllerBase.onInit', context: context);
 
@@ -167,6 +207,22 @@ mixin _$HomeController on HomeControllerBase, Store {
   @override
   Future<void> _recoverWebView() {
     return _$_recoverWebViewAsyncAction.run(() => super._recoverWebView());
+  }
+
+  late final _$loadListaAAsyncAction =
+      AsyncAction('HomeControllerBase.loadListaA', context: context);
+
+  @override
+  Future<void> loadListaA() {
+    return _$loadListaAAsyncAction.run(() => super.loadListaA());
+  }
+
+  late final _$loadListaBAsyncAction =
+      AsyncAction('HomeControllerBase.loadListaB', context: context);
+
+  @override
+  Future<void> loadListaB() {
+    return _$loadListaBAsyncAction.run(() => super.loadListaB());
   }
 
   late final _$onWebViewCreatedAsyncAction =
@@ -215,7 +271,10 @@ currentTabIndex: ${currentTabIndex},
 currentChannelListA: ${currentChannelListA},
 currentChannelListB: ${currentChannelListB},
 isLoadingLists: ${isLoadingLists},
-currentChannel: ${currentChannel}
+listaASchedules: ${listaASchedules},
+listaBSchedules: ${listaBSchedules},
+currentChannel: ${currentChannel},
+currentListSchedules: ${currentListSchedules}
     ''';
   }
 }

@@ -8,7 +8,7 @@ import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/ui/widgets/loader.dart';
 import '../../../../core/ui/widgets/messages.dart';
-import '../../../../models/schedule_list_model.dart';
+import '../../../../models/schedule_model.dart';
 import '../../../../service/home/home_service.dart';
 import '../../../../service/webview/windows_web_view_service.dart';
 import '../auth_store.dart';
@@ -47,6 +47,7 @@ abstract class HomeControllerBase with Store {
   Timer? _webViewHealthTimer;
   bool _isDisposed = false;
   bool _recoveryInProgress = false;
+  bool _servicesInitialized = false;
 
   @observable
   bool isWebViewHealthy = true;
@@ -72,9 +73,24 @@ abstract class HomeControllerBase with Store {
   @observable
   bool isLoadingLists = false;
 
+  @observable
+  List<ScheduleModel> listaASchedules = [];
+
+  @observable
+  List<ScheduleModel> listaBSchedules = [];
+
   @computed
   String? get currentChannel {
     return currentTabIndex == 0 ? currentChannelListA : currentChannelListB;
+  }
+
+  @computed
+  List<ScheduleModel> get currentListSchedules {
+    final schedules = currentTabIndex == 0 ? listaASchedules : listaBSchedules;
+    final listName = currentTabIndex == 0 ? 'Lista A' : 'Lista B';
+    _logger.info(
+        'Retornando ${schedules.length} agendamentos da $listName (aba $currentTabIndex)');
+    return schedules;
   }
 
   void _subscribeToHealthEvents() {
@@ -104,9 +120,10 @@ abstract class HomeControllerBase with Store {
     });
   }
 
+  /// Inicializa o controlador da página principal.
+  /// Configura monitoramento de saúde, carrega dados do usuário e inicializa serviços.
   @action
   Future<void> onInit() async {
-    _logger.info('Iniciando HomeController...');
     try {
       _setupWebViewMonitoring();
 
@@ -124,6 +141,8 @@ abstract class HomeControllerBase with Store {
     }
   }
 
+  /// Alterna entre as abas Lista A e Lista B.
+  /// @param index Índice da aba (0 = Lista A, 1 = Lista B)
   @action
   Future<void> switchTab(int index) async {
     if (index < 0 || index > 1) {
@@ -131,13 +150,46 @@ abstract class HomeControllerBase with Store {
       return;
     }
 
-    currentTabIndex = index;
-    _logger.info('Alternando para aba: ${index == 0 ? "Lista A" : "Lista B"}');
+    // Se já está na aba selecionada, não faz nada
+    if (currentTabIndex == index) {
+      _logger.info('Já está na aba $index, ignorando troca');
+      return;
+    }
 
-    // Recarrega o canal atual baseado na nova aba
-    await loadCurrentChannel();
+    final previousTab = currentTabIndex;
+    currentTabIndex = index;
+
+    final tabName = index == 0 ? 'Lista A' : 'Lista B';
+    _logger.info('=== INÍCIO TROCA DE ABA ===');
+    _logger.info('Trocando de aba $previousTab para $index ($tabName)');
+    _logger.info(
+        'Estado atual - Lista A: ${listaASchedules.length} agendamentos, Lista B: ${listaBSchedules.length} agendamentos');
+
+    try {
+      // Carrega a lista específica da aba selecionada se não foi carregada ainda
+      if (index == 0 && listaASchedules.isEmpty) {
+        _logger.info('Iniciando carregamento da Lista A...');
+        await loadListaA();
+        _logger.info(
+            'Lista A carregada. Agora tem ${listaASchedules.length} agendamentos');
+      } else if (index == 1 && listaBSchedules.isEmpty) {
+        _logger.info('Iniciando carregamento da Lista B...');
+        await loadListaB();
+        _logger.info(
+            'Lista B carregada. Agora tem ${listaBSchedules.length} agendamentos');
+      }
+
+      _logger.info('=== FIM TROCA DE ABA ===');
+    } catch (e, s) {
+      _logger.error('Erro ao trocar para aba $index', e, s);
+      // Em caso de erro, volta para a aba anterior
+      currentTabIndex = previousTab;
+      _logger.error('Voltando para aba anterior: $previousTab');
+    }
   }
 
+  /// Configura monitoramento periódico da saúde do WebView.
+  /// Verifica a cada 2 minutos se o WebView está responsivo.
   void _setupWebViewMonitoring() {
     _webViewHealthTimer?.cancel();
     _webViewHealthTimer = Timer.periodic(const Duration(minutes: 2), (_) {
@@ -147,6 +199,8 @@ abstract class HomeControllerBase with Store {
     });
   }
 
+  /// Verifica se o WebView está saudável e responsivo.
+  /// Se não estiver, tenta recuperar automaticamente.
   Future<void> _checkWebViewHealth() async {
     try {
       if (!_webViewService.isInitialized ||
@@ -170,18 +224,20 @@ abstract class HomeControllerBase with Store {
     }
   }
 
+  /// Tenta recuperar o WebView quando há problemas de saúde.
+  /// Para o polling, recarrega o WebView e reinicia o polling.
   @action
   Future<void> _recoverWebView() async {
     // Evita múltiplas recuperações simultâneas
     if (_recoveryInProgress) {
-      _logger.info('Recuperação já em andamento, ignorando...');
+      // _logger.info('Recuperação já em andamento, ignorando...');
       return;
     }
 
     try {
       _recoveryInProgress = true;
       isRecovering = true;
-      _logger.info('Tentando recuperar WebView...');
+      // _logger.info('Tentando recuperar WebView...');
 
       // Para o polling antes de reiniciar
       await _pollingService.stopPolling();
@@ -208,7 +264,7 @@ abstract class HomeControllerBase with Store {
       // Reinicia o polling
       await _ensurePollingActive();
 
-      _logger.info('WebView recuperado com sucesso');
+      // _logger.info('WebView recuperado com sucesso');
       isWebViewHealthy = true;
     } catch (e, s) {
       _logger.error('Falha ao recuperar WebView', e, s);
@@ -222,88 +278,166 @@ abstract class HomeControllerBase with Store {
     }
   }
 
+  /// Garante que o polling esteja ativo com o streamer atual.
+  /// Obtém o ID do streamer do usuário logado e inicia o polling.
   Future<void> _ensurePollingActive() async {
     final streamerId = _getCurrentStreamerId();
     if (streamerId > 0) {
-      _logger.info('Reiniciando polling com streamerId: $streamerId');
+      // _logger.info('Reiniciando polling com streamerId: $streamerId');
       await _pollingService.startPolling(streamerId);
     } else {
       _logger.warning('Não foi possível obter ID válido para polling');
     }
   }
 
+  /// Inicializa todos os serviços necessários para o funcionamento do app.
+  /// Carrega canais iniciais, agendamentos e inicia o polling.
   Future<void> _initializeServices() async {
-    _logger.info('Inicializando serviços...');
     try {
-      await loadCurrentChannel();
+      Loader.showLoadingChannel();
+      await loadInitialChannels();
+      Loader.hide();
+
+      Loader.showLoadingSchedules();
+      // Carrega ambas as listas inicialmente
+      await loadListaA();
+      await loadListaB();
       await _homeService.fetchSchedules();
+      Loader.hide();
 
       await _ensurePollingActive();
-
-      _logger.info('Serviços inicializados com sucesso');
     } catch (e, s) {
+      Loader.hide();
       _logger.error('Error initializing services', e, s);
-      Messages.warning('Erro ao inicializar serviços');
+      Messages.scheduleLoadError();
       rethrow;
     }
   }
 
+  /// Carrega os canais iniciais para ambas as abas.
+  @action
+  Future<void> loadInitialChannels() async {
+    try {
+      _logger.info('=== CARREGANDO CANAIS INICIAIS ===');
+
+      // Carrega canal da Lista A
+      final channelA = await _homeService.fetchCurrentChannelForList('Lista A');
+      currentChannelListA = channelA;
+      _logger.info('Canal inicial da Lista A: $channelA');
+
+      // Carrega canal da Lista B
+      final channelB = await _homeService.fetchCurrentChannelForList('Lista B');
+      currentChannelListB = channelB;
+      _logger.info('Canal inicial da Lista B: $channelB');
+
+      _logger.info('=== CANAIS INICIAIS CARREGADOS ===');
+    } catch (e, s) {
+      _logger.error('Error loading initial channels', e, s);
+      Messages.webViewError();
+      rethrow;
+    }
+  }
+
+  /// Carrega especificamente a Lista A.
+  @action
+  Future<void> loadListaA() async {
+    try {
+      _logger.info('=== INÍCIO LOAD LISTA A ===');
+      _logger.info('Estado antes: ${listaASchedules.length} agendamentos');
+
+      final scheduleList =
+          await _homeService.fetchScheduleListByName('Lista A');
+      listaASchedules = scheduleList?.schedules ?? [];
+
+      _logger
+          .info('Lista A carregada com ${listaASchedules.length} agendamentos');
+      _logger.info('=== FIM LOAD LISTA A ===');
+    } catch (e, s) {
+      _logger.error('Error loading Lista A', e, s);
+      rethrow;
+    }
+  }
+
+  /// Carrega especificamente a Lista B.
+  @action
+  Future<void> loadListaB() async {
+    try {
+      _logger.info('=== INÍCIO LOAD LISTA B ===');
+      _logger.info('Estado antes: ${listaBSchedules.length} agendamentos');
+
+      final scheduleList =
+          await _homeService.fetchScheduleListByName('Lista B');
+      listaBSchedules = scheduleList?.schedules ?? [];
+
+      _logger
+          .info('Lista B carregada com ${listaBSchedules.length} agendamentos');
+      _logger.info('=== FIM LOAD LISTA B ===');
+    } catch (e, s) {
+      _logger.error('Error loading Lista B', e, s);
+      rethrow;
+    }
+  }
+
+  /// Configura o WebView quando ele é criado.
+  /// Inicializa o WebView e os serviços necessários.
+  /// @param controller Controlador do WebView
   @action
   Future<void> onWebViewCreated(WebviewController controller) async {
-    _logger.info('WebView criado, iniciando configuração...');
     try {
       if (_authStore.userLogged == null) {
         throw Failure(message: 'Usuário não está autenticado');
       }
 
       await _webViewService.initializeWebView(controller);
-      await _initializeServices();
 
-      _logger.info('WebView configurado com sucesso');
+      // Só inicializa os serviços uma vez (no primeiro WebView criado)
+      if (!_servicesInitialized) {
+        _servicesInitialized = true;
+        await _initializeServices();
+      }
     } catch (e, s) {
       _logger.error('Erro durante inicialização do WebView', e, s);
       await _handleError(e, s);
     }
   }
 
+  /// Carrega o canal atual baseado na aba selecionada.
+  /// Sempre busca o canal atual da API. Os WebViews se atualizam automaticamente.
   @action
   Future<void> loadCurrentChannel() async {
     try {
-      // Armazena o canal atual para comparação
-      final previousChannelA = currentChannelListA;
-      final previousChannelB = currentChannelListB;
+      final listName = currentTabIndex == 0 ? 'Lista A' : 'Lista B';
+      _logger.info('=== INÍCIO LOAD CURRENT CHANNEL ===');
+      _logger.info('Carregando canal para $listName (aba $currentTabIndex)');
 
-      // Busca o novo canal baseado na lista atual
-      final newChannel = await _homeService.fetchCurrentChannel();
+      // Busca o canal atual da API baseado na lista atual
+      final newChannel =
+          await _homeService.fetchCurrentChannelForList(listName);
 
+      // Atualiza o canal atual
       if (currentTabIndex == 0) {
+        final oldChannel = currentChannelListA;
         currentChannelListA = newChannel;
-        // Se mudou de canal na Lista A, carrega a nova URL
-        if (currentChannelListA != null &&
-            currentChannelListA != previousChannelA) {
-          _logger.info(
-              'Canal da Lista A alterado de $previousChannelA para $currentChannelListA');
-          await _webViewService.loadUrl(currentChannelListA!);
-        }
+        _logger.info('Canal da Lista A atualizado: $oldChannel → $newChannel');
       } else {
+        final oldChannel = currentChannelListB;
         currentChannelListB = newChannel;
-        // Se mudou de canal na Lista B, carrega a nova URL
-        if (currentChannelListB != null &&
-            currentChannelListB != previousChannelB) {
-          _logger.info(
-              'Canal da Lista B alterado de $previousChannelB para $currentChannelListB');
-          await _webViewService.loadUrl(currentChannelListB!);
-        }
+        _logger.info('Canal da Lista B atualizado: $oldChannel → $newChannel');
       }
 
-      _logger.info('Canal atual carregado: ${currentChannel}');
+      // Os WebViews se atualizam automaticamente via didUpdateWidget
+      _logger.info(
+          'Canal atual final: $currentChannel - WebViews se atualizarão automaticamente');
+      _logger.info('=== FIM LOAD CURRENT CHANNEL ===');
     } catch (e, s) {
       _logger.error('Error loading current channel', e, s);
-      Messages.warning('Erro ao carregar canal atual');
+      Messages.webViewError();
       rethrow;
     }
   }
 
+  /// Obtém o ID do streamer atual do usuário logado.
+  /// @return ID do streamer ou 0 se não for possível obter
   int _getCurrentStreamerId() {
     try {
       if (_authStore.userLogged == null || _authStore.userLogged?.id == null) {
@@ -317,7 +451,7 @@ abstract class HomeControllerBase with Store {
         return 0;
       }
 
-      _logger.info('Streamer ID obtido com sucesso: $streamerId');
+      // _logger.info('Streamer ID obtido com sucesso: $streamerId');
       return streamerId;
     } catch (e, s) {
       _logger.error('Erro ao obter ID do streamer', e, s);
@@ -325,68 +459,83 @@ abstract class HomeControllerBase with Store {
     }
   }
 
+  /// Recarrega o WebView ativo.
+  /// Mostra loader durante o processo e trata erros adequadamente.
   @action
   Future<void> reloadWebView() async {
-    _logger.info('Recarregando WebView...');
     try {
-      Loader.show();
-      await _webViewService.reload();
-      await loadCurrentChannel();
+      Loader.showReloading();
+
+      // Como agora temos WebViews independentes, cada um gerencia seu próprio reload
+      // O serviço ainda mantém referência ao último WebView inicializado
+      if (_webViewService.isInitialized) {
+        await _webViewService.reload();
+      }
+
       Loader.hide();
       _logger.info('WebView recarregado com sucesso');
     } catch (e, s) {
       Loader.hide();
       _logger.error('Erro ao recarregar WebView', e, s);
-      Messages.warning('Erro ao atualizar a página');
+      Messages.webViewError();
     }
   }
 
+  /// Redireciona para a tela de login quando o usuário não está logado.
   Future<void> _handleNotLoggedIn() async {
-    _logger.info('Usuário não logado, redirecionando...');
     if (!Modular.to.path.contains('/auth/login')) {
       Modular.to.navigate('/auth/login/');
     }
   }
 
+  /// Trata erros gerais do controlador.
+  /// Se for erro de autenticação, faz logout e redireciona para login.
+  /// @param error Erro ocorrido
+  /// @param stackTrace Stack trace do erro
   Future<void> _handleError(Object error, StackTrace stackTrace) async {
     _logger.error('Error in HomeController', error, stackTrace);
 
     if (error.toString().contains('autenticação') ||
         error.toString().contains('Expire token')) {
       await _authStore.logout();
+      Messages.authenticationError();
       if (!Modular.to.path.contains('/auth/login')) {
         Modular.to.navigate('/auth/login/');
       }
     } else {
-      Messages.warning('Erro ao inicializar aplicação');
+      Messages.serverError();
     }
   }
 
+  /// Processa atualizações de canal recebidas do serviço de polling.
+  /// Atualiza o canal da lista correspondente (A ou B).
+  /// @param channelUrl Nova URL do canal
   @action
   Future<void> _handleChannelUpdate(String channelUrl) async {
     try {
-      _logger.info('Recebido update de canal do polling: $channelUrl');
+      final listName = currentTabIndex == 0 ? 'Lista A' : 'Lista B';
+      _logger.info(
+          'Polling atualizando canal da $listName (aba $currentTabIndex): $channelUrl');
 
       // Update the current channel based on current tab
       if (currentTabIndex == 0) {
         currentChannelListA = channelUrl;
+        _logger.info('Canal da Lista A atualizado via polling: $channelUrl');
       } else {
         currentChannelListB = channelUrl;
+        _logger.info('Canal da Lista B atualizado via polling: $channelUrl');
       }
 
-      // Load the new URL in the webview
-      if (_webViewService.isInitialized) {
-        _logger.info('Carregando novo canal no WebView: $channelUrl');
-        await _webViewService.loadUrl(channelUrl);
-      } else {
-        _logger.warning(
-            'WebView não inicializado, não foi possível carregar o canal: $channelUrl');
-      }
+      // Com IndexedStack, cada WebView mantém seu próprio estado
+      // Não carregamos a URL automaticamente para evitar conflitos
+      _logger.info(
+          'Canal atualizado. WebViews independentes manterão seus próprios estados.');
     } catch (e, s) {
       _logger.error('Erro ao processar atualização de canal', e, s);
     }
   }
 
+  /// Limpa recursos e cancela timers/subscriptions quando o controlador é descartado.
   void dispose() {
     _isDisposed = true;
     _webViewHealthTimer?.cancel();
@@ -395,6 +544,5 @@ abstract class HomeControllerBase with Store {
     _channelUpdateSubscription.cancel();
     _pollingService.stopPolling();
     _webViewService.dispose();
-    _logger.info('HomeController disposed');
   }
 }
