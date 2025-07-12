@@ -4,6 +4,7 @@ import 'package:desktop_webview_window/desktop_webview_window.dart';
 
 import '../../../../../core/exceptions/failure.dart';
 import '../../../../../core/logger/app_logger.dart';
+import '../../../../../core/utils/url_validator.dart';
 
 abstract class WebViewService {
   Future<void> initializeWebView(Webview controller);
@@ -107,6 +108,14 @@ class WebViewServiceImpl implements WebViewService {
       throw Failure(message: 'WebView não inicializado');
     }
 
+    // Valida e sanitiza a URL antes de carregar
+    final validatedUrl = UrlValidator.validateAndSanitizeUrl(url);
+    if (validatedUrl == null) {
+      _logger.error('URL inválida ou maliciosa detectada: $url');
+      _healthController.add(false);
+      throw Failure(message: 'URL inválida ou não permitida');
+    }
+
     try {
       // Usa um completer para controlar o timeout
       final completer = Completer<void>();
@@ -114,13 +123,13 @@ class WebViewServiceImpl implements WebViewService {
       // Timer para timeout
       final timer = Timer(_operationTimeout, () {
         if (!completer.isCompleted) {
-          _logger.warning('Timeout ao carregar URL: $url');
+          _logger.warning('Timeout ao carregar URL: $validatedUrl');
           completer.completeError(Failure(message: 'Timeout ao carregar URL'));
         }
       });
 
-      // Executa o launch
-      _controller!.launch(url);
+      // Executa o launch com a URL validada
+      _controller!.launch(validatedUrl);
 
       // Cancela o timer e completa com sucesso
       timer.cancel();
@@ -131,9 +140,9 @@ class WebViewServiceImpl implements WebViewService {
       await completer.future;
       _lastActivity = DateTime.now();
       _healthController.add(true);
-      _logger.info('URL carregada com sucesso: $url');
+      _logger.info('URL carregada com sucesso: $validatedUrl');
     } catch (e, s) {
-      _logger.error('Error loading URL: $url', e, s);
+      _logger.error('Error loading URL: $validatedUrl', e, s);
       _healthController.add(false);
       if (e is Failure) rethrow;
       throw Failure(message: 'Erro ao carregar URL');

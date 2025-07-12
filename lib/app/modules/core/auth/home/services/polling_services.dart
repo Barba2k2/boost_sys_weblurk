@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import '../../../../../core/logger/app_logger.dart';
+import '../../../../../core/utils/url_validator.dart';
 import '../../../../../service/home/home_service.dart';
 
 abstract class PollingService {
@@ -250,25 +251,30 @@ class PollingServiceImpl implements PollingService {
       // Se não houver canal, usamos o canal base
       final channelToShow = correctChannel ?? _baseChannel;
 
-      // _logger.info('Canal verificado: $channelToShow em ${DateTime.now()}');
-
-      // Sempre notificamos para atualização a cada 6 minutos, mesmo que o canal não tenha mudado
-      // Isso garante que o webview esteja sempre mostrando o canal correto
-      // _logger.info('Forçando atualização de canal para: $channelToShow');
-      _channelController.add(channelToShow);
-      _currentChannel = channelToShow;
-
-      _lastChannelUpdate = DateTime.now();
-    } catch (e, s) {
-      _logger.error('Erro ao verificar canal ${DateTime.now()}', e, s);
-      _lastChannelUpdate = DateTime.now();
-
-      // Em caso de erro, tentamos usar o canal base como fallback
-      if (_currentChannel != _baseChannel) {
-        _logger.warning('Erro ao buscar canal atual, voltando para canal base');
-        _channelController.add(_baseChannel);
-        _currentChannel = _baseChannel;
+      // Valida e sanitiza a URL do canal antes de processar
+      final validatedUrl = UrlValidator.validateAndSanitizeUrl(channelToShow);
+      if (validatedUrl == null) {
+        _logger.error(
+          'URL de canal inválida ou maliciosa detectada: $channelToShow',
+        );
+        return;
       }
+
+      // Se o canal atual é diferente do que deveria ser mostrado
+      if (_currentChannel != validatedUrl) {
+        _logger.info(
+          'Atualizando canal: $_currentChannel -> $validatedUrl',
+        );
+
+        // Notificar para forçar a troca de canal
+        _channelController.add(validatedUrl);
+        _currentChannel = validatedUrl;
+        _lastChannelUpdate = DateTime.now();
+        _healthController.add(true);
+      }
+    } catch (e, s) {
+      _logger.error('Erro ao verificar canal correto', e, s);
+      _healthController.add(false);
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:webview_windows/webview_windows.dart';
 import '../../core/exceptions/failure.dart';
 import '../../core/logger/app_logger.dart';
 import './windows_web_view_service.dart';
+import '../../core/utils/url_validator.dart';
 
 class WindowsWebViewServiceImpl implements WindowsWebViewService {
   WindowsWebViewServiceImpl({
@@ -37,7 +38,7 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
     final now = DateTime.now();
     if (_lastActivity != null) {
       final inactiveTime = now.difference(_lastActivity!);
-      
+
       if (inactiveTime > _inactivityThreshold) {
         final isAlive = await isResponding();
 
@@ -85,17 +86,25 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
       throw Failure(message: 'WebView não inicializado');
     }
 
+    // Valida e sanitiza a URL antes de carregar
+    final validatedUrl = UrlValidator.validateAndSanitizeUrl(url);
+    if (validatedUrl == null) {
+      _logger.error('URL inválida ou maliciosa detectada: $url');
+      _healthController.add(false);
+      throw Failure(message: 'URL inválida ou não permitida');
+    }
+
     try {
-      _logger.info('Carregando URL: $url');
+      _logger.info('Carregando URL: $validatedUrl');
 
       // Operação simples, sem usar completer ou listeners adicionais
-      await _controller!.loadUrl(url);
+      await _controller!.loadUrl(validatedUrl);
 
       _lastActivity = DateTime.now();
       _healthController.add(true);
-      _logger.info('URL carregada com sucesso: $url');
+      _logger.info('URL carregada com sucesso: $validatedUrl');
     } catch (e, s) {
-      _logger.error('Erro ao carregar URL: $url', e, s);
+      _logger.error('Erro ao carregar URL: $validatedUrl', e, s);
       _healthController.add(false);
       throw Failure(message: 'Erro ao carregar URL: ${e.toString()}');
     }
@@ -110,7 +119,8 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
 
     try {
       final now = DateTime.now();
-      if (_lastReload != null && now.difference(_lastReload!) < _minReloadInterval) {
+      if (_lastReload != null &&
+          now.difference(_lastReload!) < _minReloadInterval) {
         _logger.warning('Recarregamento muito frequente, aguardando...');
         await Future.delayed(
           _minReloadInterval - now.difference(_lastReload!),
