@@ -47,7 +47,6 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\desktop_webview_window_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\flutter_secure_storage_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\flutter_volume_controller_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\screen_retriever_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
