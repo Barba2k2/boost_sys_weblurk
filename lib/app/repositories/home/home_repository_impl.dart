@@ -313,6 +313,18 @@ class HomeRepositoryImpl implements HomeRepository {
         );
       }
     } on RestClientException catch (e, s) {
+      // Verifica se é erro de duplicação (500 com mensagem específica)
+      if (e.statusCode == 500 &&
+          e.response.data != null &&
+          e.response.data
+              .toString()
+              .contains('duplicate key value violates unique constraint')) {
+        // Pontuação já existe, consideramos como sucesso
+        _logger.info(
+            'Pontuação já existe no banco de dados, ignorando duplicação');
+        return;
+      }
+
       _logger.error('Error on save score (status code: ${e.statusCode})', e, s);
       throw Failure(
         message:
