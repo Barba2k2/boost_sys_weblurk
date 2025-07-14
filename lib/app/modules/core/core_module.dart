@@ -2,6 +2,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 
 import '../../core/controllers/settings_controller.dart';
 import '../../core/controllers/url_launch_controller.dart';
+import '../../core/controllers/volume_controller.dart';
 import '../../core/local_storage/flutter_secure_storage/flutter_secure_storage_local_storage_impl.dart';
 import '../../core/local_storage/local_storage.dart';
 import '../../core/local_storage/shared_preferences/shared_preferences_local_storage_impl.dart';
@@ -14,6 +15,7 @@ import '../../repositories/schedule/schedule_repository_impl.dart';
 import '../../service/schedule/schedule_service.dart';
 import '../../service/schedule/schedule_service_impl.dart';
 import 'auth/auth_store.dart';
+import 'auth/home/home_module.dart';
 
 class CoreModule extends Module {
   @override
@@ -58,6 +60,12 @@ class CoreModule extends Module {
           ),
           export: true,
         ),
+        Bind.lazySingleton<VolumeController>(
+          (i) => VolumeController(
+            logger: i<AppLogger>(),
+          ),
+          export: true,
+        ),
         Bind.lazySingleton<UrlLaunchController>(
           (i) => UrlLaunchController(
             logger: i<AppLogger>(),
@@ -67,11 +75,14 @@ class CoreModule extends Module {
         Bind.lazySingleton<SettingsController>(
           (i) => SettingsController(
             logger: i<AppLogger>(),
+            volumeController: i<VolumeController>(),
           ),
           export: true,
         ),
       ];
 
   @override
-  List<ModularRoute> get routes => [];
+  List<ModularRoute> get routes => [
+        ModuleRoute('/', module: HomeModule()),
+      ];
 }
