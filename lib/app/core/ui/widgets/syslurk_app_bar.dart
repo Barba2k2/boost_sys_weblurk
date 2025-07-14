@@ -7,6 +7,8 @@ import '../../../modules/core/auth/auth_store.dart';
 import '../../../modules/core/auth/home/home_controller.dart';
 import '../../controllers/settings_controller.dart';
 import '../../controllers/url_launch_controller.dart';
+import 'build_menu_button.dart';
+import 'build_menu_item.dart';
 import 'messages.dart';
 
 class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -41,86 +43,103 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
               height: 32,
             ),
             const SizedBox(width: 16),
-            _buildMenuButton(
-              'Opções',
-              Icons.menu,
-              [
-                _buildMenuItem(
-                  'Atualizar Listas',
-                  Icons.refresh,
-                  () {
+            BuildMenuButton(
+              label: 'Opções',
+              icon: Icons.menu,
+              items: [
+                BuildMenuItem(
+                  label: 'Atualizar Listas',
+                  icon: Icons.refresh,
+                  onTap: () {
                     // homeController.loadSchedules();
                     homeController.reloadWebView();
                   },
                 ),
-                _buildMenuItem(
-                  'Encerrar',
-                  Icons.power_settings_new,
-                  () {
+                BuildMenuItem(
+                  label: 'Encerrar',
+                  icon: Icons.power_settings_new,
+                  onTap: () {
                     settingsController.terminateApp();
                   },
                 ),
-                _buildMenuItem(
-                  'Audio',
-                  Icons.volume_up,
-                  () {
+                BuildMenuItemReactive(
+                  onTap: () {
                     settingsController.muteAppAudio();
                   },
+                  builder: () {
+                    return Observer(
+                      builder: (_) {
+                        final isMuted =
+                            settingsController.isAudioCurrentlyMuted;
+                        return Row(
+                          children: [
+                            Icon(
+                              isMuted ? Icons.volume_off : Icons.volume_up,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(isMuted ? 'Desmutar Áudio' : 'Mutar Áudio'),
+                          ],
+                        );
+                      },
+                    );
+                  },
                 ),
-                _buildMenuItem(
-                  'Fuso Horário',
-                  Icons.schedule,
-                  () {
+                BuildMenuItem(
+                  label: 'Fuso Horário',
+                  icon: Icons.schedule,
+                  onTap: () {
                     Messages.info('Funcionalidade ainda não funcional');
                   },
                 ),
               ],
             ),
             const SizedBox(width: 8),
-            _buildMenuButton(
-              'Links',
-              Icons.link,
-              [
-                _buildMenuItem(
-                  'Pontuação',
-                  Icons.leaderboard,
-                  () async {
+            BuildMenuButton(
+              label: 'Links',
+              icon: Icons.link,
+              items: [
+                BuildMenuItem(
+                  label: 'Pontuação',
+                  icon: Icons.leaderboard,
+                  onTap: () async {
                     await urlController.launchURL(
                       'https://docs.google.com/spreadsheets/d/1kh4zc2INhLEOGbLqqte8NnP4NsNRvFTgSWvKNKKM9qk/edit?usp=sharing',
                     );
                   },
                 ),
-                _buildMenuItem(
-                  'Discord',
-                  Icons.discord,
-                  () async {
+                BuildMenuItem(
+                  label: 'Discord',
+                  icon: Icons.discord,
+                  onTap: () async {
                     await urlController.launchURL(
                       'https://discord.gg/udteYpaGuB',
                     );
                   },
                 ),
-                _buildMenuItem(
-                  'Redes Sociais',
-                  Icons.live_tv_rounded,
-                  () async {
+                BuildMenuItem(
+                  label: 'Redes Sociais',
+                  icon: Icons.live_tv_rounded,
+                  onTap: () async {
                     await urlController.launchURL(
                       'https://www.twitch.com/BoostTeam_',
                     );
                   },
                 ),
-                _buildMenuItem(
-                  'Formulário de horários',
-                  Icons.edit_document,
-                  () async {
+                BuildMenuItem(
+                  label: 'Formulário de horários',
+                  icon: Icons.edit_document,
+                  onTap: () async {
                     await urlController.launchURL(
                       'https://forms.gle/RN4NGWm8Qvi1daqp7',
                     );
                   },
                 ),
-                _buildMenuItem(
-                  'BoostTeam SysWeblurk',
-                  Icons.edit_document,
-                  () async {
+                BuildMenuItem(
+                  label: 'BoostTeam SysWeblurk',
+                  icon: Icons.edit_document,
+                  onTap: () async {
                     await urlController.launchURL(
                       'https://drive.google.com/drive/folders/1XsmNh_gpKYLEkMSaBPFLuT3Y5vDmeWC3?usp=sharing',
                     );
@@ -129,14 +148,14 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
               ],
             ),
             const SizedBox(width: 8),
-            _buildMenuButton(
-              'Sobre',
-              Icons.info_outline_rounded,
-              [
-                _buildMenuItem(
-                  'Sobre o Weblurk',
-                  Icons.leaderboard,
-                  () async {
+            BuildMenuButton(
+              label: 'Sobre',
+              icon: Icons.info_outline_rounded,
+              items: [
+                BuildMenuItem(
+                  label: 'Sobre o Weblurk',
+                  icon: Icons.leaderboard,
+                  onTap: () async {
                     // await urlController.launchURL(
                     //   'https://docs.google.com/spreadsheets/d/1kh4zc2INhLEOGbLqqte8NnP4NsNRvFTgSWvKNKKM9qk/edit?usp=sharing',
                     // );
@@ -185,64 +204,6 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
               return const SizedBox.shrink();
             },
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuButton(
-    String label,
-    IconData icon,
-    List<PopupMenuItem<String>> items,
-  ) {
-    return PopupMenuButton<String>(
-      offset: const Offset(0, 40),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      itemBuilder: (context) => items,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Icon(
-              icon,
-              size: 20,
-              color: Colors.white,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  PopupMenuItem<String> _buildMenuItem(
-    String label,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
-    return PopupMenuItem<String>(
-      value: label,
-      onTap: onTap,
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 20,
-            color: Colors.black,
-          ),
-          const SizedBox(width: 10),
-          Text(label),
         ],
       ),
     );
