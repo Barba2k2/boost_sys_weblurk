@@ -21,6 +21,10 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
   final _healthController = StreamController<bool>.broadcast();
   Timer? _activityCheckTimer;
 
+  // Controle de volume do WebView
+  double _currentVolume = 1.0;
+  double _savedVolume = 1.0;
+
   static const _minReloadInterval = Duration(seconds: 30);
   static const _inactivityThreshold = Duration(minutes: 10);
 
@@ -165,6 +169,218 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
       _healthController.add(false);
       return false;
     }
+  }
+
+  @override
+  Future<void> muteWebView() async {
+    if (_controller == null) {
+      _logger.warning('WebView não inicializado para mutar');
+      return;
+    }
+
+    try {
+      _logger.info('Iniciando muteWebView...');
+      _savedVolume = _currentVolume;
+      _currentVolume = 0.0;
+      _logger.info(
+          'Estado do WebView atualizado - Volume: $_currentVolume, Saved: $_savedVolume');
+
+      // JavaScript para mutar todos os elementos de áudio/vídeo
+      const muteScript = '''
+        (function() {
+          console.log('Executando script de mute...');
+          
+          // Muta todos os vídeos
+          const videos = document.querySelectorAll('video');
+          console.log('Vídeos encontrados:', videos.length);
+          videos.forEach((video, index) => {
+            video.muted = true;
+            video.volume = 0;
+            console.log('Vídeo ' + (index + 1) + ' mutado');
+          });
+          
+          // Muta todos os áudios
+          const audios = document.querySelectorAll('audio');
+          console.log('Áudios encontrados:', audios.length);
+          audios.forEach((audio, index) => {
+            audio.muted = true;
+            audio.volume = 0;
+            console.log('Áudio ' + (index + 1) + ' mutado');
+          });
+          
+          // Muta elementos de áudio/vídeo em iframes (se possível)
+          const iframes = document.querySelectorAll('iframe');
+          console.log('Iframes encontrados:', iframes.length);
+          iframes.forEach((iframe, index) => {
+            try {
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+              const iframeVideos = iframeDoc.querySelectorAll('video');
+              const iframeAudios = iframeDoc.querySelectorAll('audio');
+              
+              console.log('Iframe ' + (index + 1) + ': ' + iframeVideos.length + ' vídeos, ' + iframeAudios.length + ' áudios');
+              
+              iframeVideos.forEach((video, vIndex) => {
+                video.muted = true;
+                video.volume = 0;
+                console.log('Vídeo ' + (vIndex + 1) + ' do iframe ' + (index + 1) + ' mutado');
+              });
+              
+              iframeAudios.forEach((audio, aIndex) => {
+                audio.muted = true;
+                audio.volume = 0;
+                console.log('Áudio ' + (aIndex + 1) + ' do iframe ' + (index + 1) + ' mutado');
+              });
+            } catch (e) {
+              console.log('Iframe ' + (index + 1) + ': Cross-origin, não foi possível acessar');
+            }
+          });
+          
+          console.log('Script de mute concluído');
+          return 'WebView mutado - Vídeos: ' + videos.length + ', Áudios: ' + audios.length + ', Iframes: ' + iframes.length;
+        })();
+      ''';
+
+      _logger.info('Executando script JavaScript de mute...');
+      final result = await _controller!.executeScript(muteScript);
+      _logger.info('Script de mute executado com resultado: $result');
+      _logger.info('WebView mutado com sucesso');
+    } catch (e, s) {
+      _logger.error('Erro ao mutar WebView', e, s);
+    }
+  }
+
+  @override
+  Future<void> unmuteWebView() async {
+    if (_controller == null) {
+      _logger.warning('WebView não inicializado para desmutar');
+      return;
+    }
+
+    try {
+      _currentVolume = _savedVolume;
+
+      // JavaScript para desmutar todos os elementos de áudio/vídeo
+      final unmuteScript = '''
+        (function() {
+          const volume = $_savedVolume;
+          
+          // Desmuta todos os vídeos
+          const videos = document.querySelectorAll('video');
+          videos.forEach(video => {
+            video.muted = false;
+            video.volume = volume;
+          });
+          
+          // Desmuta todos os áudios
+          const audios = document.querySelectorAll('audio');
+          audios.forEach(audio => {
+            audio.muted = false;
+            audio.volume = volume;
+          });
+          
+          // Desmuta elementos de áudio/vídeo em iframes (se possível)
+          const iframes = document.querySelectorAll('iframe');
+          iframes.forEach(iframe => {
+            try {
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+              const iframeVideos = iframeDoc.querySelectorAll('video');
+              const iframeAudios = iframeDoc.querySelectorAll('audio');
+              
+              iframeVideos.forEach(video => {
+                video.muted = false;
+                video.volume = volume;
+              });
+              
+              iframeAudios.forEach(audio => {
+                audio.muted = false;
+                audio.volume = volume;
+              });
+            } catch (e) {
+              // Cross-origin iframe, não podemos acessar
+            }
+          });
+          
+          return 'WebView desmutado com volume: ' + volume;
+        })();
+      ''';
+
+      await _controller!.executeScript(unmuteScript);
+      _logger.info('WebView desmutado com sucesso. Volume: $_savedVolume');
+    } catch (e, s) {
+      _logger.error('Erro ao desmutar WebView', e, s);
+    }
+  }
+
+  @override
+  Future<void> setWebViewVolume(double volume) async {
+    if (_controller == null) {
+      _logger.warning('WebView não inicializado para definir volume');
+      return;
+    }
+
+    try {
+      final clampedVolume = volume.clamp(0.0, 1.0);
+      _currentVolume = clampedVolume;
+
+      if (clampedVolume > 0.0) {
+        _savedVolume = clampedVolume;
+      }
+
+      // JavaScript para definir volume em todos os elementos de áudio/vídeo
+      final volumeScript = '''
+        (function() {
+          const volume = $clampedVolume;
+          
+          // Define volume em todos os vídeos
+          const videos = document.querySelectorAll('video');
+          videos.forEach(video => {
+            video.volume = volume;
+            video.muted = volume === 0;
+          });
+          
+          // Define volume em todos os áudios
+          const audios = document.querySelectorAll('audio');
+          audios.forEach(audio => {
+            audio.volume = volume;
+            audio.muted = volume === 0;
+          });
+          
+          // Define volume em elementos de áudio/vídeo em iframes (se possível)
+          const iframes = document.querySelectorAll('iframe');
+          iframes.forEach(iframe => {
+            try {
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+              const iframeVideos = iframeDoc.querySelectorAll('video');
+              const iframeAudios = iframeDoc.querySelectorAll('audio');
+              
+              iframeVideos.forEach(video => {
+                video.volume = volume;
+                video.muted = volume === 0;
+              });
+              
+              iframeAudios.forEach(audio => {
+                audio.volume = volume;
+                audio.muted = volume === 0;
+              });
+            } catch (e) {
+              // Cross-origin iframe, não podemos acessar
+            }
+          });
+          
+          return 'Volume do WebView definido para: ' + volume;
+        })();
+      ''';
+
+      await _controller!.executeScript(volumeScript);
+      _logger.info('Volume do WebView definido para: $clampedVolume');
+    } catch (e, s) {
+      _logger.error('Erro ao definir volume do WebView', e, s);
+    }
+  }
+
+  @override
+  Future<double> getWebViewVolume() async {
+    return _currentVolume;
   }
 
   void notifyActivity() {
