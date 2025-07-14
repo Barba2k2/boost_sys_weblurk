@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:mobx/mobx.dart';
 import '../logger/app_logger.dart';
 import '../ui/widgets/messages.dart';
+import 'volume_controller.dart';
 
 part 'settings_controller.g.dart';
 
@@ -10,9 +11,15 @@ class SettingsController = SettingsControllerBase with _$SettingsController;
 abstract class SettingsControllerBase with Store {
   SettingsControllerBase({
     required AppLogger logger,
-  }) : _logger = logger;
+    required VolumeController volumeController,
+  })  : _logger = logger,
+        _volumeController = volumeController;
 
   final AppLogger _logger;
+  final VolumeController _volumeController;
+
+  @observable
+  bool isAudioMuted = false;
 
   // Método para encerrar o aplicativo
   @action
@@ -29,23 +36,28 @@ abstract class SettingsControllerBase with Store {
     }
   }
 
-  // Método para mutar o áudio do WebView
+  // Método para alternar o áudio (mutar/desmutar)
   @action
   Future<void> muteAppAudio() async {
     try {
-      if (Platform.isWindows) {
-        Messages.info('Funcionalidade ainda não implementada');
+      if (!_volumeController.isVolumeControlAvailable) {
+        Messages.info('Controle de volume não disponível nesta plataforma');
+        return;
       }
-      // else if (Platform.isMacOS) {
-      //   await shell.run('osascript -e "set volume output muted true"');
-      // } else if (Platform.isLinux) {
-      //   await shell.run('amixer -q -D pulse sset Master mute');
-      // } else {
-      //   throw 'Plataforma não suportada para mutar áudio';
-      // }
+
+      await _volumeController.toggleMute();
+      isAudioMuted = _volumeController.isMuted;
+
+      final status = isAudioMuted ? 'mutado' : 'desmutado';
+      Messages.info('Áudio $status');
+
+      _logger.info('Áudio alternado para: $status');
     } catch (e) {
-      _logger.error('Erro ao mutar o áudio do aplicativo: $e');
-      Messages.alert('Erro ao mutar o áudio do aplicativo');
+      _logger.error('Erro ao alternar o áudio do aplicativo: $e');
+      Messages.alert('Erro ao alternar o áudio do aplicativo');
     }
   }
+
+  // Método para obter o status atual do áudio
+  bool get isAudioCurrentlyMuted => _volumeController.isMuted;
 }
