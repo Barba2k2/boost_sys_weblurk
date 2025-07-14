@@ -5,6 +5,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import '../../../service/webview/windows_web_view_service.dart';
 import '../../logger/app_logger.dart';
 import '../../../service/webview/windows_web_view_service_impl.dart';
+import '../../controllers/volume_controller.dart';
 
 class WindowsWebViewWidget extends StatefulWidget {
   const WindowsWebViewWidget({
@@ -193,6 +194,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       if (state == LoadingState.navigationCompleted) {
         _notifyServiceOfActivity();
         _captureCurrentUrl();
+        _reapplyVolumeState();
       }
     });
 
@@ -292,6 +294,19 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       }
     } catch (e) {
       widget.logger?.error('Erro ao notificar serviço de atividade: $e');
+    }
+  }
+
+  Future<void> _reapplyVolumeState() async {
+    try {
+      final volumeController = Modular.get<VolumeController>();
+      if (volumeController.isMuted) {
+        await volumeController.mute();
+      } else {
+        await volumeController.unmute();
+      }
+    } catch (e) {
+      widget.logger?.error('Erro ao reaplicar estado de volume: $e');
     }
   }
 
