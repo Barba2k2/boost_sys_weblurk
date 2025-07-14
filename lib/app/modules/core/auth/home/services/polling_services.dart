@@ -290,6 +290,16 @@ class PollingServiceImpl implements PollingService {
       }
 
       final now = DateTime.now();
+
+      // Verifica se já salvamos uma pontuação neste minuto
+      if (_lastScoreUpdate != null) {
+        final timeDiff = now.difference(_lastScoreUpdate!);
+        if (timeDiff.inMinutes < 1) {
+          // Ainda no mesmo minuto, não precisa salvar novamente
+          return;
+        }
+      }
+
       await _homeService.saveScore(
         streamerId,
         DateTime(now.year, now.month, now.day),
