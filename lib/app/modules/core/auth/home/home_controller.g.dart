@@ -209,6 +209,15 @@ mixin _$HomeController on HomeControllerBase, Store {
     return _$_recoverWebViewAsyncAction.run(() => super._recoverWebView());
   }
 
+  late final _$loadInitialChannelsAsyncAction =
+      AsyncAction('HomeControllerBase.loadInitialChannels', context: context);
+
+  @override
+  Future<void> loadInitialChannels() {
+    return _$loadInitialChannelsAsyncAction
+        .run(() => super.loadInitialChannels());
+  }
+
   late final _$loadListaAAsyncAction =
       AsyncAction('HomeControllerBase.loadListaA', context: context);
 
