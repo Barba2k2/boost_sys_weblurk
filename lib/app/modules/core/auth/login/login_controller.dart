@@ -15,7 +15,6 @@ part 'login_controller.g.dart';
 class LoginController = LoginControllerBase with _$LoginController;
 
 abstract class LoginControllerBase with Store {
-
   LoginControllerBase({
     required UserService userService,
     required AppLogger logger,
@@ -42,7 +41,7 @@ abstract class LoginControllerBase with Store {
             _logger.info('Usuário autenticado, navegando para home');
             Loader.show();
             await Future.delayed(const Duration(milliseconds: 200));
-            Modular.to.navigate('/home/');
+            Modular.to.navigate('/');
             Loader.hide();
             return;
           }
@@ -73,7 +72,7 @@ abstract class LoginControllerBase with Store {
 
       if (token != null && userJson != null) {
         await Future.delayed(const Duration(milliseconds: 200));
-        Modular.to.navigate('/home/');
+        Modular.to.navigate('/');
       } else {
         Messages.alert('Erro ao realizar login');
         await _userService.logout();
