@@ -1,5 +1,8 @@
 import 'package:flutter_modular/flutter_modular.dart';
 
+import '../../../../core/local_storage/local_storage.dart';
+import '../../../../core/logger/app_logger.dart';
+import '../../../../service/user/user_service.dart';
 import 'login_controller.dart';
 import 'login_page.dart';
 
@@ -8,9 +11,9 @@ class LoginModule extends Module {
   List<Bind> get binds => [
         Bind.lazySingleton(
           (i) => LoginController(
-            userService: i(),
-            localStorage: i(),
-            logger: i(),
+            userService: i.get<UserService>(),
+            localStorage: i.get<LocalStorage>(),
+            logger: i.get<AppLogger>(),
           ),
         ),
       ];
