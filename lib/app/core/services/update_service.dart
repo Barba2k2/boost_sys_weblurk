@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
@@ -7,15 +6,11 @@ import 'navigation_service.dart';
 
 class UpdateService {
   UpdateService._();
-  
   static final UpdateService instance = UpdateService._();
-  final _shorebird = ShorebirdCodePush();
+  final ShorebirdUpdater _updater = ShorebirdUpdater();
 
   Future<void> initialize() async {
-    // Primeira verificação ao iniciar
     await checkForUpdate();
-
-    // Configurar verificação quando voltar do background
     SystemChannels.lifecycle.setMessageHandler((msg) async {
       if (msg == AppLifecycleState.resumed.toString()) {
         log('App resumed: $msg');
@@ -27,60 +22,40 @@ class UpdateService {
 
   Future<void> checkForUpdate() async {
     try {
-      // Verifica se o Shorebird está disponível
-      if (!_shorebird.isShorebirdAvailable()) {
-        log('Shorebird não está disponível');
-        return;
-      }
-
-      // Verifica se há nova atualização disponível para download
-      final isUpdateAvailable = await _shorebird.isNewPatchAvailableForDownload();
-
-      if (isUpdateAvailable) {
-        // Baixa a atualização
-        await _shorebird.downloadUpdateIfAvailable();
-
-        // Verifica se a atualização está pronta para ser instalada
-        final isReadyToInstall = await _shorebird.isNewPatchReadyToInstall();
-
-        if (isReadyToInstall) {
-          _showUpdateDialog();
-        }
+      final status = await _updater.checkForUpdate();
+      if (status == UpdateStatus.outdated) {
+        _showUpdateDialog();
+      } else {
+        log('Nenhuma atualização disponível');
       }
     } catch (e) {
       debugPrint('Erro ao verificar atualização: $e');
     }
   }
 
-  Future<String> _getVersionInfo() async {
-    try {
-      final currentPatch = await _shorebird.currentPatchNumber();
-      final nextPatch = await _shorebird.nextPatchNumber();
-      return 'Atualizando do patch $currentPatch para $nextPatch';
-    } catch (e) {
-      return 'Não foi possível obter informações da versão';
-    }
-  }
-
   void _showUpdateDialog() {
     final context = NavigationService.navigatorKey.currentContext;
-    if (context == null) return;
-
+    if (context == null) {
+      debugPrint('Contexto não disponível para mostrar diálogo de atualização');
+      return;
+    }
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => _UpdateDialog(
         onConfirm: () async {
-          // Obtém as informações da versão antes de fechar o diálogo
-          final versionInfo = await _getVersionInfo();
-          debugPrint(versionInfo);
-
-          // Verifica se o contexto ainda está montado
-          if (!dialogContext.mounted) return;
-
-          // Fecha o diálogo e reinicia o app
-          Navigator.pop(dialogContext);
-          SystemNavigator.pop();
+          try {
+            await _updater.update();
+            if (dialogContext.mounted) {
+              Navigator.pop(dialogContext);
+            }
+            SystemNavigator.pop();
+          } on UpdateException catch (e) {
+            debugPrint('Erro ao atualizar: $e');
+            if (dialogContext.mounted) {
+              Navigator.pop(dialogContext);
+            }
+          }
         },
         onCancel: () {
           Navigator.pop(dialogContext);
@@ -107,12 +82,12 @@ class _UpdateDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: onConfirm,
-          child: const Text('Reiniciar agora'),
-        ),
-        TextButton(
           onPressed: onCancel,
           child: const Text('Mais tarde'),
+        ),
+        TextButton(
+          onPressed: onConfirm,
+          child: const Text('Reiniciar agora'),
         ),
       ],
     );
