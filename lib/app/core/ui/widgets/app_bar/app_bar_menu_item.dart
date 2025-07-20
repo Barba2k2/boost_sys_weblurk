@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AppBarMenuItem extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
   const AppBarMenuItem({
     super.key,
     required this.label,
     required this.icon,
     required this.onTap,
   });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -28,4 +28,4 @@ class AppBarMenuItem extends StatelessWidget {
       ),
     );
   }
-} 
+}
