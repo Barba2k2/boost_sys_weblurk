@@ -2,6 +2,7 @@ import '../../core/exceptions/failure.dart';
 import '../../core/helpers/constants.dart';
 import '../../core/local_storage/local_storage.dart';
 import '../../core/logger/app_logger.dart';
+import '../../core/services/error_message_service.dart';
 import '../../repositories/user/user_repository.dart';
 import 'user_service.dart';
 
@@ -49,21 +50,10 @@ class UserServiceImpl implements UserService {
 
       await _clearAllData();
 
-      // Fornecer mensagens de erro mais específicas
-      if (e.toString().contains('Connection failed') ||
-          e.toString().contains('Operation not permitted')) {
-        throw Failure(
-            message:
-                'Erro de conexão com o servidor. Verifique sua conexão com a internet.');
-      } else if (e.toString().contains('User not exists')) {
-        throw Failure(
-            message: 'Usuário não encontrado. Verifique suas credenciais.');
-      } else if (e.toString().contains('Token de acesso não encontrado')) {
-        throw Failure(
-            message: 'Erro na resposta do servidor. Tente novamente.');
-      } else {
-        throw Failure(message: 'Erro ao realizar login. Tente novamente.');
-      }
+      // Usar o ErrorMessageService para extrair mensagem amigável
+      final userFriendlyMessage =
+          ErrorMessageService.instance.extractUserFriendlyMessage(e);
+      throw Failure(message: userFriendlyMessage);
     }
   }
 
