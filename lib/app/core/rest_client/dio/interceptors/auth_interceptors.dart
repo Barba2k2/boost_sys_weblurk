@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../../features/auth/domain/entities/auth_store.dart';
+import '../../../../features/auth/domain/entities/auth_state.dart';
 import '../../../helpers/constants.dart';
 import '../../../local_storage/local_storage.dart';
 import '../../../logger/app_logger.dart';
@@ -9,13 +9,14 @@ class AuthInterceptors extends Interceptor {
   AuthInterceptors({
     required LocalStorage localStorage,
     required AppLogger logger,
-    required AuthStore authStore,
+    required AuthState authState,
   })  : _localStorage = localStorage,
         _logger = logger,
-        _authStore = authStore;
+        _authState = authState;
+
   final LocalStorage _localStorage;
   final AppLogger _logger;
-  final AuthStore _authStore;
+  final AuthState _authState;
 
   @override
   Future<void> onRequest(
@@ -32,7 +33,7 @@ class AuthInterceptors extends Interceptor {
         );
 
         if (accessToken == null) {
-          _authStore.logout();
+          _authState.logout();
 
           return handler.reject(
             DioException(
@@ -44,8 +45,6 @@ class AuthInterceptors extends Interceptor {
         }
 
         options.headers['Authorization'] = accessToken;
-      } else {
-        options.headers.remove('Authorization');
       }
 
       handler.next(options);
