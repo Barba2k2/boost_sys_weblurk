@@ -42,7 +42,9 @@ class LoginViewModel extends ChangeNotifier {
       if (user != null) {
         return Result.ok(user);
       } else {
-        return Result.error(Exception('Usuário não encontrado após login'));
+        return Result.error(
+          Exception('Usuário não encontrado após login'),
+        );
       }
     } catch (e) {
       // Usar o ErrorMessageService para extrair mensagem amigável
