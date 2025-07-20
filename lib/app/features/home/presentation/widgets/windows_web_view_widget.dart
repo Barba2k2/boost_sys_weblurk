@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart';
-import '../../../service/webview/windows_web_view_service.dart';
-import '../../logger/app_logger.dart';
-import '../../di/di.dart';
+import '../../../../core/di/dependency_injection.dart';
+import '../../../../core/logger/app_logger.dart';
+import '../../domain/services/windows_web_view_service.dart';
 
 class WindowsWebViewWidget extends StatefulWidget {
   const WindowsWebViewWidget({
