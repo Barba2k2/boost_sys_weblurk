@@ -1,4 +1,3 @@
-import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/rest_client/rest_client.dart';
 import '../../domain/entities/schedule_list_entity.dart';
