@@ -127,8 +127,6 @@ class VolumeController extends ChangeNotifier {
       // Garante que o volume está entre 0.0 e 1.0
       final clampedVolume = volume.clamp(0.0, 1.0);
 
-      _currentVolume = clampedVolume;
-
       // Se o volume for maior que 0, considera como desmutado
       if (clampedVolume > 0.0) {
         _isMuted = false;
@@ -137,6 +135,7 @@ class VolumeController extends ChangeNotifier {
         _isMuted = true;
       }
 
+      _currentVolume = clampedVolume;
       notifyListeners();
 
       // Define o volume no WebView também
@@ -145,6 +144,8 @@ class VolumeController extends ChangeNotifier {
       _logger.info('Volume do app definido para: $clampedVolume');
     } catch (e, s) {
       _logger.error('Erro ao definir volume do app', e, s);
+      // Em caso de erro, manter o volume anterior
+      notifyListeners();
     }
   }
 
