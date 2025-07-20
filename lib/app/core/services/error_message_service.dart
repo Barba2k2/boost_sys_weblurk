@@ -70,6 +70,17 @@ class ErrorMessageService {
       }
     }
 
+    // Padrão mais genérico: Failure(message: qualquer coisa)
+    final failureMatch3 =
+        RegExp(r'Failure\(message: ([^)]+)\)').firstMatch(errorString);
+    if (failureMatch3 != null) {
+      final message = failureMatch3.group(1);
+      if (message != null && message.isNotEmpty) {
+        // Remove aspas se existirem
+        return message.replaceAll("'", "").replaceAll('"', '').trim();
+      }
+    }
+
     // Se não conseguir extrair, retorna mensagem genérica
     return 'Erro interno do sistema. Tente novamente.';
   }
