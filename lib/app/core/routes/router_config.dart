@@ -26,6 +26,7 @@ class RouterConfig {
             builder: (context, state) => LoginPage(
               viewModel: LoginViewModel(
                 authStore: injector(),
+                userService: injector(),
               ),
             ),
           ),
