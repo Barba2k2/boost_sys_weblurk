@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
-import '../../logger/app_logger.dart';
+import '../../../../core/logger/app_logger.dart';
 
 class MyWebviewWidget extends StatefulWidget {
   const MyWebviewWidget({
@@ -9,7 +9,7 @@ class MyWebviewWidget extends StatefulWidget {
     this.logger,
     super.key,
   });
-  
+
   final String initialUrl;
   final void Function(Webview)? onWebViewCreated;
   final AppLogger? logger;
