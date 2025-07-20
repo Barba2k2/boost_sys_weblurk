@@ -1,59 +1,52 @@
 import 'dart:async';
-
-import 'package:flutter_modular/flutter_modular.dart';
-import 'package:mobx/mobx.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../service/webview/windows_web_view_service.dart';
 import '../logger/app_logger.dart';
 
-part 'volume_controller.g.dart';
-
-class VolumeController = VolumeControllerBase with _$VolumeController;
-
-abstract class VolumeControllerBase with Store {
-  VolumeControllerBase({
+class VolumeController extends ChangeNotifier {
+  VolumeController({
     required AppLogger logger,
-  }) : _logger = logger {
+    required WindowsWebViewService webViewService,
+  })  : _logger = logger,
+        _webViewService = webViewService {
     _initializeVolumeControl();
   }
 
   final AppLogger _logger;
+  final WindowsWebViewService _webViewService;
+
   double _originalVolume = 1.0; // Volume padrão do app
   bool _isInitialized = false;
 
-  @observable
-  bool isMuted = false;
+  bool _isMuted = false;
+  bool get isMuted => _isMuted;
 
-  @observable
-  double currentVolume = 1.0; // Volume atual do app (0.0 a 1.0)
+  double _currentVolume = 1.0; // Volume atual do app (0.0 a 1.0)
+  double get currentVolume => _currentVolume;
 
-  @observable
-  bool isVolumeControlAvailable = true; // Sempre disponível para o app
-
-  // Getter para o serviço do WebView
-  WindowsWebViewService get _webViewService =>
-      Modular.get<WindowsWebViewService>();
+  bool _isVolumeControlAvailable = true; // Sempre disponível para o app
+  bool get isVolumeControlAvailable => _isVolumeControlAvailable;
 
   /// Inicializa o controle de volume do app
   Future<void> _initializeVolumeControl() async {
     try {
       // Inicializa com volume máximo
-      currentVolume = 1.0;
+      _currentVolume = 1.0;
       _originalVolume = 1.0;
       _isInitialized = true;
 
       _logger.info(
-          'Controle de volume do app inicializado. Volume atual: $currentVolume');
+          'Controle de volume do app inicializado. Volume atual: $_currentVolume');
     } catch (e, s) {
       _logger.error('Erro ao inicializar controle de volume do app', e, s);
-      isVolumeControlAvailable = false;
+      _isVolumeControlAvailable = false;
     }
   }
 
   /// Muta o áudio do app (define volume para 0)
-  @action
   Future<void> mute() async {
-    if (!isVolumeControlAvailable || !_isInitialized) {
+    if (!_isVolumeControlAvailable || !_isInitialized) {
       _logger.warning('Controle de volume do app não disponível para mutar');
       return;
     }
@@ -62,14 +55,15 @@ abstract class VolumeControllerBase with Store {
       _logger.info('Iniciando processo de mute...');
 
       // Salva o volume atual antes de mutar
-      _originalVolume = currentVolume;
+      _originalVolume = _currentVolume;
       _logger.info('Volume original salvo: $_originalVolume');
 
       // Define o volume do app para 0 (mudo)
-      currentVolume = 0.0;
-      isMuted = true;
+      _currentVolume = 0.0;
+      _isMuted = true;
+      notifyListeners();
       _logger.info(
-          'Estado interno atualizado - Volume: $currentVolume, Muted: $isMuted');
+          'Estado interno atualizado - Volume: $_currentVolume, Muted: $_isMuted');
 
       // Muta o WebView também
       _logger.info('Chamando muteWebView()...');
@@ -84,9 +78,8 @@ abstract class VolumeControllerBase with Store {
   }
 
   /// Desmuta o áudio do app (restaura o volume anterior)
-  @action
   Future<void> unmute() async {
-    if (!isVolumeControlAvailable || !_isInitialized) {
+    if (!_isVolumeControlAvailable || !_isInitialized) {
       _logger.warning('Controle de volume do app não disponível para desmutar');
       return;
     }
@@ -95,10 +88,11 @@ abstract class VolumeControllerBase with Store {
       _logger.info('Iniciando processo de unmute...');
 
       // Restaura o volume anterior
-      currentVolume = _originalVolume;
-      isMuted = false;
+      _currentVolume = _originalVolume;
+      _isMuted = false;
+      notifyListeners();
       _logger.info(
-          'Estado interno atualizado - Volume: $currentVolume, Muted: $isMuted');
+          'Estado interno atualizado - Volume: $_currentVolume, Muted: $_isMuted');
 
       // Desmuta o WebView também
       _logger.info('Chamando unmuteWebView()...');
@@ -113,9 +107,8 @@ abstract class VolumeControllerBase with Store {
   }
 
   /// Alterna entre mutado e desmutado
-  @action
   Future<void> toggleMute() async {
-    if (isMuted) {
+    if (_isMuted) {
       await unmute();
     } else {
       await mute();
@@ -123,9 +116,8 @@ abstract class VolumeControllerBase with Store {
   }
 
   /// Define um volume específico para o app (0.0 a 1.0)
-  @action
   Future<void> setVolume(double volume) async {
-    if (!isVolumeControlAvailable || !_isInitialized) {
+    if (!_isVolumeControlAvailable || !_isInitialized) {
       _logger.warning(
           'Controle de volume do app não disponível para definir volume');
       return;
@@ -135,15 +127,17 @@ abstract class VolumeControllerBase with Store {
       // Garante que o volume está entre 0.0 e 1.0
       final clampedVolume = volume.clamp(0.0, 1.0);
 
-      currentVolume = clampedVolume;
+      _currentVolume = clampedVolume;
 
       // Se o volume for maior que 0, considera como desmutado
       if (clampedVolume > 0.0) {
-        isMuted = false;
+        _isMuted = false;
         _originalVolume = clampedVolume;
       } else {
-        isMuted = true;
+        _isMuted = true;
       }
+
+      notifyListeners();
 
       // Define o volume no WebView também
       await _webViewService.setWebViewVolume(clampedVolume);
@@ -155,30 +149,29 @@ abstract class VolumeControllerBase with Store {
   }
 
   /// Obtém o volume atual do app
-  @action
   Future<double> getVolume() async {
-    if (!isVolumeControlAvailable || !_isInitialized) {
+    if (!_isVolumeControlAvailable || !_isInitialized) {
       return 0.0;
     }
 
-    return currentVolume;
+    return _currentVolume;
   }
 
   /// Verifica se o áudio do app está mutado
-  bool get isAppMuted => isMuted;
+  bool get isAppMuted => _isMuted;
 
   /// Obtém o volume original do app (antes de mutar)
   double get originalVolume => _originalVolume;
 
   /// Obtém o volume atual do app
-  double get appVolume => currentVolume;
+  double get appVolume => _currentVolume;
 
   /// Verifica se o áudio está atualmente mutado (para compatibilidade)
-  bool get isAudioCurrentlyMuted => isMuted;
+  bool get isAudioCurrentlyMuted => _isMuted;
 
-  /// Dispose do controlador
+  @override
   void dispose() {
-    // Não há listeners externos para remover
     _logger.info('VolumeController do app disposto');
+    super.dispose();
   }
 }
