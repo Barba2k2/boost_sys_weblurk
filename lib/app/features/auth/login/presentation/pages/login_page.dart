@@ -4,9 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:validatorless/validatorless.dart';
 
 import '../../../../../core/routes/app_routes.dart';
-import '../../../../../core/ui/widgets/boost_text_form_field.dart';
-import '../../../../../core/ui/widgets/messages.dart';
 import '../../../../../core/services/error_message_service.dart';
+import '../../../../../core/ui/widgets/boost_text_form_field.dart';
 import '../../../../../core/utils/result.dart';
 import '../viewmodels/login_viewmodel.dart';
 
@@ -135,7 +134,8 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             child: command.running
                                 ? const CircularProgressIndicator(
-                                    color: Colors.white)
+                                    color: Colors.white,
+                                  )
                                 : Text(
                                     'Entrar',
                                     style: GoogleFonts.poppins(
