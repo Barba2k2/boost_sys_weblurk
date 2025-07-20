@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/home/data/services/polling_services.dart';
+import '../../features/home/data/services/webview_service.dart';
 import '../../repositories/home/home_repository.dart';
 import '../../repositories/home/home_repository_impl.dart';
 import '../../repositories/schedule/schedule_repository.dart';
@@ -14,8 +15,6 @@ import '../../service/schedule/schedule_service.dart';
 import '../../service/schedule/schedule_service_impl.dart';
 import '../../service/user/user_service.dart';
 import '../../service/user/user_service_impl.dart';
-import '../../service/webview/windows_web_view_service.dart';
-import '../../service/webview/windows_web_view_service_impl.dart';
 import '../auth/auth_store.dart';
 import '../controllers/settings_controller.dart';
 import '../controllers/url_launch_controller.dart';
@@ -121,8 +120,8 @@ class Injector {
     );
 
     // WebView Service
-    i.registerLazySingleton<WindowsWebViewService>(
-      () => WindowsWebViewServiceImpl(
+    i.registerLazySingleton<WebViewService>(
+      () => WebViewServiceImpl(
         logger: i(),
       ),
     );
