@@ -32,10 +32,10 @@ class LoginViewModel extends ChangeNotifier {
     try {
       // Usar o UserService real para fazer login
       await _userService.login(params.email, params.password);
-      
+
       // Recarregar os dados do usuário do AuthStore
       await _authStore.reloadUserData();
-      
+
       // Retornar o usuário logado
       final user = _authStore.userLogged;
       if (user != null) {
@@ -44,7 +44,23 @@ class LoginViewModel extends ChangeNotifier {
         return Result.error(Exception('Usuário não encontrado após login'));
       }
     } catch (e) {
-      return Result.error(Exception('Erro no login: $e'));
+      // Melhorar a mensagem de erro
+      String errorMessage;
+
+      if (e.toString().contains('Failure')) {
+        // Extrair a mensagem do Failure
+        final failureMatch =
+            RegExp(r"Failure\(message: '([^']*)'\)").firstMatch(e.toString());
+        if (failureMatch != null) {
+          errorMessage = failureMatch.group(1) ?? 'Erro ao realizar login';
+        } else {
+          errorMessage = 'Erro ao realizar login. Tente novamente.';
+        }
+      } else {
+        errorMessage = 'Erro ao realizar login: $e';
+      }
+
+      return Result.error(Exception(errorMessage));
     }
   }
 
@@ -62,11 +78,10 @@ class LoginViewModel extends ChangeNotifier {
 
 // Parâmetros para login
 class LoginParams {
-  final String email;
-  final String password;
-
   LoginParams({
     required this.email,
     required this.password,
   });
+  final String email;
+  final String password;
 }
