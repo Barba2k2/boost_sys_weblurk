@@ -22,10 +22,10 @@ class UniversalWebViewWidget extends StatefulWidget {
   final bool isMuted;
 
   @override
-  State<UniversalWebViewWidget> createState() => _UniversalWebViewWidgetState();
+  State<UniversalWebViewWidget> createState() => UniversalWebViewWidgetState();
 }
 
-class _UniversalWebViewWidgetState extends State<UniversalWebViewWidget> {
+class UniversalWebViewWidgetState extends State<UniversalWebViewWidget> {
   late WebViewController _controller;
   bool _isLoading = true;
   String? _errorMessage;
@@ -68,30 +68,32 @@ class _UniversalWebViewWidgetState extends State<UniversalWebViewWidget> {
   Future<void> _initWebView() async {
     if (_isOperationInProgress) return;
     _isOperationInProgress = true;
-    
+
     try {
-      widget.logger?.info('Inicializando WebView universal para  [1m${Platform.operatingSystem} [0m');
-      
+      widget.logger?.info(
+        'Inicializando WebView universal para  ${Platform.operatingSystem}',
+      );
+
       _controller = await UniversalWebViewController.createController(
         logger: widget.logger,
       );
-      
+
       await UniversalWebViewController.configureController(
         controller: _controller,
         navigationDelegate: _createNavigationDelegate(),
         logger: widget.logger,
       );
-      
+
       await UniversalWebViewController.loadUrl(
         controller: _controller,
         url: _currentUrl,
         logger: widget.logger,
       );
-      
+
       if (widget.onWebViewCreated != null) {
         widget.onWebViewCreated!(_controller);
       }
-      
+
       widget.logger?.info('WebView inicializado com sucesso');
     } catch (e, s) {
       _handleInitError(e, s);
@@ -153,7 +155,8 @@ class _UniversalWebViewWidgetState extends State<UniversalWebViewWidget> {
   }
 
   NavigationDecision _handleNavigationRequest(NavigationRequest request) {
-    return UniversalWebViewNavigation.handleNavigationRequest(request, widget.logger);
+    return UniversalWebViewNavigation.handleNavigationRequest(
+        request, widget.logger);
   }
 
   void _handleWebResourceError(WebResourceError error) {
@@ -167,7 +170,8 @@ class _UniversalWebViewWidgetState extends State<UniversalWebViewWidget> {
     _progressTimer?.cancel();
     _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (_isLoading && _loadingProgress.value < 0.9) {
-        _loadingProgress.value = (_loadingProgress.value + 0.02).clamp(0.0, 0.9);
+        _loadingProgress.value =
+            (_loadingProgress.value + 0.02).clamp(0.0, 0.9);
       }
     });
   }
@@ -203,7 +207,7 @@ class _UniversalWebViewWidgetState extends State<UniversalWebViewWidget> {
     }
   }
 
-  Future<void> _safeRefresh() async {
+  Future<void> safeRefresh() async {
     await UniversalWebViewRefresh.safeRefresh(
       controller: _controller,
       currentUrl: _currentUrl,
@@ -226,7 +230,8 @@ class _UniversalWebViewWidgetState extends State<UniversalWebViewWidget> {
     _progressTimer?.cancel();
     _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (_isLoading) {
-        _loadingProgress.value = (_loadingProgress.value + 0.02).clamp(0.0, 0.95);
+        _loadingProgress.value =
+            (_loadingProgress.value + 0.02).clamp(0.0, 0.95);
       } else {
         _loadingProgress.value = 1.0;
         timer.cancel();
@@ -275,9 +280,10 @@ class _UniversalWebViewWidgetState extends State<UniversalWebViewWidget> {
     return Stack(
       children: [
         WebViewWidget(controller: _controller),
-        if (_isLoading) UniversalWebViewUIWidgets.buildProgressIndicator(
-          loadingProgress: _loadingProgress,
-        ),
+        if (_isLoading)
+          UniversalWebViewUIWidgets.buildProgressIndicator(
+            loadingProgress: _loadingProgress,
+          ),
         UniversalWebViewUIWidgets.buildLoadingIndicator(isLoading: _isLoading),
         if (_isMuted) UniversalWebViewUIWidgets.buildMuteIndicator(),
       ],
@@ -289,4 +295,4 @@ class _UniversalWebViewWidgetState extends State<UniversalWebViewWidget> {
     _progressTimer?.cancel();
     super.dispose();
   }
-} 
+}
