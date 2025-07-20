@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:desktop_webview_window/desktop_webview_window.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../../logger/app_logger.dart';
 
 class MyWebviewWidget extends StatefulWidget {
@@ -9,9 +9,9 @@ class MyWebviewWidget extends StatefulWidget {
     this.logger,
     super.key,
   });
-  
+
   final String initialUrl;
-  final void Function(Webview)? onWebViewCreated;
+  final void Function(WebViewController)? onWebViewCreated;
   final AppLogger? logger;
 
   @override
@@ -19,6 +19,7 @@ class MyWebviewWidget extends StatefulWidget {
 }
 
 class _MyWebviewWidgetState extends State<MyWebviewWidget> {
+  late final WebViewController _controller;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -30,23 +31,64 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
 
   Future<void> _initializeWebView() async {
     try {
-      widget.logger?.info('Initializing WebView Window');
+      widget.logger?.info('Initializing WebView');
 
-      final webview = await WebviewWindow.create(
-        configuration: const CreateConfiguration(
-          title: 'Boost Team SysLurk',
-          titleBarHeight: 0,
-          windowWidth: 1100,
-          windowHeight: 670,
-        ),
-      );
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onProgress: (int progress) {
+              widget.logger?.info('WebView loading progress: $progress%');
+            },
+            onPageStarted: (String url) {
+              widget.logger?.info('WebView page started: $url');
+            },
+            onPageFinished: (String url) {
+              widget.logger?.info('WebView page finished: $url');
+              setState(() {
+                _isLoading = false;
+              });
+            },
+            onWebResourceError: (WebResourceError error) {
+              widget.logger
+                  ?.error('WebView error: ${error.description}', error, null);
+              setState(() {
+                _errorMessage = 'Erro ao carregar página: ${error.description}';
+                _isLoading = false;
+              });
+            },
+          ),
+        )
+        ..addJavaScriptChannel(
+          'Flutter',
+          onMessageReceived: (JavaScriptMessage message) {
+            widget.logger?.info('JavaScript message: ${message.message}');
+          },
+        )
+        ..loadRequest(Uri.parse(widget.initialUrl));
 
-      // Carregar URL
-      webview.launch(widget.initialUrl);
+      // Adicionar scripts para melhorar a experiência
+      await _controller.runJavaScript('''
+        // Impedir diálogos de confirmação de saída
+        window.addEventListener('beforeunload', function(e) {
+          e.preventDefault();
+          e.returnValue = '';
+        });
+        
+        // Script para manter a conexão ativa
+        setInterval(function() {
+          console.log('Heartbeat: ' + new Date().toISOString());
+        }, 60000);
+        
+        // Notificar Flutter quando a página estiver pronta
+        window.addEventListener('load', function() {
+          Flutter.postMessage('Page loaded successfully');
+        });
+      ''');
 
       // Callback de criação
       if (widget.onWebViewCreated != null) {
-        widget.onWebViewCreated!(webview);
+        widget.onWebViewCreated!(_controller);
       }
 
       setState(() {
@@ -62,6 +104,7 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
             Stack Trace:
             $s
           ''';
+        _isLoading = false;
       });
     }
   }
@@ -75,13 +118,28 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                const Icon(Icons.error_outline, color: Colors.red),
+                const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                const Text(
+                  'Erro ao carregar WebView',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
-                SelectableText(_errorMessage!),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: _initializeWebView,
-                  child: const Text('Tentar Novamente'),
+                SelectableText(
+                  _errorMessage!,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _errorMessage = null;
+                      _isLoading = true;
+                    });
+                    _initializeWebView();
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Tentar Novamente'),
                 ),
               ],
             ),
@@ -90,21 +148,32 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
       );
     }
 
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return Container(
-      color: Colors.black87,
-      child: const Center(
-        child: Text(
-          'As Lives estão sendo exibidas em uma janela separada',
-          style: TextStyle(
-            fontSize: 28,
-            color: Colors.white,
+    return Stack(
+      children: [
+        WebViewWidget(controller: _controller),
+        if (_isLoading)
+          Container(
+            color: Colors.black87,
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Colors.white),
+                  SizedBox(height: 16),
+                  Text(
+                    'Carregando...',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+      ],
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
