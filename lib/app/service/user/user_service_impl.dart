@@ -48,7 +48,22 @@ class UserServiceImpl implements UserService {
       _logger.error('Service - Failed to login user', e, s);
 
       await _clearAllData();
-      throw Failure(message: 'Failed to login user');
+
+      // Fornecer mensagens de erro mais específicas
+      if (e.toString().contains('Connection failed') ||
+          e.toString().contains('Operation not permitted')) {
+        throw Failure(
+            message:
+                'Erro de conexão com o servidor. Verifique sua conexão com a internet.');
+      } else if (e.toString().contains('User not exists')) {
+        throw Failure(
+            message: 'Usuário não encontrado. Verifique suas credenciais.');
+      } else if (e.toString().contains('Token de acesso não encontrado')) {
+        throw Failure(
+            message: 'Erro na resposta do servidor. Tente novamente.');
+      } else {
+        throw Failure(message: 'Erro ao realizar login. Tente novamente.');
+      }
     }
   }
 
@@ -59,11 +74,18 @@ class UserServiceImpl implements UserService {
       await _localStorage.remove(
         Constants.LOCAL_SOTRAGE_USER_LOGGED_STATUS_KEY,
       );
+    } catch (e) {
+      _logger.error('Error clearing local storage data', e);
+    }
+
+    try {
       await _localSecureStorage.remove(
         Constants.LOCAL_SOTRAGE_REFRESH_TOKEN_KEY,
       );
     } catch (e) {
-      _logger.error('Error clearing data', e);
+      _logger.error('Error clearing secure storage data', e);
+      // No macOS, pode haver problemas de permissão com flutter_secure_storage
+      // Mas não devemos falhar o login por isso
     }
   }
 
