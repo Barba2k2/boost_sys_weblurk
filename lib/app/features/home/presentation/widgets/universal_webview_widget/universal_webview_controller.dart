@@ -12,11 +12,11 @@ class UniversalWebViewController {
     late final PlatformWebViewControllerCreationParams params;
     
     if (Platform.isAndroid) {
-      params = PlatformWebViewControllerCreationParams();
+      params = const PlatformWebViewControllerCreationParams();
     } else if (Platform.isIOS) {
-      params = PlatformWebViewControllerCreationParams();
+      params = const PlatformWebViewControllerCreationParams();
     } else {
-      params = PlatformWebViewControllerCreationParams();
+      params = const PlatformWebViewControllerCreationParams();
     }
     
     final controller = WebViewController.fromPlatformCreationParams(params);
