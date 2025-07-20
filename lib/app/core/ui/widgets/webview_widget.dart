@@ -51,7 +51,7 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
             },
             onWebResourceError: (WebResourceError error) {
               widget.logger
-                  ?.error('WebView error: ${error.description}', error, null);
+                  ?.error('WebView error: ${error.description}', error);
               setState(() {
                 _errorMessage = 'Erro ao carregar página: ${error.description}';
                 _isLoading = false;
