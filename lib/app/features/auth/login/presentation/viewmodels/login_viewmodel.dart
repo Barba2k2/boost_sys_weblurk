@@ -3,17 +3,21 @@ import 'package:flutter/foundation.dart';
 import '../../../../../core/utils/command.dart';
 import '../../../../../core/utils/result.dart';
 import '../../../../../core/auth/auth_store.dart';
+import '../../../../../service/user/user_service.dart';
 import '../../../../../models/user_model.dart';
 
 class LoginViewModel extends ChangeNotifier {
   LoginViewModel({
     required AuthStore authStore,
-  }) : _authStore = authStore {
+    required UserService userService,
+  })  : _authStore = authStore,
+        _userService = userService {
     // Escutar mudanças no AuthStore
     _authStore.addListener(() => notifyListeners());
   }
 
   final AuthStore _authStore;
+  final UserService _userService;
 
   // Estado reativo do AuthStore
   UserModel? get userLogged => _authStore.userLogged;
@@ -26,19 +30,19 @@ class LoginViewModel extends ChangeNotifier {
   // Método privado para login
   Future<Result<UserModel>> _login(LoginParams params) async {
     try {
-      // Aqui você implementaria a lógica de login
-      // Por enquanto, vamos simular um login bem-sucedido
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Simular usuário logado
-      final user = UserModel(
-        id: 1,
-        nickname: params.email,
-        role: 'user',
-        status: 'online',
-      );
-
-      return Result.ok(user);
+      // Usar o UserService real para fazer login
+      await _userService.login(params.email, params.password);
+      
+      // Recarregar os dados do usuário do AuthStore
+      await _authStore.reloadUserData();
+      
+      // Retornar o usuário logado
+      final user = _authStore.userLogged;
+      if (user != null) {
+        return Result.ok(user);
+      } else {
+        return Result.error(Exception('Usuário não encontrado após login'));
+      }
     } catch (e) {
       return Result.error(Exception('Erro no login: $e'));
     }
@@ -47,6 +51,7 @@ class LoginViewModel extends ChangeNotifier {
   // Método privado para logout
   Future<Result<void>> _logout() async {
     try {
+      await _userService.logout();
       await _authStore.logout();
       return Result.ok(null);
     } catch (e) {
