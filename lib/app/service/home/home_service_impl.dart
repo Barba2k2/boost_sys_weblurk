@@ -1,6 +1,6 @@
 import '../../core/exceptions/failure.dart';
 import '../../core/logger/app_logger.dart';
-import '../../core/ui/widgets/messages.dart';
+import '../../core/services/error_message_service.dart';
 import '../../models/score_model.dart';
 import '../../models/schedule_list_model.dart';
 import '../../models/schedule_model.dart';
@@ -23,7 +23,7 @@ class HomeServiceImpl implements HomeService {
       await _homeRepository.loadSchedules(DateTime.now());
     } catch (e, s) {
       _logger.error('Error on load schedules', e, s);
-      Messages.warning('Erro ao carregar os agendamentos');
+      ErrorMessageService.instance.showScheduleError();
       throw Failure(message: 'Erro ao carregar os agendamentos');
     }
   }
@@ -34,7 +34,7 @@ class HomeServiceImpl implements HomeService {
       return await _homeRepository.loadScheduleLists(DateTime.now());
     } catch (e, s) {
       _logger.error('Error on load schedule lists', e, s);
-      Messages.warning('Erro ao carregar as listas de agendamentos');
+      ErrorMessageService.instance.showScheduleError();
       throw Failure(message: 'Erro ao carregar as listas de agendamentos');
     }
   }
@@ -45,7 +45,7 @@ class HomeServiceImpl implements HomeService {
       return await _homeRepository.getAvailableListNames();
     } catch (e, s) {
       _logger.error('Error on get available list names', e, s);
-      Messages.warning('Erro ao carregar nomes das listas');
+      ErrorMessageService.instance.showScheduleError();
       throw Failure(message: 'Erro ao carregar nomes das listas');
     }
   }
@@ -60,7 +60,7 @@ class HomeServiceImpl implements HomeService {
       return result;
     } catch (e, s) {
       _logger.error('Erro no fetch da lista $listName', e, s);
-      Messages.warning('Erro ao buscar lista $listName');
+      ErrorMessageService.instance.showScheduleError();
       throw Failure(message: 'Erro ao buscar lista $listName');
     }
   }
