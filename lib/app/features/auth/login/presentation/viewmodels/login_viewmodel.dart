@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../../core/utils/command.dart';
 import '../../../../../core/utils/result.dart';
 import '../../../../../core/auth/auth_store.dart';
+import '../../../../../core/services/error_message_service.dart';
 import '../../../../../service/user/user_service.dart';
 import '../../../../../models/user_model.dart';
 
@@ -44,22 +45,9 @@ class LoginViewModel extends ChangeNotifier {
         return Result.error(Exception('Usuário não encontrado após login'));
       }
     } catch (e) {
-      // Melhorar a mensagem de erro
-      String errorMessage;
-
-      if (e.toString().contains('Failure')) {
-        // Extrair a mensagem do Failure
-        final failureMatch =
-            RegExp(r"Failure\(message: '([^']*)'\)").firstMatch(e.toString());
-        if (failureMatch != null) {
-          errorMessage = failureMatch.group(1) ?? 'Erro ao realizar login';
-        } else {
-          errorMessage = 'Erro ao realizar login. Tente novamente.';
-        }
-      } else {
-        errorMessage = 'Erro ao realizar login: $e';
-      }
-
+      // Usar o ErrorMessageService para extrair mensagem amigável
+      final errorMessage =
+          ErrorMessageService.instance.extractUserFriendlyMessage(e);
       return Result.error(Exception(errorMessage));
     }
   }
