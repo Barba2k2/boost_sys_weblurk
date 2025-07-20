@@ -35,8 +35,8 @@ abstract class Command<T> extends ChangeNotifier {
 
 // Command sem parâmetros
 class Command0<T> extends Command<T> {
-  final CommandAction0<T> action;
   Command0(this.action);
+  final CommandAction0<T> action;
 
   Future<void> execute() async {
     await _execute(action);
@@ -45,8 +45,8 @@ class Command0<T> extends Command<T> {
 
 // Command com 1 parâmetro
 class Command1<T, A> extends Command<T> {
-  final CommandAction1<T, A> action;
   Command1(this.action);
+  final CommandAction1<T, A> action;
 
   Future<void> execute(A params) async {
     await _execute(() => action(params));
@@ -55,8 +55,8 @@ class Command1<T, A> extends Command<T> {
 
 // Command com 2 parâmetros
 class Command2<T, A, B> extends Command<T> {
-  final CommandAction2<T, A, B> action;
   Command2(this.action);
+  final CommandAction2<T, A, B> action;
 
   Future<void> execute(A params1, B params2) async {
     await _execute(() => action(params1, params2));
