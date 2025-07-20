@@ -5,13 +5,6 @@ import '../../controllers/url_launch_controller.dart';
 import 'messages.dart';
 
 class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String? username;
-  final VoidCallback onReloadWebView;
-  final VoidCallback onTerminateApp;
-  final VoidCallback onMuteAppAudio;
-  final UrlLaunchController urlController;
-  final SettingsController settingsController;
-
   const SyslurkAppBar({
     super.key,
     required this.username,
@@ -22,6 +15,13 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.settingsController,
   });
 
+  final String? username;
+  final VoidCallback onReloadWebView;
+  final VoidCallback onTerminateApp;
+  final VoidCallback onMuteAppAudio;
+  final UrlLaunchController urlController;
+  final SettingsController settingsController;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -29,7 +29,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
         color: const Color(0xFF2C1F4A),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
