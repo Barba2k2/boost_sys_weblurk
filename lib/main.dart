@@ -4,6 +4,7 @@ import 'app/core/application_config.dart';
 import 'app/core/di/injector.dart';
 import 'app/core/routes/router_config.dart' as app_router;
 import 'app/core/services/update_service.dart';
+import 'app/core/ui/widgets/messages.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,11 @@ Future<void> main() async {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
+      builder: (context, child) {
+        // Configurar o contexto global para o Messages
+        Messages.setGlobalContext(context);
+        return child!;
+      },
     ),
   );
 }
