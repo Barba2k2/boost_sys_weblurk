@@ -221,8 +221,7 @@ class PollingServiceImpl implements PollingService {
   // Verificar se estamos exibindo o canal correto
   Future<void> _verifyCorrectChannel() async {
     try {
-      // Por enquanto, vamos usar o método genérico
-      // Idealmente, deveria considerar qual aba está ativa
+      // Buscar o canal atual baseado nos agendamentos
       final correctChannel = await _homeService.fetchCurrentChannel();
       final channelToShow = correctChannel ?? _baseChannel;
 
@@ -244,8 +243,7 @@ class PollingServiceImpl implements PollingService {
   @override
   Future<void> checkAndUpdateChannel() async {
     try {
-      // Buscar o canal atual que deve ser exibido
-      // Por enquanto, vamos usar o método genérico, mas idealmente deveria considerar a aba ativa
+      // Buscar o canal atual baseado nos agendamentos ativos
       final correctChannel = await _homeService.fetchCurrentChannel();
 
       // Se não houver canal, usamos o canal base
