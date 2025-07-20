@@ -38,9 +38,11 @@ class UserRepositoryImpl implements UserRepository {
         throw Failure(message: 'Token de acesso não encontrado na resposta');
       }
     } on RestClientException catch (e, s) {
-      if (e.statusCode == HttpStatus.badRequest) {
+      if (e.statusCode == HttpStatus.badRequest ||
+          e.statusCode == HttpStatus.forbidden) {
         final errorMessage = e.response.data?['message'] ?? 'Erro de validação';
-        if (errorMessage.contains('User not exists')) {
+        if (errorMessage.contains('User not exists') ||
+            errorMessage.contains('User not found')) {
           _logger.error('Error: $errorMessage', e, s);
           _logger.error('User not exists - ${e.error}', e, s);
           throw Failure(
@@ -67,7 +69,8 @@ class UserRepositoryImpl implements UserRepository {
 
       final data = {
         if (kIsWeb) 'web_token': deviceToken,
-        if (!kIsWeb && Platform.isWindows || Platform.isAndroid)
+        if (!kIsWeb &&
+            (Platform.isWindows || Platform.isAndroid || Platform.isMacOS))
           'windows_token': deviceToken,
       };
 
