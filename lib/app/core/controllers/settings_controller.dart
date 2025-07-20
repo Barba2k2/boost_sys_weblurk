@@ -1,28 +1,25 @@
 import 'dart:io';
-import 'package:mobx/mobx.dart';
+import 'package:flutter/foundation.dart';
 import '../logger/app_logger.dart';
 import '../ui/widgets/messages.dart';
 import 'volume_controller.dart';
 
-part 'settings_controller.g.dart';
-
-class SettingsController = SettingsControllerBase with _$SettingsController;
-
-abstract class SettingsControllerBase with Store {
-  SettingsControllerBase({
+class SettingsController extends ChangeNotifier {
+  SettingsController({
     required AppLogger logger,
     required VolumeController volumeController,
   })  : _logger = logger,
-        _volumeController = volumeController;
+        _volumeController = volumeController {
+    // Escutar mudanças no VolumeController
+    _volumeController.addListener(() => notifyListeners());
+  }
 
   final AppLogger _logger;
   final VolumeController _volumeController;
 
-  @observable
-  bool isAudioMuted = false;
+  bool get isAudioMuted => _volumeController.isMuted;
 
   // Método para encerrar o aplicativo
-  @action
   Future<void> terminateApp() async {
     try {
       if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -37,7 +34,6 @@ abstract class SettingsControllerBase with Store {
   }
 
   // Método para alternar o áudio (mutar/desmutar)
-  @action
   Future<void> muteAppAudio() async {
     try {
       if (!_volumeController.isVolumeControlAvailable) {
@@ -46,9 +42,8 @@ abstract class SettingsControllerBase with Store {
       }
 
       await _volumeController.toggleMute();
-      isAudioMuted = _volumeController.isMuted;
 
-      final status = isAudioMuted ? 'mutado' : 'desmutado';
+      final status = _volumeController.isMuted ? 'mutado' : 'desmutado';
       Messages.info('Áudio $status');
 
       _logger.info('Áudio alternado para: $status');
