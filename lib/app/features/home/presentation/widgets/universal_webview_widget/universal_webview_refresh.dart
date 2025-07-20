@@ -22,7 +22,7 @@ class UniversalWebViewRefresh {
         logger: logger,
       );
       
-      String urlToRefresh = currentUrl;
+      final String urlToRefresh = currentUrl;
       if (urlToRefresh.isEmpty) {
         await UniversalWebViewJavaScript.captureCurrentUrl(
           controller: controller,
