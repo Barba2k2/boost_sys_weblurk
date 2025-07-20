@@ -6,13 +6,13 @@ sealed class Result<T> {
 }
 
 final class Ok<T> extends Result<T> {
-  final T value;
   const Ok._(this.value);
+  final T value;
 }
 
 final class Error<T> extends Result<T> {
-  final Exception error;
   const Error._(this.error);
+  final Exception error;
 }
 
 // Extensões para facilitar o uso
