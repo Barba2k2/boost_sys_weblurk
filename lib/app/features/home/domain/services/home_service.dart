@@ -1,7 +1,7 @@
 import '../entities/schedule_list_entity.dart';
 
 abstract class HomeService {
-  Future<void> fetchSchedules();
+  Future<List<dynamic>> fetchSchedules();
   Future<List<ScheduleListEntity>> fetchScheduleLists();
   Future<List<String>> getAvailableListNames();
   Future<ScheduleListEntity?> fetchScheduleListByName(String listName);
