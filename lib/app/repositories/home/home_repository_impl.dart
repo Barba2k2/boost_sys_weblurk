@@ -281,16 +281,56 @@ class HomeRepositoryImpl implements HomeRepository {
         }
       }
 
-      // Certifique-se de que a resposta é uma lista e pegue o primeiro item
-      if (allSchedules.isNotEmpty) {
-        final firstSchedule = allSchedules.first;
-        return firstSchedule.streamerUrl;
-      } else {
-        _logger.warning(
-          'A lista de agendamentos está vazia ou a estrutura dos dados não está correta',
-        );
-        return null;
+      // Buscar o agendamento atual baseado no horário
+      final now = DateTime.now();
+      for (final schedule in allSchedules) {
+        try {
+          final startTimeStr = schedule.startTime;
+          final endTimeStr = schedule.endTime;
+
+          // Remove o formato Time() se presente
+          final cleanStartTime =
+              startTimeStr.replaceAll('Time(', '').replaceAll(')', '');
+          final cleanEndTime =
+              endTimeStr.replaceAll('Time(', '').replaceAll(')', '');
+
+          if (cleanStartTime.isEmpty || cleanEndTime.isEmpty) continue;
+
+          final startTimeParts = cleanStartTime.split(':');
+          final endTimeParts = cleanEndTime.split(':');
+
+          if (startTimeParts.length < 2 || endTimeParts.length < 2) {
+            continue;
+          }
+
+          final startDateTime = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            int.parse(startTimeParts[0]),
+            int.parse(startTimeParts[1]),
+            startTimeParts.length > 2 ? int.parse(startTimeParts[2]) : 0,
+          );
+          final endDateTime = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            int.parse(endTimeParts[0]),
+            int.parse(endTimeParts[1]),
+            endTimeParts.length > 2 ? int.parse(endTimeParts[2]) : 0,
+          );
+
+          if (now.isAfter(startDateTime) && now.isBefore(endDateTime)) {
+            return schedule.streamerUrl;
+          }
+        } catch (e) {
+          _logger.warning('Erro ao processar horário do agendamento: $e');
+          continue;
+        }
       }
+
+      _logger.info('Nenhum agendamento ativo encontrado');
+      return null;
     } catch (e, s) {
       _logger.error('Error fetching channel URL', e, s);
       throw Failure(
