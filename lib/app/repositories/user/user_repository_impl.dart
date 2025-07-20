@@ -32,15 +32,21 @@ class UserRepositoryImpl implements UserRepository {
         },
       );
 
-      return result.data['access_token'];
+      if (result.data != null && result.data['access_token'] != null) {
+        return result.data['access_token'];
+      } else {
+        throw Failure(message: 'Token de acesso não encontrado na resposta');
+      }
     } on RestClientException catch (e, s) {
-      if (e.statusCode == HttpStatus.badRequest ||
-          e.response.data['message'].contains('User not exists')) {
-        _logger.error('Error: ${e.response.data['message']}', e, s);
-        _logger.error('User not exists - ${e.error}', e, s);
-        throw Failure(
-          message: 'Usuario não encontrado, entre em contato com o suporte!!',
-        );
+      if (e.statusCode == HttpStatus.badRequest) {
+        final errorMessage = e.response.data?['message'] ?? 'Erro de validação';
+        if (errorMessage.contains('User not exists')) {
+          _logger.error('Error: $errorMessage', e, s);
+          _logger.error('User not exists - ${e.error}', e, s);
+          throw Failure(
+            message: 'Usuario não encontrado, entre em contato com o suporte!!',
+          );
+        }
       }
       _logger.error('Repository - Failed to login user', e, s);
       throw Failure(message: 'Erro ao realizar login');
@@ -61,7 +67,8 @@ class UserRepositoryImpl implements UserRepository {
 
       final data = {
         if (kIsWeb) 'web_token': deviceToken,
-        if (!kIsWeb && Platform.isWindows || Platform.isAndroid) 'windows_token': deviceToken,
+        if (!kIsWeb && Platform.isWindows || Platform.isAndroid)
+          'windows_token': deviceToken,
       };
 
       final result = await _restClient.auth().patch(
