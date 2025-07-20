@@ -4,12 +4,12 @@ import 'app_bar_menu_button.dart';
 import 'app_bar_menu_item.dart';
 
 class AppBarLinksMenu extends StatelessWidget {
-  final UrlLaunchController urlController;
-
   const AppBarLinksMenu({
     super.key,
     required this.urlController,
   });
+
+  final UrlLaunchController urlController;
 
   @override
   Widget build(BuildContext context) {
@@ -65,4 +65,4 @@ class AppBarLinksMenu extends StatelessWidget {
       ],
     );
   }
-} 
+}
