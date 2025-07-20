@@ -148,6 +148,11 @@ class TestableHomeService implements HomeService {
   Future<ScheduleListModel?> fetchScheduleListByName(String listName) async {
     return null;
   }
+
+  @override
+  Future<String?> fetchCurrentChannelForList(String listName) async {
+    return 'https://twitch.tv/BoostTeam_';
+  }
 }
 
 void main() {
