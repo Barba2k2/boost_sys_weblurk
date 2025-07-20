@@ -11,7 +11,6 @@ import '../rest_client_response.dart';
 import 'interceptors/auth_interceptors.dart';
 
 class DioRestClient implements RestClient {
-
   DioRestClient({
     required LocalStorage localStorage,
     required AppLogger logger,
@@ -39,6 +38,9 @@ class DioRestClient implements RestClient {
     baseUrl: Environments.param(Constants.ENV_BASE_URL_KEY) ?? '',
     connectTimeout: const Duration(milliseconds: 60000),
     receiveTimeout: const Duration(milliseconds: 60000),
+    validateStatus: (status) {
+      return status != null && status < 500;
+    },
   );
 
   @override
