@@ -15,7 +15,7 @@ class UiConfig {
           centerTitle: true,
           elevation: 0,
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -32,7 +32,7 @@ class UiConfig {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           elevation: 4,
         ),
-        tabBarTheme: const TabBarTheme(
+        tabBarTheme: const TabBarThemeData(
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
         ),
@@ -49,7 +49,7 @@ class UiConfig {
           centerTitle: true,
           elevation: 0,
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -66,7 +66,7 @@ class UiConfig {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           elevation: 4,
         ),
-        tabBarTheme: const TabBarTheme(
+        tabBarTheme: const TabBarThemeData(
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
         ),
