@@ -100,7 +100,7 @@ class Win32Helper {
         0, // dwExStyle
         TEXT('STATIC'), // lpClassName
         TEXT('Flutter Widget Window'), // lpWindowName
-        WINDOW_STYLE.WS_CHILD | WINDOW_STYLE.WS_VISIBLE, // dwStyle
+        WS_CHILD | WS_VISIBLE, // dwStyle
         rect.ref.left, // x
         rect.ref.top, // y
         rect.ref.right - rect.ref.left, // width
