@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../exceptions/failure.dart';
-import '../ui/widgets/messages.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ErrorMessageService {
   ErrorMessageService._();
@@ -77,7 +76,7 @@ class ErrorMessageService {
       final message = failureMatch3.group(1);
       if (message != null && message.isNotEmpty) {
         // Remove aspas se existirem
-        return message.replaceAll("'", "").replaceAll('"', '').trim();
+        return message.replaceAll("'", '').replaceAll('"', '').trim();
       }
     }
 
