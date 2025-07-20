@@ -1,10 +1,8 @@
 import '../../../../core/logger/app_logger.dart';
-import '../../../../utils/utils.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/services/auth_service.dart';
 import '../../../../core/result/result.dart';
-import 'package:result_dart/result_dart.dart' as rd;
 import 'package:uuid/uuid.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -19,29 +17,34 @@ class AuthRepositoryImpl implements AuthRepository {
   final _uuid = const Uuid();
 
   @override
-  Future<AppResult<Map<String, dynamic>>> login(String nickname, String password) async {
+  Future<AppResult<Map<String, dynamic>>> login(
+    String nickname,
+    String password,
+  ) async {
     try {
       _logger.info('Repository: Iniciando login para usuário: $nickname');
-      
+
       // Primeira etapa: fazer login
       final loginResponse = await _authService.login(nickname, password);
       final userData = loginResponse['user'] as UserEntity;
       final accessToken = loginResponse['access_token'] as String?;
-      
+
       // Segunda etapa: confirmar login com windows_token
       if (accessToken != null) {
         // Gerar um windows_token usando UUID
         final windowsToken = _uuid.v4();
-        
+
         // Extrair apenas o token (remover "Bearer" se presente)
-        final cleanAccessToken = accessToken.startsWith('Bearer ') 
-            ? accessToken.substring(7) 
+        final cleanAccessToken = accessToken.startsWith('Bearer ')
+            ? accessToken.substring(7)
             : accessToken;
-        
-        _logger.info('Repository: Confirmando login com windows_token: $windowsToken');
-        final confirmResponse = await _authService.confirmLogin(cleanAccessToken, windowsToken);
+
+        _logger.info(
+            'Repository: Confirmando login com windows_token: $windowsToken');
+        final confirmResponse =
+            await _authService.confirmLogin(cleanAccessToken, windowsToken);
         _logger.info('Repository: Login confirmado com sucesso');
-        
+
         // Retorna o user junto com os novos tokens
         return AppSuccess({
           'user': userData,
@@ -49,7 +52,8 @@ class AuthRepositoryImpl implements AuthRepository {
           'refresh_token': confirmResponse['refresh_token'],
         });
       } else {
-        _logger.warning('Repository: Access token não encontrado na resposta do login');
+        _logger.warning(
+            'Repository: Access token não encontrado na resposta do login');
         return AppSuccess({
           'user': userData,
           'access_token': '',
@@ -63,12 +67,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AppResult<void>> logout() async {
+  Future<AppResult<AppUnit>> logout() async {
     try {
       _logger.info('Repository: Iniciando logout');
       await _authService.logout();
       _logger.info('Repository: Logout realizado com sucesso');
-      return AppSuccess(null);
+      return AppSuccess(appUnit);
     } catch (e, s) {
       _logger.error('Repository: Erro inesperado no logout', e, s);
       return AppFailure(Exception('Erro no logout: $e'));
