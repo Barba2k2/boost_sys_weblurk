@@ -1,20 +1,20 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 
-import '../../service/webview/windows_web_view_service.dart';
+import '../../features/home/data/services/webview_service.dart';
 import '../logger/app_logger.dart';
 
 class VolumeController extends ChangeNotifier {
   VolumeController({
     required AppLogger logger,
-    required WindowsWebViewService webViewService,
+    required WebViewService webViewService,
   })  : _logger = logger,
         _webViewService = webViewService {
     _initializeVolumeControl();
   }
 
   final AppLogger _logger;
-  final WindowsWebViewService _webViewService;
+  final WebViewService _webViewService;
 
   double _originalVolume = 1.0; // Volume padrão do app
   bool _isInitialized = false;
