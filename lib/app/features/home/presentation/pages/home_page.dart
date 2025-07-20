@@ -7,12 +7,12 @@ import '../../../../models/schedule_model.dart';
 import '../viewmodels/home_viewmodel.dart';
 
 class HomePage extends StatefulWidget {
-  final HomeViewModel viewModel;
 
   const HomePage({
     super.key,
     required this.viewModel,
   });
+  final HomeViewModel viewModel;
 
   @override
   State<HomePage> createState() => _HomePageState();
