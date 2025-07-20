@@ -1,29 +1,29 @@
 import 'package:flutter/foundation.dart';
 import '../../../../core/result/result.dart';
 import '../../../../utils/command.dart';
-import '../../../auth/domain/entities/auth_store.dart';
+import '../../../auth/domain/entities/auth_state.dart';
 import '../../domain/entities/schedule_list_entity.dart';
 import '../../domain/repositories/home_repository.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
     required HomeRepository repository,
-    required AuthStore authStore,
+    required AuthState authState,
   })  : _repository = repository,
-        _authStore = authStore {
+        _authState = authState {
     loadSchedules = Command0<List<ScheduleListEntity>>(_loadSchedules);
     startPolling = Command1<void, int>(_startPolling);
     stopPolling = Command0<void>(_stopPolling);
     reloadWebView = Command0<void>(_reloadWebView);
     loadUrl = Command1<void, String>(_loadUrl);
     initializeHome = Command0<void>(_initializeHome);
-    
-    // Escuta mudanças no AuthStore para reiniciar o polling quando necessário
-    _authStore.addListener(_onAuthStateChanged);
+
+    // Escuta mudanças no AuthState para reiniciar o polling quando necessário
+    _authState.addListener(_onAuthStateChanged);
   }
 
   final HomeRepository _repository;
-  final AuthStore _authStore;
+  final AuthState _authState;
 
   late Command0<List<ScheduleListEntity>> loadSchedules;
   late Command1<void, int> startPolling;
@@ -42,7 +42,7 @@ class HomeViewModel extends ChangeNotifier {
 
   void _onAuthStateChanged() {
     // Se o usuário fez login, inicia o polling
-    if (_authStore.isLoggedIn) {
+    if (_authState.isLoggedIn) {
       _startPolling(0);
     } else {
       // Se o usuário fez logout, para o polling
@@ -74,7 +74,7 @@ class HomeViewModel extends ChangeNotifier {
     _setInitializing(true);
     try {
       final channelResult = await _repository.fetchCurrentChannel();
-      final schedulesResult = await _repository.fetchScheduleLists();
+      await _repository.fetchScheduleLists();
       if (channelResult.isSuccess) {
         final channel = channelResult.data;
         _setCurrentChannel(channel);
@@ -82,12 +82,12 @@ class HomeViewModel extends ChangeNotifier {
       } else {
         _setInitialUrl('https://www.twitch.tv/BootTeam_');
       }
-      
+
       // Só inicia o polling se o usuário estiver logado
-      if (_authStore.isLoggedIn) {
+      if (_authState.isLoggedIn) {
         _startPolling(0);
       }
-      
+
       return AppSuccess(null);
     } finally {
       _setInitializing(false);
@@ -111,7 +111,7 @@ class HomeViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    _authStore.removeListener(_onAuthStateChanged);
+    _authState.removeListener(_onAuthStateChanged);
     super.dispose();
   }
 }
