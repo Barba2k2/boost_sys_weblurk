@@ -73,6 +73,10 @@ class AuthStore extends ChangeNotifier {
     }
   }
 
+  Future<void> reloadUserData() async {
+    await _loadUserLogged();
+  }
+
   Future<void> logout() async {
     try {
       await _localStorage.remove(Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY);
