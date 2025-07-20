@@ -154,10 +154,10 @@ class HomeServiceImpl implements HomeService {
         }
       }
 
-      _logger.warning(
-        'Nenhuma live correspondente ao horário atual, carregando canal padrão',
+      _logger.info(
+        'Nenhuma live ativa no horário atual, retornando null para usar canal padrão',
       );
-      return 'https://twitch.tv/BoostTeam_';
+      return null;
     } catch (e, s) {
       _logger.error('Erro ao buscar o canal atual', e, s);
       throw Failure(message: 'Erro ao buscar o canal atual');
@@ -239,10 +239,10 @@ class HomeServiceImpl implements HomeService {
         return currentSchedule.streamerUrl;
       }
 
-      _logger.warning(
-        'Nenhuma live correspondente ao horário atual na $listName, carregando canal padrão',
+      _logger.info(
+        'Nenhuma live ativa no horário atual na $listName, retornando null para usar canal padrão',
       );
-      return 'https://twitch.tv/BoostTeam_';
+      return null;
     } catch (e, s) {
       _logger.error('Erro ao buscar o canal atual da $listName', e, s);
       throw Failure(message: 'Erro ao buscar o canal atual da $listName');
