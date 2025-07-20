@@ -1,0 +1,40 @@
+// Sealed class para resultados
+sealed class Result<T> {
+  const Result();
+  factory Result.ok(T value) = Ok._;
+  factory Result.error(Exception error) = Error._;
+}
+
+final class Ok<T> extends Result<T> {
+  final T value;
+  const Ok._(this.value);
+}
+
+final class Error<T> extends Result<T> {
+  final Exception error;
+  const Error._(this.error);
+}
+
+// Extensões para facilitar o uso
+extension ResultExtensions<T> on Result<T> {
+  bool get isOk => this is Ok<T>;
+  bool get isError => this is Error<T>;
+
+  T? get valueOrNull {
+    switch (this) {
+      case Ok(:final value):
+        return value;
+      case Error():
+        return null;
+    }
+  }
+
+  Exception? get errorOrNull {
+    switch (this) {
+      case Ok():
+        return null;
+      case Error(:final error):
+        return error;
+    }
+  }
+}
