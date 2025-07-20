@@ -8,7 +8,7 @@ void main() {
         (WidgetTester tester) async {
       // Act
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: HomePage(),
         ),
       );
@@ -21,7 +21,7 @@ void main() {
         (WidgetTester tester) async {
       // Act
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: HomePage(),
         ),
       );
@@ -33,7 +33,7 @@ void main() {
     testWidgets('should handle page rendering', (WidgetTester tester) async {
       // Act
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: HomePage(),
         ),
       );
