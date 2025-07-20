@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:asuka/asuka.dart';
 
 import 'app/core/application_config.dart';
 import 'app/core/di/injector.dart';
@@ -21,6 +22,7 @@ Future<void> main() async {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
+      builder: asuka.builder,
     ),
   );
 }
