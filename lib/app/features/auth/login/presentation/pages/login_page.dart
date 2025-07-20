@@ -5,16 +5,16 @@ import 'package:validatorless/validatorless.dart';
 
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/ui/widgets/boost_text_form_field.dart';
+import '../../../../../core/ui/widgets/messages.dart';
 import '../../../../../core/utils/result.dart';
 import '../viewmodels/login_viewmodel.dart';
 
 class LoginPage extends StatefulWidget {
-  final LoginViewModel viewModel;
-
   const LoginPage({
     super.key,
     required this.viewModel,
   });
+  final LoginViewModel viewModel;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -171,12 +171,37 @@ class _LoginPageState extends State<LoginPage> {
                   final errorMessage =
                       command.result?.errorOrNull?.toString() ??
                           'Erro desconhecido';
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Erro: $errorMessage'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
+
+                  // Melhorar a mensagem de erro para o usuário
+                  String userFriendlyMessage;
+
+                  if (errorMessage.contains('Instance of \'Failure\'')) {
+                    // Extrair a mensagem real do Failure
+                    final failureMessage = errorMessage.replaceAll(
+                        'Exception: Erro no login: Instance of \'Failure\'',
+                        '');
+                    userFriendlyMessage = failureMessage.isNotEmpty
+                        ? failureMessage.trim()
+                        : 'Erro ao realizar login. Tente novamente.';
+                  } else if (errorMessage.contains('User not exists') ||
+                      errorMessage.contains('User not found')) {
+                    userFriendlyMessage =
+                        'Usuário não encontrado. Verifique suas credenciais.';
+                  } else if (errorMessage.contains('Connection failed') ||
+                      errorMessage.contains('Operation not permitted')) {
+                    userFriendlyMessage =
+                        'Erro de conexão. Verifique sua internet e tente novamente.';
+                  } else if (errorMessage
+                      .contains('Token de acesso não encontrado')) {
+                    userFriendlyMessage =
+                        'Erro na resposta do servidor. Tente novamente.';
+                  } else {
+                    userFriendlyMessage =
+                        'Erro ao realizar login. Tente novamente.';
+                  }
+
+                  // Usar o sistema de mensagens existente
+                  Messages.error(userFriendlyMessage, retryAction: 'retry');
                 });
               }
 
