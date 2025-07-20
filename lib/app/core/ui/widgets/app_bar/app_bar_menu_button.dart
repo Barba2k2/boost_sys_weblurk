@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppBarMenuButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final List<PopupMenuItem<String>> items;
-
   const AppBarMenuButton({
     super.key,
     required this.label,
@@ -13,12 +9,16 @@ class AppBarMenuButton extends StatelessWidget {
     required this.items,
   });
 
+  final String label;
+  final IconData icon;
+  final List<Widget> items;
+
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
       offset: const Offset(0, 40),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      itemBuilder: (context) => items,
+      itemBuilder: (context) => items.cast<PopupMenuEntry<String>>(),
       child: Row(
         children: [
           Icon(icon, color: Colors.white, size: 20),
@@ -36,4 +36,4 @@ class AppBarMenuButton extends StatelessWidget {
       ),
     );
   }
-} 
+}
