@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppBarUserInfo extends StatelessWidget {
-  final String username;
-
   const AppBarUserInfo({
     super.key,
     required this.username,
   });
+
+  final String username;
 
   @override
   Widget build(BuildContext context) {
@@ -41,4 +41,4 @@ class AppBarUserInfo extends StatelessWidget {
       ),
     );
   }
-} 
+}
