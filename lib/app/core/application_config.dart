@@ -8,12 +8,12 @@ import 'helpers/environments.dart';
 import 'services/update_service.dart';
 
 class ApplicationConfig {
-  Future<void> consfigureApp() async {
+  Future<void> configureApp() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     await _loadEnvs();
 
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isMacOS) {
       await _configureWindowManager();
     } else if (Platform.isAndroid) {
       await _initializeUpdateService();
