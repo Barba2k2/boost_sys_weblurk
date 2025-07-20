@@ -82,10 +82,18 @@ class HomeViewModel extends ChangeNotifier {
   Future<Result<String>> _fetchCurrentChannel() async {
     try {
       final channel = await _homeService.fetchCurrentChannel();
-      _currentChannel = channel ?? 'https://twitch.tv/BoostTeam_';
-      notifyListeners();
-      return Result.ok(_currentChannel);
+      if (channel != null && channel.isNotEmpty) {
+        _currentChannel = channel;
+        notifyListeners();
+        return Result.ok(_currentChannel);
+      } else {
+        // Se não há canal ativo, usar o canal padrão
+        _currentChannel = 'https://twitch.tv/BoostTeam_';
+        notifyListeners();
+        return Result.ok(_currentChannel);
+      }
     } catch (e) {
+      // Em caso de erro, manter o canal atual
       return Result.error(Exception('Erro ao buscar canal atual: $e'));
     }
   }
