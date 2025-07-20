@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class UrlBarContainer extends StatelessWidget {
-  final Widget child;
-
   const UrlBarContainer({
     super.key,
     required this.child,
   });
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -18,4 +18,4 @@ class UrlBarContainer extends StatelessWidget {
       child: child,
     );
   }
-} 
+}
