@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../../core/exceptions/failure.dart';
 import '../../core/helpers/constants.dart';
 import '../../core/local_storage/local_storage.dart';
@@ -135,6 +137,12 @@ class UserServiceImpl implements UserService {
       _logger.error('Failed to get token from local storage', e, s);
       return null;
     }
+  }
+
+  @override
+  Future<void> updateLoginStatus(String status) async {
+    log('Status: $status');
+    await _updateLoginStatus(status);
   }
 
   Future<void> _saveLastSeen() async {
