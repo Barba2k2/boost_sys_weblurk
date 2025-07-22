@@ -38,7 +38,6 @@ abstract class LoginControllerBase with Store {
         try {
           final userData = UserModel.fromJson(json.decode(userJson));
           if (userData.id != 0) {
-            _logger.info('Usuário autenticado, navegando para home');
             Loader.show();
             await Future.delayed(const Duration(milliseconds: 200));
             Modular.to.navigate('/');
@@ -49,8 +48,6 @@ abstract class LoginControllerBase with Store {
           _logger.error('Erro ao decodificar dados do usuário', e);
         }
       }
-
-      _logger.info('Permanece na tela de login');
     } catch (e, s) {
       _logger.error('Erro ao verificar login', e, s);
       await _userService.logout();
