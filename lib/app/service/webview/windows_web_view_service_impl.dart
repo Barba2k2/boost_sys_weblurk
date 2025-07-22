@@ -93,7 +93,6 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
     // Valida e sanitiza a URL antes de carregar
     final validatedUrl = UrlValidator.validateAndSanitizeUrl(url);
     if (validatedUrl == null) {
-      _logger.error('URL inválida ou maliciosa detectada: $url');
       _healthController.add(false);
       throw Failure(message: 'URL inválida ou não permitida');
     }
@@ -106,7 +105,6 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
 
       _lastActivity = DateTime.now();
       _healthController.add(true);
-      _logger.info('URL carregada com sucesso: $validatedUrl');
     } catch (e, s) {
       _logger.error('Erro ao carregar URL: $validatedUrl', e, s);
       _healthController.add(false);
@@ -125,13 +123,10 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
       final now = DateTime.now();
       if (_lastReload != null &&
           now.difference(_lastReload!) < _minReloadInterval) {
-        _logger.warning('Recarregamento muito frequente, aguardando...');
         await Future.delayed(
           _minReloadInterval - now.difference(_lastReload!),
         );
       }
-
-      _logger.info('Recarregando WebView...');
 
       // Operação simples de reload sem completer ou listeners adicionais
       await _controller!.reload();
@@ -174,57 +169,92 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
   @override
   Future<void> muteWebView() async {
     if (_controller == null) {
-      _logger.warning('WebView não inicializado para mutar');
       return;
     }
 
     try {
-      _logger.info('Iniciando muteWebView...');
       _savedVolume = _currentVolume;
       _currentVolume = 0.0;
-      _logger.info(
-          'Estado do WebView atualizado - Volume: $_currentVolume, Saved: $_savedVolume');
 
-      // JavaScript para mutar todos os elementos de áudio/vídeo
+      // JavaScript para mutar todos os elementos de áudio/vídeo, incluindo Twitch e YouTube
       const muteScript = '''
         (function() {
-          console.log('Executando script de mute...');
-          
           // Muta todos os vídeos
           const videos = document.querySelectorAll('video');
-          console.log('Vídeos encontrados:', videos.length);
           videos.forEach((video, index) => {
             video.muted = true;
             video.volume = 0;
             console.log('Vídeo ' + (index + 1) + ' mutado');
           });
-          
+
           // Muta todos os áudios
           const audios = document.querySelectorAll('audio');
-          console.log('Áudios encontrados:', audios.length);
           audios.forEach((audio, index) => {
             audio.muted = true;
             audio.volume = 0;
             console.log('Áudio ' + (index + 1) + ' mutado');
           });
-          
+
+          // Muta players do Twitch
+          try {
+            // Twitch embed usa window.Twitch.ext ou window.Twitch.Player
+            if (window.Twitch && window.Twitch.Player) {
+              const twitchPlayers = document.querySelectorAll('iframe');
+              twitchPlayers.forEach((iframe, idx) => {
+                try {
+                  const player = iframe.contentWindow.Twitch && iframe.contentWindow.Twitch.Player;
+                  if (player && typeof player.prototype.setMuted === 'function') {
+                    player.prototype.setMuted(true);
+                    player.prototype.setVolume(0);
+                    console.log('Twitch player mutado via prototype');
+                  }
+                } catch (e) {}
+              });
+            }
+            // Twitch player embed direto
+            if (window.player && typeof window.player.setMuted === 'function') {
+              window.player.setMuted(true);
+              window.player.setVolume(0);
+              console.log('Twitch player mutado via window.player');
+            }
+          } catch (e) { console.log('Erro ao tentar mutar Twitch:', e); }
+
+          // Muta players do YouTube
+          try {
+            // YouTube embed API
+            if (window.YT && window.YT.Player) {
+              const ytPlayers = document.querySelectorAll('iframe');
+              ytPlayers.forEach((iframe, idx) => {
+                try {
+                  const player = iframe.contentWindow.YT && iframe.contentWindow.YT.Player;
+                  if (player && typeof player.prototype.mute === 'function') {
+                    player.prototype.mute();
+                    player.prototype.setVolume(0);
+                    console.log('YouTube player mutado via prototype');
+                  }
+                } catch (e) {}
+              });
+            }
+            // YouTube player embed direto
+            if (window.player && typeof window.player.mute === 'function') {
+              window.player.mute();
+              window.player.setVolume(0);
+              console.log('YouTube player mutado via window.player');
+            }
+          } catch (e) { console.log('Erro ao tentar mutar YouTube:', e); }
+
           // Muta elementos de áudio/vídeo em iframes (se possível)
           const iframes = document.querySelectorAll('iframe');
-          console.log('Iframes encontrados:', iframes.length);
           iframes.forEach((iframe, index) => {
             try {
               const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
               const iframeVideos = iframeDoc.querySelectorAll('video');
               const iframeAudios = iframeDoc.querySelectorAll('audio');
-              
-              console.log('Iframe ' + (index + 1) + ': ' + iframeVideos.length + ' vídeos, ' + iframeAudios.length + ' áudios');
-              
               iframeVideos.forEach((video, vIndex) => {
                 video.muted = true;
                 video.volume = 0;
                 console.log('Vídeo ' + (vIndex + 1) + ' do iframe ' + (index + 1) + ' mutado');
               });
-              
               iframeAudios.forEach((audio, aIndex) => {
                 audio.muted = true;
                 audio.volume = 0;
@@ -234,26 +264,23 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
               console.log('Iframe ' + (index + 1) + ': Cross-origin, não foi possível acessar');
             }
           });
-          
+
           console.log('Script de mute concluído');
           return 'WebView mutado - Vídeos: ' + videos.length + ', Áudios: ' + audios.length + ', Iframes: ' + iframes.length;
         })();
       ''';
 
-      _logger.info('Executando script JavaScript de mute...');
-      final result = await _controller!.executeScript(muteScript);
-      _logger.info('Script de mute executado com resultado: $result');
-      _logger.info('WebView mutado com sucesso');
+      await _controller!.executeScript(muteScript);
     } catch (e, s) {
       _logger.error('Erro ao mutar WebView', e, s);
+      throw Failure(message: 'Erro ao mutar WebView');
     }
   }
 
   @override
   Future<void> unmuteWebView() async {
     if (_controller == null) {
-      _logger.warning('WebView não inicializado para desmutar');
-      return;
+      throw Failure(message: 'WebView não inicializado para desmutar');
     }
 
     try {
@@ -305,16 +332,15 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
       ''';
 
       await _controller!.executeScript(unmuteScript);
-      _logger.info('WebView desmutado com sucesso. Volume: $_savedVolume');
     } catch (e, s) {
       _logger.error('Erro ao desmutar WebView', e, s);
+      throw Failure(message: 'Erro ao desmutar WebView');
     }
   }
 
   @override
   Future<void> setWebViewVolume(double volume) async {
     if (_controller == null) {
-      _logger.warning('WebView não inicializado para definir volume');
       return;
     }
 
@@ -395,7 +421,6 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
     try {
       // Não fazemos dispose do controller aqui, deixamos o widget fazer isso
       _controller = null;
-      _logger.info('WebView service disposed');
     } catch (e, s) {
       _logger.error('Erro ao fazer dispose do WebView service', e, s);
     } finally {
