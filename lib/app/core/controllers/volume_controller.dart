@@ -5,6 +5,8 @@ import 'package:mobx/mobx.dart';
 
 import '../../service/webview/windows_web_view_service.dart';
 import '../logger/app_logger.dart';
+import 'dart:io';
+import '../helpers/win32_helper.dart';
 
 part 'volume_controller.g.dart';
 
@@ -41,9 +43,6 @@ abstract class VolumeControllerBase with Store {
       currentVolume = 1.0;
       _originalVolume = 1.0;
       _isInitialized = true;
-
-      _logger.info(
-          'Controle de volume do app inicializado. Volume atual: $currentVolume');
     } catch (e, s) {
       _logger.error('Erro ao inicializar controle de volume do app', e, s);
       isVolumeControlAvailable = false;
@@ -54,32 +53,26 @@ abstract class VolumeControllerBase with Store {
   @action
   Future<void> mute() async {
     if (!isVolumeControlAvailable || !_isInitialized) {
-      _logger.warning('Controle de volume do app não disponível para mutar');
       return;
     }
 
     try {
-      _logger.info('Iniciando processo de mute...');
-
       // Salva o volume atual antes de mutar
       _originalVolume = currentVolume;
-      _logger.info('Volume original salvo: $_originalVolume');
-
       // Define o volume do app para 0 (mudo)
       currentVolume = 0.0;
       isMuted = true;
-      _logger.info(
-          'Estado interno atualizado - Volume: $currentVolume, Muted: $isMuted');
 
       // Muta o WebView também
-      _logger.info('Chamando muteWebView()...');
       await _webViewService.muteWebView();
-      _logger.info('muteWebView() concluído');
 
-      _logger.info(
-          'Áudio do app mutado com sucesso. Volume anterior: $_originalVolume');
+      // Muta o áudio do app nativamente no Windows
+      if (Platform.isWindows) {
+        Win32Helper.muteAppAudio();
+      }
     } catch (e, s) {
-      _logger.error('Erro ao mutar áudio do app', e, s);
+      _logger.error('[DEBUG] Erro ao mutar áudio do app', e, s);
+      throw Exception('Erro ao mutar áudio do app');
     }
   }
 
@@ -87,28 +80,25 @@ abstract class VolumeControllerBase with Store {
   @action
   Future<void> unmute() async {
     if (!isVolumeControlAvailable || !_isInitialized) {
-      _logger.warning('Controle de volume do app não disponível para desmutar');
       return;
     }
 
     try {
-      _logger.info('Iniciando processo de unmute...');
 
       // Restaura o volume anterior
       currentVolume = _originalVolume;
       isMuted = false;
-      _logger.info(
-          'Estado interno atualizado - Volume: $currentVolume, Muted: $isMuted');
 
       // Desmuta o WebView também
-      _logger.info('Chamando unmuteWebView()...');
       await _webViewService.unmuteWebView();
-      _logger.info('unmuteWebView() concluído');
 
-      _logger.info(
-          'Áudio do app desmutado com sucesso. Volume restaurado para: $_originalVolume');
+      // Desmuta o áudio do app nativamente no Windows
+      if (Platform.isWindows) {
+        Win32Helper.unmuteAppAudio();
+      }
     } catch (e, s) {
       _logger.error('Erro ao desmutar áudio do app', e, s);
+      throw Exception('Erro ao desmutar áudio do app');
     }
   }
 
@@ -126,8 +116,6 @@ abstract class VolumeControllerBase with Store {
   @action
   Future<void> setVolume(double volume) async {
     if (!isVolumeControlAvailable || !_isInitialized) {
-      _logger.warning(
-          'Controle de volume do app não disponível para definir volume');
       return;
     }
 
@@ -147,10 +135,9 @@ abstract class VolumeControllerBase with Store {
 
       // Define o volume no WebView também
       await _webViewService.setWebViewVolume(clampedVolume);
-
-      _logger.info('Volume do app definido para: $clampedVolume');
     } catch (e, s) {
       _logger.error('Erro ao definir volume do app', e, s);
+      throw Exception('Erro ao definir volume do app');
     }
   }
 
@@ -175,10 +162,4 @@ abstract class VolumeControllerBase with Store {
 
   /// Verifica se o áudio está atualmente mutado (para compatibilidade)
   bool get isAudioCurrentlyMuted => isMuted;
-
-  /// Dispose do controlador
-  void dispose() {
-    // Não há listeners externos para remover
-    _logger.info('VolumeController do app disposto');
-  }
 }
