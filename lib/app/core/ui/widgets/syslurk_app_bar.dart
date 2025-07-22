@@ -63,6 +63,8 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                   },
                 ),
                 BuildMenuItemReactive(
+                  // A lógica de mute/unmute está centralizada no SettingsController,
+                  // não chame VolumeController ou serviço do WebView diretamente aqui.
                   onTap: () {
                     settingsController.muteAppAudio();
                   },
