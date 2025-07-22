@@ -300,10 +300,11 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
   Future<void> _reapplyVolumeState() async {
     try {
       final volumeController = Modular.get<VolumeController>();
+      final webViewService = Modular.get<WindowsWebViewService>();
       if (volumeController.isMuted) {
-        await volumeController.mute();
+        await webViewService.muteWebView();
       } else {
-        await volumeController.unmute();
+        await webViewService.unmuteWebView();
       }
     } catch (e) {
       widget.logger?.error('Erro ao reaplicar estado de volume: $e');
