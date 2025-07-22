@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -72,8 +73,10 @@ class UserRepositoryImpl implements UserRepository {
       return ConfirmLoginModel.fromMap(result.data);
     } on RestClientException catch (e, s) {
       _logger.error('Failed to confirm login', e, s);
+      log('Failed to confirm login - ${e.response.data}');
       throw Failure(message: 'Erro ao confirmar login');
     } catch (e, s) {
+      log('Failed to confirm login - ${e.toString()}');
       _logger.error('Failed to confirm login - 2', e, s);
       throw Failure(message: 'Erro ao confirmar login - 2');
     }
