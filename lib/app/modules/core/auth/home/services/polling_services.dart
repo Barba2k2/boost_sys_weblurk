@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:developer' as logger;
 
 import '../../../../../core/logger/app_logger.dart';
 import '../../../../../core/utils/url_validator.dart';
 import '../../../../../service/home/home_service.dart';
+import '../../../../../service/user/user_service.dart';
 
 abstract class PollingService {
   Future<void> startPolling(int streamerId);
@@ -18,17 +20,21 @@ class PollingServiceImpl implements PollingService {
   PollingServiceImpl({
     required HomeService homeService,
     required AppLogger logger,
+    required UserService userService,
   })  : _homeService = homeService,
-        _logger = logger {
+        _logger = logger,
+        _userService = userService {
     _setupSystemLifecycleDetection();
   }
 
   final HomeService _homeService;
   final AppLogger _logger;
+  final UserService _userService;
   Timer? _channelTimer;
   Timer? _scoreTimer;
   Timer? _watchdogTimer;
   Timer? _backgroundWatcherTimer;
+  Timer? _statusTimer;
   DateTime? _lastChannelUpdate;
   DateTime? _lastScoreUpdate;
   DateTime? _lastSuspensionResume;
@@ -130,6 +136,7 @@ class PollingServiceImpl implements PollingService {
   void _startTimers(int streamerId) {
     _channelTimer?.cancel();
     _scoreTimer?.cancel();
+    _statusTimer?.cancel();
 
     // Executa imediatamente
     checkAndUpdateChannel();
@@ -146,6 +153,16 @@ class PollingServiceImpl implements PollingService {
       (_) => checkAndUpdateScore(streamerId),
     );
 
+    // Timer para updateLoginStatus ON
+    _statusTimer = Timer.periodic(
+      const Duration(minutes: 6),
+      (_) async {
+        try {
+          logger.log('Updating login status to ON');
+          await _userService.updateLoginStatus('ON');
+        } catch (_) {}
+      },
+    );
     // _logger.info('Timers reiniciados: ${DateTime.now()}');
   }
 
@@ -345,6 +362,7 @@ class PollingServiceImpl implements PollingService {
     _scoreTimer?.cancel();
     _watchdogTimer?.cancel();
     _backgroundWatcherTimer?.cancel();
+    _statusTimer?.cancel();
     // _logger.info('Polling services parados ${DateTime.now()}');
   }
 
