@@ -12,6 +12,7 @@ import 'core/rest_client/rest_client.dart';
 import 'modules/core/auth/auth_module.dart';
 import 'modules/core/auth/auth_store.dart';
 import 'modules/core/core_module.dart';
+import 'modules/core/auth/home/home_module.dart';
 
 class AppModule extends Module {
   @override
@@ -59,5 +60,6 @@ class AppModule extends Module {
   List<ModularRoute> get routes => [
         ModuleRoute('/', module: CoreModule()),
         ModuleRoute('/auth', module: AuthModule()),
+        ModuleRoute('/home', module: HomeModule()),
       ];
 }
