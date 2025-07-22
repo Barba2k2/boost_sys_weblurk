@@ -6,7 +6,6 @@ import '../../../local_storage/local_storage.dart';
 import '../../../logger/app_logger.dart';
 
 class AuthInterceptors extends Interceptor {
-
   AuthInterceptors({
     required LocalStorage localStorage,
     required AppLogger logger,
@@ -28,7 +27,7 @@ class AuthInterceptors extends Interceptor {
           options.extra[Constants.REST_CLIENT_AUTH_REQUIRED_KEY] ?? false;
 
       if (authRequired) {
-        final accessToken = await _localStorage.read<String>(
+        var accessToken = await _localStorage.read<String>(
           Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY,
         );
 
@@ -44,6 +43,10 @@ class AuthInterceptors extends Interceptor {
           );
         }
 
+        // Garante que o token sempre tenha o prefixo 'Bearer ' apenas uma vez
+        if (!accessToken.startsWith('Bearer ')) {
+          accessToken = 'Bearer $accessToken';
+        }
         options.headers['Authorization'] = accessToken;
       } else {
         options.headers.remove('Authorization');
