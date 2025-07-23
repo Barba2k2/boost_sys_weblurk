@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../app_colors.dart';
 
 class BuildMenuItem extends PopupMenuEntry<String> {
   const BuildMenuItem({
@@ -21,7 +22,7 @@ class BuildMenuItem extends PopupMenuEntry<String> {
           Icon(
             icon,
             size: 20,
-            color: Colors.white,
+            color: AppColors.menuItemIcon,
           ),
           const SizedBox(width: 10),
           Text(label),
@@ -78,7 +79,7 @@ class _BuildMenuItemState extends State<BuildMenuItem> {
           Icon(
             widget.icon,
             size: 20,
-            color: Colors.white,
+            color: AppColors.menuItemIcon,
           ),
           const SizedBox(width: 10),
           Text(widget.label),
