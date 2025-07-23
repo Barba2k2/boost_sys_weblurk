@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
@@ -31,9 +30,8 @@ class ApplicationConfig {
       );
 
       windowManager.setResizable(false);
-    } catch (e, s) {
-      log('Error configuring window manager: $e');
-      log('StackTrace: $s');
+    } catch (e) {
+      // erro tratado
     }
   }
 

@@ -43,9 +43,6 @@ class UserServiceImpl implements UserService {
       );
 
       await _updateLoginStatus('ON');
-      _logger.info(
-        'Login completo realizado com sucesso: ${userModel.nickname}',
-      );
     } catch (e, s) {
       _logger.error('Service - Failed to login user', e, s);
 
@@ -80,7 +77,6 @@ class UserServiceImpl implements UserService {
       }
 
       await _clearAllData();
-      _logger.info('Logout completed successfully');
     } catch (e, s) {
       _logger.error('Service - Failed to logout user', e, s);
       throw Failure(message: 'Failed to logout user');
@@ -93,7 +89,6 @@ class UserServiceImpl implements UserService {
         Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY,
         accessToken,
       );
-      _logger.info('Access token saved successfully');
     } catch (e, s) {
       _logger.error('Failed to save access token on local storage', e, s);
       throw Failure(message: 'Failed to save access token');
@@ -105,7 +100,6 @@ class UserServiceImpl implements UserService {
       final userModel = await _userRepository.getUserLogged();
       await _userRepository.updateLoginStatus(userModel.id, status);
       await _saveLastSeen();
-      _logger.info('Login status updated to: $status');
     } catch (e, s) {
       _logger.error('Failed to update login status', e, s);
       throw Failure(message: 'Failed to update login status');

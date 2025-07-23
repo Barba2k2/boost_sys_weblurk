@@ -74,7 +74,6 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
       // Apenas usamos o controller para operações, não para eventos
       _lastActivity = DateTime.now();
       _healthController.add(true);
-      _logger.info('WebView inicializado com sucesso');
     } catch (e, s) {
       _logger.error('Erro ao inicializar WebView', e, s);
       _healthController.add(false);
@@ -98,8 +97,6 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
     }
 
     try {
-      _logger.info('Carregando URL: $validatedUrl');
-
       // Operação simples, sem usar completer ou listeners adicionais
       await _controller!.loadUrl(validatedUrl);
 
@@ -134,7 +131,6 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
       _lastReload = DateTime.now();
       _lastActivity = DateTime.now();
       _healthController.add(true);
-      _logger.info('WebView recarregado com sucesso');
     } catch (e, s) {
       _logger.error('Erro ao recarregar WebView: ${e.toString()}', e, s);
       _healthController.add(false);
@@ -151,13 +147,11 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
 
     try {
       // Tentativa de executar JavaScript simples para verificar se o webview responde
-      // _logger.info('Verificando se WebView está respondendo...');
 
       await _controller!.executeScript('1 + 1');
 
       _lastActivity = DateTime.now();
       _healthController.add(true);
-      // _logger.info('WebView está respondendo');
       return true;
     } catch (e) {
       _logger.warning('WebView não está respondendo: ${e.toString()}');
@@ -398,7 +392,6 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
       ''';
 
       await _controller!.executeScript(volumeScript);
-      _logger.info('Volume do WebView definido para: $clampedVolume');
     } catch (e, s) {
       _logger.error('Erro ao definir volume do WebView', e, s);
     }

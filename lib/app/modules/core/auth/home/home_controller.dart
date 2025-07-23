@@ -87,9 +87,6 @@ abstract class HomeControllerBase with Store {
   @computed
   List<ScheduleModel> get currentListSchedules {
     final schedules = currentTabIndex == 0 ? listaASchedules : listaBSchedules;
-    final listName = currentTabIndex == 0 ? 'Lista A' : 'Lista B';
-    _logger.info(
-        'Retornando ${schedules.length} agendamentos da $listName (aba $currentTabIndex)');
     return schedules;
   }
 
@@ -152,34 +149,19 @@ abstract class HomeControllerBase with Store {
 
     // Se já está na aba selecionada, não faz nada
     if (currentTabIndex == index) {
-      _logger.info('Já está na aba $index, ignorando troca');
       return;
     }
 
     final previousTab = currentTabIndex;
     currentTabIndex = index;
 
-    final tabName = index == 0 ? 'Lista A' : 'Lista B';
-    _logger.info('=== INÍCIO TROCA DE ABA ===');
-    _logger.info('Trocando de aba $previousTab para $index ($tabName)');
-    _logger.info(
-        'Estado atual - Lista A: ${listaASchedules.length} agendamentos, Lista B: ${listaBSchedules.length} agendamentos');
-
     try {
       // Carrega a lista específica da aba selecionada se não foi carregada ainda
       if (index == 0 && listaASchedules.isEmpty) {
-        _logger.info('Iniciando carregamento da Lista A...');
         await loadListaA();
-        _logger.info(
-            'Lista A carregada. Agora tem ${listaASchedules.length} agendamentos');
       } else if (index == 1 && listaBSchedules.isEmpty) {
-        _logger.info('Iniciando carregamento da Lista B...');
         await loadListaB();
-        _logger.info(
-            'Lista B carregada. Agora tem ${listaBSchedules.length} agendamentos');
       }
-
-      _logger.info('=== FIM TROCA DE ABA ===');
     } catch (e, s) {
       _logger.error('Erro ao trocar para aba $index', e, s);
       // Em caso de erro, volta para a aba anterior
@@ -230,14 +212,12 @@ abstract class HomeControllerBase with Store {
   Future<void> _recoverWebView() async {
     // Evita múltiplas recuperações simultâneas
     if (_recoveryInProgress) {
-      // _logger.info('Recuperação já em andamento, ignorando...');
       return;
     }
 
     try {
       _recoveryInProgress = true;
       isRecovering = true;
-      // _logger.info('Tentando recuperar WebView...');
 
       // Para o polling antes de reiniciar
       await _pollingService.stopPolling();
@@ -264,7 +244,6 @@ abstract class HomeControllerBase with Store {
       // Reinicia o polling
       await _ensurePollingActive();
 
-      // _logger.info('WebView recuperado com sucesso');
       isWebViewHealthy = true;
     } catch (e, s) {
       _logger.error('Falha ao recuperar WebView', e, s);
@@ -283,7 +262,6 @@ abstract class HomeControllerBase with Store {
   Future<void> _ensurePollingActive() async {
     final streamerId = _getCurrentStreamerId();
     if (streamerId > 0) {
-      // _logger.info('Reiniciando polling com streamerId: $streamerId');
       await _pollingService.startPolling(streamerId);
     } else {
       _logger.warning('Não foi possível obter ID válido para polling');
@@ -318,19 +296,13 @@ abstract class HomeControllerBase with Store {
   @action
   Future<void> loadInitialChannels() async {
     try {
-      _logger.info('=== CARREGANDO CANAIS INICIAIS ===');
-
       // Carrega canal da Lista A
       final channelA = await _homeService.fetchCurrentChannelForList('Lista A');
       currentChannelListA = channelA;
-      _logger.info('Canal inicial da Lista A: $channelA');
 
       // Carrega canal da Lista B
       final channelB = await _homeService.fetchCurrentChannelForList('Lista B');
       currentChannelListB = channelB;
-      _logger.info('Canal inicial da Lista B: $channelB');
-
-      _logger.info('=== CANAIS INICIAIS CARREGADOS ===');
     } catch (e, s) {
       _logger.error('Error loading initial channels', e, s);
       Messages.webViewError();
@@ -342,16 +314,9 @@ abstract class HomeControllerBase with Store {
   @action
   Future<void> loadListaA() async {
     try {
-      _logger.info('=== INÍCIO LOAD LISTA A ===');
-      _logger.info('Estado antes: ${listaASchedules.length} agendamentos');
-
       final scheduleList =
           await _homeService.fetchScheduleListByName('Lista A');
       listaASchedules = scheduleList?.schedules ?? [];
-
-      _logger
-          .info('Lista A carregada com ${listaASchedules.length} agendamentos');
-      _logger.info('=== FIM LOAD LISTA A ===');
     } catch (e, s) {
       _logger.error('Error loading Lista A', e, s);
       rethrow;
@@ -362,16 +327,9 @@ abstract class HomeControllerBase with Store {
   @action
   Future<void> loadListaB() async {
     try {
-      _logger.info('=== INÍCIO LOAD LISTA B ===');
-      _logger.info('Estado antes: ${listaBSchedules.length} agendamentos');
-
       final scheduleList =
           await _homeService.fetchScheduleListByName('Lista B');
       listaBSchedules = scheduleList?.schedules ?? [];
-
-      _logger
-          .info('Lista B carregada com ${listaBSchedules.length} agendamentos');
-      _logger.info('=== FIM LOAD LISTA B ===');
     } catch (e, s) {
       _logger.error('Error loading Lista B', e, s);
       rethrow;
@@ -407,8 +365,6 @@ abstract class HomeControllerBase with Store {
   Future<void> loadCurrentChannel() async {
     try {
       final listName = currentTabIndex == 0 ? 'Lista A' : 'Lista B';
-      _logger.info('=== INÍCIO LOAD CURRENT CHANNEL ===');
-      _logger.info('Carregando canal para $listName (aba $currentTabIndex)');
 
       // Busca o canal atual da API baseado na lista atual
       final newChannel =
@@ -416,19 +372,10 @@ abstract class HomeControllerBase with Store {
 
       // Atualiza o canal atual
       if (currentTabIndex == 0) {
-        final oldChannel = currentChannelListA;
         currentChannelListA = newChannel;
-        _logger.info('Canal da Lista A atualizado: $oldChannel → $newChannel');
       } else {
-        final oldChannel = currentChannelListB;
         currentChannelListB = newChannel;
-        _logger.info('Canal da Lista B atualizado: $oldChannel → $newChannel');
       }
-
-      // Os WebViews se atualizam automaticamente via didUpdateWidget
-      _logger.info(
-          'Canal atual final: $currentChannel - WebViews se atualizarão automaticamente');
-      _logger.info('=== FIM LOAD CURRENT CHANNEL ===');
     } catch (e, s) {
       _logger.error('Error loading current channel', e, s);
       Messages.webViewError();
@@ -451,7 +398,6 @@ abstract class HomeControllerBase with Store {
         return 0;
       }
 
-      // _logger.info('Streamer ID obtido com sucesso: $streamerId');
       return streamerId;
     } catch (e, s) {
       _logger.error('Erro ao obter ID do streamer', e, s);
@@ -473,7 +419,6 @@ abstract class HomeControllerBase with Store {
       }
 
       Loader.hide();
-      _logger.info('WebView recarregado com sucesso');
     } catch (e, s) {
       Loader.hide();
       _logger.error('Erro ao recarregar WebView', e, s);
@@ -513,23 +458,12 @@ abstract class HomeControllerBase with Store {
   @action
   Future<void> _handleChannelUpdate(String channelUrl) async {
     try {
-      final listName = currentTabIndex == 0 ? 'Lista A' : 'Lista B';
-      _logger.info(
-          'Polling atualizando canal da $listName (aba $currentTabIndex): $channelUrl');
-
       // Update the current channel based on current tab
       if (currentTabIndex == 0) {
         currentChannelListA = channelUrl;
-        _logger.info('Canal da Lista A atualizado via polling: $channelUrl');
       } else {
         currentChannelListB = channelUrl;
-        _logger.info('Canal da Lista B atualizado via polling: $channelUrl');
       }
-
-      // Com IndexedStack, cada WebView mantém seu próprio estado
-      // Não carregamos a URL automaticamente para evitar conflitos
-      _logger.info(
-          'Canal atualizado. WebViews independentes manterão seus próprios estados.');
     } catch (e, s) {
       _logger.error('Erro ao processar atualização de canal', e, s);
     }

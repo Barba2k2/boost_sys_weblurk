@@ -9,7 +9,7 @@ class MyWebviewWidget extends StatefulWidget {
     this.logger,
     super.key,
   });
-  
+
   final String initialUrl;
   final void Function(Webview)? onWebViewCreated;
   final AppLogger? logger;
@@ -30,8 +30,6 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
 
   Future<void> _initializeWebView() async {
     try {
-      widget.logger?.info('Initializing WebView Window');
-
       final webview = await WebviewWindow.create(
         configuration: const CreateConfiguration(
           title: 'Boost Team SysLurk',

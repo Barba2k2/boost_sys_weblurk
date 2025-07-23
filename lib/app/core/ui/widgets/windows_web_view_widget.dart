@@ -69,7 +69,6 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
     }
 
     try {
-      widget.logger?.info('Carregando nova URL: $url');
       await _controller.loadUrl(url);
     } catch (e, s) {
       widget.logger?.error('Erro ao carregar nova URL: $url', e, s);
@@ -85,7 +84,7 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
 
     try {
       _isOperationInProgress = true;
-      widget.logger?.info('Inicializando WebView Windows');
+      //
 
       await _controller.initialize();
 
@@ -167,8 +166,6 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
           console.error("Erro ao substituir window.open:", e);
         }
       ''');
-
-      widget.logger?.info('Diálogos JavaScript desabilitados com sucesso');
     } catch (e) {
       widget.logger?.error('Erro ao desabilitar diálogos JavaScript: $e');
     }
@@ -189,8 +186,6 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
         _isLoading = state != LoadingState.navigationCompleted;
       });
 
-      widget.logger?.info('Estado de carregamento: $state');
-
       if (state == LoadingState.navigationCompleted) {
         _notifyServiceOfActivity();
         _captureCurrentUrl();
@@ -200,14 +195,12 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
 
     // Monitorar mensagens da webview
     _webMessageSubscription = _controller.webMessage.listen((message) {
-      widget.logger?.info('Mensagem recebida da WebView: $message');
       _notifyServiceOfActivity();
 
       if (message.startsWith('current_url:')) {
         try {
           final url = message.split('current_url:')[1].trim();
           _currentUrl = url;
-          widget.logger?.info('URL atual capturada: $_currentUrl');
         } catch (e) {
           widget.logger?.error('Erro ao extrair URL atual: $e');
         }
@@ -233,9 +226,6 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
   // Método para lidar com diálogos detectados
   Future<void> _handleDetectedDialog() async {
     try {
-      widget.logger?.warning(
-          'Diálogo detectado, tentando lidar com ele automaticamente');
-
       // Executamos um script que tenta fechar diálogos ou confirmar ações
       await _controller.executeScript('''
         try {
@@ -319,7 +309,6 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
 
     try {
       _isOperationInProgress = true;
-      widget.logger?.info('Iniciando refresh seguro...');
 
       // Desabilitar diálogos JavaScript novamente antes de recarregar
       await _disableJavaScriptDialogs();
@@ -330,8 +319,6 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       }
 
       if (_currentUrl.isNotEmpty) {
-        widget.logger?.info('Recarregando pela URL atual: $_currentUrl');
-
         // Mostramos o indicador de carregamento
         setState(() {
           _isLoading = true;
@@ -353,7 +340,6 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
 
         // Em vez de reload(), que pode travar, carregamos a URL atual novamente
         await _controller.loadUrl(_currentUrl);
-        widget.logger?.info('URL recarregada com sucesso');
       } else {
         widget.logger
             ?.warning('URL atual não disponível, tentando reload padrão');
@@ -374,7 +360,6 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
           if (!completer.isCompleted) completer.complete();
 
           await completer.future;
-          widget.logger?.info('Reload padrão concluído com sucesso');
         } catch (e) {
           widget.logger?.error('Erro no reload padrão: $e');
           // Se falhar, tentamos reinicializar o WebView completamente
@@ -441,8 +426,6 @@ class _WindowsWebViewWidgetState extends State<WindowsWebViewWidget> {
       if (widget.onWebViewCreated != null) {
         widget.onWebViewCreated!(_controller);
       }
-
-      widget.logger?.info('WebView reinicializado com sucesso');
     } catch (e, s) {
       widget.logger?.error('Erro fatal ao reinicializar WebView: $e', s);
 

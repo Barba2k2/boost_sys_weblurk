@@ -20,21 +20,12 @@ abstract class AuthStoreBase with Store {
   final LocalStorage _localStorage;
   final _logger = Modular.get<AppLogger>();
 
-  static bool _hasInitialized = false;
-
   @readonly
   UserModel? _userLogged;
 
   @action
   Future<void> loadUserLogged() async {
     try {
-      // Garante que o logout seja feito apenas na primeira inicialização
-      if (!_hasInitialized) {
-        _hasInitialized = true;
-        await logout();
-        return;
-      }
-
       final userModelJson = await _localStorage.read<String>(
         Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
       );

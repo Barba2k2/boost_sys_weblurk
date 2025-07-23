@@ -189,16 +189,11 @@ class HomeRepositoryImpl implements HomeRepository {
         endpoint = '/list-a/get?date=$formattedDate';
       }
 
-      _logger.info('Buscando $listName no endpoint: $endpoint');
       final response = await _restClient.auth().get(endpoint);
-      _logger.info('Resposta $listName: status=${response.statusCode}');
 
       if (response.statusCode == 200) {
         if (response.data != null) {
           final result = ScheduleListModel.fromMap(response.data);
-          _logger.info(
-            '$listName carregada com ${result.schedules.length} agendamentos',
-          );
           return result;
         }
         return null;
@@ -319,9 +314,6 @@ class HomeRepositoryImpl implements HomeRepository {
           e.response.data
               .toString()
               .contains('duplicate key value violates unique constraint')) {
-        // Pontuação já existe, consideramos como sucesso
-        _logger.info(
-            'Pontuação já existe no banco de dados, ignorando duplicação');
         return;
       }
 

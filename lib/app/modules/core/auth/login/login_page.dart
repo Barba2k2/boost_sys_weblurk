@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:validatorless/validatorless.dart';
 import '../../../../core/ui/widgets/boost_text_form_field.dart';
 import 'login_controller.dart';
-import 'dart:developer';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -38,11 +37,10 @@ class _LoginPageState extends State<LoginPage> {
       )
           .then((_) {
         if (mounted) {
-          log('Login efetuado com sucesso');
           setState(() {});
         }
       }).catchError((error) {
-        log('Erro ao efetuar login: $error');
+        // erro tratado
       });
     }
   }

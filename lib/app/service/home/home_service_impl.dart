@@ -167,7 +167,6 @@ class HomeServiceImpl implements HomeService {
   @override
   Future<String?> fetchCurrentChannelForList(String listName) async {
     try {
-      // _logger.info('Buscando canal atual para: $listName');
       final now = DateTime.now();
       final scheduleList =
           await _homeRepository.loadScheduleListByName(listName, now);
@@ -178,8 +177,6 @@ class HomeServiceImpl implements HomeService {
         );
         return 'https://twitch.tv/BoostTeam_';
       }
-
-      // _logger.info('Lista $listName encontrada com ${scheduleList.schedules.length} agendamentos');
 
       // Procura por um agendamento atual na lista específica
       final currentSchedule = scheduleList.schedules.firstWhere(
@@ -235,13 +232,8 @@ class HomeServiceImpl implements HomeService {
       );
 
       if (currentSchedule.streamerUrl.isNotEmpty) {
-        // _logger.info('Canal atual encontrado na $listName: ${currentSchedule.streamerUrl}');
         return currentSchedule.streamerUrl;
       }
-
-      _logger.warning(
-        'Nenhuma live correspondente ao horário atual na $listName, carregando canal padrão',
-      );
       return 'https://twitch.tv/BoostTeam_';
     } catch (e, s) {
       _logger.error('Erro ao buscar o canal atual da $listName', e, s);

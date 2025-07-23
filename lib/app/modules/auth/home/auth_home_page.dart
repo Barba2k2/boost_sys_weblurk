@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -44,13 +42,14 @@ class _AuthHomePageState extends State<AuthHomePage> {
 
       final userLogged = widget._authStore.userLogged;
 
-      if (userLogged != null && userLogged.id != 0 && userLogged.nickname.isNotEmpty) {
+      if (userLogged != null &&
+          userLogged.id != 0 &&
+          userLogged.nickname.isNotEmpty) {
         Modular.to.navigate('/home/');
       } else {
         Modular.to.navigate('/auth/login/');
       }
-    } catch (e, s) {
-      log('Erro ao verificar usuário: $e \n StackTarce: $s');
+    } catch (e) {
       await widget._authStore.logout();
       Modular.to.navigate('/auth/login/');
     }

@@ -92,7 +92,6 @@ class WebViewServiceImpl implements WebViewService {
 
       _lastActivity = DateTime.now();
       _healthController.add(true);
-      _logger.info('WebView initialized successfully');
     } catch (e, s) {
       _logger.error('Error initializing WebView', e, s);
       _healthController.add(false);
@@ -140,7 +139,6 @@ class WebViewServiceImpl implements WebViewService {
       await completer.future;
       _lastActivity = DateTime.now();
       _healthController.add(true);
-      _logger.info('URL carregada com sucesso: $validatedUrl');
     } catch (e, s) {
       _logger.error('Error loading URL: $validatedUrl', e, s);
       _healthController.add(false);
@@ -187,7 +185,6 @@ class WebViewServiceImpl implements WebViewService {
       _lastReload = DateTime.now();
       _lastActivity = DateTime.now();
       _healthController.add(true);
-      _logger.info('WebView recarregado com sucesso');
     } catch (e, s) {
       _logger.error('Error reloading WebView', e, s);
       _healthController.add(false);

@@ -40,18 +40,16 @@ abstract class SettingsControllerBase with Store {
   @action
   Future<void> muteAppAudio() async {
     try {
-      if (!_volumeController.isVolumeControlAvailable) {
-        Messages.info('Controle de volume não disponível nesta plataforma');
-        return;
-      }
+      // if (!_volumeController.isVolumeControlAvailable) {
+      //   Messages.info('Controle de volume não disponível nesta plataforma');
+      //   return;
+      // }
 
       await _volumeController.toggleMute();
       isAudioMuted = _volumeController.isMuted;
 
       final status = isAudioMuted ? 'mutado' : 'desmutado';
       Messages.info('Áudio $status');
-
-      _logger.info('Áudio alternado para: $status');
     } catch (e) {
       _logger.error('Erro ao alternar o áudio do aplicativo: $e');
       Messages.alert('Erro ao alternar o áudio do aplicativo');

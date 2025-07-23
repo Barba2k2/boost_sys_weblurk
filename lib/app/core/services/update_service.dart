@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
@@ -13,7 +12,6 @@ class UpdateService {
     await checkForUpdate();
     SystemChannels.lifecycle.setMessageHandler((msg) async {
       if (msg == AppLifecycleState.resumed.toString()) {
-        log('App resumed: $msg');
         await checkForUpdate();
       }
       return null;
@@ -25,8 +23,6 @@ class UpdateService {
       final status = await _updater.checkForUpdate();
       if (status == UpdateStatus.outdated) {
         _showUpdateDialog();
-      } else {
-        log('Nenhuma atualização disponível');
       }
     } catch (e) {
       debugPrint('Erro ao verificar atualização: $e');
@@ -36,7 +32,6 @@ class UpdateService {
   void _showUpdateDialog() {
     final context = NavigationService.navigatorKey.currentContext;
     if (context == null) {
-      debugPrint('Contexto não disponível para mostrar diálogo de atualização');
       return;
     }
     showDialog(
