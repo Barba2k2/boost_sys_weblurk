@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import '../../../../core/services/settings_service.dart';
 import '../../../../core/services/url_launcher_service.dart';
 import '../../../../core/services/volume_service.dart';
+import '../../../../core/ui/app_colors.dart';
 import '../../../../core/ui/widgets/live_url_bar.dart';
 import '../../../../core/ui/widgets/schedule_tabs_widget.dart';
 import '../../../../core/ui/widgets/syslurk_app_bar.dart';
@@ -53,6 +54,7 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
+
   Widget _buildFloatingActionButton() {
     return ListenableBuilder(
       listenable: widget.viewModel.loadSchedulesCommand,
@@ -64,11 +66,10 @@ class _HomePageState extends State<HomePage> {
               ? null
               : () => widget.viewModel.loadSchedulesCommand.execute(),
           child: command.running
-              ? const CircularProgressIndicator(color: Colors.white)
+              ? const CircularProgressIndicator(color: AppColors.cardHeaderText)
               : const Icon(Icons.refresh),
         );
       },
     );
   }
-
 }
