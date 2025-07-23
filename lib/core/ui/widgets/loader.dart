@@ -1,5 +1,6 @@
 import 'package:asuka/asuka.dart';
 import 'package:flutter/material.dart';
+import '../app_colors.dart';
 
 class Loader {
   Loader._();
@@ -10,10 +11,10 @@ class Loader {
   static void show() {
     _entry ??= OverlayEntry(
       builder: (context) => Container(
-        color: Colors.black54,
+        color: AppColors.loaderBackground,
         child: const Center(
           child: CircularProgressIndicator(
-            color: Colors.purple,
+            color: AppColors.loader,
           ),
         ),
       ),
