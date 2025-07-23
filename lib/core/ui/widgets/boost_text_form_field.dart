@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../app_colors.dart';
 
 class BoostTextFormField extends StatefulWidget {
   const BoostTextFormField({
@@ -35,14 +36,14 @@ class _BoostTextFormFieldState extends State<BoostTextFormField> {
       validator: widget.validator,
       obscureText: _obscureText,
       style: GoogleFonts.poppins(
-        color: Colors.white,
+        color: AppColors.cardHeaderText,
       ),
       decoration: InputDecoration(
         labelText: widget.label,
         labelStyle: GoogleFonts.poppins(
-          color: Colors.white,
+          color: AppColors.cardHeaderText,
         ),
-        fillColor: Colors.black26,
+        fillColor: AppColors.translucentField,
         filled: true,
         suffixIcon: widget.obscureText
             ? IconButton(
@@ -52,34 +53,36 @@ class _BoostTextFormFieldState extends State<BoostTextFormField> {
                   });
                 },
                 icon: Icon(
-                  _obscureText ? Icons.visibility_rounded : Icons.visibility_off_rounded,
-                  color: Colors.white,
+                  _obscureText
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                  color: AppColors.cardHeaderText,
                 ),
               )
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
-            color: Colors.white,
+            color: AppColors.cardHeaderText,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
-            color: Colors.white,
+            color: AppColors.cardHeaderText,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
-            color: Colors.white,
+            color: AppColors.cardHeaderText,
             width: 2,
           ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
-            color: Colors.red,
+            color: AppColors.error,
             width: 2,
           ),
         ),
