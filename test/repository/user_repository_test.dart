@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:boost_sys_weblurk/app/repositories/user/user_repository_impl.dart';
-import 'package:boost_sys_weblurk/app/core/rest_client/rest_client.dart';
-import 'package:boost_sys_weblurk/app/core/rest_client/rest_client_response.dart';
-import 'package:boost_sys_weblurk/app/core/exceptions/failure.dart';
+import 'package:boost_sys_weblurk/repositories/user/user_repository_impl.dart';
+import 'package:boost_sys_weblurk/core/rest_client/rest_client.dart';
+import 'package:boost_sys_weblurk/core/rest_client/rest_client_response.dart';
+import 'package:boost_sys_weblurk/core/exceptions/failure.dart';
 import '../mocks/app_logger_mock.dart';
 
 // Custom implementation of RestClient for testing
