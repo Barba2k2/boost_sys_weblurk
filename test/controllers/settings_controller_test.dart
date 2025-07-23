@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:boost_sys_weblurk/app/core/logger/app_logger.dart';
+import 'package:boost_sys_weblurk/core/logger/app_logger.dart';
 
 class MockAppLogger extends Mock implements AppLogger {}
 
