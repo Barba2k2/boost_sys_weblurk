@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import 'webview_widget.dart';
+import '../app_colors.dart';
 
 class ScheduleTabsWidget extends StatefulWidget {
   const ScheduleTabsWidget({
@@ -51,14 +52,14 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
         // TabBar
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
+            color: AppColors.cardBackground.withValues(alpha: 0.9),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(8),
               topRight: Radius.circular(8),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: AppColors.menuItemIconInactive.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -67,9 +68,9 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
           child: TabBar(
             controller: _tabController,
             onTap: (index) => widget.viewModel.switchTabCommand.execute(index),
-            labelColor: const Color(0xFF2C1F4A),
-            unselectedLabelColor: Colors.grey[600],
-            indicatorColor: const Color(0xFF2C1F4A),
+            labelColor: AppColors.tabBarLabel,
+            unselectedLabelColor: AppColors.tabBarUnselected,
+            indicatorColor: AppColors.tabBarIndicator,
             labelStyle: GoogleFonts.inter(
               fontWeight: FontWeight.w600,
               fontSize: 14,
