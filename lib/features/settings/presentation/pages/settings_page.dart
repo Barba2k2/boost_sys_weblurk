@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routes/app_routes.dart';
+import '../../../../core/ui/app_colors.dart';
 import '../viewmodels/settings_viewmodel.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -61,7 +62,9 @@ class SettingsPage extends StatelessWidget {
                           viewModel.isMuted
                               ? Icons.volume_off
                               : Icons.volume_up,
-                          color: viewModel.isMuted ? Colors.red : Colors.green,
+                          color: viewModel.isMuted
+                              ? AppColors.error
+                              : AppColors.success,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
