@@ -20,6 +20,7 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
   DateTime? _lastActivity;
   final _healthController = StreamController<bool>.broadcast();
   Timer? _activityCheckTimer;
+  bool _isClosed = false;
 
   // Controle de volume do WebView
   double _currentVolume = 1.0;
@@ -404,7 +405,9 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
 
   void notifyActivity() {
     _lastActivity = DateTime.now();
-    _healthController.add(true);
+    if (!_isClosed) {
+      _healthController.add(true);
+    }
   }
 
   @override
@@ -419,6 +422,7 @@ class WindowsWebViewServiceImpl implements WindowsWebViewService {
     } finally {
       _controller = null;
       _healthController.close();
+      _isClosed = true;
     }
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -172,6 +174,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
           Observer(
             builder: (_) {
               final username = authStore.userLogged?.nickname;
+              log('username: $username');
               if (username != null) {
                 return Container(
                   margin: const EdgeInsets.all(10),

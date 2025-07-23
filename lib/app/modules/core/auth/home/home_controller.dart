@@ -48,6 +48,7 @@ abstract class HomeControllerBase with Store {
   bool _isDisposed = false;
   bool _recoveryInProgress = false;
   bool _servicesInitialized = false;
+  Completer<void>? _servicesInitCompleter;
 
   @observable
   bool isWebViewHealthy = true;
@@ -273,14 +274,19 @@ abstract class HomeControllerBase with Store {
   Future<void> _initializeServices() async {
     try {
       Loader.showLoadingChannel();
-      await loadInitialChannels();
+      // Carrega apenas os canais iniciais, sem buscar as listas completas
+      final channelA = await _homeService.fetchCurrentChannelForList('Lista A');
+      currentChannelListA = channelA;
+      final channelB = await _homeService.fetchCurrentChannelForList('Lista B');
+      currentChannelListB = channelB;
       Loader.hide();
 
       Loader.showLoadingSchedules();
-      // Carrega ambas as listas inicialmente
-      await loadListaA();
-      await loadListaB();
-      await _homeService.fetchSchedules();
+      // Carrega as listas apenas uma vez
+      final scheduleA = await _homeService.fetchScheduleListByName('Lista A');
+      listaASchedules = scheduleA?.schedules ?? [];
+      final scheduleB = await _homeService.fetchScheduleListByName('Lista B');
+      listaBSchedules = scheduleB?.schedules ?? [];
       Loader.hide();
 
       await _ensurePollingActive();
@@ -348,10 +354,22 @@ abstract class HomeControllerBase with Store {
 
       await _webViewService.initializeWebView(controller);
 
-      // Só inicializa os serviços uma vez (no primeiro WebView criado)
-      if (!_servicesInitialized) {
-        _servicesInitialized = true;
-        await _initializeServices();
+      // Protege inicialização para evitar múltiplas execuções simultâneas
+      if (_servicesInitCompleter == null) {
+        _servicesInitCompleter = Completer<void>();
+        if (!_servicesInitialized) {
+          _servicesInitialized = true;
+          try {
+            await _initializeServices();
+            _servicesInitCompleter?.complete();
+          } catch (e, s) {
+            _servicesInitCompleter?.completeError(e, s);
+            rethrow;
+          }
+        }
+      } else {
+        // Aguarda a inicialização já em andamento
+        await _servicesInitCompleter!.future;
       }
     } catch (e, s) {
       _logger.error('Erro durante inicialização do WebView', e, s);

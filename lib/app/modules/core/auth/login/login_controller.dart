@@ -10,6 +10,7 @@ import '../../../../core/ui/widgets/loader.dart';
 import '../../../../core/ui/widgets/messages.dart';
 import '../../../../models/user_model.dart';
 import '../../../../service/user/user_service.dart';
+import '../auth_store.dart';
 part 'login_controller.g.dart';
 
 class LoginController = LoginControllerBase with _$LoginController;
@@ -68,6 +69,9 @@ abstract class LoginControllerBase with Store {
       );
 
       if (token != null && userJson != null) {
+        // Atualiza o AuthStore explicitamente após login
+        final authStore = Modular.get<AuthStore>();
+        await authStore.loadUserLogged();
         await Future.delayed(const Duration(milliseconds: 200));
         Modular.to.navigate('/');
       } else {
