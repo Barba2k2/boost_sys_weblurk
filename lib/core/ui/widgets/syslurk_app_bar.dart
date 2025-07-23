@@ -5,6 +5,7 @@ import '../../services/settings_service.dart';
 import '../../services/url_launcher_service.dart';
 import '../../services/volume_service.dart';
 import '../widgets/messages.dart';
+import '../app_colors.dart';
 
 class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
   final HomeViewModel viewModel;
@@ -26,17 +27,17 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF2C1F4A),
+        color: AppColors.appBar,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: AppColors.menuItemIconInactive.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Row(
@@ -157,7 +158,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                 vertical: 6,
               ),
               decoration: BoxDecoration(
-                color: const Color(0xFFA162FF),
+                color: AppColors.menuButtonActive,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -165,13 +166,13 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                   const Icon(
                     Icons.account_circle,
                     size: 20,
-                    color: Colors.white,
+                    color: AppColors.menuItemIcon,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     username!,
                     style: GoogleFonts.inter(
-                      color: Colors.white,
+                      color: AppColors.menuItemIcon,
                       fontWeight: FontWeight.w500,
                       fontSize: 14,
                     ),
@@ -196,7 +197,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.12),
+          color: AppColors.menuButton,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -204,7 +205,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
             Text(
               label,
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: AppColors.menuItemIcon,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -212,7 +213,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
             Icon(
               icon,
               size: 20,
-              color: Colors.white,
+              color: AppColors.menuItemIcon,
             ),
           ],
         ),
@@ -233,7 +234,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
           Icon(
             icon,
             size: 20,
-            color: Colors.black,
+            color: AppColors.menuItemIconInactive,
           ),
           const SizedBox(width: 10),
           Text(label),
