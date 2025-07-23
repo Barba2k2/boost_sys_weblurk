@@ -1,12 +1,12 @@
-import 'package:boost_sys_weblurk/app/service/home/home_service.dart';
+import 'package:boost_sys_weblurk/service/home/home_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:boost_sys_weblurk/app/repositories/home/home_repository.dart';
-import 'package:boost_sys_weblurk/app/core/logger/app_logger.dart';
-import 'package:boost_sys_weblurk/app/core/exceptions/failure.dart';
-import 'package:boost_sys_weblurk/app/models/score_model.dart';
-import 'package:boost_sys_weblurk/app/models/schedule_model.dart';
-import 'package:boost_sys_weblurk/app/models/schedule_list_model.dart';
+import 'package:boost_sys_weblurk/repositories/home/home_repository.dart';
+import 'package:boost_sys_weblurk/core/logger/app_logger.dart';
+import 'package:boost_sys_weblurk/core/exceptions/failure.dart';
+import 'package:boost_sys_weblurk/models/score_model.dart';
+import 'package:boost_sys_weblurk/models/schedule_model.dart';
+import 'package:boost_sys_weblurk/models/schedule_list_model.dart';
 
 // Mock classes
 class MockHomeRepository extends Mock implements HomeRepository {}
