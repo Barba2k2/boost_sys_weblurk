@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:boost_sys_weblurk/app/core/controllers/url_launch_controller.dart';
-import 'package:boost_sys_weblurk/app/core/logger/app_logger.dart';
+import 'package:boost_sys_weblurk/core/controllers/url_launch_controller.dart';
+import 'package:boost_sys_weblurk/core/logger/app_logger.dart';
 
 // Mock the logger
 class MockAppLogger extends Mock implements AppLogger {}
