@@ -5,6 +5,7 @@ import 'package:validatorless/validatorless.dart';
 
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/services/error_message_service.dart';
+import '../../../../../core/ui/app_colors.dart';
 import '../../../../../core/ui/widgets/boost_text_form_field.dart';
 import '../../../../../core/utils/result.dart';
 import '../viewmodels/login_viewmodel.dart';
@@ -65,13 +66,14 @@ class _LoginPageState extends State<LoginPage> {
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color:
+                        AppColors.menuItemIconInactive.withValues(alpha: 0.5),
                     blurRadius: 10,
                     spreadRadius: 5,
                     offset: const Offset(0, 5),
                   ),
                 ],
-                color: Colors.purple[800],
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(20),
               ),
               padding: const EdgeInsets.all(32),
@@ -86,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                     Text(
                       'BoostTeam SysWebLurk',
                       style: GoogleFonts.poppins(
-                        color: Colors.white,
+                        color: AppColors.cardHeaderText,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
@@ -123,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: ElevatedButton(
                             onPressed: command.running ? null : _handleLogin,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.amber[900],
+                              backgroundColor: AppColors.warning,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 32,
                                 vertical: 16,
@@ -134,12 +136,12 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             child: command.running
                                 ? const CircularProgressIndicator(
-                                    color: Colors.white,
+                                    color: AppColors.cardHeaderText,
                                   )
                                 : Text(
                                     'Entrar',
                                     style: GoogleFonts.poppins(
-                                      color: Colors.white,
+                                      color: AppColors.cardHeaderText,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
