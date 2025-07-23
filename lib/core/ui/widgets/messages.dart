@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../app_colors.dart';
 
 class Messages {
   Messages._();
@@ -23,9 +24,9 @@ class Messages {
         SnackBar(
           content: Text(
             message,
-            style: GoogleFonts.inter(color: Colors.white),
+            style: GoogleFonts.inter(color: AppColors.cardHeaderText),
           ),
-          backgroundColor: const Color(0xFF4CAF50),
+          backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -40,15 +41,15 @@ class Messages {
         SnackBar(
           content: Text(
             message,
-            style: GoogleFonts.inter(color: Colors.white),
+            style: GoogleFonts.inter(color: AppColors.cardHeaderText),
           ),
-          backgroundColor: const Color(0xFFFF9800),
+          backgroundColor: AppColors.warning,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 5),
           action: retryAction != null
               ? SnackBarAction(
                   label: 'Tentar Novamente',
-                  textColor: Colors.white,
+                  textColor: AppColors.cardHeaderText,
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     // Aqui você pode adicionar uma callback para retry
@@ -56,7 +57,7 @@ class Messages {
                 )
               : SnackBarAction(
                   label: 'OK',
-                  textColor: Colors.white,
+                  textColor: AppColors.cardHeaderText,
                   onPressed: () =>
                       ScaffoldMessenger.of(context).hideCurrentSnackBar(),
                 ),
@@ -73,15 +74,15 @@ class Messages {
         SnackBar(
           content: Text(
             message,
-            style: GoogleFonts.inter(color: Colors.white),
+            style: GoogleFonts.inter(color: AppColors.cardHeaderText),
           ),
-          backgroundColor: const Color(0xFFF44336),
+          backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 6),
           action: retryAction != null
               ? SnackBarAction(
                   label: 'Tentar Novamente',
-                  textColor: Colors.white,
+                  textColor: AppColors.cardHeaderText,
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     // Aqui você pode adicionar uma callback para retry
@@ -89,7 +90,7 @@ class Messages {
                 )
               : SnackBarAction(
                   label: 'OK',
-                  textColor: Colors.white,
+                  textColor: AppColors.cardHeaderText,
                   onPressed: () =>
                       ScaffoldMessenger.of(context).hideCurrentSnackBar(),
                 ),
