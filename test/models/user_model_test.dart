@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:boost_sys_weblurk/app/models/user_model.dart';
+import 'package:boost_sys_weblurk/models/user_model.dart';
 
 void main() {
   group(
