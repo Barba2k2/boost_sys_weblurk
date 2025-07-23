@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:boost_sys_weblurk/app/core/ui/widgets/boost_text_form_field.dart';
+import 'package:boost_sys_weblurk/core/ui/widgets/boost_text_form_field.dart';
 
 void main() {
   group('BoostTextFormField', () {
