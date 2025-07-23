@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:boost_sys_weblurk/app/core/local_storage/shared_preferences/shared_preferences_local_storage_impl.dart';
+import 'package:boost_sys_weblurk/core/local_storage/shared_preferences/shared_preferences_local_storage_impl.dart';
 
 void main() {
   late SharedPreferencesLocalStorageImpl localStorage;
