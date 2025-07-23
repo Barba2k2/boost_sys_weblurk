@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../app_colors.dart';
 
 class BuildMenuButton extends StatelessWidget {
   const BuildMenuButton({
@@ -22,7 +23,7 @@ class BuildMenuButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
+          color: AppColors.menuButton,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -30,7 +31,7 @@ class BuildMenuButton extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: AppColors.menuItemIcon,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -38,7 +39,7 @@ class BuildMenuButton extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: Colors.white,
+              color: AppColors.menuItemIcon,
             ),
           ],
         ),
