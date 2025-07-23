@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../app_colors.dart';
 
 class ScheduleTable extends StatelessWidget {
   const ScheduleTable({
@@ -16,14 +17,14 @@ class ScheduleTable extends StatelessWidget {
     return Center(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        color: Colors.white.withOpacity(0.8),
+        color: AppColors.cardBackground.withValues(alpha: 0.8),
         child: Column(
           children: [
             // Header da lista
             Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
-                color: Color(0xFF2C1F4A),
+                color: AppColors.cardHeader,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(8),
                   topRight: Radius.circular(8),
@@ -33,7 +34,7 @@ class ScheduleTable extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.schedule,
-                    color: Colors.white,
+                    color: AppColors.cardHeaderText,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -42,7 +43,7 @@ class ScheduleTable extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
                       fontSize: 16.0,
-                      color: Colors.white,
+                      color: AppColors.cardHeaderText,
                     ),
                   ),
                   const Spacer(),
@@ -51,7 +52,7 @@ class ScheduleTable extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontWeight: FontWeight.w400,
                       fontSize: 12.0,
-                      color: Colors.white70,
+                      color: AppColors.cardHeaderSubText,
                     ),
                   ),
                 ],
@@ -67,14 +68,16 @@ class ScheduleTable extends StatelessWidget {
                           Icon(
                             Icons.event_busy,
                             size: 48,
-                            color: Colors.grey[400],
+                            color: AppColors.menuItemIconInactive
+                                .withValues(alpha: 0.4),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'Nenhum agendamento nesta lista',
                             style: GoogleFonts.inter(
                               fontSize: 14,
-                              color: Colors.grey[600],
+                              color: AppColors.menuItemIconInactive
+                                  .withValues(alpha: 0.6),
                             ),
                           ),
                         ],
@@ -89,7 +92,7 @@ class ScheduleTable extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 14.0,
-                              color: Colors.black,
+                              color: AppColors.menuItemIconInactive,
                             ),
                           ),
                         ),
@@ -99,7 +102,7 @@ class ScheduleTable extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 14.0,
-                              color: Colors.black,
+                              color: AppColors.menuItemIconInactive,
                             ),
                           ),
                         ),
@@ -109,7 +112,7 @@ class ScheduleTable extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 14.0,
-                              color: Colors.black,
+                              color: AppColors.menuItemIconInactive,
                             ),
                           ),
                         ),
@@ -119,7 +122,7 @@ class ScheduleTable extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 14.0,
-                              color: Colors.black,
+                              color: AppColors.menuItemIconInactive,
                             ),
                           ),
                         ),
@@ -129,7 +132,7 @@ class ScheduleTable extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 14.0,
-                              color: Colors.black,
+                              color: AppColors.menuItemIconInactive,
                             ),
                           ),
                         ),
@@ -139,7 +142,7 @@ class ScheduleTable extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 14.0,
-                              color: Colors.black,
+                              color: AppColors.menuItemIconInactive,
                             ),
                           ),
                         ),
@@ -158,7 +161,7 @@ class ScheduleTable extends StatelessWidget {
                                     style: GoogleFonts.inter(
                                       fontWeight: FontWeight.w400,
                                       fontSize: 12.0,
-                                      color: Colors.black,
+                                      color: AppColors.menuItemIconInactive,
                                     ),
                                   ),
                                 ),
@@ -168,7 +171,7 @@ class ScheduleTable extends StatelessWidget {
                                     style: GoogleFonts.inter(
                                       fontWeight: FontWeight.w400,
                                       fontSize: 12.0,
-                                      color: Colors.black,
+                                      color: AppColors.menuItemIconInactive,
                                     ),
                                   ),
                                 ),
@@ -178,7 +181,7 @@ class ScheduleTable extends StatelessWidget {
                                     style: GoogleFonts.inter(
                                       fontWeight: FontWeight.w400,
                                       fontSize: 12.0,
-                                      color: Colors.black,
+                                      color: AppColors.menuItemIconInactive,
                                     ),
                                   ),
                                 ),
@@ -188,7 +191,7 @@ class ScheduleTable extends StatelessWidget {
                                     style: GoogleFonts.inter(
                                       fontWeight: FontWeight.w400,
                                       fontSize: 12.0,
-                                      color: Colors.black,
+                                      color: AppColors.menuItemIconInactive,
                                     ),
                                   ),
                                 ),
@@ -198,7 +201,7 @@ class ScheduleTable extends StatelessWidget {
                                     style: GoogleFonts.inter(
                                       fontWeight: FontWeight.w400,
                                       fontSize: 12.0,
-                                      color: Colors.black,
+                                      color: AppColors.menuItemIconInactive,
                                     ),
                                   ),
                                 ),
@@ -208,7 +211,7 @@ class ScheduleTable extends StatelessWidget {
                                     style: GoogleFonts.inter(
                                       fontWeight: FontWeight.w400,
                                       fontSize: 12.0,
-                                      color: Colors.black,
+                                      color: AppColors.menuItemIconInactive,
                                     ),
                                   ),
                                 ),
@@ -228,11 +231,11 @@ class ScheduleTable extends StatelessWidget {
     final status = streamer['status'] ?? 0;
     switch (status) {
       case 1:
-        return Colors.green.withOpacity(0.1);
+        return AppColors.scheduleRowActive;
       case 2:
-        return Colors.orange.withOpacity(0.1);
+        return AppColors.scheduleRowPending;
       case 3:
-        return Colors.red.withOpacity(0.1);
+        return AppColors.scheduleRowCancelled;
       default:
         return null;
     }
