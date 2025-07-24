@@ -8,6 +8,19 @@ import '../../../../core/utils/url_validator.dart';
 
 abstract class WebViewService {
   Future<void> initializeWebView(WebviewController controller);
+  Future<void> loadUrlForController(WebviewController controller, String url);
+  Future<void> reloadController(WebviewController controller);
+  Future<bool> isControllerResponding(WebviewController controller);
+  Future<void> muteController(WebviewController controller);
+  Future<void> unmuteController(WebviewController controller);
+  Future<void> setVolumeForController(
+    WebviewController controller,
+    double volume,
+  );
+  Stream<bool> getHealthStatusForController(WebviewController controller);
+  void dispose();
+
+  // Métodos para compatibilidade com código existente (usando controller primário)
   Future<void> loadUrl(String url);
   Future<void> reload();
   Future<bool> isResponding();
@@ -17,105 +30,125 @@ abstract class WebViewService {
   bool get isInitialized;
   WebviewController? get controller;
   Stream<bool> get healthStatus;
-  void dispose();
 }
 
 class WebViewServiceImpl implements WebViewService {
   WebViewServiceImpl({
     required AppLogger logger,
-  }) : _logger = logger {
-    _startActivityMonitoring();
-  }
+  }) : _logger = logger;
 
   final AppLogger _logger;
-  WebviewController? _controller;
-  DateTime? _lastReload;
-  DateTime? _lastActivity;
-  final _healthController = StreamController<bool>.broadcast();
-  Timer? _activityCheckTimer;
-  bool _isPageLoaded = false;
 
-  static const _minReloadInterval = Duration(seconds: 30);
-  static const _inactivityThreshold = Duration(minutes: 10);
+  // Mapa para gerenciar múltiplos controllers
+  final Map<WebviewController, _ControllerData> _controllers = {};
+
+  // Controller primário para compatibilidade
+  WebviewController? _primaryController;
 
   @override
-  Stream<bool> get healthStatus => _healthController.stream;
-
-  void _startActivityMonitoring() {
-    _activityCheckTimer?.cancel();
-    _activityCheckTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      _checkActivity();
-    });
-  }
-
-  void _checkActivity() async {
-    final now = DateTime.now();
-    if (_lastActivity != null) {
-      final inactiveTime = now.difference(_lastActivity!);
-
-      if (inactiveTime > _inactivityThreshold) {
-        if (!_isPageLoaded) {
-          _healthController.add(false);
-        } else {
-          _lastActivity = now;
-          _healthController.add(true);
-        }
-      }
-    } else {
-      _lastActivity = now;
+  Stream<bool> get healthStatus {
+    if (_primaryController != null &&
+        _controllers.containsKey(_primaryController)) {
+      return _controllers[_primaryController]!.healthController.stream;
     }
+    return Stream.value(false);
   }
 
   @override
-  WebviewController? get controller => _controller;
+  WebviewController? get controller => _primaryController;
 
   @override
-  bool get isInitialized => _controller != null;
+  bool get isInitialized => _primaryController != null;
 
   @override
   Future<void> initializeWebView(WebviewController controller) async {
     try {
-      _controller = controller;
-      _controller!.url.listen(
-        (url) {
-          {
-            _isPageLoaded = true;
-            _lastActivity = DateTime.now();
-            _healthController.add(true);
-            _logger.info('WebView navigation completed: $url');
-          }
-        },
-      );
-      _controller!.webMessage.listen(
-        (message) {
-          _lastActivity = DateTime.now();
-        },
-      );
+      if (_controllers.containsKey(controller)) {
+        _logger.info('WebView controller já inicializado');
+        return;
+      }
 
-      _lastActivity = DateTime.now();
-      _healthController.add(true);
-      _logger.info('WebView initialized successfully');
+      final controllerData = _ControllerData();
+      _controllers[controller] = controllerData;
+
+      // Se é o primeiro controller, torna-se o primário
+      _primaryController ??= controller;
+
+      // Configurar listeners
+      controller.url.listen((url) {
+        controllerData.isPageLoaded = true;
+        controllerData.lastActivity = DateTime.now();
+        controllerData.healthController.add(true);
+        _logger.info('WebView navigation completed: $url');
+      });
+
+      controller.webMessage.listen((message) {
+        controllerData.lastActivity = DateTime.now();
+      });
+
+      controllerData.lastActivity = DateTime.now();
+      controllerData.healthController.add(true);
+
+      // Iniciar monitoramento de atividade
+      _startActivityMonitoring(controller);
+
+      _logger.info('WebView controller initialized successfully');
     } catch (e, s) {
-      _logger.error('Error initializing WebView', e, s);
-      _healthController.add(false);
-      _controller = null;
+      _logger.error('Error initializing WebView controller', e, s);
+      _controllers.remove(controller);
       throw Failure(message: 'Erro ao inicializar WebView');
     }
   }
 
+  void _startActivityMonitoring(WebviewController controller) {
+    final controllerData = _controllers[controller];
+    if (controllerData == null) return;
+
+    controllerData.activityCheckTimer?.cancel();
+    controllerData.activityCheckTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => _checkActivity(controller),
+    );
+  }
+
+  void _checkActivity(WebviewController controller) {
+    final controllerData = _controllers[controller];
+    if (controllerData == null) return;
+
+    final now = DateTime.now();
+    if (controllerData.lastActivity != null) {
+      final inactiveTime = now.difference(controllerData.lastActivity!);
+      const inactivityThreshold = Duration(minutes: 10);
+
+      if (inactiveTime > inactivityThreshold) {
+        if (!controllerData.isPageLoaded) {
+          controllerData.healthController.add(false);
+        } else {
+          controllerData.lastActivity = now;
+          controllerData.healthController.add(true);
+        }
+      }
+    } else {
+      controllerData.lastActivity = now;
+    }
+  }
+
   @override
-  Future<void> loadUrl(String url) async {
+  Future<void> loadUrlForController(
+      WebviewController controller, String url) async {
     try {
       if (!UrlValidator.isValidUrl(url)) {
         throw Failure(message: 'URL inválida: $url');
       }
 
-      if (_controller == null) {
-        throw Failure(message: 'WebView não inicializado');
+      final controllerData = _controllers[controller];
+      if (controllerData == null) {
+        throw Failure(message: 'WebView controller não inicializado');
       }
-      _isPageLoaded = false;
-      await _controller!.loadUrl(url);
-      _lastActivity = DateTime.now();
+
+      controllerData.isPageLoaded = false;
+      await controller.loadUrl(url);
+      controllerData.lastActivity = DateTime.now();
       _logger.info('URL loaded successfully: $url');
     } catch (e, s) {
       _logger.error('Error loading URL: $url', e, s);
@@ -124,45 +157,51 @@ class WebViewServiceImpl implements WebViewService {
   }
 
   @override
-  Future<void> reload() async {
+  Future<void> reloadController(WebviewController controller) async {
     try {
+      final controllerData = _controllers[controller];
+      if (controllerData == null) {
+        throw Failure(message: 'WebView controller não inicializado');
+      }
+
       final now = DateTime.now();
-      if (_lastReload != null) {
-        final timeSinceLastReload = now.difference(_lastReload!);
-        if (timeSinceLastReload < _minReloadInterval) {
+      if (controllerData.lastReload != null) {
+        final timeSinceLastReload = now.difference(controllerData.lastReload!);
+        const minReloadInterval = Duration(seconds: 30);
+        if (timeSinceLastReload < minReloadInterval) {
           _logger.info('Reload skipped - too soon since last reload');
           return;
         }
       }
 
-      if (_controller == null) {
-        throw Failure(message: 'WebView não inicializado');
-      }
-      _isPageLoaded = false;
-      await _controller!.reload();
-      _lastReload = now;
-      _lastActivity = now;
-      _logger.info('WebView reloaded successfully');
+      controllerData.isPageLoaded = false;
+      await controller.reload();
+      controllerData.lastReload = now;
+      controllerData.lastActivity = now;
+      _logger.info('WebView controller reloaded successfully');
     } catch (e, s) {
-      _logger.error('Error reloading WebView', e, s);
+      _logger.error('Error reloading WebView controller', e, s);
       throw Failure(message: 'Erro ao recarregar WebView');
     }
   }
 
   @override
-  Future<bool> isResponding() async {
-    return _isPageLoaded;
+  Future<bool> isControllerResponding(WebviewController controller) async {
+    final controllerData = _controllers[controller];
+    return controllerData?.isPageLoaded ?? false;
   }
 
   @override
-  Future<void> muteWebView() async {
+  Future<void> muteController(WebviewController controller) async {
     try {
-      if (_controller == null) {
-        _logger.warning('WebView not initialized for mute operation');
+      final controllerData = _controllers[controller];
+      if (controllerData == null) {
+        _logger
+            .warning('WebView controller not initialized for mute operation');
         return;
       }
 
-      await _controller!.executeScript('''
+      await controller.executeScript('''
         // Mute all audio elements
         const audioElements = document.querySelectorAll('audio, video');
         audioElements.forEach(audio => {
@@ -179,21 +218,23 @@ class WebViewServiceImpl implements WebViewService {
         }
       ''');
 
-      _logger.info('WebView muted successfully');
+      _logger.info('WebView controller muted successfully');
     } catch (e, s) {
-      _logger.error('Error muting WebView', e, s);
+      _logger.error('Error muting WebView controller', e, s);
     }
   }
 
   @override
-  Future<void> unmuteWebView() async {
+  Future<void> unmuteController(WebviewController controller) async {
     try {
-      if (_controller == null) {
-        _logger.warning('WebView not initialized for unmute operation');
+      final controllerData = _controllers[controller];
+      if (controllerData == null) {
+        _logger
+            .warning('WebView controller not initialized for unmute operation');
         return;
       }
 
-      await _controller!.executeScript('''
+      await controller.executeScript('''
         // Unmute all audio elements
         const audioElements = document.querySelectorAll('audio, video');
         audioElements.forEach(audio => {
@@ -210,24 +251,26 @@ class WebViewServiceImpl implements WebViewService {
         }
       ''');
 
-      _logger.info('WebView unmuted successfully');
+      _logger.info('WebView controller unmuted successfully');
     } catch (e, s) {
-      _logger.error('Error unmuting WebView', e, s);
+      _logger.error('Error unmuting WebView controller', e, s);
     }
   }
 
   @override
-  Future<void> setWebViewVolume(double volume) async {
+  Future<void> setVolumeForController(
+      WebviewController controller, double volume) async {
     try {
-      if (_controller == null) {
-        _logger.warning('WebView not initialized for volume control');
+      final controllerData = _controllers[controller];
+      if (controllerData == null) {
+        _logger
+            .warning('WebView controller not initialized for volume control');
         return;
       }
 
-      // Clamp volume between 0 and 1
       final clampedVolume = volume.clamp(0.0, 1.0);
 
-      await _controller!.executeScript('''
+      await controller.executeScript('''
         // Set volume for all audio elements
         const audioElements = document.querySelectorAll('audio, video');
         audioElements.forEach(audio => {
@@ -236,17 +279,82 @@ class WebViewServiceImpl implements WebViewService {
         });
       ''');
 
-      _logger.info('WebView volume set to: $clampedVolume');
+      _logger.info('WebView controller volume set to: $clampedVolume');
     } catch (e, s) {
-      _logger.error('Error setting WebView volume', e, s);
+      _logger.error('Error setting WebView controller volume', e, s);
+    }
+  }
+
+  @override
+  Stream<bool> getHealthStatusForController(WebviewController controller) {
+    final controllerData = _controllers[controller];
+    if (controllerData != null) {
+      return controllerData.healthController.stream;
+    }
+    return Stream.value(false);
+  }
+
+  // Métodos de compatibilidade que usam o controller primário
+  @override
+  Future<void> loadUrl(String url) async {
+    if (_primaryController != null) {
+      await loadUrlForController(_primaryController!, url);
+    }
+  }
+
+  @override
+  Future<void> reload() async {
+    if (_primaryController != null) {
+      await reloadController(_primaryController!);
+    }
+  }
+
+  @override
+  Future<bool> isResponding() async {
+    if (_primaryController != null) {
+      return await isControllerResponding(_primaryController!);
+    }
+    return false;
+  }
+
+  @override
+  Future<void> muteWebView() async {
+    if (_primaryController != null) {
+      await muteController(_primaryController!);
+    }
+  }
+
+  @override
+  Future<void> unmuteWebView() async {
+    if (_primaryController != null) {
+      await unmuteController(_primaryController!);
+    }
+  }
+
+  @override
+  Future<void> setWebViewVolume(double volume) async {
+    if (_primaryController != null) {
+      await setVolumeForController(_primaryController!, volume);
     }
   }
 
   @override
   void dispose() {
-    _activityCheckTimer?.cancel();
-    _healthController.close();
-    _controller = null;
+    for (final controllerData in _controllers.values) {
+      controllerData.activityCheckTimer?.cancel();
+      controllerData.healthController.close();
+    }
+    _controllers.clear();
+    _primaryController = null;
     _logger.info('WebView service disposed');
   }
+}
+
+class _ControllerData {
+  DateTime? lastReload;
+  DateTime? lastActivity;
+  final StreamController<bool> healthController =
+      StreamController<bool>.broadcast();
+  Timer? activityCheckTimer;
+  bool isPageLoaded = false;
 }
