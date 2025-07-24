@@ -7,7 +7,6 @@ import '../../../../models/schedule_list_model.dart';
 import '../../../../models/schedule_model.dart';
 import '../../../../models/user_model.dart';
 import '../../../../service/home/home_service.dart';
-import '../../../../core/logger/app_logger.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
@@ -17,6 +16,9 @@ class HomeViewModel extends ChangeNotifier {
         _authStore = authStore {
     // Escutar mudanças no AuthStore
     _authStore.addListener(() => notifyListeners());
+
+    // Inicializar canais com valores padrão
+    _initializeChannels();
   }
 
   final HomeService _homeService;
@@ -46,23 +48,62 @@ class HomeViewModel extends ChangeNotifier {
   late final switchTabCommand = Command1<void, int>(_switchTab);
   late final fetchCurrentChannelCommand =
       Command0<String>(_fetchCurrentChannel);
+  late final updateChannelsCommand = Command0<void>(_updateChannels);
 
-  // Adicionar propriedades e métodos necessários para a HomePage:
+  void _initializeChannels() {
+    // Inicializar com canais padrão
+    _currentChannel = 'https://twitch.tv/BoostTeam_';
+    _currentChannelListA = 'https://twitch.tv/BoostTeam_';
+    _currentChannelListB = 'https://twitch.tv/BoostTeam_';
+  }
 
-  // Logger
-  late final AppLogger logger;
-
-  // Métodos para integração com a HomePage
+  // Método para integração com a HomePage
   Future<void> updateChannels() async {
-    final channelA = await _homeService.fetchCurrentChannelForList('Lista A');
-    final channelB = await _homeService.fetchCurrentChannelForList('Lista B');
-    _currentChannelListA = (channelA != null && channelA.isNotEmpty)
-        ? channelA
-        : 'https://twitch.tv/BoostTeam_';
-    _currentChannelListB = (channelB != null && channelB.isNotEmpty)
-        ? channelB
-        : 'https://twitch.tv/BoostTeam_';
-    notifyListeners();
+    await updateChannelsCommand.execute();
+  }
+
+  Future<Result<void>> _updateChannels() async {
+    try {
+      final channelA = await _homeService.fetchCurrentChannelForList('Lista A');
+      final channelB = await _homeService.fetchCurrentChannelForList('Lista B');
+
+      final newChannelA = (channelA != null && channelA.isNotEmpty)
+          ? channelA
+          : 'https://twitch.tv/BoostTeam_';
+      final newChannelB = (channelB != null && channelB.isNotEmpty)
+          ? channelB
+          : 'https://twitch.tv/BoostTeam_';
+
+      bool shouldNotify = false;
+
+      if (_currentChannelListA != newChannelA) {
+        _currentChannelListA = newChannelA;
+        shouldNotify = true;
+      }
+
+      if (_currentChannelListB != newChannelB) {
+        _currentChannelListB = newChannelB;
+        shouldNotify = true;
+      }
+
+      // Atualizar canal atual baseado na aba ativa
+      final newCurrentChannel =
+          _currentTabIndex == 0 ? newChannelA : newChannelB;
+      if (_currentChannel != newCurrentChannel) {
+        _currentChannel = newCurrentChannel;
+        shouldNotify = true;
+      }
+
+      if (shouldNotify) {
+        notifyListeners();
+      }
+
+      return Result.ok(null);
+    } catch (e) {
+      return Result.error(
+        Exception('Erro ao atualizar canais: $e'),
+      );
+    }
   }
 
   void onInit() {
@@ -75,7 +116,7 @@ class HomeViewModel extends ChangeNotifier {
     fetchCurrentChannelCommand.execute();
   }
 
-  bool get isRecovering => false; // Ajustar se houver lógica de recuperação
+  bool get isRecovering => updateChannelsCommand.running;
 
   void onWebViewCreated(controller) {
     // Implementação real se necessário
@@ -86,10 +127,16 @@ class HomeViewModel extends ChangeNotifier {
     try {
       final schedules = await _homeService.fetchScheduleLists();
       _scheduleLists = schedules;
+
+      // Após carregar os agendamentos, atualizar os canais
+      await updateChannels();
+
       notifyListeners();
       return Result.ok(schedules);
     } catch (e) {
-      return Result.error(Exception('Erro ao carregar agendamentos: $e'));
+      return Result.error(
+        Exception('Erro ao carregar agendamentos: $e'),
+      );
     }
   }
 
@@ -97,7 +144,9 @@ class HomeViewModel extends ChangeNotifier {
   Future<Result<void>> _switchTab(int index) async {
     try {
       if (index < 0 || index > 1) {
-        return Result.error(Exception('Índice de aba inválido: $index'));
+        return Result.error(
+          Exception('Índice de aba inválido: $index'),
+        );
       }
 
       if (_currentTabIndex == index) {
@@ -105,6 +154,12 @@ class HomeViewModel extends ChangeNotifier {
       }
 
       _currentTabIndex = index;
+
+      // Atualizar canal atual baseado na nova aba
+      _currentChannel = index == 0 //
+          ? _currentChannelListA
+          : _currentChannelListB;
+
       notifyListeners();
 
       // Carregar agendamentos da aba se necessário
@@ -124,6 +179,10 @@ class HomeViewModel extends ChangeNotifier {
       final channel = await _homeService.fetchCurrentChannel();
       if (channel != null && channel.isNotEmpty) {
         _currentChannel = channel;
+
+        // Atualizar também os canais específicos das listas
+        await updateChannels();
+
         notifyListeners();
         return Result.ok(_currentChannel);
       } else {
