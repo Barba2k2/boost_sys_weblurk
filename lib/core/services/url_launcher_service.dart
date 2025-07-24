@@ -7,9 +7,12 @@ import '../utils/url_validator.dart';
 class UrlLauncherService {
   UrlLauncherService({
     required AppLogger logger,
-  }) : _logger = logger;
+    Shell? shell, // ✅ CORREÇÃO: Permitir injeção de Shell
+  })  : _logger = logger,
+        _shell = shell ?? Shell(); // ✅ CORREÇÃO: Usar Shell injetado ou criar um novo
 
   final AppLogger _logger;
+  final Shell _shell;
 
   Future<void> launchURL(String url) async {
     try {
@@ -19,13 +22,12 @@ class UrlLauncherService {
         Messages.alert('URL inválida ou não permitida');
         return;
       }
-      final Shell shell = Shell();
       if (Platform.isWindows) {
-        await shell.run('start $validatedUrl');
+        await _shell.run('start $validatedUrl');
       } else if (Platform.isMacOS) {
-        await shell.run('open $validatedUrl');
+        await _shell.run('open $validatedUrl');
       } else if (Platform.isLinux) {
-        await shell.run('xdg-open $validatedUrl');
+        await _shell.run('xdg-open $validatedUrl');
       } else {
         throw 'Platform not supported';
       }
