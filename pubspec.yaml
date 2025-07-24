@@ -34,7 +34,7 @@ dependencies:
   shared_preferences: ^2.3.2
   shorebird_code_push: ^2.0.4
   universal_platform: ^1.1.0
-  url_launcher: ^6.3.1
+  url_launcher: ^6.3.2
   uuid: ^4.5.1
   validatorless: ^1.2.3
   web_socket_channel: ^3.0.2
