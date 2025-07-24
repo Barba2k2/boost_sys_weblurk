@@ -1,5 +1,8 @@
+// lib/features/home/presentation/viewmodels/home_viewmodel.dart
 import 'package:flutter/foundation.dart';
+import 'package:webview_windows/webview_windows.dart';
 
+import '../../../../core/logger/app_logger.dart';
 import '../../../../core/utils/command.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../models/schedule_list_model.dart';
@@ -11,9 +14,11 @@ import '../../../auth/login/presentation/viewmodels/auth_viewmodel.dart';
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
     required HomeService homeService,
-    required AuthViewModel authStore,
+    required AuthViewModel authViewmodel,
+    required AppLogger logger,
   })  : _homeService = homeService,
-        _authStore = authStore {
+        _authStore = authViewmodel,
+        _logger = logger {
     // Escutar mudanças no AuthStore
     _authStore.addListener(() => notifyListeners());
 
@@ -23,6 +28,7 @@ class HomeViewModel extends ChangeNotifier {
 
   final HomeService _homeService;
   final AuthViewModel _authStore;
+  final AppLogger _logger;
 
   // Estado reativo do AuthStore
   UserModel? get userLogged => _authStore.userLogged;
@@ -42,6 +48,10 @@ class HomeViewModel extends ChangeNotifier {
   String get currentChannelListA => _currentChannelListA;
   String get currentChannelListB => _currentChannelListB;
 
+  // ✅ CORREÇÃO: Armazenar referências dos controllers
+  WebviewController? _webviewControllerA;
+  WebviewController? _webviewControllerB;
+
   // Commands para operações
   late final loadSchedulesCommand =
       Command0<List<ScheduleListModel>>(_loadSchedules);
@@ -49,12 +59,30 @@ class HomeViewModel extends ChangeNotifier {
   late final fetchCurrentChannelCommand =
       Command0<String>(_fetchCurrentChannel);
   late final updateChannelsCommand = Command0<void>(_updateChannels);
+  late final reloadWebViewCommand = Command0<void>(_reloadWebView);
 
   void _initializeChannels() {
-    // Inicializar com canais padrão
     _currentChannel = 'https://twitch.tv/BoostTeam_';
     _currentChannelListA = 'https://twitch.tv/BoostTeam_';
     _currentChannelListB = 'https://twitch.tv/BoostTeam_';
+  }
+
+  // ✅ CORREÇÃO: Método para registrar controllers dos WebViews
+  void onWebViewCreated(WebviewController controller) {
+    try {
+      _logger.info('WebView controller registrado');
+
+      // Determinar qual aba este controller pertence baseado no timing
+      if (_webviewControllerA == null) {
+        _webviewControllerA = controller;
+        _logger.info('Controller da Lista A registrado');
+      } else if (_webviewControllerB == null) {
+        _webviewControllerB = controller;
+        _logger.info('Controller da Lista B registrado');
+      }
+    } catch (e, s) {
+      _logger.error('Erro ao registrar WebView controller', e, s);
+    }
   }
 
   // Método para integração com a HomePage
@@ -79,11 +107,13 @@ class HomeViewModel extends ChangeNotifier {
       if (_currentChannelListA != newChannelA) {
         _currentChannelListA = newChannelA;
         shouldNotify = true;
+        _logger.info('Canal da Lista A atualizado: $newChannelA');
       }
 
       if (_currentChannelListB != newChannelB) {
         _currentChannelListB = newChannelB;
         shouldNotify = true;
+        _logger.info('Canal da Lista B atualizado: $newChannelB');
       }
 
       // Atualizar canal atual baseado na aba ativa
@@ -99,10 +129,9 @@ class HomeViewModel extends ChangeNotifier {
       }
 
       return Result.ok(null);
-    } catch (e) {
-      return Result.error(
-        Exception('Erro ao atualizar canais: $e'),
-      );
+    } catch (e, s) {
+      _logger.error('Erro ao atualizar canais', e, s);
+      return Result.error(Exception('Erro ao atualizar canais: $e'));
     }
   }
 
@@ -112,15 +141,32 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void reloadWebView() {
-    updateChannels();
-    fetchCurrentChannelCommand.execute();
+    reloadWebViewCommand.execute();
   }
 
-  bool get isRecovering => updateChannelsCommand.running;
+  Future<Result<void>> _reloadWebView() async {
+    try {
+      _logger.info('Recarregando WebView...');
 
-  void onWebViewCreated(controller) {
-    // Implementação real se necessário
+      // ✅ CORREÇÃO: Recarregar o WebView da aba ativa
+      final activeController =
+          _currentTabIndex == 0 ? _webviewControllerA : _webviewControllerB;
+
+      if (activeController != null) {
+        await activeController.reload();
+        _logger.info('WebView recarregado com sucesso');
+      } else {
+        _logger.warning('Nenhum controller ativo para recarregar');
+      }
+
+      return Result.ok(null);
+    } catch (e, s) {
+      _logger.error('Erro ao recarregar WebView', e, s);
+      return Result.error(Exception('Erro ao recarregar WebView: $e'));
+    }
   }
+
+  bool get isRecovering => false; // Removido sistema de recuperação complexo
 
   // Método privado para carregar agendamentos
   Future<Result<List<ScheduleListModel>>> _loadSchedules() async {
@@ -133,10 +179,9 @@ class HomeViewModel extends ChangeNotifier {
 
       notifyListeners();
       return Result.ok(schedules);
-    } catch (e) {
-      return Result.error(
-        Exception('Erro ao carregar agendamentos: $e'),
-      );
+    } catch (e, s) {
+      _logger.error('Erro ao carregar agendamentos', e, s);
+      return Result.error(Exception('Erro ao carregar agendamentos: $e'));
     }
   }
 
@@ -144,21 +189,21 @@ class HomeViewModel extends ChangeNotifier {
   Future<Result<void>> _switchTab(int index) async {
     try {
       if (index < 0 || index > 1) {
-        return Result.error(
-          Exception('Índice de aba inválido: $index'),
-        );
+        return Result.error(Exception('Índice de aba inválido: $index'));
       }
 
       if (_currentTabIndex == index) {
         return Result.ok(null);
       }
 
+      final oldIndex = _currentTabIndex;
       _currentTabIndex = index;
 
       // Atualizar canal atual baseado na nova aba
-      _currentChannel = index == 0 //
-          ? _currentChannelListA
-          : _currentChannelListB;
+      _currentChannel =
+          index == 0 ? _currentChannelListA : _currentChannelListB;
+
+      _logger.info('Aba alterada de $oldIndex para $index');
 
       notifyListeners();
 
@@ -168,7 +213,8 @@ class HomeViewModel extends ChangeNotifier {
       }
 
       return Result.ok(null);
-    } catch (e) {
+    } catch (e, s) {
+      _logger.error('Erro ao trocar aba', e, s);
       return Result.error(Exception('Erro ao trocar aba: $e'));
     }
   }
@@ -191,7 +237,8 @@ class HomeViewModel extends ChangeNotifier {
         notifyListeners();
         return Result.ok(_currentChannel);
       }
-    } catch (e) {
+    } catch (e, s) {
+      _logger.error('Erro ao buscar canal atual', e, s);
       // Em caso de erro, manter o canal atual
       return Result.error(Exception('Erro ao buscar canal atual: $e'));
     }
@@ -210,5 +257,13 @@ class HomeViewModel extends ChangeNotifier {
       return _currentTabIndex == 0 ? 'Lista A' : 'Lista B';
     }
     return _scheduleLists[_currentTabIndex].listName;
+  }
+
+  @override
+  void dispose() {
+    // Limpar controllers se necessário
+    _webviewControllerA?.dispose();
+    _webviewControllerB?.dispose();
+    super.dispose();
   }
 }
