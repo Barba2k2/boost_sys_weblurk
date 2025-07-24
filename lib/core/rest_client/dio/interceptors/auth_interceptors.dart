@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../auth/auth_store.dart';
+import '../../../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
 import '../../../helpers/constants.dart';
 import '../../../local_storage/local_storage.dart';
 import '../../../logger/app_logger.dart';
@@ -9,13 +9,13 @@ class AuthInterceptors extends Interceptor {
   AuthInterceptors({
     required LocalStorage localStorage,
     required AppLogger logger,
-    required AuthStore authStore,
+    required AuthViewModel authStore,
   })  : _localStorage = localStorage,
         _logger = logger,
         _authStore = authStore;
   final LocalStorage _localStorage;
   final AppLogger _logger;
-  final AuthStore _authStore;
+  final AuthViewModel _authStore;
 
   @override
   Future<void> onRequest(
