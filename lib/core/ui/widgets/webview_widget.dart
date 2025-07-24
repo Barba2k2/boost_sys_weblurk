@@ -1,34 +1,62 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_windows/webview_windows.dart';
+
+import '../../../features/home/data/services/webview_service.dart';
 import '../app_colors.dart';
 
 class MyWebviewWidget extends StatefulWidget {
-  const MyWebviewWidget({required this.initialUrl, super.key});
+  const MyWebviewWidget({
+    required this.initialUrl,
+    required this.webviewController,
+    required this.webviewService,
+    super.key,
+  });
+
   final String initialUrl;
+  final WebviewController webviewController;
+  final WebViewService webviewService;
 
   @override
   State<MyWebviewWidget> createState() => _MyWebviewWidgetState();
 }
 
 class _MyWebviewWidgetState extends State<MyWebviewWidget> {
-  InAppWebViewController? _controller;
   bool _isLoading = true;
   String? _errorMessage;
   bool _timeout = false;
-  String? _message;
+  WebviewController? _winController;
+  bool _winInitialized = false;
+  InAppWebViewController? _controller;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 10), () {
-      if (mounted && _isLoading) {
-        setState(() {
-          _timeout = true;
-          _isLoading = false;
-          _errorMessage =
-              'A página não respondeu.\nPode ser uma limitação da Twitch ou do site. Deseja abrir no navegador externo?';
-        });
-      }
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      _initWinWebView();
+    } else {
+      Future.delayed(const Duration(seconds: 10), () {
+        if (mounted && _isLoading) {
+          setState(() {
+            _timeout = true;
+            _isLoading = false;
+            _errorMessage =
+                'A página não respondeu.\nPode ser uma limitação da Twitch ou do site. Deseja abrir no navegador externo?';
+          });
+        }
+      });
+    }
+  }
+
+  Future<void> _initWinWebView() async {
+    _winController = WebviewController();
+    await _winController!.initialize();
+    await _winController!.loadUrl(widget.initialUrl);
+    setState(() {
+      _winInitialized = true;
+      _isLoading = false;
     });
   }
 
@@ -38,11 +66,23 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
       return const Center(
         child: Text(
           'URL inválida ou não informada',
-          style: TextStyle(color: AppColors.error, fontSize: 16),
+          style: TextStyle(
+            color: AppColors.error,
+            fontSize: 16,
+          ),
         ),
       );
     }
 
+    // WINDOWS: embutido
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      if (!_winInitialized) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      return SizedBox.expand(child: Webview(_winController!));
+    }
+
+    // MOBILE/WEB: usa inappwebview embutido
     if (_errorMessage != null) {
       return Center(
         child: SingleChildScrollView(
@@ -51,41 +91,43 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.error_outline,
-                  color: AppColors.error,
-                  size: 48,
-                ),
+                const Icon(Icons.error_outline, color: Colors.red, size: 48),
                 const SizedBox(height: 16),
                 const Text(
                   'Erro ao carregar WebView',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 SelectableText(
                   _errorMessage!,
-                  style: TextStyle(fontSize: 12, color: AppColors.error),
+                  style: const TextStyle(fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
                   onPressed: () async {
-                    setState(() {
-                      _errorMessage = null;
-                      _isLoading = true;
-                      _timeout = false;
-                    });
-                    _controller?.loadUrl(
-                      urlRequest: URLRequest(
-                        url: WebUri(widget.initialUrl),
-                      ),
-                    );
+                    if (_timeout) {
+                      final url = Uri.parse(widget.initialUrl);
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url,
+                            mode: LaunchMode.externalApplication);
+                      }
+                    } else {
+                      setState(() {
+                        _errorMessage = null;
+                        _isLoading = true;
+                        _timeout = false;
+                      });
+                      _controller?.loadUrl(
+                        urlRequest: URLRequest(
+                          url: WebUri(widget.initialUrl),
+                        ),
+                      );
+                    }
                   },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Tentar Novamente'),
+                  icon: Icon(_timeout ? Icons.open_in_browser : Icons.refresh),
+                  label: Text(
+                      _timeout ? 'Abrir no navegador' : 'Tentar Novamente'),
                 ),
               ],
             ),
@@ -99,10 +141,12 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
         InAppWebView(
           initialUrlRequest: URLRequest(url: WebUri(widget.initialUrl)),
           initialSettings: InAppWebViewSettings(
-            userAgent:
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
+            javaScriptEnabled: true,
             useShouldOverrideUrlLoading: true,
             mediaPlaybackRequiresUserGesture: false,
+            clearCache: false,
+            cacheEnabled: true,
+            supportZoom: true,
             transparentBackground: true,
             allowsInlineMediaPlayback: true,
           ),
@@ -113,29 +157,24 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
             setState(() {
               _isLoading = true;
               _timeout = false;
-              _message = 'Carregando $url';
             });
           },
           onLoadStop: (controller, url) async {
             setState(() {
               _isLoading = false;
               _timeout = false;
-              _message = 'Carregado $url';
             });
           },
           onReceivedError: (controller, request, error) {
             setState(() {
               _isLoading = false;
               _timeout = false;
-              _errorMessage =
-                  'Erro ao carregar página: ${error.description.toString()}';
-              _message = 'Erro ao carregar página: ${error.type.toString()}';
+              _errorMessage = 'Erro ao carregar página: ${error.description}';
             });
           },
           onReceivedServerTrustAuthRequest: (controller, challenge) async {
             return ServerTrustAuthResponse(
-              action: ServerTrustAuthResponseAction.PROCEED,
-            );
+                action: ServerTrustAuthResponseAction.PROCEED);
           },
         ),
         if (_isLoading)
