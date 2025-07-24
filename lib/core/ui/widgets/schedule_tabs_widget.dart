@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:webview_windows/webview_windows.dart';
-
-import '../../../features/home/data/services/webview_service.dart';
 import '../../../features/home/presentation/viewmodels/home_viewmodel.dart';
-import '../../di/injector.dart';
-import '../app_colors.dart';
 import 'webview_widget.dart';
+import '../../di/injector.dart';
+import '../../../features/home/data/services/webview_service.dart';
 
 class ScheduleTabsWidget extends StatefulWidget {
   const ScheduleTabsWidget({
@@ -43,13 +41,63 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
   }
 
   Future<void> _initWebviewControllers() async {
-    _webviewControllerA = WebviewController();
-    _webviewControllerB = WebviewController();
-    await _webviewControllerA.initialize();
-    await _webviewControllerB.initialize();
-    setState(() {
-      _isControllersInitialized = true;
+    try {
+      _webviewControllerA = WebviewController();
+      _webviewControllerB = WebviewController();
+
+      // ✅ CORREÇÃO: Inicializar os controllers do webview_windows
+      await _webviewControllerA.initialize();
+      await _webviewControllerB.initialize();
+
+      // ✅ CORREÇÃO: Inicializar os controllers no WebViewService
+      await _webviewService.initializeWebView(_webviewControllerA);
+      await _webviewService.initializeWebView(_webviewControllerB);
+
+      if (mounted) {
+        setState(() {
+          _isControllersInitialized = true;
+        });
+      }
+
+      // ✅ Configurar listeners para mudanças de canal
+      _setupChannelListeners();
+    } catch (e) {
+      debugPrint('Erro ao inicializar WebView controllers: $e');
+      if (mounted) {
+        setState(() {
+          _isControllersInitialized = false;
+        });
+      }
+    }
+  }
+
+  void _setupChannelListeners() {
+    // Escutar mudanças nos canais e atualizar as WebViews correspondentes
+    widget.viewModel.addListener(() {
+      if (_isControllersInitialized) {
+        _updateWebViewUrls();
+      }
     });
+  }
+
+  Future<void> _updateWebViewUrls() async {
+    try {
+      // Atualizar Lista A
+      final channelA = widget.viewModel.currentChannelListA;
+      if (channelA.isNotEmpty) {
+        await _webviewService.loadUrlForController(
+            _webviewControllerA, channelA);
+      }
+
+      // Atualizar Lista B
+      final channelB = widget.viewModel.currentChannelListB;
+      if (channelB.isNotEmpty) {
+        await _webviewService.loadUrlForController(
+            _webviewControllerB, channelB);
+      }
+    } catch (e) {
+      debugPrint('Erro ao atualizar URLs das WebViews: $e');
+    }
   }
 
   void _onViewModelChanged() {
@@ -63,8 +111,10 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
   void dispose() {
     widget.viewModel.removeListener(_onViewModelChanged);
     _tabController.dispose();
-    _webviewControllerA.dispose();
-    _webviewControllerB.dispose();
+
+    // ✅ Não fazer dispose dos controllers aqui pois eles são gerenciados pelo service
+    // O service fará o cleanup quando necessário
+
     super.dispose();
   }
 
@@ -75,14 +125,14 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
         // TabBar
         Container(
           decoration: BoxDecoration(
-            color: AppColors.cardBackground.withValues(alpha: 0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(8),
               topRight: Radius.circular(8),
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.menuItemIconInactive.withValues(alpha: 0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -91,9 +141,9 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
           child: TabBar(
             controller: _tabController,
             onTap: (index) => widget.viewModel.switchTabCommand.execute(index),
-            labelColor: AppColors.tabBarLabel,
-            unselectedLabelColor: AppColors.tabBarUnselected,
-            indicatorColor: AppColors.tabBarIndicator,
+            labelColor: const Color(0xFF2C1F4A),
+            unselectedLabelColor: Colors.grey[600],
+            indicatorColor: const Color(0xFF2C1F4A),
             labelStyle: GoogleFonts.inter(
               fontWeight: FontWeight.w600,
               fontSize: 14,
@@ -116,23 +166,34 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
                   children: [
                     // Aba Lista A
                     MyWebviewWidget(
-                      initialUrl: widget.viewModel.currentTabIndex == 0
-                          ? widget.viewModel.currentChannelListA
-                          : 'https://twitch.tv/BoostTeam_',
+                      initialUrl:
+                          widget.viewModel.currentChannelListA.isNotEmpty
+                              ? widget.viewModel.currentChannelListA
+                              : 'https://twitch.tv/BoostTeam_',
                       webviewController: _webviewControllerA,
                       webviewService: _webviewService,
                     ),
                     // Aba Lista B
                     MyWebviewWidget(
-                      initialUrl: widget.viewModel.currentTabIndex == 1
-                          ? widget.viewModel.currentChannelListB
-                          : 'https://twitch.tv/BoostTeam_',
+                      initialUrl:
+                          widget.viewModel.currentChannelListB.isNotEmpty
+                              ? widget.viewModel.currentChannelListB
+                              : 'https://twitch.tv/BoostTeam_',
                       webviewController: _webviewControllerB,
                       webviewService: _webviewService,
                     ),
                   ],
                 )
-              : const Center(child: CircularProgressIndicator()),
+              : const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Inicializando WebViews...'),
+                    ],
+                  ),
+                ),
         ),
       ],
     );
