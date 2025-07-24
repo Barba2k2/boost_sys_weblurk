@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_windows/webview_windows.dart';
 
 import '../../../../core/exceptions/failure.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/utils/url_validator.dart';
 
 abstract class WebViewService {
-  Future<void> initializeWebView(WebViewController controller);
+  Future<void> initializeWebView(WebviewController controller);
   Future<void> loadUrl(String url);
   Future<void> reload();
   Future<bool> isResponding();
@@ -15,7 +15,7 @@ abstract class WebViewService {
   Future<void> unmuteWebView();
   Future<void> setWebViewVolume(double volume);
   bool get isInitialized;
-  WebViewController? get controller;
+  WebviewController? get controller;
   Stream<bool> get healthStatus;
   void dispose();
 }
@@ -28,11 +28,12 @@ class WebViewServiceImpl implements WebViewService {
   }
 
   final AppLogger _logger;
-  WebViewController? _controller;
+  WebviewController? _controller;
   DateTime? _lastReload;
   DateTime? _lastActivity;
   final _healthController = StreamController<bool>.broadcast();
   Timer? _activityCheckTimer;
+  bool _isPageLoaded = false;
 
   static const _minReloadInterval = Duration(seconds: 30);
   static const _inactivityThreshold = Duration(minutes: 10);
@@ -53,9 +54,7 @@ class WebViewServiceImpl implements WebViewService {
       final inactiveTime = now.difference(_lastActivity!);
 
       if (inactiveTime > _inactivityThreshold) {
-        final isAlive = await isResponding();
-
-        if (!isAlive) {
+        if (!_isPageLoaded) {
           _healthController.add(false);
         } else {
           _lastActivity = now;
@@ -68,29 +67,30 @@ class WebViewServiceImpl implements WebViewService {
   }
 
   @override
-  WebViewController? get controller => _controller;
+  WebviewController? get controller => _controller;
 
   @override
   bool get isInitialized => _controller != null;
 
   @override
-  Future<void> initializeWebView(WebViewController controller) async {
+  Future<void> initializeWebView(WebviewController controller) async {
     try {
       _controller = controller;
-
-      // Configurações otimizadas para WebView
-      await _controller?.runJavaScript('''
-        // Impedir diálogos de confirmação de saída
-        window.addEventListener('beforeunload', function(e) {
-          e.preventDefault();
-          e.returnValue = '';
-        });
-        
-        // Script para manter a conexão ativa
-        setInterval(function() {
-          console.log('Heartbeat: ' + new Date().toISOString());
-        }, 60000);
-      ''');
+      _controller!.url.listen(
+        (url) {
+          {
+            _isPageLoaded = true;
+            _lastActivity = DateTime.now();
+            _healthController.add(true);
+            _logger.info('WebView navigation completed: $url');
+          }
+        },
+      );
+      _controller!.webMessage.listen(
+        (message) {
+          _lastActivity = DateTime.now();
+        },
+      );
 
       _lastActivity = DateTime.now();
       _healthController.add(true);
@@ -113,8 +113,8 @@ class WebViewServiceImpl implements WebViewService {
       if (_controller == null) {
         throw Failure(message: 'WebView não inicializado');
       }
-
-      await _controller!.loadRequest(Uri.parse(url));
+      _isPageLoaded = false;
+      await _controller!.loadUrl(url);
       _lastActivity = DateTime.now();
       _logger.info('URL loaded successfully: $url');
     } catch (e, s) {
@@ -138,7 +138,7 @@ class WebViewServiceImpl implements WebViewService {
       if (_controller == null) {
         throw Failure(message: 'WebView não inicializado');
       }
-
+      _isPageLoaded = false;
       await _controller!.reload();
       _lastReload = now;
       _lastActivity = now;
@@ -151,27 +151,7 @@ class WebViewServiceImpl implements WebViewService {
 
   @override
   Future<bool> isResponding() async {
-    try {
-      if (_controller == null) {
-        return false;
-      }
-
-      // Verificar se o WebView está respondendo executando um script simples
-      final result = await _controller!
-          .runJavaScriptReturningResult('document.readyState');
-      final isAlive = result.toString().contains('complete');
-
-      if (isAlive) {
-        _lastActivity = DateTime.now();
-        _healthController.add(true);
-      }
-
-      return isAlive;
-    } catch (e, s) {
-      _logger.error('Error checking WebView health', e, s);
-      _healthController.add(false);
-      return false;
-    }
+    return _isPageLoaded;
   }
 
   @override
@@ -182,7 +162,7 @@ class WebViewServiceImpl implements WebViewService {
         return;
       }
 
-      await _controller!.runJavaScript('''
+      await _controller!.executeScript('''
         // Mute all audio elements
         const audioElements = document.querySelectorAll('audio, video');
         audioElements.forEach(audio => {
@@ -213,7 +193,7 @@ class WebViewServiceImpl implements WebViewService {
         return;
       }
 
-      await _controller!.runJavaScript('''
+      await _controller!.executeScript('''
         // Unmute all audio elements
         const audioElements = document.querySelectorAll('audio, video');
         audioElements.forEach(audio => {
@@ -247,7 +227,7 @@ class WebViewServiceImpl implements WebViewService {
       // Clamp volume between 0 and 1
       final clampedVolume = volume.clamp(0.0, 1.0);
 
-      await _controller!.runJavaScript('''
+      await _controller!.executeScript('''
         // Set volume for all audio elements
         const audioElements = document.querySelectorAll('audio, video');
         audioElements.forEach(audio => {
