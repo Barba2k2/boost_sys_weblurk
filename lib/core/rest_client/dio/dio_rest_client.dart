@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../auth/auth_store.dart';
+import '../../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
 import '../../helpers/constants.dart';
 import '../../helpers/environments.dart';
 import '../../local_storage/local_storage.dart';
@@ -14,7 +14,7 @@ class DioRestClient implements RestClient {
   DioRestClient({
     required LocalStorage localStorage,
     required AppLogger logger,
-    required AuthStore authStore,
+    required AuthViewModel authStore,
     BaseOptions? baseOptions,
   }) {
     _dio = Dio(baseOptions ?? _defaultOptions);
