@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
 import '../../features/home/data/services/polling_services.dart';
 import '../../features/home/data/services/webview_service.dart';
 import '../../repositories/home/home_repository.dart';
@@ -15,10 +16,6 @@ import '../../service/schedule/schedule_service.dart';
 import '../../service/schedule/schedule_service_impl.dart';
 import '../../service/user/user_service.dart';
 import '../../service/user/user_service_impl.dart';
-import '../auth/auth_store.dart';
-import '../services/settings_service.dart';
-import '../services/volume_service.dart';
-import '../services/url_launcher_service.dart';
 import '../local_storage/flutter_secure_storage/flutter_secure_storage_local_storage_impl.dart';
 import '../local_storage/local_storage.dart';
 import '../local_storage/shared_preferences/shared_preferences_local_storage_impl.dart';
@@ -26,6 +23,9 @@ import '../logger/app_logger.dart';
 import '../logger/logger_app_logger_impl.dart';
 import '../rest_client/dio/dio_rest_client.dart';
 import '../rest_client/rest_client.dart';
+import '../services/settings_service.dart';
+import '../services/url_launcher_service.dart';
+import '../services/volume_service.dart';
 
 final GetIt i = GetIt.instance;
 
@@ -57,8 +57,8 @@ class Injector {
     );
 
     // Auth Store
-    i.registerLazySingleton<AuthStore>(
-      () => AuthStore(
+    i.registerLazySingleton<AuthViewModel>(
+      () => AuthViewModel(
         localStorage: i(),
         logger: i(),
       ),
