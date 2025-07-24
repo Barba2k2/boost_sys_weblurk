@@ -1,17 +1,17 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/auth/auth_store.dart';
 import '../../../../core/utils/command.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../models/schedule_list_model.dart';
 import '../../../../models/schedule_model.dart';
 import '../../../../models/user_model.dart';
 import '../../../../service/home/home_service.dart';
+import '../../../auth/login/presentation/viewmodels/auth_viewmodel.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
     required HomeService homeService,
-    required AuthStore authStore,
+    required AuthViewModel authStore,
   })  : _homeService = homeService,
         _authStore = authStore {
     // Escutar mudanças no AuthStore
@@ -22,7 +22,7 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   final HomeService _homeService;
-  final AuthStore _authStore;
+  final AuthViewModel _authStore;
 
   // Estado reativo do AuthStore
   UserModel? get userLogged => _authStore.userLogged;
