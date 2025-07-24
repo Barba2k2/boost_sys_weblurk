@@ -2,8 +2,10 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
+import '../../features/auth/login/presentation/viewmodels/login_viewmodel.dart';
 import '../../features/home/data/services/polling_services.dart';
 import '../../features/home/data/services/webview_service.dart';
+import '../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import '../../repositories/home/home_repository.dart';
 import '../../repositories/home/home_repository_impl.dart';
 import '../../repositories/schedule/schedule_repository.dart';
@@ -167,7 +169,22 @@ class Injector {
   }
 
   static Future<void> _injectControllers() async {
-    // Remover injeção dos antigos controllers
+    // Login ViewModel
+    i.registerFactory<LoginViewModel>(
+      () => LoginViewModel(
+        authStore: i(),
+        userService: i(),
+      ),
+    );
+
+    // Home ViewModel
+    i.registerFactory<HomeViewModel>(
+      () => HomeViewModel(
+        homeService: i(),
+        logger: i(),
+        authViewmodel: i(),
+      ),
+    );
   }
 }
 
