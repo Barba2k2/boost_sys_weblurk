@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/login/presentation/pages/login_page.dart';
+import '../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
 import '../../features/auth/login/presentation/viewmodels/login_viewmodel.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/viewmodels/settings_viewmodel.dart';
-import '../auth/auth_store.dart';
 import '../di/injector.dart';
 import 'app_routes.dart';
 
 class RouterConfig {
   static GoRouter get router => GoRouter(
         redirect: _redirect,
-        refreshListenable: injector<AuthStore>(),
+        refreshListenable: injector<AuthViewModel>(),
         initialLocation: AppRoutes.splash,
         routes: [
           GoRoute(
@@ -54,7 +54,7 @@ class RouterConfig {
 
   static Future<String?> _redirect(
       BuildContext context, GoRouterState state) async {
-    final authStore = injector<AuthStore>();
+    final authStore = injector<AuthViewModel>();
     final loggedIn = authStore.userLogged != null;
     final loggingIn = state.matchedLocation == AppRoutes.login;
     final isSplash = state.matchedLocation == AppRoutes.splash;
