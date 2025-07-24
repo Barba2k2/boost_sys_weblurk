@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:webview_windows/webview_windows.dart';
 import '../../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import 'webview_widget.dart';
+import '../../di/injector.dart';
+import '../../../features/home/data/services/webview_service.dart';
 
 class ScheduleTabsWidget extends StatefulWidget {
   const ScheduleTabsWidget({
@@ -18,6 +21,10 @@ class ScheduleTabsWidget extends StatefulWidget {
 class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
     with TickerProviderStateMixin {
   late TabController _tabController;
+  late WebviewController _webviewControllerA;
+  late WebviewController _webviewControllerB;
+  late WebViewService _webviewService;
+  bool _isControllersInitialized = false;
 
   @override
   void initState() {
@@ -28,6 +35,19 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
       initialIndex: widget.viewModel.currentTabIndex,
     );
     widget.viewModel.addListener(_onViewModelChanged);
+
+    _webviewService = injector<WebViewService>();
+    _initWebviewControllers();
+  }
+
+  Future<void> _initWebviewControllers() async {
+    _webviewControllerA = WebviewController();
+    _webviewControllerB = WebviewController();
+    await _webviewControllerA.initialize();
+    await _webviewControllerB.initialize();
+    setState(() {
+      _isControllersInitialized = true;
+    });
   }
 
   void _onViewModelChanged() {
@@ -41,6 +61,8 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
   void dispose() {
     widget.viewModel.removeListener(_onViewModelChanged);
     _tabController.dispose();
+    _webviewControllerA.dispose();
+    _webviewControllerB.dispose();
     super.dispose();
   }
 
@@ -86,23 +108,29 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
         ),
         // TabBarView
         Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              // Aba Lista A
-              MyWebviewWidget(
-                initialUrl: widget.viewModel.currentTabIndex == 0
-                    ? widget.viewModel.currentChannelListA
-                    : 'https://twitch.tv/BoostTeam_',
-              ),
-              // Aba Lista B
-              MyWebviewWidget(
-                initialUrl: widget.viewModel.currentTabIndex == 1
-                    ? widget.viewModel.currentChannelListB
-                    : 'https://twitch.tv/BoostTeam_',
-              ),
-            ],
-          ),
+          child: _isControllersInitialized
+              ? TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Aba Lista A
+                    MyWebviewWidget(
+                      initialUrl: widget.viewModel.currentTabIndex == 0
+                          ? widget.viewModel.currentChannelListA
+                          : 'https://twitch.tv/BoostTeam_',
+                      webviewController: _webviewControllerA,
+                      webviewService: _webviewService,
+                    ),
+                    // Aba Lista B
+                    MyWebviewWidget(
+                      initialUrl: widget.viewModel.currentTabIndex == 1
+                          ? widget.viewModel.currentChannelListB
+                          : 'https://twitch.tv/BoostTeam_',
+                      webviewController: _webviewControllerB,
+                      webviewService: _webviewService,
+                    ),
+                  ],
+                )
+              : const Center(child: CircularProgressIndicator()),
         ),
       ],
     );
