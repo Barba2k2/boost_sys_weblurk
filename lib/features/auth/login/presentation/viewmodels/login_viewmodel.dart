@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../../core/services/error_message_service.dart';
 import '../../../../../core/utils/command.dart';
 import '../../../../../core/utils/result.dart';
-import '../../../../../core/auth/auth_store.dart';
-import '../../../../../core/services/error_message_service.dart';
-import '../../../../../service/user/user_service.dart';
 import '../../../../../models/user_model.dart';
+import '../../../../../service/user/user_service.dart';
+import 'auth_viewmodel.dart';
 
 class LoginViewModel extends ChangeNotifier {
   LoginViewModel({
-    required AuthStore authStore,
+    required AuthViewModel authStore,
     required UserService userService,
   })  : _authStore = authStore,
         _userService = userService {
@@ -17,7 +17,7 @@ class LoginViewModel extends ChangeNotifier {
     _authStore.addListener(() => notifyListeners());
   }
 
-  final AuthStore _authStore;
+  final AuthViewModel _authStore;
   final UserService _userService;
 
   // Estado reativo do AuthStore
