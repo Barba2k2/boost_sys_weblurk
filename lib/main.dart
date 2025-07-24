@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'core/application_config.dart';
 import 'core/di/injector.dart';
-import 'core/routes/router_config.dart' as app_router;
+import 'core/routes/router_config.dart';
 import 'core/services/update_service.dart';
-import 'core/ui/widgets/messages.dart';
 import 'core/ui/ui_config.dart';
 
 Future<void> main() async {
@@ -17,14 +16,9 @@ Future<void> main() async {
 
   runApp(
     MaterialApp.router(
-      routerConfig: app_router.RouterConfig.router,
+      routerConfig: AppRouter.router,
       title: UiConfig.title,
       theme: UiConfig.theme,
-      builder: (context, child) {
-        // Configurar o contexto global para o Messages
-        Messages.setGlobalContext(context);
-        return child!;
-      },
     ),
   );
 }
