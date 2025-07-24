@@ -33,4 +33,6 @@ class AppColors {
   static const Color scheduleRowCancelled = Color(0x1AF44336);
   static const Color translucentField = Color(0x42000000);
   static const Color transparent = Colors.transparent;
+  static const Color webviewBackground = Colors.black87;
+  static const Color webviewText = Colors.white;
 }
