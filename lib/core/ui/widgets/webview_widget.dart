@@ -1,9 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_windows/webview_windows.dart';
-
 import '../../../features/home/data/services/webview_service.dart';
 import '../app_colors.dart';
 
@@ -25,39 +21,59 @@ class MyWebviewWidget extends StatefulWidget {
 
 class _MyWebviewWidgetState extends State<MyWebviewWidget> {
   bool _isLoading = true;
-  String? _errorMessage;
-  bool _timeout = false;
-  WebviewController? _winController;
-  bool _winInitialized = false;
-  InAppWebViewController? _controller;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    if (defaultTargetPlatform == TargetPlatform.windows) {
-      _initWinWebView();
-    } else {
-      Future.delayed(const Duration(seconds: 10), () {
-        if (mounted && _isLoading) {
+    _initWebView();
+  }
+
+  Future<void> _initWebView() async {
+    try {
+      // ✅ CORREÇÃO: Primeiro inicializar o service com o controller
+      await widget.webviewService.initializeWebView(widget.webviewController);
+
+      // ✅ Depois carregar a URL
+      await widget.webviewService.loadUrl(widget.initialUrl);
+
+      // Script para manter a conexão ativa e impedir diálogos
+      await widget.webviewController.executeScript('''
+        // Impedir diálogos de confirmação de saída
+        window.addEventListener('beforeunload', function(e) {
+          e.preventDefault();
+          e.returnValue = '';
+        });
+        
+        // Script para manter a conexão ativa
+        setInterval(function() {
+          console.log('Heartbeat: ' + new Date().toISOString());
+        }, 60000);
+      ''');
+
+      // ✅ Escutar o health status do service
+      widget.webviewService.healthStatus.listen((isResponding) {
+        if (mounted) {
           setState(() {
-            _timeout = true;
-            _isLoading = false;
-            _errorMessage =
-                'A página não respondeu.\nPode ser uma limitação da Twitch ou do site. Deseja abrir no navegador externo?';
+            _isLoading = !isResponding;
+            _isInitialized = isResponding;
           });
         }
       });
-    }
-  }
 
-  Future<void> _initWinWebView() async {
-    _winController = WebviewController();
-    await _winController!.initialize();
-    await _winController!.loadUrl(widget.initialUrl);
-    setState(() {
-      _winInitialized = true;
-      _isLoading = false;
-    });
+      setState(() {
+        _isInitialized = true;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Erro ao inicializar WebView: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isInitialized = false;
+        });
+      }
+    }
   }
 
   @override
@@ -74,126 +90,35 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget> {
       );
     }
 
-    // WINDOWS: embutido
-    if (defaultTargetPlatform == TargetPlatform.windows) {
-      if (!_winInitialized) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      return SizedBox.expand(child: Webview(_winController!));
-    }
-
-    // MOBILE/WEB: usa inappwebview embutido
-    if (_errorMessage != null) {
-      return Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, color: Colors.red, size: 48),
-                const SizedBox(height: 16),
-                const Text(
-                  'Erro ao carregar WebView',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                SelectableText(
-                  _errorMessage!,
-                  style: const TextStyle(fontSize: 12),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    if (_timeout) {
-                      final url = Uri.parse(widget.initialUrl);
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url,
-                            mode: LaunchMode.externalApplication);
-                      }
-                    } else {
-                      setState(() {
-                        _errorMessage = null;
-                        _isLoading = true;
-                        _timeout = false;
-                      });
-                      _controller?.loadUrl(
-                        urlRequest: URLRequest(
-                          url: WebUri(widget.initialUrl),
-                        ),
-                      );
-                    }
-                  },
-                  icon: Icon(_timeout ? Icons.open_in_browser : Icons.refresh),
-                  label: Text(
-                      _timeout ? 'Abrir no navegador' : 'Tentar Novamente'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
     return Stack(
       children: [
-        InAppWebView(
-          initialUrlRequest: URLRequest(url: WebUri(widget.initialUrl)),
-          initialSettings: InAppWebViewSettings(
-            javaScriptEnabled: true,
-            useShouldOverrideUrlLoading: true,
-            mediaPlaybackRequiresUserGesture: false,
-            clearCache: false,
-            cacheEnabled: true,
-            supportZoom: true,
-            transparentBackground: true,
-            allowsInlineMediaPlayback: true,
+        if (_isInitialized)
+          SizedBox.expand(child: Webview(widget.webviewController))
+        else
+          Container(
+            color: AppColors.webviewBackground,
+            child: const Center(
+              child: Text(
+                'Inicializando WebView...',
+                style: TextStyle(
+                  color: AppColors.webviewText,
+                  fontSize: 16,
+                ),
+              ),
+            ),
           ),
-          onWebViewCreated: (controller) {
-            _controller = controller;
-          },
-          onLoadStart: (controller, url) {
-            setState(() {
-              _isLoading = true;
-              _timeout = false;
-            });
-          },
-          onLoadStop: (controller, url) async {
-            setState(() {
-              _isLoading = false;
-              _timeout = false;
-            });
-          },
-          onReceivedError: (controller, request, error) {
-            setState(() {
-              _isLoading = false;
-              _timeout = false;
-              _errorMessage = 'Erro ao carregar página: ${error.description}';
-            });
-          },
-          onReceivedServerTrustAuthRequest: (controller, challenge) async {
-            return ServerTrustAuthResponse(
-                action: ServerTrustAuthResponseAction.PROCEED);
-          },
-        ),
         if (_isLoading)
           Container(
-            color: AppColors.loaderBackground,
+            color: AppColors.webviewBackground,
             child: const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator.adaptive(
-                    backgroundColor: AppColors.cardHeaderText,
-                  ),
+                  CircularProgressIndicator(color: Colors.white),
                   SizedBox(height: 16),
                   Text(
                     'Carregando...',
-                    style: TextStyle(
-                      color: AppColors.cardHeaderText,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ],
               ),
