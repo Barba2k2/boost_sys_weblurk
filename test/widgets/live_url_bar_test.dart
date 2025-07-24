@@ -59,7 +59,10 @@ void main() {
           final container = tester.widget<Container>(
             find.byType(Container),
           );
-          expect(container.color, Colors.purple[300]);
+          expect(
+            container.color,
+            const Color(0xFF6750A4).withValues(alpha: 0.7), // 0.7 * 255 = 178
+          );
         },
       );
 
