@@ -1,3 +1,4 @@
+import '../logger/app_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,9 +12,10 @@ import '../../features/settings/presentation/viewmodels/settings_viewmodel.dart'
 import '../di/injector.dart';
 import 'app_routes.dart';
 
-class RouterConfig {
+class AppRouter {
   static GoRouter get router => GoRouter(
-        redirect: _redirect,
+        // ✅ CORREÇÃO: Adicionado o logger ao redirect para depuração.
+        redirect: (context, state) => _redirect(context, state, injector()),
         refreshListenable: injector<AuthViewModel>(),
         initialLocation: AppRoutes.splash,
         routes: [
@@ -24,61 +26,55 @@ class RouterConfig {
           GoRoute(
             path: AppRoutes.login,
             builder: (context, state) => LoginPage(
-              viewModel: LoginViewModel(
-                authStore: injector(),
-                userService: injector(),
-              ),
+              // ✅ CORREÇÃO: ViewModel injetado diretamente.
+              viewModel: injector<LoginViewModel>(),
             ),
           ),
           GoRoute(
             path: AppRoutes.home,
             builder: (context, state) => HomePage(
-              viewModel: HomeViewModel(
-                homeService: injector(),
-                authStore: injector(),
-              ),
+              // ✅ CORREÇÃO: ViewModel injetado diretamente.
+              viewModel: injector<HomeViewModel>(),
             ),
           ),
           GoRoute(
             path: AppRoutes.settings,
             builder: (context, state) => SettingsPage(
-              viewModel: SettingsViewModel(
-                settingsService: injector(),
-                volumeService: injector(),
-                urlLauncherService: injector(),
-              ),
+              // ✅ CORREÇÃO: ViewModel injetado diretamente.
+              viewModel: injector<SettingsViewModel>(),
             ),
           ),
         ],
       );
 
   static Future<String?> _redirect(
-      BuildContext context, GoRouterState state) async {
+    BuildContext context,
+    GoRouterState state,
+    AppLogger logger,
+  ) async {
     final authStore = injector<AuthViewModel>();
     final loggedIn = authStore.userLogged != null;
     final loggingIn = state.matchedLocation == AppRoutes.login;
     final isSplash = state.matchedLocation == AppRoutes.splash;
 
-    // Se está na splash, redireciona baseado no status de login
+    logger.info(
+        'Redirecting... loggedIn: $loggedIn, location: ${state.matchedLocation}');
+
     if (isSplash) {
-      if (loggedIn) {
-        return AppRoutes.home;
-      } else {
-        return AppRoutes.login;
-      }
+      return loggedIn ? AppRoutes.home : AppRoutes.login;
     }
 
-    // Se não está logado e não está fazendo login, redireciona para login
     if (!loggedIn && !loggingIn) {
+      logger.info('User not logged in, redirecting to login.');
       return AppRoutes.login;
     }
 
-    // Se está logado e tentando fazer login, redireciona para home
-    if (loggingIn && loggedIn) {
+    if (loggedIn && loggingIn) {
+      logger.info('User already logged in, redirecting to home.');
       return AppRoutes.home;
     }
 
-    return null;
+    return null; // Nenhuma ação de redirecionamento necessária
   }
 }
 
