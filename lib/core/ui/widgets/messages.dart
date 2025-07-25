@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
 
 class Messages {
@@ -24,7 +23,10 @@ class Messages {
         SnackBar(
           content: Text(
             message,
-            style: GoogleFonts.inter(color: AppColors.cardHeaderText),
+            style: const TextStyle(
+              fontFamily: 'Ibrand',
+              color: AppColors.cardHeaderText,
+            ),
           ),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
@@ -41,7 +43,10 @@ class Messages {
         SnackBar(
           content: Text(
             message,
-            style: GoogleFonts.inter(color: AppColors.cardHeaderText),
+            style: const TextStyle(
+              fontFamily: 'Ibrand',
+              color: AppColors.cardHeaderText,
+            ),
           ),
           backgroundColor: AppColors.warning,
           behavior: SnackBarBehavior.floating,
@@ -74,7 +79,8 @@ class Messages {
         SnackBar(
           content: Text(
             message,
-            style: GoogleFonts.inter(color: AppColors.cardHeaderText),
+            style: const TextStyle(
+                fontFamily: 'Ibrand', color: AppColors.cardHeaderText),
           ),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
