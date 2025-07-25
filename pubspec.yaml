@@ -60,3 +60,8 @@ flutter:
     - assets/images/logo-cla-boost.png
     - .env
     - shorebird.yaml
+  fonts:
+    - family: Ibrand
+      fonts:
+        - asset: assets/fonts/Ibrand.otf
+        - asset: assets/fonts/Ibrand.ttf
