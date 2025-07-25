@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF6750A4);
+  static const Color primary = Colors.purple;
   static const Color secondary = Color(0xFF625B71);
   static const Color tertiary = Color(0xFF7D5260);
   static const Color background = Color(0xFF231942);
@@ -21,7 +21,7 @@ class AppColors {
   static const Color menuButton = Color(0x1FFFFFFF);
   static const Color menuButtonActive = Color(0xFFA162FF);
   static const Color menuItemIcon = Colors.white;
-  static const Color menuItemIconInactive = Colors.black;
+  static const Color menuItemIconInactive = Color(0xFF6A1B9A);
   static const Color loader = Colors.purple;
   static const Color loaderBackground = Colors.black54;
   static const Color error = Colors.red;
