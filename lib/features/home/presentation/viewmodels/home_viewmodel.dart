@@ -10,15 +10,18 @@ import '../../../../models/schedule_model.dart';
 import '../../../../models/user_model.dart';
 import '../../../../service/home/home_service.dart';
 import '../../../auth/login/presentation/viewmodels/auth_viewmodel.dart';
+import '../../data/services/webview_service.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
     required HomeService homeService,
     required AuthViewModel authViewmodel,
     required AppLogger logger,
+    required WebViewService webViewService,
   })  : _homeService = homeService,
         _authStore = authViewmodel,
-        _logger = logger {
+        _logger = logger,
+        _webViewService = webViewService {
     // Escutar mudanças no AuthStore
     _authStore.addListener(() => notifyListeners());
 
@@ -29,6 +32,7 @@ class HomeViewModel extends ChangeNotifier {
   final HomeService _homeService;
   final AuthViewModel _authStore;
   final AppLogger _logger;
+  final WebViewService _webViewService;
 
   // Estado reativo do AuthStore
   UserModel? get userLogged => _authStore.userLogged;
@@ -77,6 +81,10 @@ class HomeViewModel extends ChangeNotifier {
       } else if (identifier == 'listaB') {
         _webviewControllerB = controller;
       }
+
+      // Conecta os controllers ao WebViewService para controle de áudio
+      _webViewService.setWebViewControllers(
+          _webviewControllerA, _webviewControllerB);
     } catch (e, s) {
       _logger.error('Erro ao registrar WebView controller', e, s);
     }
