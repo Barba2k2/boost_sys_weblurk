@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routes/app_routes.dart';
+import '../../../../core/services/update_service.dart';
 import '../../../../core/ui/app_colors.dart';
 import '../viewmodels/settings_viewmodel.dart';
 
@@ -27,6 +28,8 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _buildVolumeSection(),
+          const SizedBox(height: 24),
+          _buildUpdateSection(),
           const SizedBox(height: 24),
           _buildUrlSection(),
         ],
@@ -117,6 +120,59 @@ class SettingsPage extends StatelessWidget {
                   ],
                 );
               },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUpdateSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.system_update,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Atualizações',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Verifique se há atualizações disponíveis para o aplicativo.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  UpdateService.instance.checkForUpdateManually();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Verificar Atualizações'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+              ),
             ),
           ],
         ),
