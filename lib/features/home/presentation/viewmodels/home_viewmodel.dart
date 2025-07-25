@@ -68,17 +68,14 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   // ✅ CORREÇÃO: Método para registrar controllers dos WebViews
-  void onWebViewCreated(WebviewController controller) {
+  void onWebViewCreated(WebviewController controller, String identifier) {
     try {
-      _logger.info('WebView controller registrado');
+      _logger.info('WebView controller registrado para $identifier');
 
-      // Determinar qual aba este controller pertence baseado no timing
-      if (_webviewControllerA == null) {
+      if (identifier == 'listaA') {
         _webviewControllerA = controller;
-        _logger.info('Controller da Lista A registrado');
-      } else if (_webviewControllerB == null) {
+      } else if (identifier == 'listaB') {
         _webviewControllerB = controller;
-        _logger.info('Controller da Lista B registrado');
       }
     } catch (e, s) {
       _logger.error('Erro ao registrar WebView controller', e, s);
