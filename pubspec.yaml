@@ -43,6 +43,7 @@ dependencies:
   webview_windows: ^0.4.0
   win32: ^5.8.0
   # flutter_volume_controller: ^1.3.3  # Removido - agora controla apenas o áudio do app
+  win32audio: ^1.4.0
   window_manager: ^0.4.3
 
 dev_dependencies:
