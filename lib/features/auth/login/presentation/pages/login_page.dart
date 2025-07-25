@@ -51,6 +51,7 @@ class _LoginPageState extends State<LoginPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Messages.setGlobalContext(context);
     });
+
     return Scaffold(
       body: Stack(
         children: [
@@ -65,21 +66,16 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // Login Form Container
+          // Login Form Container with Rotating Border Light
           Align(
             child: Container(
               decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                        AppColors.menuItemIconInactive.withValues(alpha: 0.5),
-                    blurRadius: 50,
-                    spreadRadius: 2,
-                    // offset: const Offset(5, 5),
-                  ),
-                ],
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.menuItemIconInactive.withValues(alpha: 0.8),
+                  // width: 1,
+                ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 32),
               width: 600,
