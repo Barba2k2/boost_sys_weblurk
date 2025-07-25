@@ -1,7 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:validatorless/validatorless.dart';
 
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/services/error_message_service.dart';
@@ -9,6 +9,7 @@ import '../../../../../core/ui/app_colors.dart';
 import '../../../../../core/ui/widgets/boost_text_form_field.dart';
 import '../../../../../core/utils/result.dart';
 import '../viewmodels/login_viewmodel.dart';
+import '../../../../../core/ui/widgets/messages.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -46,6 +47,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Configura o contexto global para mensagens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Messages.setGlobalContext(context);
+    });
     return Scaffold(
       body: Stack(
         children: [
@@ -68,30 +73,31 @@ class _LoginPageState extends State<LoginPage> {
                   BoxShadow(
                     color:
                         AppColors.menuItemIconInactive.withValues(alpha: 0.5),
-                    blurRadius: 10,
-                    spreadRadius: 5,
-                    offset: const Offset(0, 5),
+                    blurRadius: 50,
+                    spreadRadius: 2,
+                    // offset: const Offset(5, 5),
                   ),
                 ],
                 color: AppColors.primary,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(12),
               ),
-              padding: const EdgeInsets.all(32),
-              width: 500,
-              height: 380,
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              width: 600,
+              height: 350,
               child: Form(
                 key: _formKey,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Logo/Título
-                    Text(
-                      'BoostTeam SysWebLurk',
-                      style: GoogleFonts.poppins(
+                    const Text(
+                      'Boost Team SysWebLurk',
+                      style: TextStyle(
                         color: AppColors.cardHeaderText,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Ibrand',
+                        letterSpacing: 3.0,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -100,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                     BoostTextFormField(
                       controller: _nicknameEC,
                       label: 'Usuário',
-                      validator: Validatorless.required('Login obrigatório'),
+                      validator: widget.viewModel.validateUser,
                     ),
                     const SizedBox(height: 16),
 
@@ -108,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                     BoostTextFormField(
                       controller: _passwordEC,
                       label: 'Password',
-                      validator: Validatorless.required('Senha obrigatória'),
+                      validator: widget.viewModel.validatePassword,
                       obscureText: true,
                     ),
                     const SizedBox(height: 20),
@@ -138,12 +144,14 @@ class _LoginPageState extends State<LoginPage> {
                                 ? const CircularProgressIndicator(
                                     color: AppColors.cardHeaderText,
                                   )
-                                : Text(
+                                : const Text(
                                     'Entrar',
-                                    style: GoogleFonts.poppins(
+                                    style: TextStyle(
+                                      fontFamily: 'Ibrand',
                                       color: AppColors.cardHeaderText,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 2.0,
                                     ),
                                   ),
                           ),
@@ -174,6 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                   final error = command.result?.errorOrNull;
 
                   // Usar o ErrorMessageService para tratar o erro
+                  log('error: $error');
                   ErrorMessageService.instance.handleLoginError(error);
                 });
               }
