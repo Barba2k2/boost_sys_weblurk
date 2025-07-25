@@ -1,4 +1,5 @@
 import '../../features/home/data/services/webview_service.dart';
+import '../helpers/audio_helper.dart';
 import '../logger/app_logger.dart';
 
 class VolumeService {
@@ -25,11 +26,11 @@ class VolumeService {
 
   Future<void> _initializeVolumeControl() async {
     try {
+      await AudioHelper.initialize();
+
       _currentVolume = 1.0;
       _originalVolume = 1.0;
       _isInitialized = true;
-      _logger.info(
-          'Controle de volume do app inicializado. Volume atual: $_currentVolume');
     } catch (e, s) {
       _logger.error('Erro ao inicializar controle de volume do app', e, s);
       _isVolumeControlAvailable = false;
@@ -38,21 +39,17 @@ class VolumeService {
 
   Future<void> mute() async {
     if (!_isVolumeControlAvailable || !_isInitialized) {
-      _logger.warning('Controle de volume do app não disponível para mutar');
       return;
     }
     try {
-      _logger.info('Iniciando processo de mute...');
-      _originalVolume = _currentVolume;
-      _logger.info('Volume original salvo: $_originalVolume');
+      _originalVolume = await AudioHelper.getCurrentVolume();
+
+      await AudioHelper.setApplicationMute(true);
+
       _currentVolume = 0.0;
       _isMuted = true;
-      _logger.info(
-          'Estado interno atualizado - Volume: $_currentVolume, Muted: $_isMuted');
+
       await _webViewService.muteWebView();
-      _logger.info('muteWebView() concluído');
-      _logger.info(
-          'Áudio do app mutado com sucesso. Volume anterior: $_originalVolume');
     } catch (e, s) {
       _logger.error('Erro ao mutar áudio do app', e, s);
     }
@@ -60,19 +57,15 @@ class VolumeService {
 
   Future<void> unmute() async {
     if (!_isVolumeControlAvailable || !_isInitialized) {
-      _logger.warning('Controle de volume do app não disponível para desmutar');
       return;
     }
     try {
-      _logger.info('Iniciando processo de unmute...');
+      await AudioHelper.setApplicationMute(false);
+
       _currentVolume = _originalVolume;
       _isMuted = false;
-      _logger.info(
-          'Estado interno atualizado - Volume: $_currentVolume, Muted: $_isMuted');
+
       await _webViewService.unmuteWebView();
-      _logger.info('unmuteWebView() concluído');
-      _logger.info(
-          'Áudio do app desmutado com sucesso. Volume restaurado para: $_originalVolume');
     } catch (e, s) {
       _logger.error('Erro ao desmutar áudio do app', e, s);
     }
@@ -88,12 +81,13 @@ class VolumeService {
 
   Future<void> setVolume(double volume) async {
     if (!_isVolumeControlAvailable || !_isInitialized) {
-      _logger.warning(
-          'Controle de volume do app não disponível para definir volume');
       return;
     }
     try {
       final clampedVolume = volume.clamp(0.0, 1.0);
+
+      await AudioHelper.setCurrentVolume(clampedVolume);
+
       if (clampedVolume > 0.0) {
         _isMuted = false;
         _originalVolume = clampedVolume;
@@ -101,8 +95,8 @@ class VolumeService {
         _isMuted = true;
       }
       _currentVolume = clampedVolume;
+
       await _webViewService.setWebViewVolume(clampedVolume);
-      _logger.info('Volume do app definido para: $clampedVolume');
     } catch (e, s) {
       _logger.error('Erro ao definir volume do app', e, s);
     }
@@ -112,7 +106,24 @@ class VolumeService {
     if (!_isVolumeControlAvailable || !_isInitialized) {
       return 0.0;
     }
-    return _currentVolume;
+
+    try {
+      final systemVolume = await AudioHelper.getCurrentVolume();
+      _currentVolume = systemVolume;
+      return systemVolume;
+    } catch (e, s) {
+      _logger.error('Erro ao obter volume do sistema', e, s);
+      return _currentVolume;
+    }
+  }
+
+  Future<bool> isSystemMuted() async {
+    try {
+      return await AudioHelper.isApplicationMuted();
+    } catch (e, s) {
+      _logger.error('Erro ao verificar mute do sistema', e, s);
+      return _isMuted;
+    }
   }
 
   bool get isAppMuted => _isMuted;
