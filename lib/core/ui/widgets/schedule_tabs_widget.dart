@@ -1,10 +1,10 @@
-// lib/core/ui/widgets/schedule_tabs_widget.dart
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../../features/home/presentation/viewmodels/home_viewmodel.dart';
-import 'webview_widget.dart';
 import '../../di/injector.dart';
 import '../../logger/app_logger.dart';
+import '../app_colors.dart';
+import 'webview_widget.dart';
 
 class ScheduleTabsWidget extends StatefulWidget {
   const ScheduleTabsWidget({
@@ -35,6 +35,11 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
     );
 
     widget.viewModel.addListener(_onViewModelChanged);
+
+    // Listener para atualizar o arredondamento ao trocar de aba
+    _tabController.addListener(() {
+      setState(() {});
+    });
   }
 
   void _onViewModelChanged() {
@@ -52,19 +57,28 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
 
   @override
   Widget build(BuildContext context) {
+    final selectedIndex = _tabController.index;
+    BorderRadius indicatorRadius = BorderRadius.circular(0);
+    if (selectedIndex == 0) {
+      indicatorRadius = const BorderRadius.only(
+        topRight: Radius.circular(8),
+        bottomRight: Radius.circular(8),
+      );
+    } else {
+      indicatorRadius = const BorderRadius.only(
+        topLeft: Radius.circular(8),
+        bottomLeft: Radius.circular(8),
+      );
+    }
     return Column(
       children: [
         // TabBar
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withAlpha(230), // ~90%
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
-            ),
+            color: AppColors.menuButton,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(25), // 10%
+                color: Colors.black.withValues(alpha: 0.10),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -73,16 +87,24 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
           child: TabBar(
             controller: _tabController,
             onTap: (index) => widget.viewModel.switchTabCommand.execute(index),
-            labelColor: const Color(0xFF2C1F4A),
-            unselectedLabelColor: Colors.grey[600],
-            indicatorColor: const Color(0xFF2C1F4A),
-            labelStyle: GoogleFonts.inter(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+            labelColor: AppColors.menuItemIcon,
+            unselectedLabelColor: AppColors.menuItemIconInactive,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              color: AppColors.appBar,
+              borderRadius: indicatorRadius,
             ),
-            unselectedLabelStyle: GoogleFonts.inter(
-              fontWeight: FontWeight.w400,
-              fontSize: 14,
+            labelStyle: const TextStyle(
+              fontFamily: 'Ibrand',
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              letterSpacing: 2.2,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontFamily: 'Ibrand',
+              fontWeight: FontWeight.w300,
+              fontSize: 16,
+              letterSpacing: 2.2,
             ),
             tabs: const [
               Tab(text: 'Lista A'),
@@ -103,6 +125,8 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
                     : 'https://twitch.tv/BoostTeam_',
                 currentUrl: widget.viewModel.currentChannelListA,
                 logger: _logger,
+                onWebViewCreated: widget.viewModel.onWebViewCreated,
+                tabIdentifier: 'listaA',
               ),
               MyWebviewWidget(
                 key: const ValueKey('webview_lista_b'),
@@ -111,6 +135,8 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
                     : 'https://twitch.tv/BoostTeam_',
                 currentUrl: widget.viewModel.currentChannelListB,
                 logger: _logger,
+                onWebViewCreated: widget.viewModel.onWebViewCreated,
+                tabIdentifier: 'listaB',
               ),
             ],
           ),
