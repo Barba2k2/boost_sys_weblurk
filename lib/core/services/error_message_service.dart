@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../ui/widgets/messages.dart';
@@ -93,6 +95,10 @@ class ErrorMessageService {
       return 'Usuário não encontrado. Verifique suas credenciais.';
     }
 
+    if (errorString.contains('Invalid password')) {
+      return 'Senha incorreta. Verifique e tente novamente.';
+    }
+
     if (errorString.contains('Token de acesso não encontrado')) {
       return 'Erro na resposta do servidor. Tente novamente.';
     }
@@ -125,11 +131,13 @@ class ErrorMessageService {
 
   /// Verifica se é um erro de servidor
   bool _isServerError(String errorString) {
+    log('errorString: $errorString');
     return errorString.contains('500') ||
         errorString.contains('502') ||
         errorString.contains('503') ||
         errorString.contains('504') ||
         errorString.contains('Internal Server Error') ||
+        errorString.contains('Erro interno do sistema') ||
         errorString.contains('Bad Gateway') ||
         errorString.contains('Service Unavailable');
   }
