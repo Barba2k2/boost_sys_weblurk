@@ -12,8 +12,13 @@ class MyWebviewWidget extends StatefulWidget {
     required this.initialUrl,
     this.currentUrl,
     this.logger,
+    required this.onWebViewCreated,
+    required this.tabIdentifier,
     super.key,
   });
+
+  final Function(WebviewController, String) onWebViewCreated;
+  final String tabIdentifier;
 
   final String initialUrl;
   final String? currentUrl;
@@ -102,8 +107,7 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
       _setupEventListeners();
       await _controller.loadUrl(_currentUrl);
 
-      // ✅ CORREÇÃO: Removida chamada de callback não utilizada.
-      // widget.onWebViewCreated?.call(_controller);
+      widget.onWebViewCreated(_controller, widget.tabIdentifier);
 
       if (mounted) {
         setState(() {
