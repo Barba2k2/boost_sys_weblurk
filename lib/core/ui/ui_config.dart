@@ -33,9 +33,9 @@ class UiConfig {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           elevation: 4,
         ),
-        tabBarTheme: const TabBarThemeData(
-          labelColor: AppColors.cardHeaderText,
-          unselectedLabelColor: AppColors.cardHeaderSubText,
+        tabBarTheme: TabBarThemeData(
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
         ),
       );
 
@@ -67,9 +67,9 @@ class UiConfig {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           elevation: 4,
         ),
-        tabBarTheme: const TabBarThemeData(
-          labelColor: AppColors.cardHeaderText,
-          unselectedLabelColor: AppColors.cardHeaderSubText,
+        tabBarTheme: TabBarThemeData(
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
         ),
       );
 
