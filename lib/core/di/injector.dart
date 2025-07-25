@@ -183,6 +183,7 @@ class Injector {
         homeService: i(),
         logger: i(),
         authViewmodel: i(),
+        webViewService: i(),
       ),
     );
   }
