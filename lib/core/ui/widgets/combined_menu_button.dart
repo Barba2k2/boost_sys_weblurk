@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import '../../services/settings_service.dart';
 import '../../services/url_launcher_service.dart';
 import '../../services/volume_service.dart';
-import '../widgets/messages.dart';
 import '../app_colors.dart';
-import 'menu_item_widget.dart'; // Will be created next
+import '../widgets/messages.dart';
+import 'menu_item_widget.dart';
 
-class CombinedMenuButton extends StatelessWidget {
+class CombinedMenuButton extends StatefulWidget {
   final HomeViewModel viewModel;
   final SettingsService settingsService;
   final UrlLauncherService urlLauncherService;
@@ -23,6 +24,88 @@ class CombinedMenuButton extends StatelessWidget {
   });
 
   @override
+  State<CombinedMenuButton> createState() => _CombinedMenuButtonState();
+}
+
+class _CombinedMenuButtonState extends State<CombinedMenuButton> {
+  bool _isMuted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkMuteStatus();
+  }
+
+  Future<void> _checkMuteStatus() async {
+    try {
+      final isMuted = await widget.volumeService.isSystemMuted();
+      if (mounted) {
+        setState(() {
+          _isMuted = isMuted;
+        });
+      }
+    } catch (e) {
+      // Fallback para estado interno se não conseguir verificar o sistema
+      if (mounted) {
+        setState(() {
+          _isMuted = widget.volumeService.isMuted;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleMute() async {
+    await widget.volumeService.mute();
+    await _checkMuteStatus();
+    _showMessage('Áudio mutado');
+  }
+
+  Future<void> _handleUnmute() async {
+    await widget.volumeService.unmute();
+    await _checkMuteStatus();
+    _showMessage('Áudio desmutado');
+  }
+
+  void _showMessage(String message) {
+    if (mounted) {
+      Navigator.of(context).pop();
+
+      final overlay = Overlay.of(context);
+      final overlayEntry = OverlayEntry(
+        builder: (context) => Positioned(
+          left: 20,
+          right: 200,
+          bottom: 20,
+          child: Material(
+            elevation: 8,
+            borderRadius: BorderRadius.circular(8),
+            color: AppColors.success,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontFamily: 'Ibrand',
+                  color: AppColors.cardHeaderText,
+                  fontSize: 18,
+                ),
+                textAlign: TextAlign.left,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      overlay.insert(overlayEntry);
+
+      Future.delayed(const Duration(seconds: 3), () {
+        overlayEntry.remove();
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
       offset: const Offset(0, 40),
@@ -32,14 +115,14 @@ class CombinedMenuButton extends StatelessWidget {
           label: 'Atualizar Listas',
           icon: Icons.refresh,
           onTap: () {
-            viewModel.reloadWebView();
+            widget.viewModel.reloadWebView();
           },
         ),
         MenuItemWidget(
           label: 'Encerrar',
           icon: Icons.power_settings_new,
           onTap: () {
-            settingsService.terminateApp();
+            widget.settingsService.terminateApp();
           },
         ),
         PopupMenuItem<String>(
@@ -58,45 +141,42 @@ class CombinedMenuButton extends StatelessWidget {
                 Icon(Icons.arrow_right),
               ],
             ),
-            itemBuilder: (context) {
-              final isMuted = volumeService.isMuted;
-              return [
-                PopupMenuItem<String>(
-                  value: 'muted',
-                  child: Row(
-                    children: [
-                      if (isMuted)
-                        const Icon(
-                          Icons.check,
-                          size: 18,
-                          color: Colors.green,
-                        ),
-                      if (!isMuted) const SizedBox(width: 18),
-                      const SizedBox(width: 8),
-                      const Text('Mutado'),
-                    ],
-                  ),
-                  onTap: () {
-                    volumeService.mute();
-                  },
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'muted',
+                child: Row(
+                  children: [
+                    if (_isMuted)
+                      const Icon(
+                        Icons.check,
+                        size: 18,
+                        color: Colors.green,
+                      ),
+                    if (!_isMuted) const SizedBox(width: 18),
+                    const SizedBox(width: 8),
+                    const Text('Mutado'),
+                  ],
                 ),
-                PopupMenuItem<String>(
-                  value: 'unmuted',
-                  child: Row(
-                    children: [
-                      if (!isMuted)
-                        const Icon(Icons.check, size: 18, color: Colors.green),
-                      if (isMuted) const SizedBox(width: 18),
-                      const SizedBox(width: 8),
-                      const Text('Desmutado'),
-                    ],
-                  ),
-                  onTap: () {
-                    volumeService.unmute();
-                  },
+                onTap: () {
+                  _handleMute();
+                },
+              ),
+              PopupMenuItem<String>(
+                value: 'unmuted',
+                child: Row(
+                  children: [
+                    if (!_isMuted)
+                      const Icon(Icons.check, size: 18, color: Colors.green),
+                    if (_isMuted) const SizedBox(width: 18),
+                    const SizedBox(width: 8),
+                    const Text('Desmutado'),
+                  ],
                 ),
-              ];
-            },
+                onTap: () {
+                  _handleUnmute();
+                },
+              ),
+            ],
           ),
         ),
         MenuItemWidget(
@@ -106,12 +186,11 @@ class CombinedMenuButton extends StatelessWidget {
             Messages.info('Funcionalidade ainda não funcional');
           },
         ),
-        // Links
         MenuItemWidget(
           label: 'Pontuação',
           icon: Icons.leaderboard,
           onTap: () async {
-            await urlLauncherService.launchURL(
+            await widget.urlLauncherService.launchURL(
               'https://docs.google.com/spreadsheets/d/1kh4zc2INhLEOGbLqqte8NnP4NsNRvFTgSWvKNKKM9qk/edit?usp=sharing',
             );
           },
@@ -120,7 +199,7 @@ class CombinedMenuButton extends StatelessWidget {
           label: 'Discord',
           icon: Icons.discord,
           onTap: () async {
-            await urlLauncherService.launchURL(
+            await widget.urlLauncherService.launchURL(
               'https://discord.gg/udteYpaGuB',
             );
           },
@@ -129,7 +208,7 @@ class CombinedMenuButton extends StatelessWidget {
           label: 'Redes Sociais',
           icon: Icons.live_tv_rounded,
           onTap: () async {
-            await urlLauncherService.launchURL(
+            await widget.urlLauncherService.launchURL(
               'https://www.twitch.com/BoostTeam_',
             );
           },
@@ -138,7 +217,7 @@ class CombinedMenuButton extends StatelessWidget {
           label: 'Formulário de horários',
           icon: Icons.edit_document,
           onTap: () async {
-            await urlLauncherService.launchURL(
+            await widget.urlLauncherService.launchURL(
               'https://forms.gle/RN4NGWm8Qvi1daqp7',
             );
           },
@@ -147,12 +226,11 @@ class CombinedMenuButton extends StatelessWidget {
           label: 'BoostTeam SysWeblurk',
           icon: Icons.edit_document,
           onTap: () async {
-            await urlLauncherService.launchURL(
+            await widget.urlLauncherService.launchURL(
               'https://drive.google.com/drive/folders/1XsmNh_gpKYLEkMSaBPFLuT3Y5vDmeWC3?usp=sharing',
             );
           },
         ),
-        // Sobre
         MenuItemWidget(
           label: 'Sobre o Weblurk',
           icon: Icons.leaderboard,
