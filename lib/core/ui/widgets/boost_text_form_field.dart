@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
 
 class BoostTextFormField extends StatefulWidget {
@@ -35,12 +34,14 @@ class _BoostTextFormFieldState extends State<BoostTextFormField> {
       controller: widget.controller,
       validator: widget.validator,
       obscureText: _obscureText,
-      style: GoogleFonts.poppins(
+      style: const TextStyle(
+        fontFamily: 'Ibrand',
         color: AppColors.cardHeaderText,
       ),
       decoration: InputDecoration(
         labelText: widget.label,
-        labelStyle: GoogleFonts.poppins(
+        labelStyle: const TextStyle(
+          fontFamily: 'Ibrand',
           color: AppColors.cardHeaderText,
         ),
         fillColor: AppColors.translucentField,
@@ -82,9 +83,20 @@ class _BoostTextFormFieldState extends State<BoostTextFormField> {
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
-            color: AppColors.error,
+            color: AppColors.cardHeaderText,
             width: 2,
           ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(
+            color: AppColors.cardHeaderText,
+            width: 2,
+          ),
+        ),
+        errorStyle: const TextStyle(
+          fontFamily: 'Ibrand',
+          color: AppColors.cardHeaderText,
         ),
       ),
     );
