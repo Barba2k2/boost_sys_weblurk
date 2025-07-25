@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:validatorless/validatorless.dart';
 
 import '../../../../../core/services/error_message_service.dart';
 import '../../../../../core/utils/command.dart';
@@ -63,6 +64,14 @@ class LoginViewModel extends ChangeNotifier {
     } catch (e) {
       return Result.error(Exception('Erro no logout: $e'));
     }
+  }
+
+  String? validateUser(String? value) {
+    return Validatorless.required('Login obrigatório')(value);
+  }
+
+  String? validatePassword(String? value) {
+    return Validatorless.required('Senha obrigatória')(value);
   }
 }
 
