@@ -55,12 +55,10 @@ class AudioHelper {
         _previousVolume = await getCurrentVolume();
         await Audio.setAudioMixerVolume(_currentProcessId!, 0.0);
         _isMuted = true;
-        log('Application audio muted');
       } else {
         // Restore previous volume
         await Audio.setAudioMixerVolume(_currentProcessId!, _previousVolume);
         _isMuted = false;
-        log('Application audio unmuted');
       }
     } catch (e) {
       log('Error setting audio mute: $e');

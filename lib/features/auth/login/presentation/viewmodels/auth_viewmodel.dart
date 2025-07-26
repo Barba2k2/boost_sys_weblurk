@@ -28,7 +28,6 @@ class AuthViewModel extends ChangeNotifier {
       // Garante que o logout seja feito apenas na primeira inicialização
       if (!_hasInitialized) {
         _hasInitialized = true;
-        _logger.info('Primeira inicialização, realizando logout...');
         await logout();
         return;
       }
@@ -45,8 +44,9 @@ class AuthViewModel extends ChangeNotifier {
         );
 
         if (token != null && token.isNotEmpty) {
-          _userLogged = UserModel.fromJson(json.decode(userModelJson));
-          _logger.info('Dados do usuário carregados: ${_userLogged?.nickname}');
+          _userLogged = UserModel.fromJson(
+            json.decode(userModelJson),
+          );
           notifyListeners();
         } else {
           _logger.warning('Token não encontrado');
@@ -86,7 +86,6 @@ class AuthViewModel extends ChangeNotifier {
       );
       _userLogged = null;
       notifyListeners();
-      _logger.info('Logout realizado com sucesso');
     } catch (e, s) {
       _logger.error('Erro ao realizar logout', e, s);
     }
