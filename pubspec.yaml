@@ -1,8 +1,8 @@
 name: boost_sys_weblurk
-description: "A new Flutter project."
+description: "Gerenciamento de agendamentos de streamers"
 publish_to: 'none'
 
-version: 1.0.13+1
+version: 1.0.14+1
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
