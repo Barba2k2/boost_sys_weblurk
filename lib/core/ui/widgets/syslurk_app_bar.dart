@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import '../../services/settings_service.dart';
 import '../../services/url_launcher_service.dart';
@@ -76,7 +75,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                     _extractChannelName(viewModel.currentChannel);
                 return Text(
                   'Canal: $channelName',
-                  style: GoogleFonts.inter(
+                  style: const TextStyle(
                     color: AppColors.menuItemIcon,
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
@@ -108,7 +107,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                   const SizedBox(width: 8),
                   Text(
                     username!,
-                    style: GoogleFonts.inter(
+                    style: const TextStyle(
                       color: AppColors.menuItemIcon,
                       fontWeight: FontWeight.w500,
                       fontSize: 14,
