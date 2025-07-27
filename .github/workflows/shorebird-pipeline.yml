@@ -33,95 +33,300 @@ env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
-  analyze:
+  auto-version-manager:
     runs-on: windows-latest
     outputs:
       action: ${{ steps.decision.outputs.action }}
-      version: ${{ steps.version.outputs.version }}
+      final-version: ${{ steps.auto-version.outputs.final-version }}
+      version-was-updated: ${{ steps.auto-version.outputs.version-was-updated }}
       should-proceed: ${{ steps.decision.outputs.should-proceed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Determine Version
-        id: version
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Auto Version Management
+        id: auto-version
         shell: powershell
         run: |
+          Write-Host "========================================"
+          Write-Host "INICIANDO GERENCIAMENTO AUTOMATICO DE VERSAO"
+          Write-Host "========================================"
+          
+          # 1. Ler versao atual do pubspec.yaml
+          Write-Host "1. Lendo versao atual do pubspec.yaml..."
           try {
             $pubspecContent = Get-Content pubspec.yaml -Raw -ErrorAction Stop
             $versionMatch = $pubspecContent | Select-String 'version:\s*(.+)'
             
             if ($versionMatch) {
               $currentVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
-              Write-Host "Current version: $currentVersion"
+              Write-Host "   Versao encontrada: $currentVersion"
             } else {
-              $currentVersion = "1.0.14+2"
-              Write-Host "Version not found, using default: $currentVersion"
+              throw "Versao nao encontrada no pubspec.yaml"
             }
           } catch {
-            $currentVersion = "1.0.14+2"
-            Write-Host "Error reading pubspec.yaml, using default: $currentVersion"
+            Write-Host "   ERRO: Nao foi possivel ler o pubspec.yaml: $_"
+            throw "Falha ao ler versao do pubspec.yaml"
           }
           
-          echo "version=$currentVersion" >> $env:GITHUB_OUTPUT
+          # 2. Verificar releases existentes no Shorebird
+          Write-Host ""
+          Write-Host "2. Verificando releases existentes no Shorebird..."
+          $existingReleases = @()
+          $releaseExists = $false
+          
+          try {
+            $releasesOutput = shorebird releases list 2>&1
+            Write-Host "   Comando shorebird releases executado"
+            
+            if ($LASTEXITCODE -eq 0) {
+              $existingReleases = $releasesOutput
+              Write-Host "   Releases encontradas:"
+              $releasesOutput | ForEach-Object { Write-Host "     $_" }
+              
+              # Verificar se versao atual ja existe
+              if ($releasesOutput -like "*$currentVersion*") {
+                $releaseExists = $true
+                Write-Host "   ALERTA: Release $currentVersion JA EXISTE!"
+              } else {
+                Write-Host "   OK: Release $currentVersion nao existe ainda"
+              }
+            } else {
+              Write-Host "   Aviso: Erro ao listar releases (exit code: $LASTEXITCODE)"
+              Write-Host "   Output: $releasesOutput"
+              Write-Host "   Assumindo que nao ha releases existentes"
+            }
+          } catch {
+            Write-Host "   Erro ao verificar releases: $_"
+            Write-Host "   Continuando assumindo que nao ha conflito..."
+          }
+          
+          # 3. Calcular nova versao se necessario
+          $finalVersion = $currentVersion
+          $versionWasUpdated = $false
+          
+          if ($releaseExists) {
+            Write-Host ""
+            Write-Host "3. Release ja existe - calculando nova versao..."
+            
+            try {
+              # Parse da versao atual
+              $versionParts = $currentVersion -split '\+'
+              $semverPart = $versionParts[0]  # ex: 1.0.14
+              $buildPart = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 1 }
+              
+              Write-Host "   Versao atual: $semverPart+$buildPart"
+              
+              # Incrementar build number ate encontrar versao disponivel
+              $maxAttempts = 10
+              $attempts = 0
+              
+              do {
+                $buildPart += 1
+                $candidateVersion = "$semverPart+$buildPart"
+                $attempts += 1
+                
+                Write-Host "   Testando versao: $candidateVersion"
+                
+                # Verificar se esta versao candidata ja existe
+                $candidateExists = $existingReleases -like "*$candidateVersion*"
+                
+                if (-not $candidateExists) {
+                  $finalVersion = $candidateVersion
+                  $versionWasUpdated = $true
+                  Write-Host "   ENCONTRADA: Versao disponivel: $finalVersion"
+                  break
+                }
+                
+                Write-Host "   Versao $candidateVersion tambem ja existe, tentando proxima..."
+                
+              } while ($attempts -lt $maxAttempts)
+              
+              if ($attempts -ge $maxAttempts) {
+                throw "Nao foi possivel encontrar versao disponivel apos $maxAttempts tentativas"
+              }
+              
+            } catch {
+              Write-Host "   ERRO ao calcular nova versao: $_"
+              throw "Falha no calculo da nova versao"
+            }
+          } else {
+            Write-Host ""
+            Write-Host "3. Versao atual esta disponivel - nenhuma mudanca necessaria"
+          }
+          
+          # 4. Atualizar pubspec.yaml se necessario
+          if ($versionWasUpdated) {
+            Write-Host ""
+            Write-Host "4. Atualizando pubspec.yaml..."
+            
+            try {
+              # Ler conteudo atual
+              $pubspecContent = Get-Content pubspec.yaml -Raw
+              
+              # Fazer backup
+              $backupContent = $pubspecContent
+              
+              # Atualizar versao
+              $updatedContent = $pubspecContent -replace "version:\s*.+", "version: $finalVersion"
+              
+              # Salvar arquivo atualizado
+              Set-Content pubspec.yaml $updatedContent -Encoding UTF8
+              
+              Write-Host "   pubspec.yaml atualizado: $currentVersion -> $finalVersion"
+              
+              # Verificar se arquivo foi realmente modificado
+              $hasChanges = git diff --name-only pubspec.yaml
+              
+              if ($hasChanges) {
+                Write-Host "   Mudanca confirmada pelo Git"
+              } else {
+                Write-Host "   ERRO: Arquivo nao foi modificado pelo Git"
+                # Restaurar backup
+                Set-Content pubspec.yaml $backupContent -Encoding UTF8
+                throw "Falha na modificacao do pubspec.yaml"
+              }
+              
+            } catch {
+              Write-Host "   ERRO ao atualizar pubspec.yaml: $_"
+              throw "Falha na atualizacao do pubspec.yaml"
+            }
+          } else {
+            Write-Host ""
+            Write-Host "4. Nenhuma atualizacao do pubspec.yaml necessaria"
+          }
+          
+          # 5. Commitar mudancas se houve atualizacao
+          if ($versionWasUpdated) {
+            Write-Host ""
+            Write-Host "5. Commitando mudancas de versao..."
+            
+            try {
+              # Configurar Git
+              git config --global user.email "action@github.com"
+              git config --global user.name "GitHub Action Auto-Versioning"
+              
+              # Adicionar mudancas
+              git add pubspec.yaml
+              
+              # Verificar se ha mudancas para commitar
+              $stagedChanges = git diff --cached --name-only
+              
+              if ($stagedChanges) {
+                # Fazer commit
+                $commitMessage = "chore: auto-bump version to $finalVersion [skip ci]"
+                git commit -m $commitMessage
+                
+                # Push das mudancas
+                git push origin HEAD
+                
+                Write-Host "   Commit realizado: $commitMessage"
+                Write-Host "   Push concluido com sucesso"
+              } else {
+                Write-Host "   Nenhuma mudanca para commitar"
+              }
+              
+            } catch {
+              Write-Host "   ERRO no commit/push: $_"
+              throw "Falha ao commitar mudancas de versao"
+            }
+          } else {
+            Write-Host ""
+            Write-Host "5. Nenhum commit necessario"
+          }
+          
+          # Output dos resultados
+          echo "final-version=$finalVersion" >> $env:GITHUB_OUTPUT
+          echo "version-was-updated=$versionWasUpdated" >> $env:GITHUB_OUTPUT
+          
+          Write-Host ""
+          Write-Host "========================================"
+          Write-Host "GERENCIAMENTO DE VERSAO CONCLUIDO"
+          Write-Host "========================================"
+          Write-Host "Versao original: $currentVersion"
+          Write-Host "Versao final: $finalVersion"
+          Write-Host "Foi atualizada: $versionWasUpdated"
+          Write-Host "========================================"
 
-      - name: Analyze Changes and Decide Action
+      - name: Determine Action
         id: decision
         shell: powershell
         run: |
           $forceAction = "${{ github.event.inputs.force_action }}"
-          $branch = "${{ github.ref_name }}"
+          $finalVersion = "${{ steps.auto-version.outputs.final-version }}"
+          $versionWasUpdated = "${{ steps.auto-version.outputs.version-was-updated }}"
           
-          Write-Host "Analyzing changes..."
-          Write-Host "Branch: $branch"
-          Write-Host "Force action: $forceAction"
+          Write-Host "Determinando acao para versao: $finalVersion"
+          Write-Host "Versao foi atualizada: $versionWasUpdated"
+          Write-Host "Acao forcada: $forceAction"
           
+          # Analisar commits para decidir acao
           try {
             $commits = git log --oneline -5 --format="%s" 2>$null
-            Write-Host "Recent commits:"
+            Write-Host "Commits recentes:"
             $commits | ForEach-Object { Write-Host "  - $_" }
           } catch {
-            Write-Host "Could not get commits"
             $commits = @()
           }
           
+          # Logica de decisao
           if ($forceAction -eq "release") {
             $action = "release"
-            Write-Host "Action forced to: release"
+            Write-Host "Decisao: RELEASE (forcado)"
           } elseif ($forceAction -eq "patch") {
             $action = "patch"
-            Write-Host "Action forced to: patch"
+            Write-Host "Decisao: PATCH (forcado)"
           } else {
+            # Auto-detectar baseado nos commits e contexto
             $hasBreaking = $commits | Where-Object { $_ -match "(BREAKING|!):" }
             $hasFeature = $commits | Where-Object { $_ -match "^feat" }
             $hasFix = $commits | Where-Object { $_ -match "^fix" }
+            $isVersionBump = $commits | Where-Object { $_ -match "auto-bump version" }
             
-            if ($hasBreaking -or $hasFeature) {
+            if ($versionWasUpdated -eq "true" -and $isVersionBump) {
+              # Se acabamos de fazer auto-bump e foi isso, criar patch
+              $action = "patch"
+              Write-Host "Decisao: PATCH (apos auto-bump de versao)"
+            } elseif ($hasBreaking) {
               $action = "release"
-              Write-Host "Auto-detected action: release (breaking change or new feature)"
-            } elseif ($hasFix) {
-              $action = "patch"
-              Write-Host "Auto-detected action: patch (bug fix)"
+              Write-Host "Decisao: RELEASE (breaking change detectado)"
+            } elseif ($hasFeature) {
+              $action = "release"
+              Write-Host "Decisao: RELEASE (nova feature detectada)"
             } else {
+              # Default para patch (mais seguro)
               $action = "patch"
-              Write-Host "Auto-detected action: patch (default for other changes)"
+              Write-Host "Decisao: PATCH (default/bug fixes)"
             }
           }
           
           echo "action=$action" >> $env:GITHUB_OUTPUT
           echo "should-proceed=true" >> $env:GITHUB_OUTPUT
           
-          Write-Host "Final decision: $action"
+          Write-Host ""
+          Write-Host "DECISAO FINAL: $action para versao $finalVersion"
 
+  # Job de Release
   shorebird-release:
-    needs: analyze
-    if: needs.analyze.outputs.action == 'release' && needs.analyze.outputs.should-proceed == 'true'
+    needs: auto-version-manager
+    if: needs.auto-version-manager.outputs.action == 'release' && needs.auto-version-manager.outputs.should-proceed == 'true'
     runs-on: windows-latest
     steps:
-      - name: Checkout
+      - name: Checkout Latest
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Pull Latest Changes
+        run: git pull origin ${{ github.ref_name }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -154,39 +359,60 @@ jobs:
         if: steps.release.outputs.success == 'true'
         shell: powershell
         run: |
-          $version = "${{ needs.analyze.outputs.version }}"
+          $version = "${{ needs.auto-version-manager.outputs.final-version }}"
           $tag = "v$version"
           
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action Bot"
-          
           try {
-            git tag -a $tag -m "Release $tag - Shorebird Pipeline"
+            git config --global user.email "action@github.com"
+            git config --global user.name "GitHub Action"
+            
+            git tag -a $tag -m "Release $tag - Auto-generated"
             git push origin $tag
-            Write-Host "Tag created: $tag"
+            Write-Host "Tag criada: $tag"
           } catch {
-            Write-Host "Error creating tag: $_"
+            Write-Host "Erro ao criar tag: $_"
           }
 
-      - name: Summary
+      - name: Release Summary
+        shell: powershell
         run: |
-          if ("${{ steps.release.outputs.success }}" -eq "true") {
+          $success = "${{ steps.release.outputs.success }}"
+          $version = "${{ needs.auto-version-manager.outputs.final-version }}"
+          $wasUpdated = "${{ needs.auto-version-manager.outputs.version-was-updated }}"
+          
+          Write-Host ""
+          Write-Host "================================================"
+          if ($success -eq "true") {
             Write-Host "RELEASE CRIADA COM SUCESSO!"
-            Write-Host "Versao: ${{ needs.analyze.outputs.version }}"
+            Write-Host "================================================"
+            Write-Host "Versao: $version"
+            if ($wasUpdated -eq "true") {
+              Write-Host "Versao foi auto-incrementada"
+            }
             Write-Host "Release base disponivel para patches futuros"
+            Write-Host "Publique os artefatos gerados na app store"
           } else {
             Write-Host "FALHA NA CRIACAO DA RELEASE"
+            Write-Host "================================================"
+            Write-Host "Versao tentada: $version"
+            Write-Host "Verifique os logs acima para detalhes"
             exit 1
           }
-        shell: powershell
+          Write-Host "================================================"
 
+  # Job de Patch
   shorebird-patch:
-    needs: analyze
-    if: needs.analyze.outputs.action == 'patch' && needs.analyze.outputs.should-proceed == 'true'
+    needs: auto-version-manager
+    if: needs.auto-version-manager.outputs.action == 'patch' && needs.auto-version-manager.outputs.should-proceed == 'true'
     runs-on: windows-latest
     steps:
-      - name: Checkout
+      - name: Checkout Latest
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Pull Latest Changes
+        run: git pull origin ${{ github.ref_name }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -215,15 +441,31 @@ jobs:
           platform: windows
           args: "--verbose"
 
-      - name: Summary
+      - name: Patch Summary
+        shell: powershell
         run: |
-          if ("${{ steps.patch.outputs.success }}" -eq "true") {
+          $success = "${{ steps.patch.outputs.success }}"
+          $version = "${{ needs.auto-version-manager.outputs.final-version }}"
+          $patchNumber = "${{ steps.patch.outputs.patch-number }}"
+          $wasUpdated = "${{ needs.auto-version-manager.outputs.version-was-updated }}"
+          
+          Write-Host ""
+          Write-Host "=============================================="
+          if ($success -eq "true") {
             Write-Host "PATCH CRIADO COM SUCESSO!"
-            Write-Host "Versao: ${{ needs.analyze.outputs.version }}"
-            Write-Host "Patch Number: ${{ steps.patch.outputs.patch-number }}"
-            Write-Host "Patch disponivel para usuarios automaticamente"
+            Write-Host "=============================================="
+            Write-Host "Versao base: $version"
+            Write-Host "Numero do patch: $patchNumber"
+            if ($wasUpdated -eq "true") {
+              Write-Host "Versao foi auto-incrementada"
+            }
+            Write-Host "Patch sera distribuido automaticamente"
+            Write-Host "Usuarios receberao update na proxima abertura"
           } else {
             Write-Host "FALHA NA CRIACAO DO PATCH"
+            Write-Host "=============================================="
+            Write-Host "Versao base: $version"
+            Write-Host "Verifique os logs acima para detalhes"
             exit 1
           }
-        shell: powershell
+          Write-Host "=============================================="
