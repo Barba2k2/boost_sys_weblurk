@@ -63,7 +63,7 @@ jobs:
             Write-Output "Verificando releases disponiveis..."
             $releases = shorebird releases list 2>$null
             
-            if (-not $releases) {
+            if (-not $releases -or $releases.Length -eq 0) {
               Write-Output "Nenhuma release encontrada!"
               Write-Output "E necessario ter pelo menos uma release base para criar patches"
               throw "Nenhuma release base disponivel"
@@ -262,7 +262,12 @@ jobs:
               shorebird doctor 2>$null
               
               Write-Output "Status das releases:"
-              shorebird releases list 2>$null | head -3
+              $diagnosticReleases = shorebird releases list 2>$null
+              if ($diagnosticReleases -and $diagnosticReleases.Length -gt 0) {
+                $diagnosticReleases | head -3
+              } else {
+                Write-Output "Nenhuma release encontrada para diagnóstico"
+              }
               
             } catch {
               Write-Output "Nao foi possivel executar diagnostico adicional"
@@ -288,7 +293,7 @@ jobs:
             
             $patches = shorebird patches list --release-version=$targetRelease 2>$null
             
-            if ($patches) {
+            if ($patches -and $patches.Length -gt 0) {
               Write-Output "Patches encontrados para release $targetRelease:"
               $patches | Write-Output
               
@@ -309,7 +314,12 @@ jobs:
             # Listar todos os patches para debug
             Write-Output "Todos os patches do projeto:"
             try {
-              shorebird patches list 2>$null | head -10
+              $allPatches = shorebird patches list 2>$null
+              if ($allPatches -and $allPatches.Length -gt 0) {
+                $allPatches | head -10
+              } else {
+                Write-Output "Nenhum patch encontrado"
+              }
             } catch {
               Write-Output "Nao foi possivel listar todos os patches"
             }

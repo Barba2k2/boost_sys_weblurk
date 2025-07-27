@@ -64,7 +64,7 @@ jobs:
             Write-Output "Releases existentes:"
             $releases = shorebird releases list 2>$null
             
-            if ($releases) {
+            if ($releases -and $releases.Length -gt 0) {
               $releases | head -5 | Write-Output
             } else {
               Write-Output "Nenhuma release encontrada ou erro ao listar"
@@ -107,7 +107,7 @@ jobs:
             # Verificar se a release já existe
             $existingReleases = shorebird releases list 2>$null
             
-            if ($existingReleases) {
+            if ($existingReleases -and $existingReleases.Length -gt 0) {
               $releaseExists = $existingReleases | Select-String $version
               
               if ($releaseExists) {
@@ -157,9 +157,14 @@ jobs:
               Write-Output "Release Shorebird criada com sucesso!"
               echo "release-created=true" >> $env:GITHUB_OUTPUT
               
-              # Listar releases para confirmar
-              Write-Output "Releases atuais:"
-              shorebird releases list 2>$null | head -3
+            # Listar releases para confirmar
+            Write-Output "Releases atuais:"
+            $currentReleases = shorebird releases list 2>$null
+            if ($currentReleases -and $currentReleases.Length -gt 0) {
+              $currentReleases | head -3
+            } else {
+              Write-Output "Nenhuma release encontrada"
+            }
               
             } else {
               Write-Output "Falha na criacao da release (Exit code: $LASTEXITCODE)"
@@ -261,7 +266,7 @@ jobs:
             
             $releases = shorebird releases list 2>$null
             
-            if ($releases) {
+            if ($releases -and $releases.Length -gt 0) {
               $releaseFound = $releases | Select-String $version
               
               if ($releaseFound) {
@@ -278,7 +283,12 @@ jobs:
             # Verificar patches disponíveis
             Write-Output "Patches disponiveis para esta release:"
             try {
-              shorebird patches list --release-version=$version 2>$null | head -3
+              $patchesForRelease = shorebird patches list --release-version=$version 2>$null
+              if ($patchesForRelease -and $patchesForRelease.Length -gt 0) {
+                $patchesForRelease | head -3
+              } else {
+                Write-Output "Nenhum patch ainda para esta release (esperado)"
+              }
             } catch {
               Write-Output "Nenhum patch ainda para esta release (esperado)"
             }
