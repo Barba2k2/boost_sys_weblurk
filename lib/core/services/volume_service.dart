@@ -126,7 +126,6 @@ class VolumeService {
     }
   }
 
-  // ✅ NOVO: Método para sincronizar estado de mute com WebView
   Future<void> syncMuteState() async {
     if (!_isVolumeControlAvailable || !_isInitialized) {
       return;
@@ -143,7 +142,6 @@ class VolumeService {
     }
   }
 
-  // ✅ NOVO: Método para verificar e corrigir estado de mute
   Future<void> verifyAndFixMuteState() async {
     if (!_isVolumeControlAvailable || !_isInitialized) {
       return;
@@ -153,14 +151,11 @@ class VolumeService {
       final systemMuted = await AudioHelper.isApplicationMuted();
       final currentVolume = await AudioHelper.getCurrentVolume();
 
-      // Verifica se há inconsistência entre o estado interno e o sistema
       if (_isMuted != systemMuted || (_isMuted && currentVolume > 0.0)) {
         if (_isMuted) {
-          // Força o mute se deveria estar mutado
           await AudioHelper.setApplicationMute(true);
           await _webViewService.muteWebView();
         } else {
-          // Força o unmute se deveria estar desmutado
           await AudioHelper.setApplicationMute(false);
           await _webViewService.unmuteWebView();
         }
@@ -170,7 +165,6 @@ class VolumeService {
     }
   }
 
-  // ✅ NOVO: Método para verificar e corrigir estado de mute periodicamente
   Future<void> periodicMuteStateCheck() async {
     if (!_isVolumeControlAvailable || !_isInitialized) {
       return;
@@ -179,7 +173,6 @@ class VolumeService {
     try {
       await verifyAndFixMuteState();
 
-      // Verifica também se o WebView está no estado correto
       await _webViewService.verifyAndFixMuteState(_isMuted);
     } catch (e, s) {
       _logger.error('Erro na verificação periódica do estado de mute', e, s);
