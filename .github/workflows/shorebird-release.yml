@@ -248,17 +248,14 @@ jobs:
           Write-Output "Atualizando CHANGELOG.md..."
 
           $newVersion = "${{ inputs.version }}"
-          $changeType = "${{ inputs.change_type }}"
+          $date = Get-Date -Format "yyyy-MM-dd"
           $releaseNotes = "### Mudancas nesta versao"
 
           try {
-            $date = Get-Date -Format "yyyy-MM-dd"
-            
             $changelogEntry = "## [$newVersion] - $date`n`n$releaseNotes`n"
             
             if (Test-Path "CHANGELOG.md") {
               Write-Output "CHANGELOG.md encontrado, atualizando..."
-              
               $existingChangelog = Get-Content "CHANGELOG.md" -Raw -ErrorAction Stop
               
               if ($existingChangelog -like "*# Changelog*") {
@@ -268,8 +265,7 @@ jobs:
               }
             } else {
               Write-Output "Criando novo CHANGELOG.md..."
-              
-              $header = "# Changelog`n`nTodas as mudanças importantes do projeto são documentadas neste arquivo.`n`nO formato é baseado em [Keep a Changelog](https://keepachangelog.com/),`ne este projeto adere ao [Semantic Versioning](https://semver.org/).`n"
+              $header = "# Changelog`n`nTodas as mudancas importantes do projeto sao documentadas neste arquivo.`n`nO formato e baseado em [Keep a Changelog](https://keepachangelog.com/),`ne este projeto adere ao [Semantic Versioning](https://semver.org/).`n"
               $newChangelog = "$header$changelogEntry"
             }
             
@@ -284,14 +280,13 @@ jobs:
               Write-Output "Nova entrada adicionada:"
               Write-Output $changelogEntry
               
-              # Commit da alteração
               git config --local user.email "action@github.com"
               git config --local user.name "GitHub Action"
               git add CHANGELOG.md
               git commit -m "docs: update changelog for version $newVersion"
               git push
             } else {
-              Write-Output "CHANGELOG.md não foi modificado"
+              Write-Output "CHANGELOG.md nao foi modificado"
               echo "changelog-updated=false" >> $env:GITHUB_OUTPUT
             }
             
