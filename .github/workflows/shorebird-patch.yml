@@ -49,12 +49,16 @@ jobs:
         with:
           cache: true
 
+      - name: Enable Git Long Paths
+        shell: bash
+        run: |
+          echo "Habilitando suporte a long paths no Git..."
+          git config --global core.longpaths true
+          echo "Configuração de long paths aplicada."
+
       - name: Verify Shorebird Configuration
         shell: powershell
         run: |
-          Write-Output "Habilitando suporte a caminhos de arquivo longos no Git..."
-          git config --global core.longpaths true
-        
           Write-Output "Verificando configuracao do Shorebird para patches..."
           try {
             $shorebirdVersion = shorebird --version
