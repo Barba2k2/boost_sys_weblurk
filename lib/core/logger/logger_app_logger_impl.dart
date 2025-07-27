@@ -21,7 +21,6 @@ class LoggerAppLoggerImpl implements AppLogger {
         await logDir.create();
       }
 
-      // Rotacionar logs se necessário
       if (await _logFile.exists()) {
         final size = await _logFile.length();
         if (size > _maxLogSize) {
