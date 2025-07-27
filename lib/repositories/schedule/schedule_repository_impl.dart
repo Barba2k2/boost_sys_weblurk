@@ -16,7 +16,6 @@ class ScheduleRepositoryImpl implements SchedulesRepository {
   @override
   Future<List> fetchSchedule() async {
     try {
-      // Busca ambas as listas A e B
       final responseListA = await _restClient.auth().get('/list-a/');
       final responseListB = await _restClient.auth().get('/list-b/');
 
