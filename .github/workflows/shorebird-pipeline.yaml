@@ -3,8 +3,7 @@ name: Shorebird Pipeline
 on:
   push:
     branches:
-      - master
-      - main
+      - 1.0.14+1
     tags:
       - "v*"
   pull_request:
@@ -22,7 +21,7 @@ on:
           - release
           - patch
       release_version:
-        description: "Versão da release para patch (ex: 1.0.13+1)"
+        description: "Versão da release para patch"
         required: false
         type: string
 
