@@ -210,32 +210,33 @@ jobs:
             # Ler o arquivo pubspec.yaml
             $pubspecContent = Get-Content $pubspecPath -Raw
             
-            # Extrair versão atual usando regex
-            if ($pubspecContent -match 'version:\s*(\d+)\.(\d+)\.(\d+)\+(\d+)') {
+            # Extrair versão atual usando regex (com ou sem build number)
+            if ($pubspecContent -match 'version:\s*(\d+)\.(\d+)\.(\d+)(?:\+(\d+))?') {
               $major = [int]$matches[1]
               $minor = [int]$matches[2]
               $patch = [int]$matches[3]
-              $build = [int]$matches[4]
+              $build = if ($matches[4]) { [int]$matches[4] } else { 0 }
               
               Write-Output "Versao atual: $major.$minor.$patch+$build"
               
               # Lógica de incremento
               if ($build -ge 9) {
-                # Se build >= 9, incrementar patch e resetar build
+                # Se build >= 9, incrementar patch e não adicionar build
                 $patch++
-                $build = 1
-                Write-Output "Build atingiu limite (9), incrementando patch para $patch"
+                $newVersion = "$major.$minor.$patch"
+                Write-Output "Build atingiu limite (9), incrementando patch para $patch (sem build number)"
               } else {
                 # Se build < 9, apenas incrementar build
                 $build++
+                $newVersion = "$major.$minor.$patch+$build"
                 Write-Output "Incrementando build para $build"
               }
               
               $newVersion = "$major.$minor.$patch+$build"
               Write-Output "Nova versao calculada: $newVersion"
               
-              # Atualizar o arquivo
-              $newContent = $pubspecContent -replace 'version:\s*\d+\.\d+\.\d+\+\d+', "version: $newVersion"
+              # Atualizar o arquivo (lidando com versões com ou sem build)
+              $newContent = $pubspecContent -replace 'version:\s*\d+\.\d+\.\d+(?:\+\d+)?', "version: $newVersion"
               
               # Verificar se a substituição foi feita
               if ($newContent -eq $pubspecContent) {
