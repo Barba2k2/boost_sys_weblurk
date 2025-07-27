@@ -11,7 +11,6 @@ Future<void> main() async {
   await ApplicationConfig().consfigureApp();
   await UpdateService.instance.initialize();
 
-  // Configurar injeção de dependências
   await Injector.setup();
 
   runApp(
