@@ -20,7 +20,6 @@ class ScheduleTable extends StatelessWidget {
         color: AppColors.cardBackground.withValues(alpha: 0.8),
         child: Column(
           children: [
-            // Header da lista
             Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
@@ -58,7 +57,6 @@ class ScheduleTable extends StatelessWidget {
                 ],
               ),
             ),
-            // Tabela
             Expanded(
               child: schedules.isEmpty
                   ? Center(
