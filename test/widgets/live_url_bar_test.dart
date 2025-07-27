@@ -9,10 +9,8 @@ void main() {
       testWidgets(
         'displays provided channel URL',
         (WidgetTester tester) async {
-          // Arrange
           const testChannel = 'https://twitch.tv/testchannel';
 
-          // Act
           await tester.pumpWidget(
             const MaterialApp(
               home: Scaffold(
@@ -21,7 +19,6 @@ void main() {
             ),
           );
 
-          // Assert
           expect(find.text(testChannel), findsOneWidget);
         },
       );
@@ -29,7 +26,6 @@ void main() {
       testWidgets(
         'displays default URL when channel is null',
         (WidgetTester tester) async {
-          // Act
           await tester.pumpWidget(
             const MaterialApp(
               home: Scaffold(
@@ -38,7 +34,6 @@ void main() {
             ),
           );
 
-          // Assert
           expect(find.text('https://www.twitch.tv/BootTeam_'), findsOneWidget);
         },
       );
@@ -46,7 +41,6 @@ void main() {
       testWidgets(
         'has correct background color',
         (WidgetTester tester) async {
-          // Act
           await tester.pumpWidget(
             const MaterialApp(
               home: Scaffold(
@@ -55,13 +49,12 @@ void main() {
             ),
           );
 
-          // Assert
           final container = tester.widget<Container>(
             find.byType(Container),
           );
           expect(
             container.color,
-            const Color(0xFF6750A4).withValues(alpha: 0.7), // 0.7 * 255 = 178
+            const Color(0xFF6750A4).withValues(alpha: 0.7),
           );
         },
       );
@@ -69,7 +62,6 @@ void main() {
       testWidgets(
         'has correct height',
         (WidgetTester tester) async {
-          // Act
           await tester.pumpWidget(
             const MaterialApp(
               home: Scaffold(
@@ -78,7 +70,6 @@ void main() {
             ),
           );
 
-          // Assert
           final container = tester.widget<Container>(
             find.byType(Container),
           );
