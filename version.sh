@@ -1,32 +1,66 @@
 #!/bin/bash
 
-# Tenta obter a última tag, se falhar assume que é o primeiro release
-LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
-
-# Verifica se obteve uma tag válida
-if [[ ! $LATEST_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "Warning: Tag inválida ou não encontrada. Iniciando da v1.0.1"
-    NEW_TAG="v1.0.1"
-else
-    # Extrai os números da versão usando regex para maior segurança
-    if [[ $LATEST_TAG =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-        V_MAJOR="${BASH_REMATCH[1]}"
-        V_MINOR="${BASH_REMATCH[2]}"
-        V_PATCH="${BASH_REMATCH[3]}"
-        
-        # Incrementa o patch
-        V_PATCH=$((V_PATCH + 1))
-        
-        NEW_TAG="v${V_MAJOR}.${V_MINOR}.${V_PATCH}"
+# Função para extrair versão do pubspec.yaml
+extract_version_from_pubspec() {
+    local version_line=$(grep "^version:" pubspec.yaml | head -1)
+    if [[ $version_line =~ version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+) ]]; then
+        echo "${BASH_REMATCH[1]}+${BASH_REMATCH[2]}"
     else
-        echo "Error: Formato de tag inválido. Usando v1.0.1"
-        NEW_TAG="v1.0.1"
+        echo "1.0.0+1"
     fi
-fi
+}
+
+# Função para extrair apenas a versão sem build number
+extract_version_only() {
+    local version_line=$(grep "^version:" pubspec.yaml | head -1)
+    if [[ $version_line =~ version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+        echo "${BASH_REMATCH[1]}"
+    else
+        echo "1.0.0"
+    fi
+}
+
+# Função para extrair apenas o build number
+extract_build_number() {
+    local version_line=$(grep "^version:" pubspec.yaml | head -1)
+    if [[ $version_line =~ version:[[:space:]]*[0-9]+\.[0-9]+\.[0-9]+\+([0-9]+) ]]; then
+        echo "${BASH_REMATCH[1]}"
+    else
+        echo "1"
+    fi
+}
+
+# Obter versão atual do pubspec.yaml
+CURRENT_VERSION=$(extract_version_from_pubspec)
+CURRENT_VERSION_ONLY=$(extract_version_only)
+CURRENT_BUILD=$(extract_build_number)
+
+# Incrementar o build number
+NEW_BUILD=$((CURRENT_BUILD + 1))
+NEW_VERSION="${CURRENT_VERSION_ONLY}+${NEW_BUILD}"
+
+# Criar tag no formato vX.Y.Z
+NEW_TAG="v${CURRENT_VERSION_ONLY}"
 
 # Exibe informações para debug
-echo "Tag anterior: $LATEST_TAG"
+echo "Versão atual do pubspec: $CURRENT_VERSION"
+echo "Versão sem build: $CURRENT_VERSION_ONLY"
+echo "Build atual: $CURRENT_BUILD"
+echo "Novo build: $NEW_BUILD"
+echo "Nova versão: $NEW_VERSION"
 echo "Nova tag: $NEW_TAG"
 
-# Exporta para o GitHub Actions
-echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+# Exporta para o GitHub Actions (se disponível)
+if [ -n "$GITHUB_ENV" ]; then
+    echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+    echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+    echo "NEW_BUILD=$NEW_BUILD" >> $GITHUB_ENV
+    echo "CURRENT_VERSION_ONLY=$CURRENT_VERSION_ONLY" >> $GITHUB_ENV
+    echo "Variáveis exportadas para GitHub Actions"
+else
+    echo "GITHUB_ENV não disponível (executando localmente)"
+    echo "NEW_TAG=$NEW_TAG"
+    echo "NEW_VERSION=$NEW_VERSION"
+    echo "NEW_BUILD=$NEW_BUILD"
+    echo "CURRENT_VERSION_ONLY=$CURRENT_VERSION_ONLY"
+fi
