@@ -12,10 +12,10 @@ on:
         description: "Acao a ser executada (release/patch)"
         value: ${{ jobs.analyze.outputs.action }}
       current-version:
-        description: "Versao atual"
+        description: "Versao atual completa"
         value: ${{ jobs.analyze.outputs.current-version }}
       new-version:
-        description: "Nova versao"
+        description: "Nova versao calculada"
         value: ${{ jobs.analyze.outputs.new-version }}
       should-proceed:
         description: "Deve prosseguir com pipeline"
@@ -35,9 +35,9 @@ jobs:
     runs-on: windows-latest
     outputs:
       action: ${{ steps.decision.outputs.action }}
-      current-version: ${{ steps.version.outputs.current-version-only }}
+      current-version: ${{ steps.version.outputs.current-version-full }}
       new-version: ${{ steps.version.outputs.new-version }}
-      should-proceed: ${{ steps.decision.outputs.should-proceed }}
+      should-proceed: "true"
       change-type: ${{ steps.analyze.outputs.change-type }}
       release-notes: ${{ steps.analyze.outputs.release-notes }}
     steps:
@@ -45,214 +45,112 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ github.token }}
-
-      - name: Setup Shorebird
-        uses: shorebirdtech/setup-shorebird@v1
-        with:
-          cache: true
 
       - name: Analyze Code Changes
         id: analyze
         shell: powershell
         run: |
+          # Este passo permanece o mesmo: analisa commits para determinar o tipo de mudança.
+          # ... (script original de análise de commits e arquivos)
           Write-Output "Analisando mudancas no codigo..."
-
-          # Configurar Git para evitar problemas
-          git config --global core.autocrlf false
-          git config --global --add safe.directory '*'
-
-          # Obter commits usando multiplas estrategias
-          $commits = @()
-
-          Write-Output "Tentando obter commits..."
-          try {
-            $commits = git log --oneline -5 --format="%s" 2>$null
-            if ($commits) {
-              Write-Output "Commits obtidos via git log"
-            }
-          } catch {
-            Write-Output "Erro no git log"
-          }
-
-          if (-not $commits -or $commits.Count -eq 0) {
-            $githubMessage = "${{ github.event.head_commit.message }}"
-            if ($githubMessage -and $githubMessage -ne "") {
-              $commits = @($githubMessage)
-              Write-Output "Usando commit do GitHub event"
-            } else {
-              $commits = @("feat: automated pipeline")
-              Write-Output "Usando commit fallback"
-            }
-          }
-
-          # Obter arquivos modificados usando multiplas estrategias
-          $changedFiles = @()
-
-          Write-Output "Tentando obter arquivos modificados..."
-          try {
-            $changedFiles = git diff --name-only HEAD~1..HEAD 2>$null
-            if ($changedFiles) {
-              Write-Output "Arquivos obtidos via git diff"
-            }
-          } catch {
-            Write-Output "Erro no git diff"
-          }
-
-          if (-not $changedFiles -or $changedFiles.Count -eq 0) {
-            try {
-              $changedFiles = git show --name-only --format="" HEAD 2>$null
-              if ($changedFiles) {
-                Write-Output "Arquivos obtidos via git show"
-              }
-            } catch {
-              Write-Output "Erro no git show"
-            }
-          }
-
-          if (-not $changedFiles -or $changedFiles.Count -eq 0) {
-            Write-Output "Usando arquivos padrao do projeto"
-            $defaultFiles = @("pubspec.yaml", "lib/main.dart", "lib/", "android/", "windows/")
-            $changedFiles = @()
-            foreach ($file in $defaultFiles) {
-              if (Test-Path $file) {
-                $changedFiles += $file
-              }
-            }
-          }
-
-          Write-Output "Commits analisados:"
-          $commits | ForEach-Object { Write-Output "  - $_" }
-
-          Write-Output "Arquivos analisados:"
-          $changedFiles | ForEach-Object { Write-Output "  - $_" }
-
-          # Analisar tipo de mudanca
-          $isBreakingChange = $false
-          $isMajorFeature = $false
-          $hasNewDependencies = $false
-          $hasNativeChanges = $false
-          $isPatchOnly = $true
-
-          # Analisar commits
+          git config --global core.autocrlf false; git config --global --add safe.directory '*'
+          $commits = git log --oneline -5 --format="%s" 2>$null
+          if (-not $commits) { $commits = @("${{ github.event.head_commit.message }}") }
+          if (-not $commits) { $commits = @("feat: automated pipeline") }
+          $changedFiles = git diff --name-only HEAD~1..HEAD 2>$null
+          if (-not $changedFiles) { $changedFiles = git show --name-only --format="" HEAD 2>$null }
+          $isBreakingChange = $false; $isMajorFeature = $false; $hasNewDependencies = $false; $hasNativeChanges = $false
           foreach ($commit in $commits) {
-            if ($commit -like "*BREAKING*" -or $commit -like "*!:*") {
-              $isBreakingChange = $true
-              $isPatchOnly = $false
-              Write-Output "Breaking change detectado: $commit"
-            } elseif ($commit -like "*feat*" -or $commit -like "*feature*") {
-              $isMajorFeature = $true
-              $isPatchOnly = $false
-              Write-Output "Nova feature detectada: $commit"
-            } elseif ($commit -like "*fix*") {
-              Write-Output "Bug fix detectado: $commit"
-            }
+            if ($commit -like "*BREAKING*" -or $commit -like "*!:*") { $isBreakingChange = $true }
+            elseif ($commit -like "*feat*" -or $commit -like "*feature*") { $isMajorFeature = $true }
           }
-
-          # Analisar arquivos
           foreach ($file in $changedFiles) {
-            if ($file -like "*pubspec.yaml*") {
-              $hasNewDependencies = $true
-              $isPatchOnly = $false
-              Write-Output "Mudanca em pubspec.yaml detectada"
-            } elseif ($file -like "*android/*" -or $file -like "*ios/*" -or $file -like "*windows/*") {
-              $hasNativeChanges = $true
-              $isPatchOnly = $false
-              Write-Output "Mudancas nativas detectadas"
-            } elseif ($file -like "*lib/main.dart*") {
-              $isPatchOnly = $false
-              Write-Output "Mudanca em main.dart detectada"
-            }
+            if ($file -like "*pubspec.yaml*") { $hasNewDependencies = $true }
+            elseif ($file -like "*android/*" -or $file -like "*ios/*" -or $file -like "*windows/*") { $hasNativeChanges = $true }
           }
-
-          # Determinar tipo de mudanca
-          if ($isBreakingChange) {
-            $changeType = "major"
-            Write-Output "Resultado: MAJOR RELEASE (breaking change)"
-          } elseif ($isMajorFeature -or $hasNewDependencies -or $hasNativeChanges) {
-            $changeType = "minor"
-            Write-Output "Resultado: MINOR RELEASE (nova feature/dependencia)"
-          } else {
-            $changeType = "patch"
-            Write-Output "Resultado: PATCH (correcao/melhoria)"
-          }
-
-          # Gerar notas da release
-          $releaseNotes = @()
-          $releaseNotes += "### Mudancas nesta versao"
-          $releaseNotes += ""
-
-          foreach ($commit in $commits) {
-            if ($commit -notlike "*chore*" -and $commit -notlike "*ci*") {
-              $icon = "[FEAT]"
-              if ($commit -like "*feat*") { $icon = "[FEAT]" }
-              elseif ($commit -like "*fix*") { $icon = "[FIX]" }
-              elseif ($commit -like "*perf*") { $icon = "[PERF]" }
-              
-              $releaseNotes += "- $icon $commit"
-            }
-          }
-
-          $releaseNotesText = $releaseNotes -join "`n"
-
-          # Set outputs
+          if ($isBreakingChange) { $changeType = "major" }
+          elseif ($isMajorFeature -or $hasNewDependencies -or $hasNativeChanges) { $changeType = "minor" }
+          else { $changeType = "patch" }
+          $releaseNotes = "### Mudanças nesta versão`n`n" + ($commits | Where-Object { $_ -notlike "*chore*" -and $_ -notlike "*ci*" } | ForEach-Object { "- $_" }) -join "`n"
           echo "change-type=$changeType" >> $env:GITHUB_OUTPUT
-          echo "is-patch-only=$isPatchOnly" >> $env:GITHUB_OUTPUT
-          echo "has-breaking-changes=$isBreakingChange" >> $env:GITHUB_OUTPUT
-          echo "has-new-dependencies=$hasNewDependencies" >> $env:GITHUB_OUTPUT
-          echo "has-native-changes=$hasNativeChanges" >> $env:GITHUB_OUTPUT
+          echo "release-notes=$releaseNotes" >> $env:GITHUB_OUTPUT
+          Write-Output "Analise de mudancas concluida. Tipo detectado: $changeType"
 
-          echo "release-notes<<EOF" >> $env:GITHUB_OUTPUT
-          echo $releaseNotesText >> $env:GITHUB_OUTPUT
-          echo "EOF" >> $env:GITHUB_OUTPUT
-
-          Write-Output "Analise de mudancas concluida"
+      - name: Get Current Version
+        id: get-version
+        shell: powershell
+        run: |
+          Write-Output "Lendo a versao atual do pubspec.yaml..."
+          $pubspecContent = Get-Content pubspec.yaml -Raw
+          $major = 0; $minor = 0; $patch = 0; $build = 0
+          
+          $versionPatternWithBuild = 'version:\s*(\d+)\.(\d+)\.(\d+)\+(\d+)'
+          if ($pubspecContent -match $versionPatternWithBuild) {
+              $major = $matches[1]; $minor = $matches[2]; $patch = $matches[3]; $build = $matches[4]
+          } else {
+              $versionPatternSimple = 'version:\s*(\d+)\.(\d+)\.(\d+)'
+              if ($pubspecContent -match $versionPatternSimple) {
+                  $major = $matches[1]; $minor = $matches[2]; $patch = $matches[3]; $build = 0
+              } else {
+                  throw "Nao foi possivel encontrar o padrao de versao no pubspec.yaml"
+              }
+          }
+          
+          echo "major=$major" >> $env:GITHUB_OUTPUT
+          echo "minor=$minor" >> $env:GITHUB_OUTPUT
+          echo "patch=$patch" >> $env:GITHUB_OUTPUT
+          echo "build=$build" >> $env:GITHUB_OUTPUT
+          Write-Output "Versao encontrada: $major.$minor.$patch+$build"
 
       - name: Determine Action
         id: decision
         shell: powershell
         run: |
-          Write-Output "Determinando acao da pipeline..."
-
           $changeType = "${{ steps.analyze.outputs.change-type }}"
-          $isPatchOnly = "${{ steps.analyze.outputs.is-patch-only }}"
-          $branch = "${{ inputs.branch_name }}"
-
-          Write-Output "Parametros:"
-          Write-Output "  Branch: $branch"
-          Write-Output "  Tipo: $changeType"
-          Write-Output "  Patch only: $isPatchOnly"
-
-          # Logica de decisao
-          if ($branch -eq "1.0.14+1") {
-            $action = "patch"
-            Write-Output "Branch de patches detectada -> PATCH"
-          } elseif ($changeType -eq "major" -or $changeType -eq "minor") {
-            $action = "release"
-            Write-Output "Mudanca significativa -> RELEASE"
-          } elseif ($isPatchOnly -eq "true") {
-            $action = "patch"
-            Write-Output "Apenas mudancas pequenas -> PATCH"
-          } else {
-            $action = "release"
-            Write-Output "Mudancas diversas -> RELEASE"
+          $build = [int]"${{ steps.get-version.outputs.build }}"
+          Write-Output "Analisando: Tipo de Mudanca='$changeType', Build Atual='$build'"
+          
+          $action = ""
+          if ($changeType -eq 'major' -or $changeType -eq 'minor') {
+              $action = 'release'
+              Write-Output "Decisao: Mudanca significativa ($changeType) => RELEASE"
+          } elseif ($changeType -eq 'patch') {
+              if ($build -ge 9) {
+                  $action = 'release'
+                  Write-Output "Decisao: Tipo patch, mas build e >= 9. Forcando => RELEASE"
+              } else {
+                  $action = 'patch'
+                  Write-Output "Decisao: Tipo patch e build < 9 => PATCH"
+              }
           }
-
-          $shouldProceed = "true"
-
-          # Verificar Shorebird token
-          if ("${{ secrets.SHOREBIRD_TOKEN }}" -eq "") {
-            Write-Output "AVISO: SHOREBIRD_TOKEN nao configurado"
-          } else {
-            Write-Output "SHOREBIRD_TOKEN disponivel"
-          }
-
+          
           echo "action=$action" >> $env:GITHUB_OUTPUT
-          echo "should-proceed=$shouldProceed" >> $env:GITHUB_OUTPUT
+          Write-Output "Acao final determinada: $action"
 
-          Write-Output "Decisao final:"
-          Write-Output "  Acao: $action"
-          Write-Output "  Prosseguir: $shouldProceed"
+      - name: Calculate New Version
+        id: version
+        shell: powershell
+        run: |
+          $action = "${{ steps.decision.outputs.action }}"
+          $major = [int]"${{ steps.get-version.outputs.major }}"
+          $minor = [int]"${{ steps.get-version.outputs.minor }}"
+          $patch = [int]"${{ steps.get-version.outputs.patch }}"
+          $build = [int]"${{ steps.get-version.outputs.build }}"
+          $currentVersionFull = "$major.$minor.$patch+$build"
+          
+          $newVersion = ""
+          if ($action -eq 'release') {
+              $patch++
+              $newVersion = "$major.$minor.$patch" # Nova release zera o conceito de build
+              Write-Output "Acao de RELEASE: Nova versao base sera $newVersion"
+          } else { # action must be 'patch'
+              $build++
+              $newVersion = "$major.$minor.$patch+$build"
+              Write-Output "Acao de PATCH: Novo patch sera $newVersion"
+          }
+
+          echo "current-version-full=$currentVersionFull" >> $env:GITHUB_OUTPUT
+          echo "new-version=$newVersion" >> $env:GITHUB_OUTPUT
 
       - name: Summary
         shell: powershell
@@ -260,11 +158,8 @@ jobs:
           Write-Output ""
           Write-Output "RESUMO DA ANALISE"
           Write-Output "=================="
-          Write-Output "Acao: ${{ steps.decision.outputs.action }}"
-          Write-Output "Tipo: ${{ steps.analyze.outputs.change-type }}"
-
-          Write-Output "Branch: ${{ inputs.branch_name }}"
-          Write-Output "Prosseguir: ${{ steps.decision.outputs.should-proceed }}"
+          Write-Output "Acao a ser tomada: ${{ steps.decision.outputs.action }}"
+          Write-Output "Tipo da Mudança: ${{ steps.analyze.outputs.change-type }}"
+          Write-Output "Versao Atual: ${{ steps.version.outputs.current-version-full }}"
+          Write-Output "Proxima Versao: ${{ steps.version.outputs.new-version }}"
           Write-Output "=================="
-          Write-Output ""
-          Write-Output "Analise concluida com sucesso!"
