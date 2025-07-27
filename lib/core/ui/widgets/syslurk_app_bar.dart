@@ -23,6 +23,21 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.username,
   });
 
+  String _extractChannelName(String url) {
+    try {
+      if (url.contains('twitch.tv/')) {
+        final uri = Uri.parse(url);
+        final pathSegments = uri.pathSegments;
+        if (pathSegments.isNotEmpty) {
+          return pathSegments.first;
+        }
+      }
+      return 'BoostTeam_';
+    } catch (e) {
+      return 'BoostTeam_';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -54,13 +69,20 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
               height: 32,
             ),
             const SizedBox(width: 16),
-            Text(
-              'Canal: BoostTeam_',
-              style: GoogleFonts.inter(
-                color: AppColors.menuItemIcon,
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
+            ListenableBuilder(
+              listenable: viewModel,
+              builder: (context, child) {
+                final channelName =
+                    _extractChannelName(viewModel.currentChannel);
+                return Text(
+                  'Canal: $channelName',
+                  style: GoogleFonts.inter(
+                    color: AppColors.menuItemIcon,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                );
+              },
             ),
           ],
         ),
