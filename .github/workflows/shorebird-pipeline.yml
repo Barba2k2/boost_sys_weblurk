@@ -3,13 +3,11 @@ name: Shorebird Main Pipeline
 on:
   push:
     branches:
-      - master
-      - main
       - "1.0.14+1"
     paths-ignore:
-      - 'pubspec.yaml'
-      - 'CHANGELOG.md'
-      - '**.md'
+      - "pubspec.yaml"
+      - "CHANGELOG.md"
+      - "**.md"
 
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}

@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       branch_name:
-        description: "Nome da branch"
+        description: "1.0.14+1"
         required: true
         type: string
     outputs:
@@ -56,17 +56,17 @@ jobs:
         shell: powershell
         run: |
           Write-Output "🔍 Analisando mudanças no código..."
-          
+
           # Analisar commits desde o último push
           $commits = git log --oneline -10 --format="%s"
           $changedFiles = git diff --name-only HEAD~1..HEAD
-          
+
           Write-Output "📝 Commits recentes:"
           $commits | ForEach-Object { Write-Output "  - $_" }
-          
+
           Write-Output "📁 Arquivos modificados:"
           $changedFiles | ForEach-Object { Write-Output "  - $_" }
-          
+
           # Inicializar flags de análise
           $isBreakingChange = $false
           $isMajorFeature = $false
@@ -74,7 +74,7 @@ jobs:
           $hasNativeChanges = $false
           $hasInfraChanges = $false
           $isPatchOnly = $true
-          
+
           # Analisar arquivos modificados
           foreach ($file in $changedFiles) {
             switch -Regex ($file) {
@@ -99,7 +99,7 @@ jobs:
               }
             }
           }
-          
+
           # Analisar commits para padrões
           foreach ($commit in $commits) {
             switch -Regex ($commit) {
@@ -121,7 +121,7 @@ jobs:
               }
             }
           }
-          
+
           # Determinar tipo de mudança
           if ($isBreakingChange) {
             $changeType = "major"
@@ -133,12 +133,12 @@ jobs:
             $changeType = "patch"
             Write-Output "📊 Resultado: PATCH (correção/melhoria)"
           }
-          
+
           # Gerar notas da release
           $releaseNotes = @()
           $releaseNotes += "### Mudanças nesta versão"
           $releaseNotes += ""
-          
+
           foreach ($commit in $commits) {
             if ($commit -notlike "*chore:*" -and $commit -notlike "*docs:*") {
               $icon = switch -Regex ($commit) {
@@ -152,16 +152,16 @@ jobs:
               $releaseNotes += "- $icon $commit"
             }
           }
-          
+
           $releaseNotesText = $releaseNotes -join "`n"
-          
+
           # Set outputs
           echo "change-type=$changeType" >> $env:GITHUB_OUTPUT
           echo "is-patch-only=$isPatchOnly" >> $env:GITHUB_OUTPUT
           echo "has-breaking-changes=$isBreakingChange" >> $env:GITHUB_OUTPUT
           echo "has-new-dependencies=$hasNewDependencies" >> $env:GITHUB_OUTPUT
           echo "has-native-changes=$hasNativeChanges" >> $env:GITHUB_OUTPUT
-          
+
           echo "release-notes<<EOF" >> $env:GITHUB_OUTPUT
           echo $releaseNotesText >> $env:GITHUB_OUTPUT
           echo "EOF" >> $env:GITHUB_OUTPUT
@@ -171,7 +171,7 @@ jobs:
         shell: powershell
         run: |
           Write-Output "📋 Obtendo versão atual do pubspec.yaml..."
-          
+
           try {
             $pubspecContent = Get-Content pubspec.yaml -Raw -ErrorAction Stop
             $versionMatch = $pubspecContent | Select-String 'version:\s*(.+)'
@@ -187,12 +187,12 @@ jobs:
             $currentVersion = "1.0.14+2"
             Write-Output "❌ Erro ao ler pubspec.yaml, usando fallback: $currentVersion"
           }
-          
+
           # Parse da versão atual
           $versionParts = $currentVersion -split '\+'
           $semverParts = $versionParts[0] -split '\.'
           $buildNumber = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 1 }
-          
+
           try {
             $major = [int]$semverParts[0]
             $minor = [int]$semverParts[1]
@@ -204,10 +204,10 @@ jobs:
             $patch = 14
             $buildNumber = 2
           }
-          
+
           # Calcular nova versão baseada no tipo de mudança
           $changeType = "${{ steps.analyze.outputs.change-type }}"
-          
+
           switch ($changeType) {
             "major" { 
               $major += 1
@@ -233,18 +233,18 @@ jobs:
               Write-Output "📈 Default patch bump: $major.$minor.$patch+$buildNumber"
             }
           }
-          
+
           $newVersion = "$major.$minor.$patch+$buildNumber"
-          
+
           # Override manual se fornecido
           if ("${{ inputs.force_version }}" -ne "") {
             $newVersion = "${{ inputs.force_version }}"
             Write-Output "🎯 Usando versão forçada: $newVersion"
           }
-          
+
           echo "current-version=$currentVersion" >> $env:GITHUB_OUTPUT
           echo "new-version=$newVersion" >> $env:GITHUB_OUTPUT
-          
+
           Write-Output "📊 Versionamento final:"
           Write-Output "  Atual: $currentVersion"
           Write-Output "  Nova: $newVersion"
@@ -255,16 +255,16 @@ jobs:
         shell: powershell
         run: |
           Write-Output "🎯 Determinando ação da pipeline..."
-          
+
           $changeType = "${{ steps.analyze.outputs.change-type }}"
           $isPatchOnly = "${{ steps.analyze.outputs.is-patch-only }}"
           $branch = "${{ inputs.branch_name }}"
-          
+
           Write-Output "📋 Parâmetros de decisão:"
           Write-Output "  Branch: $branch"
           Write-Output "  Tipo de mudança: $changeType"
           Write-Output "  Apenas patch: $isPatchOnly"
-          
+
           # Lógica 100% automática de decisão
           if ($branch -eq "1.0.14+1") {
             $action = "patch"
@@ -279,10 +279,10 @@ jobs:
             $action = "release"
             Write-Output "🚀 Mudanças diversas → RELEASE (seguro)"
           }
-          
+
           # Verificar se deve prosseguir
           $shouldProceed = "true"
-          
+
           # Verificações de sanidade
           try {
             $env:SHOREBIRD_TOKEN = "${{ secrets.SHOREBIRD_TOKEN }}"
@@ -292,10 +292,10 @@ jobs:
             Write-Output "⚠️ Problema na configuração do Shorebird"
             # Não falhar, apenas avisar
           }
-          
+
           echo "action=$action" >> $env:GITHUB_OUTPUT
           echo "should-proceed=$shouldProceed" >> $env:GITHUB_OUTPUT
-          
+
           Write-Output "📊 Decisão final:"
           Write-Output "  Ação: $action"
           Write-Output "  Deve prosseguir: $shouldProceed"

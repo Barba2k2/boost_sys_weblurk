@@ -1,0 +1,37 @@
+name: Test Pipeline Trigger
+
+on:
+  push:
+    branches:
+      - "1.0.14+1"
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test Pipeline Trigger
+        run: |
+          echo "✅ Pipeline triggered successfully!"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+
+      - name: Check Shorebird Token
+        run: |
+          if [ -n "${{ secrets.SHOREBIRD_TOKEN }}" ]; then
+            echo "✅ SHOREBIRD_TOKEN está configurado"
+          else
+            echo "❌ SHOREBIRD_TOKEN não está configurado"
+            exit 1
+          fi
+
+      - name: Test File Changes
+        run: |
+          echo "📁 Verificando mudanças de arquivos..."
+          git log --oneline -5
+          echo "📝 Últimos commits:"
+          git log --oneline -3 --format="%s"
