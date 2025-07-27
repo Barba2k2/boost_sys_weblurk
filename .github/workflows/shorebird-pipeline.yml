@@ -9,7 +9,7 @@ on:
     paths-ignore:
       - "README.md"
       - "docs/**"
-  
+
   workflow_dispatch:
     inputs:
       force_run:
@@ -47,7 +47,7 @@ jobs:
           Write-Output "Actor: ${{ github.actor }}"
           Write-Output "Repository: ${{ github.repository }}"
           Write-Output "Run ID: ${{ github.run_id }}"
-          
+
           Write-Output "Verificando Git..."
           $gitWorking = $false
           try {
@@ -59,7 +59,7 @@ jobs:
           } catch {
             Write-Output "Git: ERRO"
           }
-          
+
           if ($gitWorking) {
             Write-Output "Testando git status..."
             try {
@@ -69,27 +69,27 @@ jobs:
               Write-Output "Git repository: PROBLEMA"
             }
           }
-          
+
           Write-Output "Verificando estrutura..."
           if (Test-Path "pubspec.yaml") {
             Write-Output "pubspec.yaml: OK"
           } else {
             Write-Output "pubspec.yaml: NAO ENCONTRADO"
           }
-          
+
           if (Test-Path "lib") {
             Write-Output "lib/: OK"
           } else {
             Write-Output "lib/: NAO ENCONTRADO"
           }
-          
+
           Write-Output "Verificando secrets..."
           if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
             Write-Output "SHOREBIRD_TOKEN: OK"
           } else {
             Write-Output "SHOREBIRD_TOKEN: NAO CONFIGURADO"
           }
-          
+
           Write-Output "Debug concluido com sucesso!"
 
   analyze:
@@ -100,18 +100,8 @@ jobs:
     secrets:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
-  versioning:
-    needs: analyze
-    if: needs.analyze.outputs.should-proceed == 'true'
-    uses: ./.github/workflows/version-management.yml
-    with:
-      current_version: ${{ needs.analyze.outputs.current-version }}
-      new_version: ${{ needs.analyze.outputs.new-version }}
-      change_type: ${{ needs.analyze.outputs.change-type }}
-      release_notes: ${{ needs.analyze.outputs.release-notes }}
-
   shorebird-release:
-    needs: [analyze, versioning]
+    needs: analyze
     if: needs.analyze.outputs.action == 'release'
     uses: ./.github/workflows/shorebird-release.yml
     with:
@@ -121,7 +111,7 @@ jobs:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
   shorebird-patch:
-    needs: [analyze, versioning]
+    needs: analyze
     if: needs.analyze.outputs.action == 'patch'
     uses: ./.github/workflows/shorebird-patch.yml
     with:
@@ -131,7 +121,7 @@ jobs:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
   notify:
-    needs: [analyze, versioning, shorebird-release, shorebird-patch]
+    needs: [analyze, shorebird-release, shorebird-patch]
     if: always()
     uses: ./.github/workflows/notify-results.yml
     with:
@@ -140,4 +130,4 @@ jobs:
       change_type: ${{ needs.analyze.outputs.change-type }}
       release_success: ${{ needs.shorebird-release.result == 'success' }}
       patch_success: ${{ needs.shorebird-patch.result == 'success' }}
-      version_updated: ${{ needs.versioning.outputs.version-updated }}
+      version_updated: true
