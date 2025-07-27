@@ -60,7 +60,7 @@ jobs:
             shorebird --version
             
             Write-Output "Verificando releases disponiveis..."
-            shorebird releases --json 2>$null
+            shorebird releases list 2>$null
             
             if ($LASTEXITCODE -ne 0) {
                 Write-Output "Aviso: Não foi possível verificar releases (pode ser normal para primeiro deploy)"
@@ -92,19 +92,27 @@ jobs:
             git config --system core.longpaths true
             
             Write-Output "Buscando releases..."
-            $releasesJson = shorebird releases --json 2>$null
+            $releasesOutput = shorebird releases list 2>$null
             
             if ($LASTEXITCODE -ne 0) {
                 throw "Comando 'shorebird releases' falhou."
             }
             
-            if ($releasesJson -and $releasesJson.Trim().StartsWith("[")) {
-              $releases = $releasesJson | ConvertFrom-Json
+            if ($releasesOutput) {
+              # Parse the releases list output to find the latest version
+              $lines = $releasesOutput -split "`n"
+              $latestVersion = $null
               
-              if ($releases -and $releases.Count -gt 0) {
-                $latestRelease = $releases[0]
-                $targetVersion = $latestRelease.version
-                Write-Output "Release base encontrada: $($latestRelease.version)"
+              foreach ($line in $lines) {
+                if ($line -match "v(\d+\.\d+\.\d+)") {
+                  $latestVersion = $matches[1]
+                  break
+                }
+              }
+              
+              if ($latestVersion) {
+                $targetVersion = $latestVersion
+                Write-Output "Release base encontrada: $latestVersion"
               } else {
                 throw "Nenhuma release encontrada para criar um patch."
               }
