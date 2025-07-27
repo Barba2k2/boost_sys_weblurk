@@ -35,7 +35,7 @@ jobs:
     runs-on: windows-latest
     outputs:
       action: ${{ steps.decision.outputs.action }}
-      current-version: ${{ steps.version.outputs.current-version }}
+      current-version: ${{ steps.version.outputs.current-version-only }}
       new-version: ${{ steps.version.outputs.new-version }}
       should-proceed: ${{ steps.decision.outputs.should-proceed }}
       change-type: ${{ steps.analyze.outputs.change-type }}
@@ -208,71 +208,14 @@ jobs:
 
           Write-Output "Analise de mudancas concluida"
 
-      - name: Get Current Version
+      - name: Version Management
         id: version
-        shell: powershell
-        run: |
-          Write-Output "Obtendo versao atual do pubspec.yaml..."
-
-          try {
-            $pubspecContent = Get-Content pubspec.yaml -Raw -ErrorAction Stop
-            $versionMatch = $pubspecContent | Select-String 'version:\s*(.+)'
-            
-            if ($versionMatch) {
-              $currentVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
-              Write-Output "Versao atual encontrada: $currentVersion"
-            } else {
-              $currentVersion = "1.0.14+2"
-              Write-Output "Versao nao encontrada, usando fallback: $currentVersion"
-            }
-          } catch {
-            $currentVersion = "1.0.14+2"
-            Write-Output "Erro ao ler pubspec.yaml, usando fallback: $currentVersion"
-          }
-
-          # Parse da versao
-          try {
-            $versionParts = $currentVersion -split '\+'
-            $semverParts = $versionParts[0] -split '\.'
-            $buildNumber = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 2 }
-            
-            $major = [int]$semverParts[0]
-            $minor = [int]$semverParts[1]
-            $patch = [int]$semverParts[2]
-          } catch {
-            Write-Output "Erro ao parsear versao, usando valores padrao"
-            $major = 1
-            $minor = 0
-            $patch = 14
-            $buildNumber = 2
-          }
-
-          # Calcular nova versao
-          $changeType = "${{ steps.analyze.outputs.change-type }}"
-
-          if ($changeType -eq "major") {
-            $major += 1
-            $minor = 0
-            $patch = 0
-            $buildNumber += 1
-          } elseif ($changeType -eq "minor") {
-            $minor += 1
-            $patch = 0
-            $buildNumber += 1
-          } else {
-            $patch += 1
-            $buildNumber += 1
-          }
-
-          $newVersion = "$major.$minor.$patch+$buildNumber"
-
-          echo "current-version=$currentVersion" >> $env:GITHUB_OUTPUT
-          echo "new-version=$newVersion" >> $env:GITHUB_OUTPUT
-
-          Write-Output "Versionamento:"
-          Write-Output "  Atual: $currentVersion"
-          Write-Output "  Nova: $newVersion"
-          Write-Output "  Tipo: $changeType"
+        uses: ./.github/actions/version-action
+        with:
+          pubspec-path: "pubspec.yaml"
+          auto-commit: "true"
+          auto-push: "true"
+          change-type: "${{ steps.analyze.outputs.change-type }}"
 
       - name: Determine Action
         id: decision
@@ -329,7 +272,7 @@ jobs:
           Write-Output "=================="
           Write-Output "Acao: ${{ steps.decision.outputs.action }}"
           Write-Output "Tipo: ${{ steps.analyze.outputs.change-type }}"
-          Write-Output "Versao: ${{ steps.version.outputs.current-version }} -> ${{ steps.version.outputs.new-version }}"
+          Write-Output "Versao: ${{ steps.version.outputs.current-version-only }} -> ${{ steps.version.outputs.new-version }}"
           Write-Output "Branch: ${{ inputs.branch_name }}"
           Write-Output "Prosseguir: ${{ steps.decision.outputs.should-proceed }}"
           Write-Output "=================="
