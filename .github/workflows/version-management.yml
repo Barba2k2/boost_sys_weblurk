@@ -131,22 +131,15 @@ jobs:
         run: |
           $newVersion = "${{ inputs.new_version }}"
           $changeType = "${{ inputs.change_type }}"
-          $releaseNotes = @"
-          ${{ inputs.release_notes }}
-          "@
           
           Write-Output "Atualizando CHANGELOG.md..."
           
           try {
             $date = Get-Date -Format "yyyy-MM-dd"
+            $releaseNotes = "${{ inputs.release_notes }}"
             
-            $changelogEntry = @"
-            
-            ## [$newVersion] - $date
-            
-            $releaseNotes
-            
-            "@
+            # Criar entrada do changelog simples
+            $changelogEntry = "`n## [$newVersion] - $date`n`n$releaseNotes`n`n"
             
             if (Test-Path "CHANGELOG.md") {
               Write-Output "CHANGELOG.md encontrado, atualizando..."
@@ -161,15 +154,8 @@ jobs:
             } else {
               Write-Output "Criando novo CHANGELOG.md..."
               
-              $newChangelog = @"
-              # Changelog
-              
-              Todas as mudanças importantes do projeto são documentadas neste arquivo.
-              
-              O formato é baseado em [Keep a Changelog](https://keepachangelog.com/),
-              e este projeto adere ao [Semantic Versioning](https://semver.org/).
-              $changelogEntry
-              "@
+              $changelogHeader = "# Changelog`n`nTodas as mudanças importantes do projeto são documentadas neste arquivo.`n`nO formato é baseado em [Keep a Changelog](https://keepachangelog.com/),`ne este projeto adere ao [Semantic Versioning](https://semver.org/).`n"
+              $newChangelog = "$changelogHeader$changelogEntry"
             }
             
             Set-Content "CHANGELOG.md" $newChangelog -Encoding UTF8
@@ -180,8 +166,7 @@ jobs:
               Write-Output "CHANGELOG.md atualizado com sucesso"
               echo "changelog-updated=true" >> $env:GITHUB_OUTPUT
               
-              Write-Output "Nova entrada adicionada:"
-              Write-Output $changelogEntry
+              Write-Output "Nova entrada adicionada para versão: $newVersion"
             } else {
               Write-Output "CHANGELOG.md não foi modificado"
               echo "changelog-updated=false" >> $env:GITHUB_OUTPUT
