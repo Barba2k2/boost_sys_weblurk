@@ -338,15 +338,16 @@ jobs:
         run: |
           $version = "${{ inputs.version }}"
           $tag = "v$version"
-          $releaseNotes = "# Boost SysWebLurk $version`n`n## Como Atualizar`n`n**Para usuarios com versao anterior:**`n1. Abra o aplicativo instalado`n2. Aguarde a deteccao automatica de atualizacao`n3. Aceite a atualizacao quando solicitado`n4. Aplicativo sera reiniciado com a nova versao`n`n**Para novos usuarios:**`n- Execute o instalador e siga as instrucoes`n- O aplicativo ja estara na versao mais recente`n`n## Tecnologia`n`n- **Shorebird:** Atualizacoes automaticas sem reinstalacao`n- **Rollback automatico:** Em caso de problemas`n- **Atualizacoes incrementais:** Menores e mais rapidas`n`n---`n`n**Pipeline:** Shorebird Release Automation`n**Plataforma:** Windows x64`n**Versao anterior:** Verificar CHANGELOG.md para detalhes"
+
+          $title = "Boost SysWebLurk $version"
+          $notes = "Release $version - Atualizacoes automaticas via Shorebird"
 
           try {
-            # Tentar usar GitHub CLI se disponível
             $ghVersion = gh --version 2>$null
             
             if ($ghVersion) {
               Write-Output "GitHub CLI encontrado, criando release..."
-              gh release create $tag --title "Boost SysWebLurk $version" --notes "$releaseNotes" --draft=false
+              gh release create $tag --title "$title" --notes "$notes" --draft=false
               Write-Output "GitHub Release criada com sucesso!"
             } else {
               Write-Output "GitHub CLI nao disponivel"
