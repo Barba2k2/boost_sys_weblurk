@@ -8,8 +8,26 @@ class UiConfig {
 
   static ThemeData get lightTheme => ThemeData(
         useMaterial3: true,
+        fontFamily: 'Ibrand',
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primary,
+        ),
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(fontFamily: 'Ibrand'),
+          displayMedium: TextStyle(fontFamily: 'Ibrand'),
+          displaySmall: TextStyle(fontFamily: 'Ibrand'),
+          headlineLarge: TextStyle(fontFamily: 'Ibrand'),
+          headlineMedium: TextStyle(fontFamily: 'Ibrand'),
+          headlineSmall: TextStyle(fontFamily: 'Ibrand'),
+          titleLarge: TextStyle(fontFamily: 'Ibrand'),
+          titleMedium: TextStyle(fontFamily: 'Ibrand'),
+          titleSmall: TextStyle(fontFamily: 'Ibrand'),
+          bodyLarge: TextStyle(fontFamily: 'Ibrand'),
+          bodyMedium: TextStyle(fontFamily: 'Ibrand'),
+          bodySmall: TextStyle(fontFamily: 'Ibrand'),
+          labelLarge: TextStyle(fontFamily: 'Ibrand'),
+          labelMedium: TextStyle(fontFamily: 'Ibrand'),
+          labelSmall: TextStyle(fontFamily: 'Ibrand'),
         ),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
@@ -40,9 +58,27 @@ class UiConfig {
 
   static ThemeData get darkTheme => ThemeData(
         useMaterial3: true,
+        fontFamily: 'Ibrand',
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primary,
           brightness: Brightness.dark,
+        ),
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(fontFamily: 'Ibrand'),
+          displayMedium: TextStyle(fontFamily: 'Ibrand'),
+          displaySmall: TextStyle(fontFamily: 'Ibrand'),
+          headlineLarge: TextStyle(fontFamily: 'Ibrand'),
+          headlineMedium: TextStyle(fontFamily: 'Ibrand'),
+          headlineSmall: TextStyle(fontFamily: 'Ibrand'),
+          titleLarge: TextStyle(fontFamily: 'Ibrand'),
+          titleMedium: TextStyle(fontFamily: 'Ibrand'),
+          titleSmall: TextStyle(fontFamily: 'Ibrand'),
+          bodyLarge: TextStyle(fontFamily: 'Ibrand'),
+          bodyMedium: TextStyle(fontFamily: 'Ibrand'),
+          bodySmall: TextStyle(fontFamily: 'Ibrand'),
+          labelLarge: TextStyle(fontFamily: 'Ibrand'),
+          labelMedium: TextStyle(fontFamily: 'Ibrand'),
+          labelSmall: TextStyle(fontFamily: 'Ibrand'),
         ),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
