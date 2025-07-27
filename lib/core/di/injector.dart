@@ -153,7 +153,6 @@ class Injector {
   }
 
   static Future<void> _injectControllers() async {
-    
     i.registerFactory<LoginViewModel>(
       () => LoginViewModel(
         authStore: i(),
@@ -161,7 +160,6 @@ class Injector {
       ),
     );
 
-    
     i.registerFactory<HomeViewModel>(
       () => HomeViewModel(
         homeService: i(),
@@ -173,6 +171,5 @@ class Injector {
     );
   }
 }
-
 
 T injector<T extends Object>() => i<T>();
