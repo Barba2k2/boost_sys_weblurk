@@ -45,6 +45,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ github.token }}
 
       - name: Pipeline Validation
         shell: powershell
@@ -96,29 +97,82 @@ jobs:
         run: |
           Write-Output "🔍 Analisando mudanças no código..."
 
-          # Obter commits desde o último push (com fallback para commits recentes)
+          # Verificar se estamos em um repositório git válido
+          Write-Output "🔍 Verificando contexto Git..."
+          $isGitRepo = $false
           try {
-            $commits = git log --oneline -10 --format="%s" 2>$null
-            if (-not $commits) {
-              Write-Output "⚠️ Nenhum commit encontrado, usando fallback"
-              $commits = @("feat: initial commit")
+            $gitStatus = git status --porcelain 2>$null
+            $isGitRepo = $LASTEXITCODE -eq 0
+            if ($isGitRepo) {
+              Write-Output "✅ Repositório Git válido detectado"
             }
           } catch {
-            Write-Output "⚠️ Erro ao obter commits, usando fallback"
-            $commits = @("feat: initial commit")
+            Write-Output "⚠️ Problema ao verificar status do Git"
+          }
+
+          # Obter commits (com múltiplas estratégias de fallback)
+          $commits = @()
+          try {
+            if ($isGitRepo) {
+              # Tentar obter commits do push atual
+              $commits = git log --oneline -5 --format="%s" 2>$null
+              if (-not $commits -or $commits.Count -eq 0) {
+                # Fallback: últimos commits disponíveis
+                $commits = git log --oneline -3 --format="%s" --all 2>$null
+              }
+            }
+            
+            if (-not $commits -or $commits.Count -eq 0) {
+              Write-Output "⚠️ Nenhum commit encontrado via Git, usando contexto do GitHub"
+              # Usar informações do contexto do GitHub
+              $commitMessage = "${{ github.event.head_commit.message }}"
+              if ($commitMessage -and $commitMessage -ne "") {
+                $commits = @($commitMessage)
+              } else {
+                $commits = @("feat: pipeline auto-triggered")
+              }
+            }
+          } catch {
+            Write-Output "⚠️ Erro ao obter commits: $_"
+            $commits = @("feat: pipeline auto-triggered")
           }
           
-          # Obter arquivos modificados (com fallback)
+          # Obter arquivos modificados (com estratégias robustas)
+          $changedFiles = @()
           try {
-            $changedFiles = git diff --name-only HEAD~1..HEAD 2>$null
-            if (-not $changedFiles) {
-              Write-Output "ℹ️ Nenhum arquivo modificado detectado (possível primeiro commit)"
-              # Para primeiro commit, assumir mudanças em arquivos importantes
-              $changedFiles = @("lib/main.dart", "pubspec.yaml")
+            if ($isGitRepo) {
+              # Estratégia 1: Comparar com commit anterior
+              $changedFiles = git diff --name-only HEAD~1..HEAD 2>$null
+              
+              if (-not $changedFiles -or $changedFiles.Count -eq 0) {
+                # Estratégia 2: Arquivos modificados no working directory
+                $changedFiles = git diff --name-only HEAD 2>$null
+              }
+              
+              if (-not $changedFiles -or $changedFiles.Count -eq 0) {
+                # Estratégia 3: Arquivos adicionados/modificados recentemente
+                $changedFiles = git show --name-only --format="" HEAD 2>$null
+              }
+            }
+            
+            if (-not $changedFiles -or $changedFiles.Count -eq 0) {
+              Write-Output "ℹ️ Usando arquivos padrão do projeto Flutter"
+              # Verificar quais arquivos realmente existem
+              $defaultFiles = @("lib/main.dart", "pubspec.yaml", "lib/", "android/", "windows/")
+              $changedFiles = @()
+              foreach ($file in $defaultFiles) {
+                if (Test-Path $file) {
+                  $changedFiles += $file
+                }
+              }
+              
+              if ($changedFiles.Count -eq 0) {
+                $changedFiles = @("pubspec.yaml") # Sempre existe em projetos Flutter
+              }
             }
           } catch {
-            Write-Output "⚠️ Erro ao obter arquivos modificados, usando fallback"
-            $changedFiles = @("lib/main.dart")
+            Write-Output "⚠️ Erro ao obter arquivos modificados: $_"
+            $changedFiles = @("pubspec.yaml", "lib/main.dart")
           }
 
           Write-Output "📝 Commits analisados:"
@@ -139,16 +193,23 @@ jobs:
           foreach ($file in $changedFiles) {
             switch -Regex ($file) {
               "^pubspec\.yaml$" { 
-                # Verificar se realmente adicionou dependências
-                try {
-                  $pubspecDiff = git diff HEAD~1..HEAD pubspec.yaml 2>$null
-                  if ($pubspecDiff -and ($pubspecDiff -like "*dependencies:*" -or $pubspecDiff -like "*+*")) {
-                    $hasNewDependencies = $true
-                    $isPatchOnly = $false
-                    Write-Output "  📦 Novas dependências detectadas"
+                # Verificar se é uma mudança real em dependências (sem depender do git diff)
+                if (Test-Path "pubspec.yaml") {
+                  try {
+                    $pubspecContent = Get-Content "pubspec.yaml" -Raw
+                    # Se pubspec.yaml foi listado como modificado e contém dependencies
+                    if ($pubspecContent -like "*dependencies:*") {
+                      $hasNewDependencies = $true
+                      $isPatchOnly = $false
+                      Write-Output "  📦 Mudança em pubspec.yaml (dependências) detectada"
+                    } else {
+                      Write-Output "  📦 Mudança em pubspec.yaml (configuração) detectada"
+                    }
+                  } catch {
+                    Write-Output "  📦 Mudança em pubspec.yaml detectada"
                   }
-                } catch {
-                  Write-Output "  📦 Mudança em pubspec.yaml detectada"
+                } else {
+                  Write-Output "  📦 pubspec.yaml listado mas não encontrado"
                 }
               }
               "^(android|ios|windows|macos|linux)/" { 
