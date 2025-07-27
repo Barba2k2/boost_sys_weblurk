@@ -1,0 +1,13 @@
+name: Simple Test
+
+on:
+  push:
+    branches: ["1.0.14+1"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - name: Hello World
+        run: echo "Hello World! Pipeline is working!"
