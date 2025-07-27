@@ -44,6 +44,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Validate Inputs
+        shell: powershell
+        run: |
+          if (-Not ("${{ inputs.version }}")) {
+            Write-Error "ERRO FATAL: O input 'version' é obrigatório e não foi fornecido."
+            exit 1
+          }
+          if (-Not ("${{ inputs.release_notes }}")) {
+            Write-Error "ERRO FATAL: O input 'release_notes' é obrigatório e não foi fornecido."
+            exit 1
+          }
+          Write-Output "Inputs 'version' e 'release_notes' validados com sucesso."
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -59,27 +72,13 @@ jobs:
         shell: powershell
         run: |
           Write-Output "Verificando configuracao do Shorebird..."
-
           try {
-            # Verificar versão
-            $shorebirdVersion = shorebird --version
-            Write-Output "Shorebird versao: $shorebirdVersion"
-            
-            # Verificar configuração do app
-            Write-Output "Verificando configuracao do app..."
-            
-            # Listar releases existentes
-            Write-Output "Releases existentes:"
-            $releases = shorebird releases list 2>$null
-            
-            if ($releases -and $releases.Length -gt 0) {
-              $releases | head -5 | Write-Output
-            } else {
-              Write-Output "Nenhuma release encontrada ou erro ao listar"
-            }
-            
+            shorebird --version
+            Write-Output "Verificando acesso às releases..."
+            shorebird releases list | Out-Null
+            Write-Output "Configuração do Shorebird parece OK."
           } catch {
-            Write-Output "Erro na verificacao do Shorebird: $_"
+            Write-Error "Erro na verificacao do Shorebird: $_"
             throw "Configuracao do Shorebird invalida"
           }
         env:
@@ -88,55 +87,25 @@ jobs:
       - name: Install Dependencies
         shell: powershell
         run: |
-          Write-Output "Instalando dependencias Flutter..."
+          flutter pub get
+          flutter analyze --no-fatal-warnings
 
-          try {
-            flutter pub get
-            Write-Output "Dependencias instaladas com sucesso"
-            
-            # Análise de código
-            flutter analyze --no-fatal-warnings
-            Write-Output "Analise de codigo concluida"
-            
-          } catch {
-            Write-Output "Aviso durante instalacao de dependencias: $_"
-            # Continuar mesmo com warnings
-          }
-
-      - name: Validate Release
+      - name: Validate Release Version
         id: validate-release
         shell: powershell
         run: |
-          Write-Output "Validacao pre-release..."
-
+          Write-Output "Validacao pre-release da versao ${{ inputs.version }}..."
           $version = "${{ inputs.version }}"
-
           try {
-            # Verificar se a release já existe
             $existingReleases = shorebird releases list 2>$null
-            
-            if ($existingReleases -and $existingReleases.Length -gt 0) {
-              $releaseExists = $existingReleases | Select-String $version
-              
-              if ($releaseExists) {
-                Write-Output "Release $version ja existe no Shorebird"
-                Write-Output "Release existente:"
-                $releaseExists | Write-Output
-                throw "Release $version ja existe"
-              } else {
-                Write-Output "Versao $version e unica"
-              }
+            if ($existingReleases -and ($existingReleases | Select-String -Pattern $version -Quiet)) {
+              throw "Release $version ja existe no Shorebird."
             } else {
-              Write-Output "Primeira release do projeto"
+              Write-Output "Versao $version e unica e pode ser criada."
             }
-            
           } catch {
-            if ($_.Exception.Message -like "*ja existe*") {
-              throw $_
-            } else {
-              Write-Output "Nao foi possivel verificar releases existentes: $_"
-              Write-Output "Continuando com a criacao..."
-            }
+            Write-Error "Erro ao validar a versao: $_"
+            throw
           }
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -146,52 +115,14 @@ jobs:
         shell: powershell
         run: |
           Write-Output "Criando release Shorebird para Windows..."
-
-          $version = "${{ inputs.version }}"
-          $changeType = "${{ inputs.change_type }}"
-
-          Write-Output "Parametros:"
-          Write-Output "  Versao: $version"
-          Write-Output "  Tipo: $changeType"
-
           try {
-            # Criar release com verbose para debug
-            Write-Output "Output da criacao da release:"
-            $releaseOutput = shorebird release windows --verbose 2>&1
-            $releaseOutput | Write-Output
-            
-            # Verificar sucesso
-            if ($LASTEXITCODE -eq 0) {
-              Write-Output "Release Shorebird criada com sucesso!"
-              echo "release-created=true" >> $env:GITHUB_OUTPUT
-              
-            # Listar releases para confirmar
-            Write-Output "Releases atuais:"
-            $currentReleases = shorebird releases list 2>$null
-            if ($currentReleases -and $currentReleases.Length -gt 0) {
-              $currentReleases | head -3
-            } else {
-              Write-Output "Nenhuma release encontrada"
-            }
-              
-            } else {
-              Write-Output "Falha na criacao da release (Exit code: $LASTEXITCODE)"
-              echo "release-created=false" >> $env:GITHUB_OUTPUT
-              throw "Falha na criacao da release Shorebird"
-            }
-            
+            # O --force é útil em CI para não haver prompts interativos
+            shorebird release windows --force 
+            Write-Output "Release Shorebird criada com sucesso!"
+            echo "release-created=true" >> $env:GITHUB_OUTPUT
           } catch {
-            Write-Output "Erro durante criacao da release: $_"
+            Write-Error "Erro durante criacao da release Shorebird: $_"
             echo "release-created=false" >> $env:GITHUB_OUTPUT
-            
-            # Tentar diagnóstico adicional
-            try {
-              Write-Output "Diagnostico adicional:"
-              shorebird doctor 2>$null
-            } catch {
-              Write-Output "Nao foi possivel executar diagnostico"
-            }
-            
             throw "Falha na criacao da release Shorebird"
           }
         env:
@@ -202,73 +133,29 @@ jobs:
         shell: powershell
         if: steps.shorebird-release.outputs.release-created == 'true'
         run: |
-          Write-Output "Verificando e atualizando versao no pubspec.yaml..."
-
+          Write-Output "Atualizando versao no pubspec.yaml..."
           $pubspecPath = "pubspec.yaml"
-
           try {
-            # Ler o arquivo pubspec.yaml
             $pubspecContent = Get-Content $pubspecPath -Raw
-            
-            # Extrair versão atual usando regex (com ou sem build number)
-            if ($pubspecContent -match 'version:\s*(\d+)\.(\d+)\.(\d+)(?:\+(\d+))?') {
-              $major = [int]$matches[1]
-              $minor = [int]$matches[2]
-              $patch = [int]$matches[3]
-              $build = if ($matches[4]) { [int]$matches[4] } else { 0 }
-              
-              Write-Output "Versao atual: $major.$minor.$patch+$build"
-              
-              # Lógica de incremento
-              if ($build -ge 9) {
-                # Se build >= 9, incrementar patch e não adicionar build
-                $patch++
-                $newVersion = "$major.$minor.$patch"
-                Write-Output "Build atingiu limite (9), incrementando patch para $patch (sem build number)"
-              } else {
-                # Se build < 9, apenas incrementar build
-                $build++
-                $newVersion = "$major.$minor.$patch+$build"
-                Write-Output "Incrementando build para $build"
-              }
-              
-              $newVersion = "$major.$minor.$patch+$build"
-              Write-Output "Nova versao calculada: $newVersion"
-              
-              # Atualizar o arquivo (lidando com versões com ou sem build)
-              $newContent = $pubspecContent -replace 'version:\s*\d+\.\d+\.\d+(?:\+\d+)?', "version: $newVersion"
-              
-              # Verificar se a substituição foi feita
-              if ($newContent -eq $pubspecContent) {
-                Write-Output "Aviso: Versao nao foi alterada no pubspec.yaml"
-                echo "version-updated=false" >> $env:GITHUB_OUTPUT
-                echo "new-version=$newVersion" >> $env:GITHUB_OUTPUT
-              } else {
-                # Salvar o arquivo atualizado
-                Set-Content -Path $pubspecPath -Value $newContent -NoNewline
-                Write-Output "Versao atualizada no pubspec.yaml para: $newVersion"
-                
-                # Commit da alteração
-                git config --local user.email "action@github.com"
-                git config --local user.name "GitHub Action"
-                git add $pubspecPath
-                git commit -m "chore: auto-increment version to $newVersion after successful Shorebird release"
-                git push
-                
-                echo "version-updated=true" >> $env:GITHUB_OUTPUT
-                echo "new-version=$newVersion" >> $env:GITHUB_OUTPUT
-              }
+            if ($pubspecContent -match 'version:\s*(\d+\.\d+\.\d+)\+?(\d*)') {
+              $currentVersion = $matches[1]
+              $newVersion = "${{ inputs.version }}"
+              $newContent = $pubspecContent -replace "version: $currentVersion\+\d*", "version: $newVersion"
+              Set-Content -Path $pubspecPath -Value $newContent
+              Write-Output "Versao atualizada no pubspec.yaml para: $newVersion"
+              git config --local user.email "action@github.com"
+              git config --local user.name "GitHub Action"
+              git add $pubspecPath
+              git commit -m "chore: set version to $newVersion for release"
+              git push
+              echo "version-updated=true" >> $env:GITHUB_OUTPUT
             } else {
-              Write-Output "Erro: Nao foi possivel extrair a versao do pubspec.yaml"
+              Write-Warning "Nao foi possivel encontrar o padrao de versao no pubspec.yaml."
               echo "version-updated=false" >> $env:GITHUB_OUTPUT
-              echo "new-version=failed" >> $env:GITHUB_OUTPUT
             }
-            
           } catch {
-            Write-Output "Erro ao atualizar versao no pubspec.yaml: $_"
+            Write-Error "Erro ao atualizar versao no pubspec.yaml: $_"
             echo "version-updated=false" >> $env:GITHUB_OUTPUT
-            echo "new-version=failed" >> $env:GITHUB_OUTPUT
-            # Não falhar o workflow por erro na atualização da versão
           }
 
       - name: Update CHANGELOG.md
@@ -277,198 +164,84 @@ jobs:
         if: steps.shorebird-release.outputs.release-created == 'true'
         run: |
           Write-Output "Atualizando CHANGELOG.md..."
-
           $newVersion = "${{ inputs.version }}"
           $date = Get-Date -Format "yyyy-MM-dd"
-          $releaseNotes = "### Mudancas nesta versao"
-
+          $releaseNotes = "${{ inputs.release_notes }}"
+          $changelogEntry = "## [$newVersion] - $date`n`n### Mudancas`n$releaseNotes`n"
           try {
-            $changelogEntry = "## [$newVersion] - $date`n`n$releaseNotes`n"
-            
             if (Test-Path "CHANGELOG.md") {
-              Write-Output "CHANGELOG.md encontrado, atualizando..."
-              $existingChangelog = Get-Content "CHANGELOG.md" -Raw -ErrorAction Stop
-              
-              if ($existingChangelog -like "*# Changelog*") {
-                $newChangelog = $existingChangelog -replace "(# Changelog)", "`$1`n$changelogEntry"
-              } else {
-                $newChangelog = "# Changelog`n`n$changelogEntry$existingChangelog"
-              }
+              $existingChangelog = Get-Content "CHANGELOG.md" -Raw
+              $newChangelog = $changelogEntry + "`n" + $existingChangelog
             } else {
-              Write-Output "Criando novo CHANGELOG.md..."
-              $header = "# Changelog`n`nTodas as mudancas importantes do projeto sao documentadas neste arquivo.`n`nO formato e baseado em [Keep a Changelog](https://keepachangelog.com/),`ne este projeto adere ao [Semantic Versioning](https://semver.org/).`n"
-              $newChangelog = "$header$changelogEntry"
+              $header = "# Changelog`n`nTodas as mudancas importantes do projeto sao documentadas neste arquivo."
+              $newChangelog = "$header`n`n$changelogEntry"
             }
-            
             Set-Content "CHANGELOG.md" $newChangelog -Encoding UTF8
-            
-            $changelogModified = git diff --name-only CHANGELOG.md
-            
-            if ($changelogModified) {
-              Write-Output "CHANGELOG.md atualizado com sucesso"
-              echo "changelog-updated=true" >> $env:GITHUB_OUTPUT
-              
-              Write-Output "Nova entrada adicionada:"
-              Write-Output $changelogEntry
-              
-              git config --local user.email "action@github.com"
-              git config --local user.name "GitHub Action"
-              git add CHANGELOG.md
-              git commit -m "docs: update changelog for version $newVersion"
-              git push
-            } else {
-              Write-Output "CHANGELOG.md nao foi modificado"
-              echo "changelog-updated=false" >> $env:GITHUB_OUTPUT
-            }
-            
+            Write-Output "CHANGELOG.md atualizado."
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add CHANGELOG.md
+            git commit -m "docs: update changelog for v$newVersion"
+            git push
+            echo "changelog-updated=true" >> $env:GITHUB_OUTPUT
           } catch {
-            Write-Output "Erro ao atualizar CHANGELOG.md: $_"
+            Write-Error "Erro ao atualizar CHANGELOG.md: $_"
             echo "changelog-updated=false" >> $env:GITHUB_OUTPUT
           }
 
       - name: Create Git Tag
         id: git-tag
         shell: powershell
+        if: steps.shorebird-release.outputs.release-created == 'true'
         run: |
-          Write-Output "Criando tag Git: $tag"
-
           $version = "${{ inputs.version }}"
           $tag = "v$version"
-
+          Write-Output "Criando tag Git: $tag"
           try {
-            # Verificar se a tag já existe
-            $existingTag = git tag -l $tag
-            
-            if ($existingTag) {
-              Write-Output "Tag $tag ja existe"
-              Write-Output "Removendo tag existente..."
-              git tag -d $tag
-              git push origin :refs/tags/$tag 2>$null
+            if (git rev-parse $tag 2>$null) {
+              Write-Warning "Tag $tag ja existe. Nenhuma acao sera tomada."
+            } else {
+              git tag -a $tag -m "Release $version"
+              git push origin $tag
+              Write-Output "Tag $tag criada e enviada para o repositorio remoto."
             }
-            
-            # Criar nova tag
-            git tag -a $tag -m "Release $version"
-            Write-Output "Tag local criada: $tag"
-            
-            # Enviar tag para repositório remoto
-            git push origin $tag
-            Write-Output "Tag enviada para repositorio remoto"
-            
             echo "tag-created=true" >> $env:GITHUB_OUTPUT
             echo "tag-name=$tag" >> $env:GITHUB_OUTPUT
-            
           } catch {
-            Write-Output "Erro na criacao da tag: $_"
+            Write-Error "Erro na criacao da tag Git: $_"
             echo "tag-created=false" >> $env:GITHUB_OUTPUT
-            echo "tag-name=failed" >> $env:GITHUB_OUTPUT
-            Write-Output "Continuando sem tag Git..."
           }
 
       - name: Create GitHub Release
-        shell: powershell
-        run: |
-          $version = "${{ inputs.version }}"
-          $tag = "v$version"
-
-          $title = "Boost SysWebLurk $version"
-          $notes = "Release $version - Atualizacoes automaticas via Shorebird"
-
-          try {
-            $ghVersion = gh --version 2>$null
-            
-            if ($ghVersion) {
-              Write-Output "GitHub CLI encontrado, criando release..."
-              gh release create $tag --title "$title" --notes "$notes" --draft=false
-              Write-Output "GitHub Release criada com sucesso!"
-            } else {
-              Write-Output "GitHub CLI nao disponivel"
-              Write-Output "GitHub Release nao criada automaticamente"
-              Write-Output "Crie manualmente em: https://github.com/${{ github.repository }}/releases/new"
-            }
-            
-          } catch {
-            Write-Output "Erro na criacao do GitHub Release: $_"
-            Write-Output "Continuando sem GitHub Release..."
-          }
-
-      - name: Validate Release
-        shell: powershell
-        run: |
-          Write-Output "Validacao pos-release..."
-
-          $version = "${{ inputs.version }}"
-
-          try {
-            # Verificar se a release aparece na lista
-            Write-Output "Verificando releases no Shorebird..."
-            
-            $releases = shorebird releases list 2>$null
-            
-            if ($releases -and $releases.Length -gt 0) {
-              $releaseFound = $releases | Select-String $version
-              
-              if ($releaseFound) {
-                Write-Output "Release $version confirmada no Shorebird"
-                Write-Output "Detalhes da release:"
-                $releaseFound | Write-Output
-              } else {
-                Write-Output "Release $version nao encontrada na lista"
-              }
-            } else {
-              Write-Output "Nao foi possivel validar releases"
-            }
-            
-            # Verificar patches disponíveis
-            Write-Output "Patches disponiveis para esta release:"
-            try {
-              $patchesForRelease = shorebird patches list --release-version=$version 2>$null
-              if ($patchesForRelease -and $patchesForRelease.Length -gt 0) {
-                $patchesForRelease | head -3
-              } else {
-                Write-Output "Nenhum patch ainda para esta release (esperado)"
-              }
-            } catch {
-              Write-Output "Nenhum patch ainda para esta release (esperado)"
-            }
-            
-          } catch {
-            Write-Output "Erro na validacao pos-release: $_"
-            # Não falhar por erro de validação
-          }
+        id: github-release
+        if: steps.git-tag.outputs.tag-created == 'true'
+        uses: actions/create-release@v1
         env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.git-tag.outputs.tag-name }}
+          release_name: "Release v${{ inputs.version }}"
+          body: |
+            ${{ inputs.release_notes }}
+          draft: false
+          prerelease: false
 
       - name: Summary
         shell: powershell
+        if: always()
         run: |
           Write-Output ""
           Write-Output "RESUMO DA RELEASE"
           Write-Output "=================="
-          Write-Output "Versao: ${{ inputs.version }}"
-          Write-Output "Shorebird Release: ${{ steps.shorebird-release.outputs.release-created }}"
-          Write-Output "Versao atualizada no pubspec: ${{ steps.update-version.outputs.version-updated }}"
-          Write-Output "CHANGELOG atualizado: ${{ steps.update-changelog.outputs.changelog-updated }}"
-          Write-Output "Git Tag: ${{ steps.git-tag.outputs.tag-created }}"
-          Write-Output "Tipo: ${{ inputs.change_type }}"
+          Write-Output "Versao Solicitada: ${{ inputs.version }}"
+          Write-Output "Shorebird Release Criada: ${{ steps.shorebird-release.outputs.release-created }}"
+          Write-Output "Versao no pubspec.yaml Atualizada: ${{ steps.update-version.outputs.version-updated }}"
+          Write-Output "CHANGELOG.md Atualizado: ${{ steps.update-changelog.outputs.changelog-updated }}"
+          Write-Output "Git Tag Criada: ${{ steps.git-tag.outputs.tag-created }}"
+          Write-Output "GitHub Release Criada: ${{ steps.github-release.outputs.id != '' }}"
           Write-Output "=================="
-
-          if ("${{ steps.shorebird-release.outputs.release-created }}" -eq "true") {
-            Write-Output ""
-            Write-Output "RELEASE CRIADA COM SUCESSO!"
-            Write-Output ""
-            Write-Output "Proximos passos:"
-            Write-Output "  1. Release base disponivel no Shorebird"
-            Write-Output "  2. Versao atualizada no pubspec.yaml"
-            Write-Output "  3. CHANGELOG.md atualizado com as mudancas"
-            Write-Output "  4. Patches futuros serao baseados nesta release"
-            Write-Output "  5. Usuarios podem receber atualizacoes automaticas"
-            Write-Output "  6. Monitorar logs de atualizacao dos usuarios"
-            Write-Output ""
+          if ("${{ steps.shorebird-release.outputs.release-created }}" -ne "true") {
+            Write-Error "A CRIAÇÃO DA RELEASE FALHOU. Verifique os logs acima para detalhes."
           } else {
-            Write-Output ""
-            Write-Output "FALHA NA CRIAÇÃO DA RELEASE"
-            Write-Output "Verifique logs acima para detalhes do erro"
-            Write-Output "Versao no pubspec.yaml nao foi alterada"
-            Write-Output "CHANGELOG.md nao foi atualizado"
-            Write-Output ""
+            Write-Host "RELEASE CONCLUÍDA COM SUCESSO!" -ForegroundColor Green
           }
