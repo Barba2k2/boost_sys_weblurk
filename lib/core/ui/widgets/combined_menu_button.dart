@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import '../../services/settings_service.dart';
@@ -246,17 +245,17 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
           color: AppColors.menuButton,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Row(
+        child: const Row(
           children: [
             Text(
               'Menu',
-              style: GoogleFonts.inter(
+              style: TextStyle(
                 color: AppColors.menuItemIcon,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(width: 10),
-            const Icon(
+            SizedBox(width: 10),
+            Icon(
               Icons.menu,
               size: 20,
               color: AppColors.menuItemIcon,
