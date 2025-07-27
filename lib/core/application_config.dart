@@ -15,7 +15,6 @@ class ApplicationConfig {
 
     if (Platform.isWindows) {
       await _configureWindowManager();
-    } else if (Platform.isAndroid) {
       await _initializeUpdateService();
     }
   }

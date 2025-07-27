@@ -19,7 +19,6 @@ class UpdateService {
 
     SystemChannels.lifecycle.setMessageHandler((msg) async {
       if (msg == AppLifecycleState.resumed.toString()) {
-        log('App resumed: verificando atualizações...');
         await checkForUpdateOnResume();
       }
       return null;
@@ -74,26 +73,17 @@ class UpdateService {
 
     _isChecking = true;
     try {
-      log('UpdateService: Iniciando verificação manual...');
-
-      // Teste básico do ShorebirdUpdater
-      log('UpdateService: ShorebirdUpdater criado: ${_updater.runtimeType}');
-
       final status = await _updater.checkForUpdate();
-      log('UpdateService: Status retornado: $status');
 
       if (status == UpdateStatus.outdated) {
-        log('UpdateService: Atualização disponível!');
         _showUpdateDialog(
           title: 'Atualização Disponível',
           message: 'Uma nova versão foi encontrada. Deseja atualizar agora?',
           isStartup: false,
         );
       } else if (status == UpdateStatus.upToDate) {
-        log('UpdateService: App está atualizado');
         _showNoUpdateDialog();
       } else {
-        log('UpdateService: Status desconhecido: $status');
         _showNoUpdateDialog();
       }
     } catch (e, stackTrace) {
