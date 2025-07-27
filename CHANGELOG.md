@@ -1,4 +1,4 @@
-## [1.2.0+7] - 2025-07-27
+﻿## [1.2.0+7] - 2025-07-27
 
 [FEAT] ### Mudancas nesta versao
 
@@ -13,6 +13,16 @@
 - [FIX] fix: correct YAML syntax in version-management workflow
 
 # Changelog
+## [] - 2025-07-27
+
+### Mudancas nesta versao
+
+- [FIX] fix: adjust version increment logic to handle versions without build number
+- [FEAT] feat: implement auto-increment version logic in shorebird release workflow
+- [FEAT] refactor: remove version action references from analyze-changes workflow
+- [FEAT] refactor: remove version management action
+
+
 
 Todas as mudancas notaveis neste projeto serao documentadas neste arquivo.
 
@@ -25,4 +35,5 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - [FIX] fix: correct YAML syntax in version-management workflow
 - [FEAT] Merge pull request #11 from Barba2k2/1.0.14+1
+
 
