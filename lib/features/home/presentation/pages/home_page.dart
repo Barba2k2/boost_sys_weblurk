@@ -105,40 +105,41 @@ class _HomePageState extends State<HomePage>
           ),
         ],
       ),
-      floatingActionButton: ListenableBuilder(
-        listenable: widget.viewModel.loadSchedulesCommand,
-        builder: (context, child) {
-          final command = widget.viewModel.loadSchedulesCommand;
-          return FloatingActionButton.extended(
-            backgroundColor: AppColors.primary,
-            onPressed: command.running
-                ? null
-                : () => widget.viewModel.loadSchedulesCommand.execute(),
-            icon: AnimatedBuilder(
-              animation: _rotationAnimation,
-              builder: (context, child) {
-                return Transform.rotate(
-                  angle: _rotationAnimation.value * 2 * math.pi,
-                  child: const Icon(
-                    Icons.refresh,
-                    size: 30,
-                    color: AppColors.cardHeaderText,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primary,
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.refresh),
+                    title: const Text('Atualizar Agendamentos'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      widget.viewModel.loadSchedulesCommand.execute();
+                    },
                   ),
-                );
-              },
-            ),
-            label: const Text(
-              'Atualizar',
-              style: TextStyle(
-                fontFamily: 'Ibrand',
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.cardHeaderText,
-                letterSpacing: 2.0,
+                  ListTile(
+                    leading: const Icon(Icons.system_update),
+                    title: const Text('Verificar Atualização do App'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      widget.viewModel.checkUpdate();
+                    },
+                  ),
+                ],
               ),
             ),
           );
         },
+        child: const Icon(
+          Icons.menu,
+          color: AppColors.cardHeaderText,
+        ),
       ),
     );
   }

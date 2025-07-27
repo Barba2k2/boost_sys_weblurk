@@ -6,6 +6,7 @@ import '../../../../core/logger/app_logger.dart';
 import '../../../../core/utils/command.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/services/volume_service.dart';
+import '../../../../core/services/update_service.dart';
 import '../../../../models/schedule_list_model.dart';
 import '../../../../models/schedule_model.dart';
 import '../../../../models/user_model.dart';
@@ -66,6 +67,7 @@ class HomeViewModel extends ChangeNotifier {
       Command0<String>(_fetchCurrentChannel);
   late final updateChannelsCommand = Command0<void>(_updateChannels);
   late final reloadWebViewCommand = Command0<void>(_reloadWebView);
+  late final checkUpdateCommand = Command0<void>(_checkUpdate);
 
   void _initializeChannels() {
     _currentChannel = 'https://twitch.tv/BoostTeam_';
@@ -145,6 +147,20 @@ class HomeViewModel extends ChangeNotifier {
 
   void reloadWebView() {
     reloadWebViewCommand.execute();
+  }
+
+  void checkUpdate() {
+    checkUpdateCommand.execute();
+  }
+
+  Future<Result<void>> _checkUpdate() async {
+    try {
+      await UpdateService.instance.checkForUpdateManually();
+      return Result.ok(null);
+    } catch (e, s) {
+      _logger.error('Erro ao verificar atualização', e, s);
+      return Result.error(Exception('Erro ao verificar atualização: $e'));
+    }
   }
 
   Future<Result<void>> _reloadWebView() async {
