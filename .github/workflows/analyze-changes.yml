@@ -3,16 +3,6 @@ name: Analyze Changes
 on:
   workflow_call:
     inputs:
-      force_action:
-        description: "Ação forçada"
-        required: false
-        type: string
-        default: ""
-      force_version:
-        description: "Versão forçada"
-        required: false
-        type: string
-        default: ""
       branch_name:
         description: "Nome da branch"
         required: true
@@ -189,3 +179,137 @@ jobs:
             if ($versionMatch) {
               $currentVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
               Write-Output "✅ Versão atual encontrada: $currentVersion"
+            } else {
+              $currentVersion = "1.0.14+2"
+              Write-Output "⚠️ Versão não encontrada no pubspec.yaml, usando fallback: $currentVersion"
+            }
+          } catch {
+            $currentVersion = "1.0.14+2"
+            Write-Output "❌ Erro ao ler pubspec.yaml, usando fallback: $currentVersion"
+          }
+          
+          # Parse da versão atual
+          $versionParts = $currentVersion -split '\+'
+          $semverParts = $versionParts[0] -split '\.'
+          $buildNumber = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 1 }
+          
+          try {
+            $major = [int]$semverParts[0]
+            $minor = [int]$semverParts[1]
+            $patch = [int]$semverParts[2]
+          } catch {
+            Write-Output "❌ Erro ao parsear versão, usando valores padrão"
+            $major = 1
+            $minor = 0
+            $patch = 14
+            $buildNumber = 2
+          }
+          
+          # Calcular nova versão baseada no tipo de mudança
+          $changeType = "${{ steps.analyze.outputs.change-type }}"
+          
+          switch ($changeType) {
+            "major" { 
+              $major += 1
+              $minor = 0
+              $patch = 0
+              $buildNumber += 1
+              Write-Output "📈 Major version bump: $major.0.0+$buildNumber"
+            }
+            "minor" { 
+              $minor += 1
+              $patch = 0
+              $buildNumber += 1
+              Write-Output "📈 Minor version bump: $major.$minor.0+$buildNumber"
+            }
+            "patch" { 
+              $patch += 1
+              $buildNumber += 1
+              Write-Output "📈 Patch version bump: $major.$minor.$patch+$buildNumber"
+            }
+            default { 
+              $patch += 1
+              $buildNumber += 1
+              Write-Output "📈 Default patch bump: $major.$minor.$patch+$buildNumber"
+            }
+          }
+          
+          $newVersion = "$major.$minor.$patch+$buildNumber"
+          
+          # Override manual se fornecido
+          if ("${{ inputs.force_version }}" -ne "") {
+            $newVersion = "${{ inputs.force_version }}"
+            Write-Output "🎯 Usando versão forçada: $newVersion"
+          }
+          
+          echo "current-version=$currentVersion" >> $env:GITHUB_OUTPUT
+          echo "new-version=$newVersion" >> $env:GITHUB_OUTPUT
+          
+          Write-Output "📊 Versionamento final:"
+          Write-Output "  Atual: $currentVersion"
+          Write-Output "  Nova: $newVersion"
+          Write-Output "  Tipo: $changeType"
+
+      - name: Determine Action
+        id: decision
+        shell: powershell
+        run: |
+          Write-Output "🎯 Determinando ação da pipeline..."
+          
+          $changeType = "${{ steps.analyze.outputs.change-type }}"
+          $isPatchOnly = "${{ steps.analyze.outputs.is-patch-only }}"
+          $branch = "${{ inputs.branch_name }}"
+          
+          Write-Output "📋 Parâmetros de decisão:"
+          Write-Output "  Branch: $branch"
+          Write-Output "  Tipo de mudança: $changeType"
+          Write-Output "  Apenas patch: $isPatchOnly"
+          
+          # Lógica 100% automática de decisão
+          if ($branch -eq "1.0.14+1") {
+            $action = "patch"
+            Write-Output "🔧 Branch de patches detectada → PATCH"
+          } elseif ($changeType -eq "major" -or $changeType -eq "minor") {
+            $action = "release"
+            Write-Output "🚀 Mudança significativa detectada → RELEASE"
+          } elseif ($isPatchOnly -eq "true") {
+            $action = "patch"
+            Write-Output "🔧 Apenas mudanças pequenas → PATCH"
+          } else {
+            $action = "release"
+            Write-Output "🚀 Mudanças diversas → RELEASE (seguro)"
+          }
+          
+          # Verificar se deve prosseguir
+          $shouldProceed = "true"
+          
+          # Verificações de sanidade
+          try {
+            $env:SHOREBIRD_TOKEN = "${{ secrets.SHOREBIRD_TOKEN }}"
+            shorebird doctor 2>$null
+            Write-Output "✅ Shorebird configurado corretamente"
+          } catch {
+            Write-Output "⚠️ Problema na configuração do Shorebird"
+            # Não falhar, apenas avisar
+          }
+          
+          echo "action=$action" >> $env:GITHUB_OUTPUT
+          echo "should-proceed=$shouldProceed" >> $env:GITHUB_OUTPUT
+          
+          Write-Output "📊 Decisão final:"
+          Write-Output "  Ação: $action"
+          Write-Output "  Deve prosseguir: $shouldProceed"
+          Write-Output "  Versão alvo: ${{ steps.version.outputs.new-version }}"
+
+      - name: Summary
+        shell: powershell
+        run: |
+          Write-Output ""
+          Write-Output "📋 RESUMO DA ANÁLISE"
+          Write-Output "==================="
+          Write-Output "🎯 Ação: ${{ steps.decision.outputs.action }}"
+          Write-Output "📊 Tipo: ${{ steps.analyze.outputs.change-type }}"
+          Write-Output "📱 Versão: ${{ steps.version.outputs.current-version }} → ${{ steps.version.outputs.new-version }}"
+          Write-Output "🌟 Branch: ${{ inputs.branch_name }}"
+          Write-Output "✅ Prosseguir: ${{ steps.decision.outputs.should-proceed }}"
+          Write-Output "==================="

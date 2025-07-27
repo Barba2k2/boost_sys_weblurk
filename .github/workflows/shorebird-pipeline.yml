@@ -10,19 +10,6 @@ on:
       - 'pubspec.yaml'
       - 'CHANGELOG.md'
       - '**.md'
-  workflow_dispatch:
-    inputs:
-      force_action:
-        description: "Forçar ação específica"
-        required: false
-        type: choice
-        options:
-          - "release"
-          - "patch"
-      force_version:
-        description: "Forçar versão específica"
-        required: false
-        type: string
 
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -32,8 +19,6 @@ jobs:
   analyze:
     uses: ./.github/workflows/analyze-changes.yml
     with:
-      force_action: ${{ github.event.inputs.force_action || '' }}
-      force_version: ${{ github.event.inputs.force_version || '' }}
       branch_name: ${{ github.ref_name }}
     secrets:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
