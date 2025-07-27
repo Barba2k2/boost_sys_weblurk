@@ -40,11 +40,9 @@ class Injector {
   }
 
   static Future<void> _injectCoreServices() async {
-    // SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     i.registerLazySingleton<SharedPreferences>(() => prefs);
 
-    // Local Storage
     i.registerLazySingleton<LocalStorage>(
       () => SharedPreferencesLocalStorageImpl(),
     );
@@ -53,12 +51,10 @@ class Injector {
       () => FlutterSecureStorageLocalStorageImpl(),
     );
 
-    // Logger
     i.registerLazySingleton<AppLogger>(
       () => LoggerAppLoggerImpl(),
     );
 
-    // Auth Store
     i.registerLazySingleton<AuthViewModel>(
       () => AuthViewModel(
         localStorage: i(),
@@ -66,7 +62,6 @@ class Injector {
       ),
     );
 
-    // Rest Client
     i.registerLazySingleton<RestClient>(
       () => DioRestClient(
         localStorage: i(),
@@ -77,7 +72,6 @@ class Injector {
   }
 
   static Future<void> _injectRepositories() async {
-    // User Repository
     i.registerLazySingleton<UserRepository>(
       () => UserRepositoryImpl(
         logger: i(),
@@ -85,7 +79,6 @@ class Injector {
       ),
     );
 
-    // Schedule Repository
     i.registerLazySingleton<SchedulesRepository>(
       () => ScheduleRepositoryImpl(
         restClient: i(),
@@ -93,7 +86,6 @@ class Injector {
       ),
     );
 
-    // Home Repository
     i.registerLazySingleton<HomeRepository>(
       () => HomeRepositoryImpl(
         restClient: i(),
@@ -103,7 +95,6 @@ class Injector {
   }
 
   static Future<void> _injectServices() async {
-    // User Service
     i.registerLazySingleton<UserService>(
       () => UserServiceImpl(
         logger: i(),
@@ -113,7 +104,6 @@ class Injector {
       ),
     );
 
-    // Schedule Service
     i.registerLazySingleton<ScheduleService>(
       () => StreamerServiceImpl(
         logger: i(),
@@ -121,14 +111,12 @@ class Injector {
       ),
     );
 
-    // WebView Service
     i.registerLazySingleton<WebViewService>(
       () => WebViewServiceImpl(
         logger: i(),
       ),
     );
 
-    // Home Service
     i.registerLazySingleton<HomeService>(
       () => HomeServiceImpl(
         homeRepository: i(),
@@ -136,7 +124,6 @@ class Injector {
       ),
     );
 
-    // Polling Service
     i.registerLazySingleton<PollingService>(
       () => PollingServiceImpl(
         homeService: i(),
@@ -144,7 +131,6 @@ class Injector {
       ),
     );
 
-    // Volume Service
     i.registerLazySingleton<VolumeService>(
       () => VolumeService(
         logger: i(),
@@ -152,7 +138,6 @@ class Injector {
       ),
     );
 
-    // Settings Service
     i.registerLazySingleton<SettingsService>(
       () => SettingsService(
         logger: i(),
@@ -160,7 +145,6 @@ class Injector {
       ),
     );
 
-    // UrlLauncher Service
     i.registerLazySingleton<UrlLauncherService>(
       () => UrlLauncherService(
         logger: i(),
@@ -169,7 +153,7 @@ class Injector {
   }
 
   static Future<void> _injectControllers() async {
-    // Login ViewModel
+    
     i.registerFactory<LoginViewModel>(
       () => LoginViewModel(
         authStore: i(),
@@ -177,7 +161,7 @@ class Injector {
       ),
     );
 
-    // Home ViewModel
+    
     i.registerFactory<HomeViewModel>(
       () => HomeViewModel(
         homeService: i(),
@@ -190,5 +174,5 @@ class Injector {
   }
 }
 
-// Helper para facilitar o acesso
+
 T injector<T extends Object>() => i<T>();
