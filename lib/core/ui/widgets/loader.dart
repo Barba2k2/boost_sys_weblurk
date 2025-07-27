@@ -33,7 +33,6 @@ class Loader {
     }
   }
 
-  // Loaders específicos para diferentes operações
   static void showLoadingSchedules() {
     show();
   }
