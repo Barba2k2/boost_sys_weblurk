@@ -4,18 +4,14 @@ import '../app_colors.dart';
 class Messages {
   Messages._();
 
-  // Contexto global para SnackBar
   static BuildContext? _globalContext;
 
-  // Método para configurar o contexto global
   static void setGlobalContext(BuildContext context) {
     _globalContext = context;
   }
 
-  // Método para obter o contexto global
   static BuildContext? get _context => _globalContext;
 
-  // Mensagens de sucesso
   static void success(String message) {
     final context = _context;
     if (context != null) {
@@ -35,7 +31,6 @@ class Messages {
     }
   }
 
-  // Mensagens de aviso com sugestão de retry
   static void warning(String message, {String? retryAction}) {
     final context = _context;
     if (context != null) {
@@ -57,7 +52,6 @@ class Messages {
                   textColor: AppColors.cardHeaderText,
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    // Aqui você pode adicionar uma callback para retry
                   },
                 )
               : SnackBarAction(
@@ -71,7 +65,6 @@ class Messages {
     }
   }
 
-  // Mensagens de erro específicas
   static void error(String message, {String? retryAction}) {
     final context = _context;
     if (context != null) {
@@ -91,7 +84,6 @@ class Messages {
                   textColor: AppColors.cardHeaderText,
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    // Aqui você pode adicionar uma callback para retry
                   },
                 )
               : SnackBarAction(
@@ -105,7 +97,6 @@ class Messages {
     }
   }
 
-  // Métodos de compatibilidade (mantidos para não quebrar código existente)
   static void alert(String message) {
     warning(message);
   }
@@ -114,7 +105,6 @@ class Messages {
     success(message);
   }
 
-  // Mensagens específicas para diferentes tipos de erro
   static void networkError() {
     error(
       'Falha na conexão com o servidor. Verifique sua internet e tente novamente.',
