@@ -34,6 +34,16 @@ jobs:
       version-updated: ${{ steps.update-pubspec.outputs.version-updated }}
       changelog-updated: ${{ steps.update-changelog.outputs.changelog-updated }}
     steps:
+      - name: Validate Inputs
+        shell: powershell
+        run: |
+          if (-not "${{ inputs.new_version }}") {
+            throw "Error: Input 'new_version' cannot be empty. Please provide a valid version."
+          }
+          if (-not "${{ inputs.change_type }}") {
+            throw "Error: Input 'change_type' cannot be empty."
+          }
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
