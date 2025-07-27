@@ -202,35 +202,65 @@ jobs:
         shell: powershell
         if: steps.shorebird-release.outputs.release-created == 'true'
         run: |
-          Write-Output "Atualizando versao no pubspec.yaml..."
+          Write-Output "Verificando e atualizando versao no pubspec.yaml..."
 
-          $version = "${{ inputs.version }}"
           $pubspecPath = "pubspec.yaml"
 
           try {
             # Ler o arquivo pubspec.yaml
             $pubspecContent = Get-Content $pubspecPath -Raw
             
-            # Atualizar a versão usando regex
-            $newContent = $pubspecContent -replace 'version:\s*\d+\.\d+\.\d+\+\d+', "version: $version"
-            
-            # Verificar se a substituição foi feita
-            if ($newContent -eq $pubspecContent) {
-              Write-Output "Aviso: Versao nao foi alterada no pubspec.yaml"
+            # Extrair versão atual usando regex
+            if ($pubspecContent -match 'version:\s*(\d+)\.(\d+)\.(\d+)\+(\d+)') {
+              $major = [int]$matches[1]
+              $minor = [int]$matches[2]
+              $patch = [int]$matches[3]
+              $build = [int]$matches[4]
+              
+              Write-Output "Versao atual: $major.$minor.$patch+$build"
+              
+              # Lógica de incremento
+              if ($build -ge 9) {
+                # Se build >= 9, incrementar patch e resetar build
+                $patch++
+                $build = 1
+                Write-Output "Build atingiu limite (9), incrementando patch para $patch"
+              } else {
+                # Se build < 9, apenas incrementar build
+                $build++
+                Write-Output "Incrementando build para $build"
+              }
+              
+              $newVersion = "$major.$minor.$patch+$build"
+              Write-Output "Nova versao calculada: $newVersion"
+              
+              # Atualizar o arquivo
+              $newContent = $pubspecContent -replace 'version:\s*\d+\.\d+\.\d+\+\d+', "version: $newVersion"
+              
+              # Verificar se a substituição foi feita
+              if ($newContent -eq $pubspecContent) {
+                Write-Output "Aviso: Versao nao foi alterada no pubspec.yaml"
+                echo "version-updated=false" >> $env:GITHUB_OUTPUT
+                echo "new-version=$newVersion" >> $env:GITHUB_OUTPUT
+              } else {
+                # Salvar o arquivo atualizado
+                Set-Content -Path $pubspecPath -Value $newContent -NoNewline
+                Write-Output "Versao atualizada no pubspec.yaml para: $newVersion"
+                
+                # Commit da alteração
+                git config --local user.email "action@github.com"
+                git config --local user.name "GitHub Action"
+                git add $pubspecPath
+                git commit -m "chore: auto-increment version to $newVersion after successful Shorebird release"
+                git push
+                
+                echo "version-updated=true" >> $env:GITHUB_OUTPUT
+                echo "new-version=$newVersion" >> $env:GITHUB_OUTPUT
+              }
             } else {
-              # Salvar o arquivo atualizado
-              Set-Content -Path $pubspecPath -Value $newContent -NoNewline
-              Write-Output "Versao atualizada no pubspec.yaml para: $version"
-              
-              # Commit da alteração
-              git config --local user.email "action@github.com"
-              git config --local user.name "GitHub Action"
-              git add $pubspecPath
-              git commit -m "chore: update version to $version after successful Shorebird release"
-              git push
-              
-              echo "version-updated=true" >> $env:GITHUB_OUTPUT
-              echo "new-version=$version" >> $env:GITHUB_OUTPUT
+              Write-Output "Erro: Nao foi possivel extrair a versao do pubspec.yaml"
+              echo "version-updated=false" >> $env:GITHUB_OUTPUT
+              echo "new-version=failed" >> $env:GITHUB_OUTPUT
             }
             
           } catch {
