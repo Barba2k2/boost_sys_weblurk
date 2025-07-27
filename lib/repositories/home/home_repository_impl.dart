@@ -24,7 +24,6 @@ class HomeRepositoryImpl implements HomeRepository {
     try {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
-      // Busca agendamentos de ambas as listas para a data específica
       final responseListA = await _restClient.auth().get(
             '/list-a/get?date=$formattedDate',
           );
@@ -38,7 +37,9 @@ class HomeRepositoryImpl implements HomeRepository {
         final dataA = responseListA.data;
         if (dataA is Map<String, dynamic> && dataA['schedules'] != null) {
           allSchedules.addAll(
-            (dataA['schedules'] as List).map((x) => ScheduleModel.fromMap(x)),
+            (dataA['schedules'] as List).map(
+              (x) => ScheduleModel.fromMap(x),
+            ),
           );
         }
       }
@@ -47,7 +48,9 @@ class HomeRepositoryImpl implements HomeRepository {
         final dataB = responseListB.data;
         if (dataB is Map<String, dynamic> && dataB['schedules'] != null) {
           allSchedules.addAll(
-            (dataB['schedules'] as List).map((x) => ScheduleModel.fromMap(x)),
+            (dataB['schedules'] as List).map(
+              (x) => ScheduleModel.fromMap(x),
+            ),
           );
         }
       }
@@ -61,12 +64,12 @@ class HomeRepositoryImpl implements HomeRepository {
       );
       throw Failure(
         message:
-            'Erro do RestClient ao carregar o agendamento: ${e.message ?? e.statusCode}',
+            'Erro ao carregar os agendamentos: ${e.message ?? e.statusCode}',
       );
     } catch (e, s) {
       _logger.error('Error on load schedules', e, s);
       throw Failure(
-        message: 'Erro genérico ao carregar o agendamento: ${e.toString()}',
+        message: 'Erro ao carregar os agendamentos: ${e.toString()}',
       );
     }
   }
@@ -76,7 +79,6 @@ class HomeRepositoryImpl implements HomeRepository {
     try {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
-      // Busca ambas as listas A e B para a data específica
       final responseListA = await _restClient.auth().get(
             '/list-a/get?date=$formattedDate',
           );
@@ -95,9 +97,6 @@ class HomeRepositoryImpl implements HomeRepository {
         }
       } catch (e) {
         _logger.error('Erro ao fazer parse da resposta da Lista A', e);
-        _logger.error(
-          'Corpo da resposta Lista A: \n${responseListA.data.toString()}',
-        );
         throw Failure(message: 'Erro ao processar dados da Lista A.');
       }
 
@@ -130,14 +129,14 @@ class HomeRepositoryImpl implements HomeRepository {
     } catch (e, s) {
       _logger.error('Error on load schedule lists', e, s);
       throw Failure(
-          message: 'Erro genérico ao carregar as listas: ${e.toString()}');
+        message: 'Erro genérico ao carregar as listas: ${e.toString()}',
+      );
     }
   }
 
   @override
   Future<List<String>> getAvailableListNames() async {
     try {
-      // Usa o endpoint de listas da Lista A (ambos retornam o mesmo resultado)
       final response = await _restClient.auth().get('/list-a/lists');
 
       if (response.statusCode == 200) {
@@ -145,7 +144,7 @@ class HomeRepositoryImpl implements HomeRepository {
         if (data is Map<String, dynamic> && data['list_names'] != null) {
           return List<String>.from(data['list_names']);
         }
-        return ['Lista A', 'Lista B']; // Fallback
+        return ['Lista A', 'Lista B'];
       } else {
         throw Failure(
           message:
@@ -177,7 +176,7 @@ class HomeRepositoryImpl implements HomeRepository {
   ) async {
     try {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
-      // Normaliza o nome para evitar erro de contains
+
       final normalized =
           listName.toLowerCase().replaceAll(' ', '').replaceAll('_', '');
       String endpoint;
@@ -189,71 +188,42 @@ class HomeRepositoryImpl implements HomeRepository {
         endpoint = '/list-a/get?date=$formattedDate';
       }
 
-      _logger.info('Buscando $listName no endpoint: $endpoint');
       final response = await _restClient.auth().get(endpoint);
-      _logger.info('Resposta $listName: status=${response.statusCode}');
 
       if (response.statusCode == 200) {
         if (response.data != null) {
           final result = ScheduleListModel.fromMap(response.data);
-          _logger.info(
-            '$listName carregada com ${result.schedules.length} agendamentos',
-          );
           return result;
         }
         return null;
       } else {
         throw Failure(
-          message:
-              'Erro ao carregar lista específica (código ${response.statusCode})',
+          message: 'Erro ao carregar a lista: ${response.statusCode}',
         );
       }
     } on RestClientException catch (e, s) {
       _logger.error(
-        'Error on load specific list (status code: ${e.statusCode})',
+        'Error on load list (status code: ${e.statusCode})',
         e,
         s,
       );
       throw Failure(
         message:
-            'Erro do RestClient ao carregar lista específica: ${e.message ?? e.statusCode}',
+            'Erro do RestClient ao carregar a lista: ${e.message ?? e.statusCode}',
       );
     } catch (e, s) {
-      _logger.error('Error on load specific list', e, s);
+      _logger.error('Error on load list', e, s);
       throw Failure(
-        message: 'Erro genérico ao carregar lista específica: ${e.toString()}',
+        message: 'Erro genérico ao carregar a lista: ${e.toString()}',
       );
     }
   }
-
-  // @override
-  // Future<void> forceUpdateLive() async {
-  //   try {
-  //     final response = await _restClient.auth().post('/schedule/update');
-
-  //     if (response.statusCode == 200) {
-  //       final responseBody = response.data;
-  //       final newChannel = responseBody['currentChannel'] as String?;
-
-  //       if (newChannel != null && newChannel.isNotEmpty) {
-  //         _logger.info('New channel detected: $newChannel');
-  //       }
-  //     } else {
-  //       _logger.error('Failed to force update live: ${response.statusCode}');
-  //       throw Failure(message: 'Erro ao forçar a atualização da live');
-  //     }
-  //   } catch (e, s) {
-  //     _logger.error('Error forcing live update', e, s);
-  //     throw Failure(message: 'Erro ao forçar a atualização da live');
-  //   }
-  // }
 
   @override
   Future<String?> getCurrentChannel() async {
     try {
       final formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-      // Busca agendamentos de ambas as listas para a data atual
       final responseListA = await _restClient.auth().get(
             '/list-a/get?date=$formattedDate',
           );
@@ -267,7 +237,9 @@ class HomeRepositoryImpl implements HomeRepository {
         final dataA = responseListA.data;
         if (dataA is Map<String, dynamic> && dataA['schedules'] != null) {
           allSchedules.addAll(
-            (dataA['schedules'] as List).map((x) => ScheduleModel.fromMap(x)),
+            (dataA['schedules'] as List).map(
+              (x) => ScheduleModel.fromMap(x),
+            ),
           );
         }
       }
@@ -276,19 +248,19 @@ class HomeRepositoryImpl implements HomeRepository {
         final dataB = responseListB.data;
         if (dataB is Map<String, dynamic> && dataB['schedules'] != null) {
           allSchedules.addAll(
-            (dataB['schedules'] as List).map((x) => ScheduleModel.fromMap(x)),
+            (dataB['schedules'] as List).map(
+              (x) => ScheduleModel.fromMap(x),
+            ),
           );
         }
       }
 
-      // Buscar o agendamento atual baseado no horário
       final now = DateTime.now();
       for (final schedule in allSchedules) {
         try {
           final startTimeStr = schedule.startTime;
           final endTimeStr = schedule.endTime;
 
-          // Remove o formato Time() se presente
           final cleanStartTime =
               startTimeStr.replaceAll('Time(', '').replaceAll(')', '');
           final cleanEndTime =
@@ -329,7 +301,6 @@ class HomeRepositoryImpl implements HomeRepository {
         }
       }
 
-      _logger.info('Nenhum agendamento ativo encontrado');
       return null;
     } catch (e, s) {
       _logger.error('Error fetching channel URL', e, s);
@@ -353,15 +324,11 @@ class HomeRepositoryImpl implements HomeRepository {
         );
       }
     } on RestClientException catch (e, s) {
-      // Verifica se é erro de duplicação (500 com mensagem específica)
       if (e.statusCode == 500 &&
           e.response.data != null &&
           e.response.data
               .toString()
               .contains('duplicate key value violates unique constraint')) {
-        // Pontuação já existe, consideramos como sucesso
-        _logger.info(
-            'Pontuação já existe no banco de dados, ignorando duplicação');
         return;
       }
 
