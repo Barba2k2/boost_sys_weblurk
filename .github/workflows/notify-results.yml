@@ -27,9 +27,6 @@ on:
         description: "Versão foi atualizada"
         required: true
         type: boolean
-    secrets:
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   notify:
@@ -263,7 +260,6 @@ jobs:
           try {
             # Verificar se GitHub CLI está disponível
             if (Get-Command gh -ErrorAction SilentlyContinue) {
-              $env:GITHUB_TOKEN = "${{ secrets.GITHUB_TOKEN }}"
               
               # Criar issue
               $issueArgs = @(

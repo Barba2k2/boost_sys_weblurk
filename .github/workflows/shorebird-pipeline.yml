@@ -48,8 +48,6 @@ jobs:
       new_version: ${{ needs.analyze.outputs.new-version }}
       change_type: ${{ needs.analyze.outputs.change-type }}
       release_notes: ${{ needs.analyze.outputs.release-notes }}
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Job 3: Shorebird Release (se for release)
   shorebird-release:
@@ -61,7 +59,6 @@ jobs:
       release_notes: ${{ needs.analyze.outputs.release-notes }}
     secrets:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Job 4: Shorebird Patch (se for patch)
   shorebird-patch:
@@ -86,5 +83,3 @@ jobs:
       release_success: ${{ needs.shorebird-release.result == 'success' }}
       patch_success: ${{ needs.shorebird-patch.result == 'success' }}
       version_updated: ${{ needs.versioning.outputs.version-updated }}
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

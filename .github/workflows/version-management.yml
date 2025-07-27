@@ -26,9 +26,6 @@ on:
       changelog-updated:
         description: "Changelog foi atualizado"
         value: ${{ jobs.update-version.outputs.changelog-updated }}
-    secrets:
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   update-version:
@@ -39,9 +36,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         shell: powershell

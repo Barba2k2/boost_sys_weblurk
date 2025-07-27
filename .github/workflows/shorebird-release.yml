@@ -24,8 +24,6 @@ on:
     secrets:
       SHOREBIRD_TOKEN:
         required: true
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   create-release:
@@ -37,9 +35,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -297,7 +292,6 @@ jobs:
             if (Get-Command gh -ErrorAction SilentlyContinue) {
               Write-Output "✅ GitHub CLI encontrado, criando release..."
               
-              $env:GITHUB_TOKEN = "${{ secrets.GITHUB_TOKEN }}"
               & gh @releaseArgs
               
               if ($LASTEXITCODE -eq 0) {
