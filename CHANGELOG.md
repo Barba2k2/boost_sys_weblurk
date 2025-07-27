@@ -1,3 +1,10 @@
+## [1.2.0+7] - 2025-07-27
+
+[FEAT] ### Mudancas nesta versao
+
+- [FEAT] Merge branch 'master' of https://github.com/Barba2k2/boost_sys_weblurk
+- [FEAT] Merge branch 'master' of https://github.com/Barba2k2/boost_sys_weblurk
+
 ## [1.1.0+6] - 2025-07-27
 
 [FEAT] ### Mudancas nesta versao
