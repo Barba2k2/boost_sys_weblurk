@@ -3,9 +3,11 @@ name: Shorebird Pipeline
 on:
   push:
     branches:
-      - 1.0.14+1
+      - "1.0.14+1"    # Branch para patches
+      - main
+      - master
     tags:
-      - "v*"
+      - "v*"          # Tags para releases
   pull_request:
     branches:
       - master
@@ -35,6 +37,7 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       should-release: ${{ steps.decision.outputs.should-release }}
       should-patch: ${{ steps.decision.outputs.should-patch }}
+      action: ${{ steps.decision.outputs.action }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -43,47 +46,71 @@ jobs:
 
       - name: Generate Version
         id: version
-        shell: bash
+        shell: powershell
         run: |
           # Pegar a última tag
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          try {
+            $LATEST_TAG = git describe --tags --abbrev=0 2>$null
+            if (-not $LATEST_TAG) { $LATEST_TAG = "v0.0.0" }
+          } catch {
+            $LATEST_TAG = "v0.0.0"
+          }
 
-          # Remove 'v' prefix if present for calculations
-          VERSION=${LATEST_TAG#v}
+          # Remove 'v' prefix if present
+          $VERSION = $LATEST_TAG -replace '^v', ''
 
-          # Incrementar a versão patch
-          MAJOR=$(echo $VERSION | cut -d. -f1)
-          MINOR=$(echo $VERSION | cut -d. -f2)
-          PATCH=$(echo $VERSION | cut -d. -f3)
-          NEW_PATCH=$((PATCH + 1))
-          NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
-          NEW_TAG="v${NEW_VERSION}"
+          # Parse version components
+          $versionParts = $VERSION -split '\.'
+          $MAJOR = [int]$versionParts[0]
+          $MINOR = [int]$versionParts[1]
+          $PATCH = [int]$versionParts[2]
 
-          # Definir as variáveis para uso posterior
-          echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
-          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
-          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+          # Increment patch version
+          $NEW_PATCH = $PATCH + 1
+          $NEW_VERSION = "$MAJOR.$MINOR.$NEW_PATCH"
+          $NEW_TAG = "v$NEW_VERSION"
+
+          # Set outputs
+          echo "NEW_TAG=$NEW_TAG" >> $env:GITHUB_ENV
+          echo "version=$NEW_VERSION" >> $env:GITHUB_OUTPUT
+          echo "NEW_VERSION=$NEW_VERSION" >> $env:GITHUB_ENV
+          
+          Write-Output "📋 Generated version: $NEW_VERSION"
 
       - name: Determine Action
         id: decision
+        shell: powershell
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            ACTION="${{ github.event.inputs.action }}"
-          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            ACTION="release"
-          else
-            ACTION="patch"
-          fi
+          $ACTION = "patch"  # Default action
+          
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $ACTION = "${{ github.event.inputs.action }}"
+            Write-Output "🎯 Manual action: $ACTION"
+          } 
+          elseif ("${{ github.ref }}" -like "refs/tags/v*") {
+            $ACTION = "release"
+            Write-Output "🏷️ Tag detected, action: release"
+          } 
+          elseif ("${{ github.ref }}" -eq "refs/heads/1.0.14+1") {
+            $ACTION = "patch"
+            Write-Output "🔧 Branch 1.0.14+1 detected, action: patch"
+          }
+          else {
+            Write-Output "📝 Default action: patch"
+          }
 
-          if [ "$ACTION" == "release" ]; then
-            echo "should-release=true" >> $GITHUB_OUTPUT
-            echo "should-patch=false" >> $GITHUB_OUTPUT
-          else
-            echo "should-release=false" >> $GITHUB_OUTPUT
-            echo "should-patch=true" >> $GITHUB_OUTPUT
-          fi
+          if ($ACTION -eq "release") {
+            echo "should-release=true" >> $env:GITHUB_OUTPUT
+            echo "should-patch=false" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "should-release=false" >> $env:GITHUB_OUTPUT
+            echo "should-patch=true" >> $env:GITHUB_OUTPUT
+          }
 
-          echo "ACTION=${ACTION}" >> $GITHUB_ENV
+          echo "action=$ACTION" >> $env:GITHUB_OUTPUT
+          echo "ACTION=$ACTION" >> $env:GITHUB_ENV
+          
+          Write-Output "✅ Final decision - Release: $(if ($ACTION -eq 'release') {'true'} else {'false'}), Patch: $(if ($ACTION -eq 'patch') {'true'} else {'false'})"
 
   shorebird-release:
     needs: shorebird-setup
@@ -95,10 +122,28 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+          cache: true
+
       - name: Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Verify Shorebird Setup
+        shell: powershell
+        run: |
+          Write-Output "🔍 Verificando setup do Shorebird..."
+          shorebird --version
+          
+          Write-Output "📋 Informações do app:"
+          shorebird apps list
 
       - name: Configure Git
+        shell: powershell
         run: |
           git config --global core.longpaths true
           git config --global user.email "action@github.com"
@@ -108,29 +153,45 @@ jobs:
         run: flutter pub get
 
       - name: Create Shorebird Release
+        shell: powershell
         run: |
-          echo "Criando release Shorebird para Windows..."
-          shorebird release windows --yes
+          Write-Output "🚀 Criando release Shorebird para Windows..."
+          Write-Output "📋 Versão: ${{ needs.shorebird-setup.outputs.version }}"
+          
+          try {
+            shorebird release windows --verbose
+            Write-Output "✅ Release criada com sucesso!"
+          } catch {
+            Write-Output "❌ Erro na criação da release: $_"
+            throw
+          }
         env:
           SHOREBIRD_TOKEN: ${{ env.SHOREBIRD_TOKEN }}
 
       - name: Update Version in pubspec.yaml
+        shell: powershell
         run: |
           $version = "${{ needs.shorebird-setup.outputs.version }}"
           $content = Get-Content pubspec.yaml -Raw
           $content = $content -replace 'version: \d+\.\d+\.\d+\+\d+', "version: $version+1"
           Set-Content pubspec.yaml $content
+          
+          Write-Output "📝 Version updated to: $version+1"
 
       - name: Commit Version Update
+        shell: powershell
         run: |
           git add pubspec.yaml
           git commit -m "chore: bump version to ${{ needs.shorebird-setup.outputs.version }}+1"
           git push origin HEAD
 
       - name: Create Tag
+        shell: powershell
         run: |
-          git tag -a v${{ needs.shorebird-setup.outputs.version }} -m "Release v${{ needs.shorebird-setup.outputs.version }}"
-          git push origin v${{ needs.shorebird-setup.outputs.version }}
+          $tag = "v${{ needs.shorebird-setup.outputs.version }}"
+          git tag -a $tag -m "Release $tag"
+          git push origin $tag
+          Write-Output "🏷️ Tag $tag created and pushed"
 
   shorebird-patch:
     needs: shorebird-setup
@@ -142,10 +203,31 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+          cache: true
+
       - name: Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Verify Shorebird Setup
+        shell: powershell
+        run: |
+          Write-Output "🔍 Verificando setup do Shorebird..."
+          shorebird --version
+          
+          Write-Output "📋 Informações do app:"
+          shorebird apps list
+          
+          Write-Output "📋 Releases disponíveis:"
+          shorebird releases list
 
       - name: Configure Git
+        shell: powershell
         run: |
           git config --global core.longpaths true
           git config --global user.email "action@github.com"
@@ -156,52 +238,101 @@ jobs:
 
       - name: Get Latest Release Version
         id: get-version
+        shell: powershell
         run: |
-          # Buscar a versão mais recente do Shorebird
-          $releases = shorebird releases list --json 2>$null | ConvertFrom-Json
-          if ($releases -and $releases.Count -gt 0) {
-            $latest = $releases[0]
-            echo "release-version=$($latest.version)" >> $GITHUB_OUTPUT
-          } else {
-            echo "release-version=1.0.13+1" >> $GITHUB_OUTPUT
+          Write-Output "🔍 Buscando versão da release mais recente..."
+          
+          try {
+            # Tentar buscar releases do Shorebird
+            $releasesOutput = shorebird releases list --json 2>$null
+            
+            if ($releasesOutput) {
+              $releases = $releasesOutput | ConvertFrom-Json
+              if ($releases -and $releases.Count -gt 0) {
+                $latest = $releases[0]
+                $releaseVersion = $latest.version
+                Write-Output "✅ Release encontrada: $releaseVersion"
+              } else {
+                $releaseVersion = "1.0.14+2"  # Fallback version
+                Write-Output "⚠️ Nenhuma release encontrada, usando fallback: $releaseVersion"
+              }
+            } else {
+              $releaseVersion = "1.0.14+2"  # Fallback version  
+              Write-Output "⚠️ Erro ao buscar releases, usando fallback: $releaseVersion"
+            }
+          } catch {
+            $releaseVersion = "1.0.14+2"  # Fallback version
+            Write-Output "⚠️ Exceção ao buscar releases, usando fallback: $releaseVersion"
           }
-
-      - name: Create Shorebird Patch
-        run: |
-          $releaseVersion = "${{ steps.get-version.outputs.release-version }}"
+          
+          # Override com input manual se fornecido
           if ("${{ github.event.inputs.release_version }}" -ne "") {
             $releaseVersion = "${{ github.event.inputs.release_version }}"
+            Write-Output "🎯 Usando versão manual: $releaseVersion"
           }
-          echo "Criando patch Shorebird para Windows (release: $releaseVersion)..."
-          shorebird patch windows --release-version=$releaseVersion --yes
+          
+          echo "release-version=$releaseVersion" >> $env:GITHUB_OUTPUT
+          Write-Output "📋 Versão final para patch: $releaseVersion"
+
+      - name: Create Shorebird Patch
+        shell: powershell
+        run: |
+          $releaseVersion = "${{ steps.get-version.outputs.release-version }}"
+          
+          Write-Output "🔧 Criando patch Shorebird para Windows..."
+          Write-Output "📋 Release target: $releaseVersion"
+          Write-Output "📋 Branch: ${{ github.ref }}"
+          
+          try {
+            if ($releaseVersion -and $releaseVersion -ne "") {
+              shorebird patch windows --release-version=$releaseVersion --verbose
+            } else {
+              shorebird patch windows --verbose
+            }
+            Write-Output "✅ Patch criado com sucesso!"
+            
+            Write-Output "📋 Patches atuais:"
+            shorebird patches list
+          } catch {
+            Write-Output "❌ Erro na criação do patch: $_"
+            throw
+          }
         env:
           SHOREBIRD_TOKEN: ${{ env.SHOREBIRD_TOKEN }}
 
   notify-success:
-    needs: [shorebird-release, shorebird-patch]
+    needs: [shorebird-setup, shorebird-release, shorebird-patch]
     if: always() && (needs.shorebird-release.result == 'success' || needs.shorebird-patch.result == 'success')
     runs-on: windows-latest
     steps:
       - name: Notify Success
+        shell: powershell
         run: |
-          if ("${{ needs.shorebird-release.result }}" == "success") then
-            echo "✅ Shorebird Release criada com sucesso!"
-            echo "Versão: ${{ needs.shorebird-setup.outputs.version }}"
-          else
-            echo "✅ Shorebird Patch criado com sucesso!"
-          fi
+          if ("${{ needs.shorebird-release.result }}" -eq "success") {
+            Write-Output "✅ Shorebird Release criada com sucesso!"
+            Write-Output "📋 Versão: ${{ needs.shorebird-setup.outputs.version }}"
+          } 
+          if ("${{ needs.shorebird-patch.result }}" -eq "success") {
+            Write-Output "✅ Shorebird Patch criado com sucesso!"
+            Write-Output "📋 Ação: ${{ needs.shorebird-setup.outputs.action }}"
+          }
 
   notify-failure:
-    needs: [shorebird-release, shorebird-patch]
+    needs: [shorebird-setup, shorebird-release, shorebird-patch]
     if: always() && (needs.shorebird-release.result == 'failure' || needs.shorebird-patch.result == 'failure')
     runs-on: windows-latest
     steps:
       - name: Notify Failure
+        shell: powershell
         run: |
-          echo "❌ Falha na pipeline Shorebird"
-          if ("${{ needs.shorebird-release.result }}" == "failure") then
-            echo "Falha na criação da release"
-          fi
-          if ("${{ needs.shorebird-patch.result }}" == "failure") then
-            echo "Falha na criação do patch"
-          fi
+          Write-Output "❌ Falha na pipeline Shorebird"
+          
+          if ("${{ needs.shorebird-release.result }}" -eq "failure") {
+            Write-Output "❌ Falha na criação da release"
+          }
+          if ("${{ needs.shorebird-patch.result }}" -eq "failure") {
+            Write-Output "❌ Falha na criação do patch"
+          }
+          
+          # Exit with error to mark workflow as failed
+          exit 1
