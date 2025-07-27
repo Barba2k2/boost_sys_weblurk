@@ -184,6 +184,7 @@ class Injector {
         logger: i(),
         authViewmodel: i(),
         webViewService: i(),
+        volumeService: i(),
       ),
     );
   }

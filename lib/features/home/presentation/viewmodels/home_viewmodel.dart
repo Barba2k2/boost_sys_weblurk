@@ -1,10 +1,12 @@
 // lib/features/home/presentation/viewmodels/home_viewmodel.dart
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:webview_windows/webview_windows.dart';
 
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/utils/command.dart';
 import '../../../../core/utils/result.dart';
+import '../../../../core/services/volume_service.dart';
 import '../../../../models/schedule_list_model.dart';
 import '../../../../models/schedule_model.dart';
 import '../../../../models/user_model.dart';
@@ -18,21 +20,30 @@ class HomeViewModel extends ChangeNotifier {
     required AuthViewModel authViewmodel,
     required AppLogger logger,
     required WebViewService webViewService,
+    required VolumeService volumeService,
   })  : _homeService = homeService,
         _authStore = authViewmodel,
         _logger = logger,
-        _webViewService = webViewService {
+        _webViewService = webViewService,
+        _volumeService = volumeService {
     // Escutar mudanças no AuthStore
     _authStore.addListener(() => notifyListeners());
 
     // Inicializar canais com valores padrão
     _initializeChannels();
+
+    // ✅ NOVO: Iniciar verificação periódica do estado de mute
+    _startMuteStateCheck();
   }
 
   final HomeService _homeService;
   final AuthViewModel _authStore;
   final AppLogger _logger;
   final WebViewService _webViewService;
+  final VolumeService _volumeService;
+
+  // ✅ NOVO: Timer para verificação periódica do estado de mute
+  Timer? _muteStateCheckTimer;
 
   // Estado reativo do AuthStore
   UserModel? get userLogged => _authStore.userLogged;
@@ -210,6 +221,9 @@ class HomeViewModel extends ChangeNotifier {
 
       _logger.info('Aba alterada de $oldIndex para $index');
 
+      // ✅ CORREÇÃO: Sincronizar estado de mute ao trocar de aba
+      await _volumeService.syncMuteState();
+
       notifyListeners();
 
       // Carregar agendamentos da aba se necessário
@@ -264,8 +278,33 @@ class HomeViewModel extends ChangeNotifier {
     return _scheduleLists[_currentTabIndex].listName;
   }
 
+  // ✅ NOVO: Método para iniciar verificação periódica do estado de mute
+  void _startMuteStateCheck() {
+    _muteStateCheckTimer?.cancel();
+    _muteStateCheckTimer = Timer.periodic(
+      const Duration(seconds: 5), // Verificar a cada 5 segundos
+      (timer) async {
+        try {
+          await _volumeService.periodicMuteStateCheck();
+        } catch (e, s) {
+          _logger.error(
+              'Erro na verificação periódica do estado de mute', e, s);
+        }
+      },
+    );
+  }
+
+  // ✅ NOVO: Método para parar verificação periódica
+  void _stopMuteStateCheck() {
+    _muteStateCheckTimer?.cancel();
+    _muteStateCheckTimer = null;
+  }
+
   @override
   void dispose() {
+    // ✅ CORREÇÃO: Parar timer antes de dispor
+    _stopMuteStateCheck();
+
     // Limpar controllers se necessário
     _webviewControllerA?.dispose();
     _webviewControllerB?.dispose();
