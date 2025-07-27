@@ -1,5 +1,5 @@
 import 'package:mockito/mockito.dart';
-import 'package:boost_sys_weblurk/app/core/logger/app_logger.dart';
+import 'package:boost_sys_weblurk/core/logger/app_logger.dart';
 
 class MockAppLogger extends Mock implements AppLogger {
   @override

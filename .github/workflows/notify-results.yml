@@ -1,0 +1,417 @@
+name: Notify Results
+
+on:
+  workflow_call:
+    inputs:
+      action:
+        description: "Ação executada (release/patch)"
+        required: true
+        type: string
+      version:
+        description: "Versão processada"
+        required: true
+        type: string
+      change_type:
+        description: "Tipo de mudança"
+        required: true
+        type: string
+      release_success:
+        description: "Release foi bem-sucedida"
+        required: true
+        type: boolean
+      patch_success:
+        description: "Patch foi bem-sucedido"
+        required: true
+        type: boolean
+      version_updated:
+        description: "Versão foi atualizada"
+        required: true
+        type: boolean
+
+jobs:
+  notify:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Generate Execution Summary
+        id: summary
+        shell: powershell
+        run: |
+          $action = "${{ inputs.action }}"
+          $version = "${{ inputs.version }}"
+          $changeType = "${{ inputs.change_type }}"
+          $releaseSuccess = "${{ inputs.release_success }}"
+          $patchSuccess = "${{ inputs.patch_success }}"
+          $versionUpdated = "${{ inputs.version_updated }}"
+          
+          Write-Output "📊 Gerando resumo da execução..."
+          
+          # Determinar status geral
+          $overallSuccess = $false
+          $primaryAction = ""
+          $statusIcon = ""
+          $statusMessage = ""
+          
+          if ($action -eq "release") {
+            $overallSuccess = ($releaseSuccess -eq "true")
+            $primaryAction = "RELEASE"
+            $statusIcon = if ($overallSuccess) { "🚀" } else { "❌" }
+            $statusMessage = if ($overallSuccess) { "Release criada com sucesso" } else { "Falha na criação da release" }
+          } elseif ($action -eq "patch") {
+            $overallSuccess = ($patchSuccess -eq "true")
+            $primaryAction = "PATCH"
+            $statusIcon = if ($overallSuccess) { "🔧" } else { "❌" }
+            $statusMessage = if ($overallSuccess) { "Patch criado com sucesso" } else { "Falha na criação do patch" }
+          } else {
+            $primaryAction = "UNKNOWN"
+            $statusIcon = "❓"
+            $statusMessage = "Ação desconhecida"
+          }
+          
+          # Calcular emoji do tipo de mudança
+          $changeTypeEmoji = switch ($changeType) {
+            "major" { "💥" }
+            "minor" { "✨" }
+            "patch" { "🐛" }
+            default { "📝" }
+          }
+          
+          # Gerar timestamp
+          $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+          $branch = "${{ github.ref_name }}"
+          $actor = "${{ github.actor }}"
+          $runId = "${{ github.run_id }}"
+          
+          # Set outputs para uso posterior
+          echo "overall-success=$overallSuccess" >> $env:GITHUB_OUTPUT
+          echo "primary-action=$primaryAction" >> $env:GITHUB_OUTPUT
+          echo "status-icon=$statusIcon" >> $env:GITHUB_OUTPUT
+          echo "status-message=$statusMessage" >> $env:GITHUB_OUTPUT
+          echo "change-type-emoji=$changeTypeEmoji" >> $env:GITHUB_OUTPUT
+          echo "timestamp=$timestamp" >> $env:GITHUB_OUTPUT
+          
+          Write-Output "📋 Resumo gerado:"
+          Write-Output "  Status geral: $overallSuccess"
+          Write-Output "  Ação principal: $primaryAction"
+          Write-Output "  Mensagem: $statusMessage"
+
+      - name: Display Pipeline Results
+        shell: powershell
+        run: |
+          $action = "${{ inputs.action }}"
+          $version = "${{ inputs.version }}"
+          $changeType = "${{ inputs.change_type }}"
+          $statusIcon = "${{ steps.summary.outputs.status-icon }}"
+          $statusMessage = "${{ steps.summary.outputs.status-message }}"
+          $changeTypeEmoji = "${{ steps.summary.outputs.change-type-emoji }}"
+          $timestamp = "${{ steps.summary.outputs.timestamp }}"
+          $overallSuccess = "${{ steps.summary.outputs.overall-success }}"
+          
+          Write-Output ""
+          Write-Output "╔══════════════════════════════════════════════════════════════╗"
+          Write-Output "║                     PIPELINE CONCLUÍDA                      ║"
+          Write-Output "╚══════════════════════════════════════════════════════════════╝"
+          Write-Output ""
+          Write-Output "$statusIcon RESULTADO: $statusMessage"
+          Write-Output ""
+          Write-Output "📋 DETALHES DA EXECUÇÃO:"
+          Write-Output "┌──────────────────────────────────────────────────────────────┐"
+          Write-Output "│  🎯 Ação:           $action (${{ steps.summary.outputs.primary-action }})"
+          Write-Output "│  📱 Versão:         $version"
+          Write-Output "│  $changeTypeEmoji Tipo:           $changeType"
+          Write-Output "│  🌟 Branch:         ${{ github.ref_name }}"
+          Write-Output "│  👤 Executor:       ${{ github.actor }}"
+          Write-Output "│  ⏰ Timestamp:      $timestamp"
+          Write-Output "│  🔗 Run ID:         ${{ github.run_id }}"
+          Write-Output "└──────────────────────────────────────────────────────────────┘"
+          Write-Output ""
+          Write-Output "🔍 STATUS DETALHADO:"
+          Write-Output "┌──────────────────────────────────────────────────────────────┐"
+          Write-Output "│  📝 Versionamento:  $(if ("${{ inputs.version_updated }}" -eq "true") { "✅ Atualizado" } else { "ℹ️  Não necessário" })"
+          Write-Output "│  🚀 Release:        $(if ("${{ inputs.release_success }}" -eq "true") { "✅ Criada" } elseif ("$action" -eq "release") { "❌ Falhou" } else { "➖ N/A" })"
+          Write-Output "│  🔧 Patch:          $(if ("${{ inputs.patch_success }}" -eq "true") { "✅ Criado" } elseif ("$action" -eq "patch") { "❌ Falhou" } else { "➖ N/A" })"
+          Write-Output "└──────────────────────────────────────────────────────────────┘"
+          
+          if ($overallSuccess -eq "true") {
+            Write-Output ""
+            Write-Output "🎉 SUCESSO TOTAL!"
+            Write-Output ""
+            
+            if ($action -eq "release") {
+              Write-Output "📦 RELEASE DISTRIBUÍDA:"
+              Write-Output "  ✅ Nova release base disponível no Shorebird"
+              Write-Output "  ✅ Futuras atualizações serão patches baseados nesta release"
+              Write-Output "  ✅ Usuários podem baixar nova versão completa"
+              Write-Output "  ✅ GitHub release criada com documentação"
+              Write-Output ""
+              Write-Output "📋 Próximos passos:"
+              Write-Output "  1. 📊 Monitorar adoção da nova release"
+              Write-Output "  2. 🔧 Patches futuros serão baseados na v$version"
+              Write-Output "  3. 📱 Testar atualização em dispositivos"
+              Write-Output "  4. 📈 Acompanhar métricas de performance"
+              
+            } elseif ($action -eq "patch") {
+              Write-Output "🔧 PATCH DISTRIBUÍDO:"
+              Write-Output "  ✅ Patch disponível no Shorebird"
+              Write-Output "  ✅ Usuários receberão update automático"
+              Write-Output "  ✅ Atualização incremental (download menor)"
+              Write-Output "  ✅ Rollback automático disponível se necessário"
+              Write-Output ""
+              Write-Output "📋 Próximos passos:"
+              Write-Output "  1. ⏳ Aguardar propagação (5-10 minutos)"
+              Write-Output "  2. 📱 Testar update em dispositivo com app instalado"
+              Write-Output "  3. 📊 Monitorar logs de update dos usuários"
+              Write-Output "  4. 🔍 Verificar ausência de crashes/bugs"
+            }
+            
+          } else {
+            Write-Output ""
+            Write-Output "❌ PIPELINE FALHOU!"
+            Write-Output ""
+            Write-Output "🔍 POSSÍVEIS CAUSAS:"
+            
+            if ($action -eq "release" -and "${{ inputs.release_success }}" -eq "false") {
+              Write-Output "  • Erro na criação da release Shorebird"
+              Write-Output "  • Problema de configuração/autenticação"
+              Write-Output "  • Release com esta versão já existe"
+              Write-Output "  • Falha na compilação Flutter"
+            } elseif ($action -eq "patch" -and "${{ inputs.patch_success }}" -eq "false") {
+              Write-Output "  • Erro na criação do patch Shorebird"
+              Write-Output "  • Mudanças incompatíveis com patch"
+              Write-Output "  • Release base não encontrada"
+              Write-Output "  • Problema de compilação"
+            }
+            
+            Write-Output ""
+            Write-Output "🛠️ AÇÕES RECOMENDADAS:"
+            Write-Output "  1. 📋 Revisar logs detalhados acima"
+            Write-Output "  2. 🔍 Verificar configuração: shorebird doctor"
+            Write-Output "  3. 🔧 Corrigir problemas identificados"
+            Write-Output "  4. 🔄 Re-executar pipeline manualmente"
+            Write-Output "  5. 💬 Buscar ajuda se necessário"
+          }
+          
+          Write-Output ""
+          Write-Output "╔══════════════════════════════════════════════════════════════╗"
+          Write-Output "║              FIM DO RESUMO DA PIPELINE                       ║"
+          Write-Output "╚══════════════════════════════════════════════════════════════╝"
+
+      - name: Create Issue on Failure
+        if: steps.summary.outputs.overall-success == 'false'
+        shell: powershell
+        run: |
+          Write-Output "🚨 Criando issue automática para falha na pipeline..."
+          
+          $action = "${{ inputs.action }}"
+          $version = "${{ inputs.version }}"
+          $changeType = "${{ inputs.change_type }}"
+          $runId = "${{ github.run_id }}"
+          $branch = "${{ github.ref_name }}"
+          $actor = "${{ github.actor }}"
+          $timestamp = "${{ steps.summary.outputs.timestamp }}"
+          
+          # Preparar título da issue
+          $issueTitle = "🚨 Pipeline Failure: $action for v$version"
+          
+          # Preparar corpo da issue
+          $issueBody = @"
+          # 🚨 Falha Automática na Pipeline
+          
+          **Pipeline falhou durante execução automática.**
+          
+          ## 📋 Detalhes da Falha
+          
+          - **Ação:** $action
+          - **Versão:** $version
+          - **Tipo de mudança:** $changeType
+          - **Branch:** $branch
+          - **Executor:** $actor
+          - **Timestamp:** $timestamp
+          - **Run ID:** $runId
+          
+          ## 🔍 Status dos Jobs
+          
+          - **Versionamento:** ${{ inputs.version_updated }}
+          - **Release:** ${{ inputs.release_success }}
+          - **Patch:** ${{ inputs.patch_success }}
+          
+          ## 🔗 Links Úteis
+          
+          - [Pipeline Run](https://github.com/${{ github.repository }}/actions/runs/$runId)
+          - [Logs Completos](https://github.com/${{ github.repository }}/actions/runs/$runId)
+          
+          ## 🛠️ Próximos Passos
+          
+          1. Revisar logs da pipeline
+          2. Identificar causa raiz
+          3. Corrigir problema
+          4. Re-executar pipeline
+          5. Fechar esta issue após resolução
+          
+          ---
+          
+          **Issue criada automaticamente pela pipeline em $timestamp**
+          "@
+          
+          try {
+            # Verificar se GitHub CLI está disponível
+            if (Get-Command gh -ErrorAction SilentlyContinue) {
+              
+              # Criar issue
+              $issueArgs = @(
+                "issue", "create",
+                "--title", $issueTitle,
+                "--body", $issueBody,
+                "--label", "bug,pipeline,automated"
+              )
+              
+              & gh @issueArgs
+              
+              if ($LASTEXITCODE -eq 0) {
+                Write-Output "✅ Issue criada automaticamente"
+              } else {
+                Write-Output "❌ Erro ao criar issue via CLI"
+              }
+              
+            } else {
+              Write-Output "⚠️ GitHub CLI não disponível, issue não criada"
+              Write-Output "💡 Issue body preparada:"
+              Write-Output $issueBody
+            }
+            
+          } catch {
+            Write-Output "❌ Erro na criação da issue: $_"
+            Write-Output "💡 Issue seria criada com:"
+            Write-Output "Título: $issueTitle"
+            Write-Output "Corpo: $issueBody"
+          }
+
+      - name: Performance Metrics
+        shell: powershell
+        run: |
+          Write-Output "📊 Coletando métricas da pipeline..."
+          
+          $startTime = "${{ github.event.head_commit.timestamp }}"
+          $endTime = Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"
+          $action = "${{ inputs.action }}"
+          $success = "${{ steps.summary.outputs.overall-success }}"
+          
+          try {
+            # Calcular duração aproximada (limitação: não temos timestamp exato do início)
+            Write-Output "⏱️ Métricas de Performance:"
+            Write-Output "  • Ação executada: $action"
+            Write-Output "  • Status: $(if ($success -eq "true") { "✅ Sucesso" } else { "❌ Falha" })"
+            Write-Output "  • Commit timestamp: $startTime"
+            Write-Output "  • Pipeline end: $endTime"
+            Write-Output "  • Branch: ${{ github.ref_name }}"
+            Write-Output "  • Trigger: ${{ github.event_name }}"
+            
+            # Métricas específicas por tipo
+            if ($action -eq "release") {
+              Write-Output "📦 Métricas de Release:"
+              Write-Output "  • Versionamento: ${{ inputs.version_updated }}"
+              Write-Output "  • Shorebird release: ${{ inputs.release_success }}"
+              Write-Output "  • Versão: ${{ inputs.version }}"
+            } elseif ($action -eq "patch") {
+              Write-Output "🔧 Métricas de Patch:"
+              Write-Output "  • Versionamento: ${{ inputs.version_updated }}"
+              Write-Output "  • Shorebird patch: ${{ inputs.patch_success }}"
+              Write-Output "  • Versão: ${{ inputs.version }}"
+            }
+            
+          } catch {
+            Write-Output "⚠️ Erro ao coletar métricas: $_"
+          }
+
+      - name: Cleanup and Recommendations
+        shell: powershell
+        run: |
+          Write-Output "🧹 Limpeza e recomendações finais..."
+          
+          $action = "${{ inputs.action }}"
+          $success = "${{ steps.summary.outputs.overall-success }}"
+          $version = "${{ inputs.version }}"
+          
+          Write-Output ""
+          Write-Output "📋 RECOMENDAÇÕES PÓS-PIPELINE:"
+          Write-Output "=============================="
+          
+          if ($success -eq "true") {
+            Write-Output "✅ Pipeline executada com sucesso!"
+            Write-Output ""
+            
+            if ($action -eq "release") {
+              Write-Output "🚀 Para Release v$version:"
+              Write-Output "  1. 📊 Monitorar adoção nos próximos dias"
+              Write-Output "  2. 🧪 Testar atualização em ambiente de teste"
+              Write-Output "  3. 📱 Verificar funcionamento em dispositivos reais"
+              Write-Output "  4. 📈 Acompanhar métricas de crash/performance"
+              Write-Output "  5. 📝 Documentar mudanças para usuários finais"
+              
+            } elseif ($action -eq "patch") {
+              Write-Output "🔧 Para Patch v$version:"
+              Write-Output "  1. ⏳ Aguardar 10-15 minutos para propagação completa"
+              Write-Output "  2. 📱 Testar update em app instalado"
+              Write-Output "  3. 🔍 Verificar logs de update dos usuários"
+              Write-Output "  4. 📊 Monitorar métricas de adoção"
+              Write-Output "  5. 🚨 Estar pronto para rollback se necessário"
+            }
+            
+            Write-Output ""
+            Write-Output "🛠️ Comandos úteis:"
+            Write-Output "  shorebird releases list"
+            Write-Output "  shorebird patches list"
+            Write-Output "  shorebird doctor"
+            
+          } else {
+            Write-Output "❌ Pipeline falhou!"
+            Write-Output ""
+            Write-Output "🔧 Ações de recuperação:"
+            Write-Output "  1. 📋 Revisar logs detalhados desta execução"
+            Write-Output "  2. 🔍 Executar: shorebird doctor"
+            Write-Output "  3. 🛠️ Corrigir problemas identificados"
+            Write-Output "  4. 🔄 Re-executar pipeline manualmente"
+            Write-Output "  5. 💬 Buscar suporte se problema persistir"
+            Write-Output ""
+            Write-Output "📞 Recursos de ajuda:"
+            Write-Output "  • Documentação Shorebird: https://docs.shorebird.dev"
+            Write-Output "  • GitHub Actions logs: Actions → Run ${{ github.run_id }}"
+            Write-Output "  • Issue automática criada para tracking"
+          }
+          
+          Write-Output ""
+          Write-Output "🎯 LEMBRETE IMPORTANTE:"
+          Write-Output "  Esta pipeline é 100% automática!"
+          Write-Output "  Apenas faça commits seguindo convenções e deixe a automação trabalhar!"
+          Write-Output ""
+          Write-Output "=============================="
+
+      - name: Final Status
+        shell: powershell
+        run: |
+          $success = "${{ steps.summary.outputs.overall-success }}"
+          $action = "${{ inputs.action }}"
+          $version = "${{ inputs.version }}"
+          
+          if ($success -eq "true") {
+            Write-Output ""
+            Write-Output "🎉🎉🎉 PIPELINE 100% AUTOMÁTICA CONCLUÍDA COM SUCESSO! 🎉🎉🎉"
+            Write-Output ""
+            Write-Output "✨ $action v$version disponível via Shorebird!"
+            Write-Output "🚀 Usuários receberão atualizações automaticamente!"
+            Write-Output "🎯 Zero trabalho manual necessário!"
+            Write-Output ""
+            exit 0
+          } else {
+            Write-Output ""
+            Write-Output "❌❌❌ PIPELINE FALHOU - REQUER ATENÇÃO ❌❌❌"
+            Write-Output ""
+            Write-Output "🔍 Verifique logs e issue automática criada"
+            Write-Output "🛠️ Corrija problemas e re-execute"
+            Write-Output ""
+            exit 1
+          }

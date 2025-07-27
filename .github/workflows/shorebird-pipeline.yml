@@ -1,0 +1,124 @@
+name: Shorebird Main Pipeline
+
+on:
+  push:
+    branches:
+      - "1.0.14+1"
+      - "main"
+      - "master"
+      - "develop-*"
+    paths-ignore:
+      - "README.md"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
+
+  # Adicionar trigger manual para debug
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: "Forçar execução da pipeline"
+        required: false
+        default: true
+        type: boolean
+
+# Adicionar permissões necessárias
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+jobs:
+  # Job de verificação inicial
+  debug-trigger:
+    runs-on: windows-latest
+    steps:
+      - name: Debug Pipeline Trigger
+        shell: powershell
+        run: |
+          Write-Output "DEBUG: Pipeline foi disparada!"
+          Write-Output "Informacoes do trigger:"
+          Write-Output "  Branch: ${{ github.ref_name }}"
+          Write-Output "  Event: ${{ github.event_name }}"
+          Write-Output "  SHA: ${{ github.sha }}"
+          Write-Output "  Actor: ${{ github.actor }}"
+          Write-Output "  Workflow: ${{ github.workflow }}"
+          Write-Output "  Repository: ${{ github.repository }}"
+
+          Write-Output "Arquivos modificados neste push:"
+          try {
+            $changedFiles = git diff --name-only HEAD~1..HEAD
+            if ($changedFiles) {
+              $changedFiles | ForEach-Object { Write-Output "  - $_" }
+            } else {
+              Write-Output "  (Nenhum arquivo detectado ou primeiro commit)"
+            }
+          } catch {
+            Write-Output "  (Erro ao obter arquivos modificados)"
+          }
+
+          Write-Output "Verificacao de secrets:"
+          if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
+            Write-Output "  OK: SHOREBIRD_TOKEN configurado"
+          } else {
+            Write-Output "  ERROR: SHOREBIRD_TOKEN NAO configurado"
+          }
+
+  # Job 1: Análise de Mudanças
+  analyze:
+    needs: debug-trigger
+    uses: ./.github/workflows/analyze-changes.yml
+    with:
+      branch_name: ${{ github.ref_name }}
+    secrets:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+  # Job 2: Versionamento (se necessário)
+  versioning:
+    needs: analyze
+    if: needs.analyze.outputs.should-proceed == 'true'
+    uses: ./.github/workflows/version-management.yml
+    with:
+      current_version: ${{ needs.analyze.outputs.current-version }}
+      new_version: ${{ needs.analyze.outputs.new-version }}
+      change_type: ${{ needs.analyze.outputs.change-type }}
+      release_notes: ${{ needs.analyze.outputs.release-notes }}
+
+  # Job 3: Shorebird Release (se for release)
+  shorebird-release:
+    needs: [analyze, versioning]
+    if: needs.analyze.outputs.action == 'release'
+    uses: ./.github/workflows/shorebird-release.yml
+    with:
+      version: ${{ needs.analyze.outputs.new-version }}
+      release_notes: ${{ needs.analyze.outputs.release-notes }}
+    secrets:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+  # Job 4: Shorebird Patch (se for patch)
+  shorebird-patch:
+    needs: [analyze, versioning]
+    if: needs.analyze.outputs.action == 'patch'
+    uses: ./.github/workflows/shorebird-patch.yml
+    with:
+      version: ${{ needs.analyze.outputs.new-version }}
+      change_type: ${{ needs.analyze.outputs.change-type }}
+    secrets:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+  # Job 5: Notificações e Cleanup
+  notify:
+    needs: [analyze, versioning, shorebird-release, shorebird-patch]
+    if: always()
+    uses: ./.github/workflows/notify-results.yml
+    with:
+      action: ${{ needs.analyze.outputs.action }}
+      version: ${{ needs.analyze.outputs.new-version }}
+      change_type: ${{ needs.analyze.outputs.change-type }}
+      release_success: ${{ needs.shorebird-release.result == 'success' }}
+      patch_success: ${{ needs.shorebird-patch.result == 'success' }}
+      version_updated: ${{ needs.versioning.outputs.version-updated }}

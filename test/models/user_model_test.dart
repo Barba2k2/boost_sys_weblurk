@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:boost_sys_weblurk/app/models/user_model.dart';
+import 'package:boost_sys_weblurk/models/user_model.dart';
 
 void main() {
   group(
@@ -10,7 +10,6 @@ void main() {
       test(
         'should create a UserModel from a map',
         () {
-          // Arrange
           final map = {
             'id': 1,
             'nickname': 'testuser',
@@ -19,10 +18,8 @@ void main() {
             'status': 'ON'
           };
 
-          // Act
           final userModel = UserModel.fromMap(map);
 
-          // Assert
           expect(userModel.id, 1);
           expect(userModel.nickname, 'testuser');
           expect(userModel.password, 'password123');
@@ -34,10 +31,8 @@ void main() {
       test(
         'should create an empty UserModel',
         () {
-          // Act
           final userModel = UserModel.empty();
 
-          // Assert
           expect(userModel.id, 0);
           expect(userModel.nickname, '');
           expect(userModel.password, '');
@@ -49,7 +44,6 @@ void main() {
       test(
         'should convert UserModel to a map',
         () {
-          // Arrange
           final userModel = UserModel(
             id: 1,
             nickname: 'testuser',
@@ -58,10 +52,8 @@ void main() {
             status: 'ON',
           );
 
-          // Act
           final map = userModel.toMap();
 
-          // Assert
           expect(map['id'], 1);
           expect(map['nickname'], 'testuser');
           expect(map['password'], 'password123');
@@ -73,7 +65,6 @@ void main() {
       test(
         'should convert UserModel to json',
         () {
-          // Arrange
           final userModel = UserModel(
             id: 1,
             nickname: 'testuser',
@@ -82,11 +73,9 @@ void main() {
             status: 'ON',
           );
 
-          // Act
           final jsonString = userModel.toJson();
           final decodedJson = json.decode(jsonString);
 
-          // Assert
           expect(decodedJson['id'], 1);
           expect(decodedJson['nickname'], 'testuser');
           expect(decodedJson['password'], 'password123');
@@ -98,7 +87,6 @@ void main() {
       test(
         'copyWith should update only specified fields',
         () {
-          // Arrange
           final userModel = UserModel(
             id: 1,
             nickname: 'testuser',
@@ -107,12 +95,10 @@ void main() {
             status: 'OFF',
           );
 
-          // Act
           final updatedModel = userModel.copyWith(
             status: 'ON',
           );
 
-          // Assert
           expect(updatedModel.id, 1);
           expect(updatedModel.nickname, 'testuser');
           expect(updatedModel.password, 'password123');

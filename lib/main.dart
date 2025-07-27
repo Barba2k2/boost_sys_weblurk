@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 
-import 'app/app_module.dart';
-import 'app/app_widget.dart';
-import 'app/core/application_config.dart';
+import 'core/application_config.dart';
+import 'core/di/injector.dart';
+import 'core/routes/router_config.dart';
+import 'core/ui/ui_config.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await ApplicationConfig().consfigureApp();
 
+  await Injector.setup();
+
   runApp(
-    ModularApp(
-      module: AppModule(),
-      child: const AppWidget(),
+    MaterialApp.router(
+      routerConfig: AppRouter.router,
+      title: UiConfig.title,
+      theme: UiConfig.theme,
     ),
   );
 }

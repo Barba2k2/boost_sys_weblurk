@@ -1,11 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:boost_sys_weblurk/app/repositories/user/user_repository_impl.dart';
-import 'package:boost_sys_weblurk/app/core/rest_client/rest_client.dart';
-import 'package:boost_sys_weblurk/app/core/rest_client/rest_client_response.dart';
-import 'package:boost_sys_weblurk/app/core/exceptions/failure.dart';
+import 'package:boost_sys_weblurk/repositories/user/user_repository_impl.dart';
+import 'package:boost_sys_weblurk/core/rest_client/rest_client.dart';
+import 'package:boost_sys_weblurk/core/rest_client/rest_client_response.dart';
+import 'package:boost_sys_weblurk/core/exceptions/failure.dart';
 import '../mocks/app_logger_mock.dart';
 
-// Custom implementation of RestClient for testing
 class TestRestClient implements RestClient {
   final Map<String, dynamic> responses = {};
   final Map<String, dynamic> exceptions = {};
@@ -130,7 +129,6 @@ class TestRestClient implements RestClient {
     throw UnimplementedError('Not needed for these tests');
   }
 
-  // Helper methods for verification
   bool wasMethodCalled(String method, String path) {
     return calls.any(
       (call) => call['method'] == method && call['path'] == path,
@@ -139,14 +137,19 @@ class TestRestClient implements RestClient {
 
   bool wasAuthUsed(String method, String path) {
     return calls.any(
-      (call) => call['method'] == method && call['path'] == path && call['isAuthenticated'] == true,
+      (call) =>
+          call['method'] == method &&
+          call['path'] == path &&
+          call['isAuthenticated'] == true,
     );
   }
 
   bool wasUnAuthUsed(String method, String path) {
     return calls.any(
       (call) =>
-          call['method'] == method && call['path'] == path && call['isAuthenticated'] == false,
+          call['method'] == method &&
+          call['path'] == path &&
+          call['isAuthenticated'] == false,
     );
   }
 
@@ -182,7 +185,6 @@ void main() {
       test(
         'login success returns access token',
         () async {
-          // Arrange
           restClient.setResponse(
             'POST',
             '/auth/login',
@@ -192,10 +194,8 @@ void main() {
             ),
           );
 
-          // Act
           final result = await userRepository.login('testuser', 'password123');
 
-          // Assert
           expect(result, 'test_token');
           expect(restClient.wasUnAuthUsed('POST', '/auth/login'), true);
           expect(
@@ -211,14 +211,12 @@ void main() {
       test(
         'login failure throws exception',
         () async {
-          // Arrange
           restClient.setException(
             'POST',
             '/auth/login',
             Exception('Failed to login'),
           );
 
-          // Act & Assert
           expect(
             () => userRepository.login('testuser', 'password123'),
             throwsA(isA<Failure>()),
@@ -229,20 +227,20 @@ void main() {
       test(
         'confirmLogin returns model with tokens',
         () async {
-          // Arrange
           restClient.setResponse(
             'PATCH',
             '/auth/confirm',
             RestClientResponse(
-              data: {'access_token': 'new_token', 'refresh_token': 'refresh_token'},
+              data: {
+                'access_token': 'new_token',
+                'refresh_token': 'refresh_token'
+              },
               statusCode: 200,
             ),
           );
 
-          // Act
           final result = await userRepository.confirmLogin();
 
-          // Assert
           expect(result.accessToken, 'new_token');
           expect(result.refreshToken, 'refresh_token');
           expect(restClient.wasAuthUsed('PATCH', '/auth/confirm'), true);
@@ -252,20 +250,22 @@ void main() {
       test(
         'getUserLogged returns user model',
         () async {
-          // Arrange
           restClient.setResponse(
             'GET',
             '/user/',
             RestClientResponse(
-              data: {'id': 1, 'nickname': 'testuser', 'role': 'user', 'status': 'ON'},
+              data: {
+                'id': 1,
+                'nickname': 'testuser',
+                'role': 'user',
+                'status': 'ON'
+              },
               statusCode: 200,
             ),
           );
 
-          // Act
           final result = await userRepository.getUserLogged();
 
-          // Assert
           expect(result.id, 1);
           expect(result.nickname, 'testuser');
           expect(result.role, 'user');
@@ -277,7 +277,6 @@ void main() {
       test(
         'updateLoginStatus calls correct endpoint',
         () async {
-          // Arrange
           restClient.setResponse(
             'POST',
             '/streamer/status/update',
@@ -286,11 +285,10 @@ void main() {
             ),
           );
 
-          // Act
           await userRepository.updateLoginStatus(1, 'ON');
 
-          // Assert
-          expect(restClient.wasAuthUsed('POST', '/streamer/status/update'), true);
+          expect(
+              restClient.wasAuthUsed('POST', '/streamer/status/update'), true);
           expect(
             restClient.getCallData('POST', '/streamer/status/update'),
             {
