@@ -65,16 +65,6 @@ class HomeServiceImpl implements HomeService {
     }
   }
 
-  // @override
-  // Future<void> forceUpdateLive() async {
-  //   try {
-  //     await _homeRepository.forceUpdateLive();
-  //   } catch (e, s) {
-  //     _logger.error('Error forcing live update', e, s);
-  //     throw Failure(message: 'Erro ao forçar a atualização da live');
-  //   }
-  // }
-
   @override
   Future<void> updateLists() async {
     return await fetchSchedules();
@@ -87,13 +77,9 @@ class HomeServiceImpl implements HomeService {
       final scheduleLists = await _homeRepository.loadScheduleLists(now);
 
       if (scheduleLists.isEmpty) {
-        _logger.warning(
-          'Nenhuma lista de agendamentos encontrada, carregando canal padrão',
-        );
         return 'https://twitch.tv/BoostTeam_';
       }
 
-      // Procura em todas as listas por um agendamento atual
       for (final scheduleList in scheduleLists) {
         if (scheduleList.schedules.isEmpty) continue;
 
@@ -103,7 +89,6 @@ class HomeServiceImpl implements HomeService {
               final startTimeStr = schedule.startTime;
               final endTimeStr = schedule.endTime;
 
-              // Remove o formato Time() se presente
               final cleanStartTime =
                   startTimeStr.replaceAll('Time(', '').replaceAll(')', '');
               final cleanEndTime =
@@ -154,9 +139,6 @@ class HomeServiceImpl implements HomeService {
         }
       }
 
-      _logger.info(
-        'Nenhuma live ativa no horário atual, retornando null para usar canal padrão',
-      );
       return null;
     } catch (e, s) {
       _logger.error('Erro ao buscar o canal atual', e, s);
@@ -167,28 +149,20 @@ class HomeServiceImpl implements HomeService {
   @override
   Future<String?> fetchCurrentChannelForList(String listName) async {
     try {
-      // _logger.info('Buscando canal atual para: $listName');
       final now = DateTime.now();
       final scheduleList =
           await _homeRepository.loadScheduleListByName(listName, now);
 
       if (scheduleList == null || scheduleList.schedules.isEmpty) {
-        _logger.warning(
-          'Lista $listName não encontrada ou vazia, carregando canal padrão',
-        );
         return 'https://twitch.tv/BoostTeam_';
       }
 
-      // _logger.info('Lista $listName encontrada com ${scheduleList.schedules.length} agendamentos');
-
-      // Procura por um agendamento atual na lista específica
       final currentSchedule = scheduleList.schedules.firstWhere(
         (schedule) {
           try {
             final startTimeStr = schedule.startTime;
             final endTimeStr = schedule.endTime;
 
-            // Remove o formato Time() se presente
             final cleanStartTime =
                 startTimeStr.replaceAll('Time(', '').replaceAll(')', '');
             final cleanEndTime =
@@ -235,13 +209,8 @@ class HomeServiceImpl implements HomeService {
       );
 
       if (currentSchedule.streamerUrl.isNotEmpty) {
-        // _logger.info('Canal atual encontrado na $listName: ${currentSchedule.streamerUrl}');
         return currentSchedule.streamerUrl;
       }
-
-      _logger.info(
-        'Nenhuma live ativa no horário atual na $listName, retornando null para usar canal padrão',
-      );
       return null;
     } catch (e, s) {
       _logger.error('Erro ao buscar o canal atual da $listName', e, s);
@@ -257,7 +226,6 @@ class HomeServiceImpl implements HomeService {
     int minute,
     int points,
   ) async {
-    // Validações
     if (streamerId <= 0) throw Failure(message: 'ID do streamer inválido');
     if (hour < 0 || hour > 23) throw Failure(message: 'Hora inválida');
     if (minute < 0 || minute > 59) throw Failure(message: 'Minuto inválido');
