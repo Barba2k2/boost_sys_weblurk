@@ -7,9 +7,9 @@ import '../utils/url_validator.dart';
 class UrlLauncherService {
   UrlLauncherService({
     required AppLogger logger,
-    Shell? shell, // ✅ CORREÇÃO: Permitir injeção de Shell
+    Shell? shell,
   })  : _logger = logger,
-        _shell = shell ?? Shell(); // ✅ CORREÇÃO: Usar Shell injetado ou criar um novo
+        _shell = shell ?? Shell();
 
   final AppLogger _logger;
   final Shell _shell;
