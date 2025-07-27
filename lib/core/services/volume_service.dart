@@ -135,10 +135,8 @@ class VolumeService {
     try {
       if (_isMuted) {
         await _webViewService.muteWebView();
-        _logger.info('Estado de mute sincronizado com WebView');
       } else {
         await _webViewService.unmuteWebView();
-        _logger.info('Estado de unmute sincronizado com WebView');
       }
     } catch (e, s) {
       _logger.error('Erro ao sincronizar estado de mute com WebView', e, s);
@@ -157,9 +155,6 @@ class VolumeService {
 
       // Verifica se há inconsistência entre o estado interno e o sistema
       if (_isMuted != systemMuted || (_isMuted && currentVolume > 0.0)) {
-        _logger.warning(
-            'Inconsistência detectada no estado de mute. Corrigindo...');
-
         if (_isMuted) {
           // Força o mute se deveria estar mutado
           await AudioHelper.setApplicationMute(true);
@@ -169,8 +164,6 @@ class VolumeService {
           await AudioHelper.setApplicationMute(false);
           await _webViewService.unmuteWebView();
         }
-
-        _logger.info('Estado de mute corrigido');
       }
     } catch (e, s) {
       _logger.error('Erro ao verificar e corrigir estado de mute', e, s);
