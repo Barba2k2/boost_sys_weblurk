@@ -1,0 +1,48 @@
+name: Manual Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: "Tipo de teste"
+        required: true
+        default: "basic"
+        type: choice
+        options:
+          - basic
+          - full
+
+jobs:
+  manual-test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Basic Test
+        if: inputs.test_type == 'basic'
+        run: |
+          echo "✅ Teste básico executado com sucesso!"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Event: ${{ github.event_name }}"
+
+      - name: Full Test
+        if: inputs.test_type == 'full'
+        run: |
+          echo "🔍 Teste completo iniciado..."
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+
+          echo "📁 Verificando arquivos de workflow:"
+          ls -la .github/workflows/
+
+          echo "📝 Últimos commits:"
+          git log --oneline -5
+
+          if [ -n "${{ secrets.SHOREBIRD_TOKEN }}" ]; then
+            echo "✅ SHOREBIRD_TOKEN configurado"
+          else
+            echo "❌ SHOREBIRD_TOKEN não configurado"
+          fi
