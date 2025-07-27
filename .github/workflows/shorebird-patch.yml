@@ -48,24 +48,28 @@ jobs:
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
-          
-      - name: Enable Git Long Paths
-        shell: bash
-        run: |
-          echo "Habilitando suporte a long paths no Git..."
-          git config --global core.longpaths true
-          echo "Configuração de long paths aplicada."
 
       - name: Verify Shorebird Configuration
         shell: powershell
         run: |
+          Write-Output "Habilitando suporte a long paths no Git..."
+          git config --global core.longpaths true
+        
           Write-Output "Verificando configuracao do Shorebird para patches..."
           try {
             shorebird --version
+            
             Write-Output "Verificando releases disponiveis..."
-            shorebird releases list 2>$null
+            # <<< CORREÇÃO APLICADA AQUI (list removido) >>>
+            shorebird releases 2>$null
+            
+            if ($LASTEXITCODE -ne 0) {
+                throw "Falha ao verificar releases do Shorebird."
+            }
+            
+            Write-Output "Configuração do Shorebird parece OK."
           } catch {
-            Write-Output "Erro na verificacao do Shorebird: $_"
+            Write-Error "Erro na verificacao do Shorebird: $_"
             throw "Configuracao do Shorebird invalida para patches"
           }
         env:
@@ -84,9 +88,16 @@ jobs:
         run: |
           Write-Output "Determinando release base para o patch..."
           try {
+            # <<< CORREÇÃO APLICADA AQUI (garantindo longpaths e removendo list) >>>
+            Write-Output "Configurando Git longpaths..."
             git config --global core.longpaths true
-
-            $releasesJson = shorebird releases list --json 2>$null
+            
+            Write-Output "Buscando releases..."
+            $releasesJson = shorebird releases --json 2>$null
+            
+            if ($LASTEXITCODE -ne 0) {
+                throw "Comando 'shorebird releases' falhou."
+            }
             
             if ($releasesJson -and $releasesJson.Trim().StartsWith("[")) {
               $releases = $releasesJson | ConvertFrom-Json
@@ -94,18 +105,13 @@ jobs:
               if ($releases -and $releases.Count -gt 0) {
                 $latestRelease = $releases[0]
                 $targetVersion = $latestRelease.version
-                
                 Write-Output "Release base encontrada: $($latestRelease.version)"
-                
               } else {
-                $targetVersion = "1.0.14+2" # Fallback
-                Write-Output "Lista de releases vazia, usando fallback: $targetVersion"
+                throw "Nenhuma release encontrada para criar um patch."
               }
               
             } else {
-              Write-Output "Erro ao buscar releases ou JSON invalido. Usando fallback."
-              Write-Output "Output recebido: $releasesJson"
-              $targetVersion = "1.0.14+2" # Fallback
+               throw "Nenhuma release encontrada ou o formato do retorno é inválido."
             }
             
             echo "target-release=$targetVersion" >> $env:GITHUB_OUTPUT
@@ -128,9 +134,6 @@ jobs:
           Write-Output "  Versao do patch: $version"
           Write-Output "  Release base: $targetRelease"
           Write-Output "  Tipo de mudanca: $changeType"
-          if ($changeType -eq "major" -or $changeType -eq "minor") {
-            Write-Output "Considere criar uma release ao inves de patch para mudancas $changeType"
-          }
 
       - name: Create Shorebird Patch
         id: shorebird-patch
@@ -140,6 +143,8 @@ jobs:
           Write-Output "Criando patch Shorebird para Windows..."
           Write-Output "  Release base: $targetRelease"
           try {
+            git config --global core.longpaths true
+            
             $patchOutput = shorebird patch windows --release-version=$targetRelease --verbose 2>&1
             Write-Output "Output da criacao do patch:"
             $patchOutput | Write-Output
