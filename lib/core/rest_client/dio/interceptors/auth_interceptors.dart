@@ -54,10 +54,4 @@ class AuthInterceptors extends Interceptor {
       throw Exception('Error on AuthInterceptors');
     }
   }
-
-  // @override
-  // void onResponse(Response response, ResponseInterceptorHandler handler) {}
-
-  // @override
-  // void onError(DioException err, ErrorInterceptorHandler handler) {}
 }
