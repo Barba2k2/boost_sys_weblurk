@@ -2,7 +2,7 @@ name: boost_sys_weblurk
 description: "Gerenciamento de agendamentos de streamers"
 publish_to: 'none'
 
-version: 1.0.14+5
+version: 1.0.14+6
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
