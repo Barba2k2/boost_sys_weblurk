@@ -1,3 +1,10 @@
+## [1.1.0+6] - 2025-07-27
+
+[FEAT] ### Mudancas nesta versao
+
+- [FEAT] Merge branch 'master' of https://github.com/Barba2k2/boost_sys_weblurk
+- [FIX] fix: correct YAML syntax in version-management workflow
+
 # Changelog
 
 Todas as mudancas notaveis neste projeto serao documentadas neste arquivo.
