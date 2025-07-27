@@ -48,7 +48,7 @@ jobs:
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
-
+          
       - name: Enable Git Long Paths
         shell: bash
         run: |
@@ -61,21 +61,9 @@ jobs:
         run: |
           Write-Output "Verificando configuracao do Shorebird para patches..."
           try {
-            $shorebirdVersion = shorebird --version
-            Write-Output "Shorebird versao: $shorebirdVersion"
-            
+            shorebird --version
             Write-Output "Verificando releases disponiveis..."
-            $releases = shorebird releases list 2>$null
-            
-            if (-not $releases -or $releases.Length -eq 0) {
-              Write-Output "Nenhuma release encontrada!"
-              Write-Output "E necessario ter pelo menos uma release base para criar patches"
-              throw "Nenhuma release base disponivel"
-            }
-            
-            Write-Output "Releases encontradas:"
-            $releases | head -5 | Write-Output
-            
+            shorebird releases list 2>$null
           } catch {
             Write-Output "Erro na verificacao do Shorebird: $_"
             throw "Configuracao do Shorebird invalida para patches"
@@ -87,17 +75,8 @@ jobs:
         shell: powershell
         run: |
           Write-Output "Instalando dependencias Flutter..."
-          try {
-            flutter pub get
-            Write-Output "Dependencias instaladas com sucesso"
-            
-            Write-Output "Verificacao rapida do codigo..."
-            flutter analyze --no-fatal-warnings 2>$null
-            Write-Output "Codigo verificado"
-            
-          } catch {
-            Write-Output "Aviso durante preparacao: $_"
-          }
+          flutter pub get
+          flutter analyze --no-fatal-warnings 2>$null
 
       - name: Determine Target Release
         id: target-release
@@ -105,38 +84,36 @@ jobs:
         run: |
           Write-Output "Determinando release base para o patch..."
           try {
+            git config --global core.longpaths true
+
             $releasesJson = shorebird releases list --json 2>$null
             
-            if ($releasesJson) {
+            if ($releasesJson -and $releasesJson.Trim().StartsWith("[")) {
               $releases = $releasesJson | ConvertFrom-Json
               
               if ($releases -and $releases.Count -gt 0) {
                 $latestRelease = $releases[0]
                 $targetVersion = $latestRelease.version
-                $releaseDate = $latestRelease.created_at
                 
-                Write-Output "Release base encontrada:"
-                Write-Output "  Versao: $targetVersion"
-                Write-Output "  Data: $releaseDate"
+                Write-Output "Release base encontrada: $($latestRelease.version)"
                 
               } else {
-                $targetVersion = "1.0.14+2"
+                $targetVersion = "1.0.14+2" # Fallback
                 Write-Output "Lista de releases vazia, usando fallback: $targetVersion"
               }
               
             } else {
-              $targetVersion = "1.0.14+2"
-              Write-Output "Erro ao buscar releases, usando fallback: $targetVersion"
+              Write-Output "Erro ao buscar releases ou JSON invalido. Usando fallback."
+              Write-Output "Output recebido: $releasesJson"
+              $targetVersion = "1.0.14+2" # Fallback
             }
             
             echo "target-release=$targetVersion" >> $env:GITHUB_OUTPUT
             Write-Output "Release alvo para patch: $targetVersion"
             
           } catch {
-            $targetVersion = "1.0.14+2"
-            Write-Output "Erro na determinacao da release base: $_"
-            Write-Output "Usando fallback final: $targetVersion"
-            echo "target-release=$targetVersion" >> $env:GITHUB_OUTPUT
+            Write-Error "Erro critico na determinacao da release base: $_"
+            throw "Falha ao determinar a release base para o patch."
           }
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -154,8 +131,6 @@ jobs:
           if ($changeType -eq "major" -or $changeType -eq "minor") {
             Write-Output "Considere criar uma release ao inves de patch para mudancas $changeType"
           }
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
       - name: Create Shorebird Patch
         id: shorebird-patch
