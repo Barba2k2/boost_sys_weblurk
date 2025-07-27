@@ -20,24 +20,19 @@ class ScheduleWebSocketService {
       (message) {
         final data = jsonDecode(message);
         if (data['type'] == 'SCHEDULE_UPDATE') {
-          // Atualiza a UI com os novos dados
           _handleScheduleUpdate(data['data']);
         }
       },
       onError: (error) {
         _logger.error('WebSocket error: $error');
-        // Implementar reconexão se necessário
       },
       onDone: () {
         _logger.error('WebSocket connection closed');
-        // Implementar reconexão se necessário
       },
     );
   }
 
-  void _handleScheduleUpdate(Map<String, dynamic> scheduleData) {
-    // Atualizar o estado da aplicação/UI com os novos dados
-  }
+  void _handleScheduleUpdate(Map<String, dynamic> scheduleData) {}
 
   void dispose() {
     _channel.sink.close();
