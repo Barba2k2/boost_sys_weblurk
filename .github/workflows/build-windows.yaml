@@ -2,11 +2,6 @@ name: Build Flutter Windows App
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - master
-  #   tags:
-  #     - "v*"
 
 jobs:
   build:
