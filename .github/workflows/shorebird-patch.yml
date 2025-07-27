@@ -30,7 +30,7 @@ jobs:
     runs-on: windows-latest
     outputs:
       patch-created: ${{ steps.shorebird-patch.outputs.patch-created }}
-      target-release: "latest"
+      target-release: ${{ steps.target-release.outputs.target-release }}
       patch-number: ${{ steps.shorebird-patch.outputs.patch-number }}
     steps:
       - name: Checkout code
@@ -41,7 +41,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.29.2"
+          flutter-version: '3.29.2'
           cache: true
 
       - name: Setup Shorebird
@@ -49,64 +49,452 @@ jobs:
         with:
           cache: true
 
+      - name: Configure Environment
+        shell: powershell
+        run: |
+          # Configure encoding to handle special characters
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $env:PYTHONIOENCODING = "utf-8"
+          
+          Write-Output "Configuring environment for Shorebird patches..."
+          
+          # Configure Git for long paths - this fixes the git warning
+          git config --global core.longpaths true
+          git config --global core.autocrlf false
+          git config --global core.filemode false
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action Bot"
+          
+          Write-Output "Git configuration completed"
+          
+          # Verify environment variables
+          if (-not $env:SHOREBIRD_TOKEN -or $env:SHOREBIRD_TOKEN -eq "") {
+            throw "SHOREBIRD_TOKEN is not configured"
+          }
+          
+          Write-Output "Environment configuration completed successfully"
+
+      - name: Verify Shorebird Configuration
+        shell: powershell
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+          
+          Write-Output "Verifying Shorebird configuration for patches..."
+          
+          try {
+            # Check Shorebird version
+            $shorebirdVersion = shorebird --version 2>&1
+            Write-Output "Shorebird version: $shorebirdVersion"
+            
+            # Run doctor to check configuration
+            Write-Output "Running Shorebird doctor..."
+            $doctorOutput = shorebird doctor 2>&1
+            Write-Output "Doctor output completed"
+            
+            # Check if we have any releases available for patching
+            Write-Output "Checking for available releases to patch..."
+            
+            try {
+              $releasesOutput = shorebird releases list 2>&1
+              
+              if ($LASTEXITCODE -eq 0) {
+                if ($releasesOutput -and $releasesOutput.Trim()) {
+                  Write-Output "Releases found - patches can be created"
+                  # Show first few releases
+                  $releasesOutput | Select-Object -First 5 | Write-Output
+                } else {
+                  Write-Output "No releases found"
+                  throw "No releases available for patching. You need to create a release first before creating patches."
+                }
+              } else {
+                Write-Output "Failed to list releases. Exit code: $LASTEXITCODE"
+                Write-Output "Output: $releasesOutput"
+                throw "Cannot access releases. Make sure you have at least one release created before attempting to patch."
+              }
+            } catch {
+              Write-Output "Error checking releases: $_"
+              throw "Cannot verify releases for patching: $_"
+            }
+            
+            Write-Output "Shorebird configuration verification completed successfully"
+            
+          } catch {
+            Write-Output "Error during Shorebird verification: $_"
+            throw "Shorebird configuration is invalid for patching: $_"
+          }
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
       - name: Install Dependencies
         shell: powershell
         run: |
-          flutter pub get
+          Write-Output "Installing Flutter dependencies..."
+          
+          try {
+            flutter pub get
+            Write-Output "Dependencies installed successfully"
+            
+            # Run analysis without treating warnings as errors for patches
+            Write-Output "Running code analysis..."
+            flutter analyze --no-fatal-warnings --no-fatal-infos 2>$null
+            Write-Output "Code analysis completed"
+            
+          } catch {
+            Write-Output "Warning during dependency installation: $_"
+            Write-Output "Continuing with patch process..."
+          }
+
+      - name: Determine Target Release
+        id: target-release
+        shell: powershell
+        run: |
+          Write-Output "Determining target release for patch..."
+          
+          try {
+            # Get list of releases in JSON format for better parsing
+            $releasesJson = shorebird releases list --json 2>&1
+            
+            if ($LASTEXITCODE -eq 0 -and $releasesJson -and $releasesJson.Trim()) {
+              try {
+                $releases = $releasesJson | ConvertFrom-Json
+                
+                if ($releases -and $releases.Count -gt 0) {
+                  # Get the most recent release
+                  $latestRelease = $releases[0]
+                  $targetVersion = $latestRelease.version
+                  $releaseDate = $latestRelease.created_at
+                  
+                  Write-Output "Target release found:"
+                  Write-Output "  Version: $targetVersion"
+                  Write-Output "  Date: $releaseDate"
+                  
+                  # Check existing patches for this release
+                  try {
+                    $existingPatches = shorebird patches list --release-version=$targetVersion 2>&1
+                    
+                    if ($LASTEXITCODE -eq 0) {
+                      if ($existingPatches -and $existingPatches.Trim()) {
+                        Write-Output "Existing patches found for this release"
+                      } else {
+                        Write-Output "No existing patches for this release"
+                      }
+                    } else {
+                      Write-Output "Could not check existing patches"
+                    }
+                  } catch {
+                    Write-Output "Warning: Could not verify existing patches"
+                  }
+                  
+                } else {
+                  throw "No releases found in the list"
+                }
+              } catch {
+                Write-Output "Error parsing releases JSON: $_"
+                # Fallback to text parsing
+                $firstRelease = $releasesJson | Select-String "(\d+\.\d+\.\d+\+\d+)" | Select-Object -First 1
+                if ($firstRelease) {
+                  $targetVersion = $firstRelease.Matches[0].Groups[1].Value
+                  Write-Output "Fallback: Using release version $targetVersion"
+                } else {
+                  throw "Could not parse any release version"
+                }
+              }
+            } else {
+              throw "No releases available or command failed"
+            }
+            
+            echo "target-release=$targetVersion" >> $env:GITHUB_OUTPUT
+            Write-Output "Target release set to: $targetVersion"
+            
+          } catch {
+            Write-Output "Error determining target release: $_"
+            # Use fallback version
+            $fallbackVersion = "1.0.14+2"
+            Write-Output "Using fallback version: $fallbackVersion"
+            echo "target-release=$fallbackVersion" >> $env:GITHUB_OUTPUT
+          }
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+      - name: Pre-Patch Validation
+        shell: powershell
+        run: |
+          $version = "${{ inputs.version }}"
+          $targetRelease = "${{ steps.target-release.outputs.target-release }}"
+          $changeType = "${{ inputs.change_type }}"
+          
+          Write-Output "Pre-patch validation..."
+          Write-Output "  Patch version: $version"
+          Write-Output "  Target release: $targetRelease"
+          Write-Output "  Change type: $changeType"
+          
+          # Validate that target release exists
+          try {
+            $releases = shorebird releases list 2>&1
+            if ($releases -like "*$targetRelease*") {
+              Write-Output "Target release $targetRelease confirmed"
+            } else {
+              Write-Output "Warning: Target release $targetRelease not found in list"
+              Write-Output "Available releases:"
+              $releases | Select-Object -First 5 | Write-Output
+            }
+          } catch {
+            Write-Output "Warning: Could not validate target release: $_"
+          }
+          
+          # Warn about change types that might be better as releases
+          if ($changeType -eq "major") {
+            Write-Output "Warning: Major changes detected - consider creating a release instead of a patch"
+          } elseif ($changeType -eq "minor") {
+            Write-Output "Warning: Minor changes detected - consider if this should be a release"
+          }
+          
+          Write-Output "Pre-patch validation completed"
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
       - name: Create Shorebird Patch
         id: shorebird-patch
         shell: powershell
         run: |
-          Write-Output "Criando patch Shorebird para Windows..."
-          # AQUI ESTÁ A CORREÇÃO PRINCIPAL
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+          
+          $version = "${{ inputs.version }}"
+          $targetRelease = "${{ steps.target-release.outputs.target-release }}"
+          $changeType = "${{ inputs.change_type }}"
+          
+          Write-Output "Creating Shorebird patch for Windows..."
+          Write-Output "  Patch version: $version"
+          Write-Output "  Target release: $targetRelease"
+          Write-Output "  Change type: $changeType"
+          Write-Output "  Timestamp: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+          
           try {
-            git config --system core.longpaths true
+            # Clean build directory
+            Write-Output "Cleaning build directory..."
+            flutter clean
+            flutter pub get
             
-            # Usando --release-version=latest para simplificar
-            $patchOutput = shorebird patch windows --release-version=latest --verbose 2>&1
-            Write-Output "Output da criacao do patch:"
+            $patchSuccess = $false
+            $patchOutput = ""
+            $attempts = 0
+            $maxAttempts = 3
+            
+            while (-not $patchSuccess -and $attempts -lt $maxAttempts) {
+              $attempts++
+              Write-Output "Patch creation attempt $attempts of $maxAttempts..."
+              
+              try {
+                switch ($attempts) {
+                  1 { 
+                    Write-Output "Trying patch with specific release version..."
+                    if ($targetRelease -and $targetRelease -ne "") {
+                      $patchOutput = shorebird patch windows --release-version=$targetRelease --verbose 2>&1
+                    } else {
+                      $patchOutput = shorebird patch windows --verbose 2>&1
+                    }
+                  }
+                  2 { 
+                    Write-Output "Trying patch without specifying release version..."
+                    $patchOutput = shorebird patch windows --verbose 2>&1
+                  }
+                  3 { 
+                    Write-Output "Trying patch without verbose output..."
+                    $patchOutput = shorebird patch windows 2>&1
+                  }
+                }
+                
+                if ($LASTEXITCODE -eq 0) {
+                  $patchSuccess = $true
+                  Write-Output "Patch created successfully on attempt $attempts"
+                  break
+                } else {
+                  Write-Output "Attempt $attempts failed with exit code: $LASTEXITCODE"
+                  Write-Output "Output: $patchOutput"
+                  
+                  if ($attempts -lt $maxAttempts) {
+                    Write-Output "Retrying..."
+                    Start-Sleep -Seconds 5
+                  }
+                }
+              } catch {
+                Write-Output "Exception on attempt $attempts: $_"
+                if ($attempts -eq $maxAttempts) {
+                  throw "All patch attempts failed"
+                }
+              }
+            }
+            
+            # Display final output
+            Write-Output "Final patch creation output:"
             $patchOutput | Write-Output
             
-            if ($LASTEXITCODE -eq 0) {
-              Write-Output "Patch Shorebird criado com sucesso!"
+            if ($patchSuccess) {
+              Write-Output "Shorebird patch created successfully!"
               echo "patch-created=true" >> $env:GITHUB_OUTPUT
               
-              # A lógica para extrair o número do patch permanece a mesma
+              # Try to extract patch number from output
               $patchNumberMatch = $patchOutput | Select-String "Patch (\d+)" | Select-Object -First 1
               if ($patchNumberMatch) {
                 $patchNumber = $patchNumberMatch.Matches[0].Groups[1].Value
                 echo "patch-number=$patchNumber" >> $env:GITHUB_OUTPUT
-                Write-Output "Numero do patch: $patchNumber"
+                Write-Output "Patch number: $patchNumber"
+              } else {
+                echo "patch-number=unknown" >> $env:GITHUB_OUTPUT
+                Write-Output "Patch number could not be determined"
               }
+              
             } else {
+              Write-Output "Failed to create patch after all attempts"
               echo "patch-created=false" >> $env:GITHUB_OUTPUT
-              throw "Shorebird patch falhou"
+              echo "patch-number=failed" >> $env:GITHUB_OUTPUT
+              throw "Shorebird patch creation failed"
             }
+            
           } catch {
-            Write-Error "Erro durante criacao do patch: $_"
+            Write-Output "Critical error during patch creation: $_"
             echo "patch-created=false" >> $env:GITHUB_OUTPUT
-            throw "Falha na criacao do patch Shorebird"
+            echo "patch-number=error" >> $env:GITHUB_OUTPUT
+            
+            # Additional diagnostics
+            try {
+              Write-Output "Running additional diagnostics..."
+              shorebird doctor 2>&1
+              
+              Write-Output "Recent releases:"
+              shorebird releases list 2>&1 | Select-Object -First 3
+              
+            } catch {
+              Write-Output "Could not run additional diagnostics"
+            }
+            
+            throw "Failed to create Shorebird patch: $_"
           }
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
-      # O passo de resumo continua útil
+      - name: Post-Patch Validation
+        if: steps.shorebird-patch.outputs.patch-created == 'true'
+        shell: powershell
+        run: |
+          $targetRelease = "${{ steps.target-release.outputs.target-release }}"
+          $patchNumber = "${{ steps.shorebird-patch.outputs.patch-number }}"
+          
+          Write-Output "Post-patch validation..."
+          
+          try {
+            # Wait a moment for the patch to propagate
+            Start-Sleep -Seconds 10
+            
+            # Verify patch appears in the list
+            Write-Output "Checking patches for release $targetRelease..."
+            
+            $patches = shorebird patches list --release-version=$targetRelease 2>&1
+            
+            if ($LASTEXITCODE -eq 0) {
+              Write-Output "Patches for release $targetRelease:"
+              $patches | Write-Output
+              
+              # Check if our specific patch is there
+              if ($patchNumber -and $patchNumber -ne "unknown" -and $patchNumber -ne "failed") {
+                if ($patches -like "*Patch $patchNumber*" -or $patches -like "*$patchNumber*") {
+                  Write-Output "Patch $patchNumber confirmed in the list"
+                } else {
+                  Write-Output "Patch $patchNumber not yet visible (may be propagation delay)"
+                }
+              }
+              
+            } else {
+              Write-Output "Could not verify patches (exit code: $LASTEXITCODE)"
+              Write-Output "Output: $patches"
+            }
+            
+            # List all patches for debug
+            Write-Output "All patches in the project:"
+            try {
+              shorebird patches list 2>&1 | Select-Object -First 10
+            } catch {
+              Write-Output "Could not list all patches"
+            }
+            
+          } catch {
+            Write-Output "Error in post-patch validation: $_"
+            # Don't fail the workflow for validation errors
+          }
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+      - name: Patch Distribution Info
+        if: steps.shorebird-patch.outputs.patch-created == 'true'
+        shell: powershell
+        run: |
+          $version = "${{ inputs.version }}"
+          $targetRelease = "${{ steps.target-release.outputs.target-release }}"
+          $patchNumber = "${{ steps.shorebird-patch.outputs.patch-number }}"
+          
+          Write-Output ""
+          Write-Output "PATCH DISTRIBUTION INFORMATION"
+          Write-Output "==============================="
+          Write-Output "Patch created and ready for distribution!"
+          Write-Output ""
+          Write-Output "Patch Details:"
+          Write-Output "  Version: $version"
+          Write-Output "  Target release: $targetRelease"
+          Write-Output "  Patch number: $patchNumber"
+          Write-Output "  Created at: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+          Write-Output ""
+          Write-Output "How users will receive this patch:"
+          Write-Output "  1. Users with release $targetRelease installed"
+          Write-Output "  2. Will receive automatic update on next app launch"
+          Write-Output "  3. Detection occurs within 30-60 seconds of app opening"
+          Write-Output "  4. Patch download (typically < 1MB)"
+          Write-Output "  5. Automatic application after user accepts update"
+          Write-Output ""
+          Write-Output "Monitoring recommendations:"
+          Write-Output "  - Check update logs on user devices"
+          Write-Output "  - Monitor metrics in Shorebird dashboard"
+          Write-Output "  - Watch for crash reports after distribution"
+          Write-Output ""
+          Write-Output "Useful commands:"
+          Write-Output "  shorebird patches list --release-version=$targetRelease"
+          Write-Output "  shorebird releases list"
+          Write-Output "==============================="
+
       - name: Summary
         shell: powershell
-        if: always()
         run: |
           Write-Output ""
-          Write-Output "RESUMO DO PATCH"
-          Write-Output "=================="
-          Write-Output "Versao: ${{ inputs.version }}"
-          Write-Output "Release base: latest"
-          Write-Output "Patch criado: ${{ steps.shorebird-patch.outputs.patch-created }}"
-          Write-Output "Numero: ${{ steps.shorebird-patch.outputs.patch-number }}"
-          Write-Output "Tipo: ${{ inputs.change_type }}"
-          Write-Output "=================="
+          Write-Output "PATCH CREATION SUMMARY"
+          Write-Output "======================"
+          Write-Output "Version: ${{ inputs.version }}"
+          Write-Output "Target release: ${{ steps.target-release.outputs.target-release }}"
+          Write-Output "Patch created: ${{ steps.shorebird-patch.outputs.patch-created }}"
+          Write-Output "Patch number: ${{ steps.shorebird-patch.outputs.patch-number }}"
+          Write-Output "Change type: ${{ inputs.change_type }}"
+          Write-Output "Completed at: $(Get-Date -Format 'HH:mm:ss')"
+          Write-Output "======================"
+          
           if ("${{ steps.shorebird-patch.outputs.patch-created }}" -eq "true") {
-            Write-Host "PATCH CRIADO COM SUCESSO!" -ForegroundColor Green
+            Write-Output ""
+            Write-Output "PATCH CREATED SUCCESSFULLY!"
+            Write-Output ""
+            Write-Output "Next automatic steps:"
+            Write-Output "  1. Patch available in Shorebird"
+            Write-Output "  2. Automatic distribution to users"
+            Write-Output "  3. Automatic updates on next app launch"
+            Write-Output "  4. Adoption monitoring available"
+            Write-Output ""
+            Write-Output "Target users:"
+            Write-Output "  - Devices with release ${{ steps.target-release.outputs.target-release }}"
+            Write-Output "  - Functional installed application"
+            Write-Output "  - Active internet connection"
+            Write-Output ""
           } else {
-            Write-Error "FALHA NA CRIAÇÃO DO PATCH. Verifique logs acima."
+            Write-Output ""
+            Write-Output "PATCH CREATION FAILED"
+            Write-Output "Check logs above for error details"
+            Write-Output ""
           }
