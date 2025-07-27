@@ -39,7 +39,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.2'
+          flutter-version: "3.29.2"
           cache: true
 
       - name: Setup Shorebird
@@ -50,28 +50,29 @@ jobs:
       - name: Verify Shorebird Configuration
         shell: powershell
         run: |
-          Write-Output "🔍 Verificando configuração do Shorebird..."
-          
+          Write-Output "Verificando configuracao do Shorebird..."
+
           try {
             # Verificar versão
             $shorebirdVersion = shorebird --version
-            Write-Output "✅ Shorebird versão: $shorebirdVersion"
+            Write-Output "Shorebird versao: $shorebirdVersion"
             
             # Verificar configuração do app
-            Write-Output "📋 Verificando configuração do app..."
-            shorebird apps list
+            Write-Output "Verificando configuracao do app..."
             
-            # Verificar releases existentes
-            Write-Output "📋 Releases existentes:"
-            try {
-              shorebird releases list | head -10
-            } catch {
-              Write-Output "ℹ️ Nenhuma release encontrada ou erro ao listar"
+            # Listar releases existentes
+            Write-Output "Releases existentes:"
+            $releases = shorebird releases list 2>$null
+            
+            if ($releases) {
+              $releases | head -5 | Write-Output
+            } else {
+              Write-Output "Nenhuma release encontrada ou erro ao listar"
             }
             
           } catch {
-            Write-Output "❌ Erro na verificação do Shorebird: $_"
-            throw "Configuração do Shorebird inválida"
+            Write-Output "Erro na verificacao do Shorebird: $_"
+            throw "Configuracao do Shorebird invalida"
           }
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -79,54 +80,55 @@ jobs:
       - name: Install Dependencies
         shell: powershell
         run: |
-          Write-Output "📦 Instalando dependências Flutter..."
-          
+          Write-Output "Instalando dependencias Flutter..."
+
           try {
             flutter pub get
-            Write-Output "✅ Dependências instaladas com sucesso"
+            Write-Output "Dependencias instaladas com sucesso"
             
-            # Verificar se há problemas
-            flutter analyze --no-fatal-infos --no-fatal-warnings
-            Write-Output "✅ Análise de código concluída"
+            # Análise de código
+            flutter analyze --no-fatal-warnings
+            Write-Output "Analise de codigo concluida"
             
           } catch {
-            Write-Output "⚠️ Aviso durante instalação de dependências: $_"
-            # Não falhar a pipeline por warnings menores
+            Write-Output "Aviso durante instalacao de dependencias: $_"
+            # Continuar mesmo com warnings
           }
 
-      - name: Pre-Release Validation
+      - name: Validate Release
+        id: validate-release
         shell: powershell
         run: |
+          Write-Output "Validacao pre-release..."
+
           $version = "${{ inputs.version }}"
-          
-          Write-Output "🔍 Validação pré-release..."
-          Write-Output "  Versão: $version"
-          
-          # Verificar se a versão já existe
+
           try {
-            $existingReleases = shorebird releases list --json 2>$null
+            # Verificar se a release já existe
+            $existingReleases = shorebird releases list 2>$null
             
             if ($existingReleases) {
-              $releases = $existingReleases | ConvertFrom-Json
-              $existingVersion = $releases | Where-Object { $_.version -eq $version }
+              $releaseExists = $existingReleases | Select-String $version
               
-              if ($existingVersion) {
-                Write-Output "⚠️ Release $version já existe no Shorebird"
-                Write-Output "📋 Release existente:"
-                $existingVersion | ConvertTo-Json -Depth 2 | Write-Output
-                throw "Release $version já existe"
+              if ($releaseExists) {
+                Write-Output "Release $version ja existe no Shorebird"
+                Write-Output "Release existente:"
+                $releaseExists | Write-Output
+                throw "Release $version ja existe"
               } else {
-                Write-Output "✅ Versão $version é única"
+                Write-Output "Versao $version e unica"
               }
             } else {
-              Write-Output "✅ Primeira release do projeto"
+              Write-Output "Primeira release do projeto"
             }
+            
           } catch {
-            if ($_.Exception.Message -like "*já existe*") {
-              throw
+            if ($_.Exception.Message -like "*ja existe*") {
+              throw $_
+            } else {
+              Write-Output "Nao foi possivel verificar releases existentes: $_"
+              Write-Output "Continuando com a criacao..."
             }
-            Write-Output "⚠️ Não foi possível verificar releases existentes: $_"
-            Write-Output "🔄 Continuando com a criação..."
           }
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -135,225 +137,154 @@ jobs:
         id: shorebird-release
         shell: powershell
         run: |
+          Write-Output "Criando release Shorebird para Windows..."
+
           $version = "${{ inputs.version }}"
-          
-          Write-Output "🚀 Criando release Shorebird para Windows..."
-          Write-Output "  Versão: $version"
-          Write-Output "  Timestamp: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-          
+          $changeType = "${{ inputs.change_type }}"
+
+          Write-Output "Parametros:"
+          Write-Output "  Versao: $version"
+          Write-Output "  Tipo: $changeType"
+
           try {
             # Criar release com verbose para debug
+            Write-Output "Output da criacao da release:"
             $releaseOutput = shorebird release windows --verbose 2>&1
-            
-            Write-Output "📋 Output da criação da release:"
             $releaseOutput | Write-Output
             
-            # Verificar se a release foi criada com sucesso
+            # Verificar sucesso
             if ($LASTEXITCODE -eq 0) {
-              Write-Output "✅ Release Shorebird criada com sucesso!"
+              Write-Output "Release Shorebird criada com sucesso!"
               echo "release-created=true" >> $env:GITHUB_OUTPUT
               
-              # Listar releases para confirmação
-              Write-Output "📋 Releases atuais:"
-              shorebird releases list | head -5
+              # Listar releases para confirmar
+              Write-Output "Releases atuais:"
+              shorebird releases list 2>$null | head -3
               
             } else {
-              Write-Output "❌ Falha na criação da release (Exit code: $LASTEXITCODE)"
+              Write-Output "Falha na criacao da release (Exit code: $LASTEXITCODE)"
               echo "release-created=false" >> $env:GITHUB_OUTPUT
-              throw "Shorebird release falhou"
+              throw "Falha na criacao da release Shorebird"
             }
             
           } catch {
-            Write-Output "❌ Erro durante criação da release: $_"
+            Write-Output "Erro durante criacao da release: $_"
             echo "release-created=false" >> $env:GITHUB_OUTPUT
             
-            # Tentar obter mais informações sobre o erro
+            # Tentar diagnóstico adicional
             try {
-              Write-Output "🔍 Diagnóstico adicional:"
-              shorebird doctor
+              Write-Output "Diagnostico adicional:"
+              shorebird doctor 2>$null
             } catch {
-              Write-Output "⚠️ Não foi possível executar diagnóstico"
+              Write-Output "Nao foi possivel executar diagnostico"
             }
             
-            throw "Falha na criação da release Shorebird"
+            throw "Falha na criacao da release Shorebird"
           }
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
       - name: Create Git Tag
         id: git-tag
-        if: steps.shorebird-release.outputs.release-created == 'true'
         shell: powershell
         run: |
+          Write-Output "Criando tag Git: $tag"
+
           $version = "${{ inputs.version }}"
           $tag = "v$version"
-          
-          Write-Output "🏷️ Criando tag Git: $tag"
-          
+
           try {
-            # Configurar Git
-            git config --global user.email "action@github.com"
-            git config --global user.name "GitHub Action Bot"
-            
-            # Verificar se tag já existe
+            # Verificar se a tag já existe
             $existingTag = git tag -l $tag
             
             if ($existingTag) {
-              Write-Output "⚠️ Tag $tag já existe"
-              Write-Output "🗑️ Removendo tag existente..."
-              
-              # Remover tag local e remota
-              git tag -d $tag 2>$null
-              git push origin --delete $tag 2>$null
+              Write-Output "Tag $tag ja existe"
+              Write-Output "Removendo tag existente..."
+              git tag -d $tag
+              git push origin :refs/tags/$tag 2>$null
             }
             
             # Criar nova tag
-            $tagMessage = "Release $tag - Auto-generated by Shorebird Pipeline"
-            git tag -a $tag -m $tagMessage
+            git tag -a $tag -m "Release $version"
+            Write-Output "Tag local criada: $tag"
             
-            Write-Output "✅ Tag local criada: $tag"
-            
-            # Push da tag
+            # Enviar tag para repositório remoto
             git push origin $tag
+            Write-Output "Tag enviada para repositorio remoto"
             
-            Write-Output "✅ Tag enviada para repositório remoto"
             echo "tag-created=true" >> $env:GITHUB_OUTPUT
+            echo "tag-name=$tag" >> $env:GITHUB_OUTPUT
             
           } catch {
-            Write-Output "❌ Erro na criação da tag: $_"
+            Write-Output "Erro na criacao da tag: $_"
             echo "tag-created=false" >> $env:GITHUB_OUTPUT
-            
-            # Não falhar a pipeline apenas por erro na tag
-            Write-Output "⚠️ Continuando sem tag Git..."
+            echo "tag-name=failed" >> $env:GITHUB_OUTPUT
+            Write-Output "Continuando sem tag Git..."
           }
 
       - name: Create GitHub Release
-        id: github-release
-        if: steps.shorebird-release.outputs.release-created == 'true'
         shell: powershell
         run: |
           $version = "${{ inputs.version }}"
           $tag = "v$version"
-          $releaseNotes = @"
-          ${{ inputs.release_notes }}
-          "@
-          
-          Write-Output "📝 Criando GitHub Release..."
-          Write-Output "  Tag: $tag"
-          Write-Output "  Versão: $version"
-          
+          $releaseNotes = "# Boost SysWebLurk $version`n`n## Como Atualizar`n`n**Para usuarios com versao anterior:**`n1. Abra o aplicativo instalado`n2. Aguarde a deteccao automatica de atualizacao`n3. Aceite a atualizacao quando solicitado`n4. Aplicativo sera reiniciado com a nova versao`n`n**Para novos usuarios:**`n- Execute o instalador e siga as instrucoes`n- O aplicativo ja estara na versao mais recente`n`n## Tecnologia`n`n- **Shorebird:** Atualizacoes automaticas sem reinstalacao`n- **Rollback automatico:** Em caso de problemas`n- **Atualizacoes incrementais:** Menores e mais rapidas`n`n---`n`n**Pipeline:** Shorebird Release Automation`n**Plataforma:** Windows x64`n**Versao anterior:** Verificar CHANGELOG.md para detalhes"
+
           try {
-            # Preparar corpo da release
-            $releaseBody = @"
-            # 🚀 Boost SysWebLurk $version
+            # Tentar usar GitHub CLI se disponível
+            $ghVersion = gh --version 2>$null
             
-            **Release automática gerada pelo Shorebird Pipeline**
-            
-            $releaseNotes
-            
-            ## 📦 Como Atualizar
-            
-            ### Para Usuários Existentes:
-            1. 🔄 Abra o aplicativo instalado
-            2. ⏳ Aguarde a detecção automática de atualizações (30-60 segundos)
-            3. ✅ Aceite a atualização quando solicitado
-            4. 🎉 Aplicativo será reiniciado com a nova versão
-            
-            ### Para Novos Usuários:
-            - 📥 Baixe o instalador mais recente dos assets desta release
-            - 🔧 Execute o instalador e siga as instruções
-            - 🚀 O aplicativo já estará na versão mais recente
-            
-            ## 🔧 Tecnologia
-            
-            Esta release utiliza **Shorebird Code Push** para atualizações automáticas:
-            - ⚡ Updates instantâneos sem reinstalação
-            - 🛡️ Rollback automático em caso de problemas  
-            - 📊 Atualizações incrementais menores
-            
-            ---
-            
-            **🤖 Gerado automaticamente em $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') UTC**
-            
-            **📋 Pipeline:** Shorebird Release Automation  
-            **🔧 Plataforma:** Windows x64  
-            **📱 Versão anterior:** Verificar CHANGELOG.md para detalhes
-            "@
-            
-            # Usar GitHub CLI para criar release (mais confiável que API direta)
-            $releaseArgs = @(
-              "release", "create", $tag,
-              "--title", "Boost SysWebLurk $version",
-              "--notes", $releaseBody,
-              "--latest"
-            )
-            
-            # Verificar se GitHub CLI está disponível
-            if (Get-Command gh -ErrorAction SilentlyContinue) {
-              Write-Output "✅ GitHub CLI encontrado, criando release..."
-              
-              & gh @releaseArgs
-              
-              if ($LASTEXITCODE -eq 0) {
-                Write-Output "✅ GitHub Release criada com sucesso!"
-                echo "github-release-created=true" >> $env:GITHUB_OUTPUT
-              } else {
-                Write-Output "❌ Erro ao criar GitHub Release via CLI"
-                echo "github-release-created=false" >> $env:GITHUB_OUTPUT
-              }
-              
+            if ($ghVersion) {
+              Write-Output "GitHub CLI encontrado, criando release..."
+              gh release create $tag --title "Boost SysWebLurk $version" --notes "$releaseNotes" --draft=false
+              Write-Output "GitHub Release criada com sucesso!"
             } else {
-              Write-Output "⚠️ GitHub CLI não disponível"
-              Write-Output "📝 Release notes preparadas:"
-              Write-Output $releaseBody
-              echo "github-release-created=false" >> $env:GITHUB_OUTPUT
+              Write-Output "GitHub CLI nao disponivel"
+              Write-Output "GitHub Release nao criada automaticamente"
+              Write-Output "Crie manualmente em: https://github.com/${{ github.repository }}/releases/new"
             }
             
           } catch {
-            Write-Output "❌ Erro na criação do GitHub Release: $_"
-            echo "github-release-created=false" >> $env:GITHUB_OUTPUT
-            
-            # Não falhar a pipeline apenas por erro no GitHub Release
-            Write-Output "⚠️ Continuando sem GitHub Release..."
+            Write-Output "Erro na criacao do GitHub Release: $_"
+            Write-Output "Continuando sem GitHub Release..."
           }
 
-      - name: Post-Release Validation
-        if: steps.shorebird-release.outputs.release-created == 'true'
+      - name: Validate Release
         shell: powershell
         run: |
+          Write-Output "Validacao pos-release..."
+
           $version = "${{ inputs.version }}"
-          
-          Write-Output "🔍 Validação pós-release..."
-          
+
           try {
             # Verificar se a release aparece na lista
-            $releases = shorebird releases list --json 2>$null
+            Write-Output "Verificando releases no Shorebird..."
+            
+            $releases = shorebird releases list 2>$null
             
             if ($releases) {
-              $releasesList = $releases | ConvertFrom-Json
-              $createdRelease = $releasesList | Where-Object { $_.version -eq $version }
+              $releaseFound = $releases | Select-String $version
               
-              if ($createdRelease) {
-                Write-Output "✅ Release $version confirmada no Shorebird"
-                Write-Output "📋 Detalhes da release:"
-                $createdRelease | ConvertTo-Json -Depth 2 | Write-Output
+              if ($releaseFound) {
+                Write-Output "Release $version confirmada no Shorebird"
+                Write-Output "Detalhes da release:"
+                $releaseFound | Write-Output
               } else {
-                Write-Output "⚠️ Release $version não encontrada na lista"
+                Write-Output "Release $version nao encontrada na lista"
               }
             } else {
-              Write-Output "⚠️ Não foi possível validar releases"
+              Write-Output "Nao foi possivel validar releases"
             }
             
-            # Verificar patches disponíveis para esta release
-            Write-Output "📋 Patches disponíveis para esta release:"
+            # Verificar patches disponíveis
+            Write-Output "Patches disponiveis para esta release:"
             try {
-              shorebird patches list --release-version=$version 2>$null
+              shorebird patches list --release-version=$version 2>$null | head -3
             } catch {
-              Write-Output "ℹ️ Nenhum patch ainda para esta release (esperado)"
+              Write-Output "Nenhum patch ainda para esta release (esperado)"
             }
             
           } catch {
-            Write-Output "⚠️ Erro na validação pós-release: $_"
+            Write-Output "Erro na validacao pos-release: $_"
             # Não falhar por erro de validação
           }
         env:
@@ -363,28 +294,27 @@ jobs:
         shell: powershell
         run: |
           Write-Output ""
-          Write-Output "📋 RESUMO DA RELEASE"
-          Write-Output "==================="
-          Write-Output "🚀 Versão: ${{ inputs.version }}"
-          Write-Output "📦 Shorebird Release: ${{ steps.shorebird-release.outputs.release-created }}"
-          Write-Output "🏷️ Git Tag: ${{ steps.git-tag.outputs.tag-created }}"
-          Write-Output "📝 GitHub Release: ${{ steps.github-release.outputs.github-release-created }}"
-          Write-Output "⏰ Concluído em: $(Get-Date -Format 'HH:mm:ss')"
-          Write-Output "==================="
-          
+          Write-Output "RESUMO DA RELEASE"
+          Write-Output "=================="
+          Write-Output "Versao: ${{ inputs.version }}"
+          Write-Output "Shorebird Release: ${{ steps.shorebird-release.outputs.release-created }}"
+          Write-Output "Git Tag: ${{ steps.git-tag.outputs.tag-created }}"
+          Write-Output "Tipo: ${{ inputs.change_type }}"
+          Write-Output "=================="
+
           if ("${{ steps.shorebird-release.outputs.release-created }}" -eq "true") {
             Write-Output ""
-            Write-Output "🎉 RELEASE CRIADA COM SUCESSO!"
+            Write-Output "RELEASE CRIADA COM SUCESSO!"
             Write-Output ""
-            Write-Output "📋 Próximos passos:"
-            Write-Output "  1. ✅ Release base disponível no Shorebird"
-            Write-Output "  2. 🔧 Patches futuros serão baseados nesta release"
-            Write-Output "  3. 📱 Usuários podem receber atualizações automáticas"
-            Write-Output "  4. 🔍 Monitorar logs de atualização dos usuários"
+            Write-Output "Proximos passos:"
+            Write-Output "  1. Release base disponivel no Shorebird"
+            Write-Output "  2. Patches futuros serao baseados nesta release"
+            Write-Output "  3. Usuarios podem receber atualizacoes automaticas"
+            Write-Output "  4. Monitorar logs de atualizacao dos usuarios"
             Write-Output ""
           } else {
             Write-Output ""
-            Write-Output "❌ FALHA NA CRIAÇÃO DA RELEASE"
-            Write-Output "⚠️ Verifique logs acima para detalhes do erro"
+            Write-Output "FALHA NA CRIAÇÃO DA RELEASE"
+            Write-Output "Verifique logs acima para detalhes do erro"
             Write-Output ""
           }
