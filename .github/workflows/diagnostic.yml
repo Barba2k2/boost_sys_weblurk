@@ -1,0 +1,52 @@
+name: Diagnostic Check
+
+on:
+  push:
+    branches: ["1.0.14+1"]
+  workflow_dispatch:
+
+jobs:
+  diagnostic:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check GitHub Context
+        run: |
+          echo "GitHub Event: ${{ github.event_name }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+
+      - name: Check Secrets
+        run: |
+          if [ -n "${{ secrets.SHOREBIRD_TOKEN }}" ]; then
+            echo "✅ SHOREBIRD_TOKEN está configurado"
+          else
+            echo "❌ SHOREBIRD_TOKEN não está configurado"
+          fi
+
+          if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
+            echo "✅ GITHUB_TOKEN está configurado"
+          else
+            echo "❌ GITHUB_TOKEN não está configurado"
+          fi
+
+      - name: Check Workflow Files
+        run: |
+          echo "📁 Workflow files:"
+          ls -la .github/workflows/
+
+          echo "📄 Content of simple-test.yml:"
+          cat .github/workflows/simple-test.yml
+
+      - name: Check Git Status
+        run: |
+          echo "🔍 Git status:"
+          git status
+          echo "📝 Last commits:"
+          git log --oneline -5
