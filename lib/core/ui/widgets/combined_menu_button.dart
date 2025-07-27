@@ -45,7 +45,6 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         });
       }
     } catch (e) {
-      // Fallback para estado interno se não conseguir verificar o sistema
       if (mounted) {
         setState(() {
           _isMuted = widget.volumeService.isMuted;
@@ -232,10 +231,12 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
           },
         ),
         MenuItemWidget(
-          label: 'Sobre o Weblurk',
-          icon: Icons.leaderboard,
+          label: 'Apoie o projeto',
+          icon: Icons.card_giftcard_rounded,
           onTap: () async {
-            Messages.info('Em breve!');
+            await widget.urlLauncherService.launchURL(
+              'https://github.com/Barba2k2/boost_sys_weblurk',
+            );
           },
         ),
       ],
