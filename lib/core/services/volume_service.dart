@@ -126,6 +126,73 @@ class VolumeService {
     }
   }
 
+  // ✅ NOVO: Método para sincronizar estado de mute com WebView
+  Future<void> syncMuteState() async {
+    if (!_isVolumeControlAvailable || !_isInitialized) {
+      return;
+    }
+
+    try {
+      if (_isMuted) {
+        await _webViewService.muteWebView();
+        _logger.info('Estado de mute sincronizado com WebView');
+      } else {
+        await _webViewService.unmuteWebView();
+        _logger.info('Estado de unmute sincronizado com WebView');
+      }
+    } catch (e, s) {
+      _logger.error('Erro ao sincronizar estado de mute com WebView', e, s);
+    }
+  }
+
+  // ✅ NOVO: Método para verificar e corrigir estado de mute
+  Future<void> verifyAndFixMuteState() async {
+    if (!_isVolumeControlAvailable || !_isInitialized) {
+      return;
+    }
+
+    try {
+      final systemMuted = await AudioHelper.isApplicationMuted();
+      final currentVolume = await AudioHelper.getCurrentVolume();
+
+      // Verifica se há inconsistência entre o estado interno e o sistema
+      if (_isMuted != systemMuted || (_isMuted && currentVolume > 0.0)) {
+        _logger.warning(
+            'Inconsistência detectada no estado de mute. Corrigindo...');
+
+        if (_isMuted) {
+          // Força o mute se deveria estar mutado
+          await AudioHelper.setApplicationMute(true);
+          await _webViewService.muteWebView();
+        } else {
+          // Força o unmute se deveria estar desmutado
+          await AudioHelper.setApplicationMute(false);
+          await _webViewService.unmuteWebView();
+        }
+
+        _logger.info('Estado de mute corrigido');
+      }
+    } catch (e, s) {
+      _logger.error('Erro ao verificar e corrigir estado de mute', e, s);
+    }
+  }
+
+  // ✅ NOVO: Método para verificar e corrigir estado de mute periodicamente
+  Future<void> periodicMuteStateCheck() async {
+    if (!_isVolumeControlAvailable || !_isInitialized) {
+      return;
+    }
+
+    try {
+      await verifyAndFixMuteState();
+
+      // Verifica também se o WebView está no estado correto
+      await _webViewService.verifyAndFixMuteState(_isMuted);
+    } catch (e, s) {
+      _logger.error('Erro na verificação periódica do estado de mute', e, s);
+    }
+  }
+
   bool get isAppMuted => _isMuted;
   double get originalVolume => _originalVolume;
   double get appVolume => _currentVolume;
