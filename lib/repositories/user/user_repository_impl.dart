@@ -43,8 +43,6 @@ class UserRepositoryImpl implements UserRepository {
         final errorMessage = e.response.data?['message'] ?? 'Erro de validação';
         if (errorMessage.contains('User not exists') ||
             errorMessage.contains('User not found')) {
-          _logger.error('Error: $errorMessage', e, s);
-          _logger.error('User not exists - ${e.error}', e, s);
           throw Failure(
             message: 'Usuario não encontrado, entre em contato com o suporte!!',
           );
@@ -61,11 +59,7 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<ConfirmLoginModel> confirmLogin() async {
     try {
-      // final deviceToken = await FirebaseMessaging.instance.getToken();
-
       final deviceToken = const Uuid().v4();
-
-      _logger.debug('Device Token: $deviceToken');
 
       final data = {
         if (kIsWeb) 'web_token': deviceToken,
