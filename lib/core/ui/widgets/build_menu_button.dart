@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
 
 class BuildMenuButton extends StatelessWidget {
@@ -30,7 +29,7 @@ class BuildMenuButton extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: const TextStyle(
                 color: AppColors.menuItemIcon,
                 fontWeight: FontWeight.w500,
               ),
