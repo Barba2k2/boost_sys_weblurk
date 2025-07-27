@@ -1,0 +1,191 @@
+name: Analyze Changes
+
+on:
+  workflow_call:
+    inputs:
+      force_action:
+        description: "Ação forçada"
+        required: false
+        type: string
+        default: ""
+      force_version:
+        description: "Versão forçada"
+        required: false
+        type: string
+        default: ""
+      branch_name:
+        description: "Nome da branch"
+        required: true
+        type: string
+    outputs:
+      action:
+        description: "Ação a ser executada (release/patch)"
+        value: ${{ jobs.analyze.outputs.action }}
+      current-version:
+        description: "Versão atual"
+        value: ${{ jobs.analyze.outputs.current-version }}
+      new-version:
+        description: "Nova versão"
+        value: ${{ jobs.analyze.outputs.new-version }}
+      should-proceed:
+        description: "Deve prosseguir com pipeline"
+        value: ${{ jobs.analyze.outputs.should-proceed }}
+      change-type:
+        description: "Tipo de mudança (major/minor/patch)"
+        value: ${{ jobs.analyze.outputs.change-type }}
+      release-notes:
+        description: "Notas da release"
+        value: ${{ jobs.analyze.outputs.release-notes }}
+    secrets:
+      SHOREBIRD_TOKEN:
+        required: true
+
+jobs:
+  analyze:
+    runs-on: windows-latest
+    outputs:
+      action: ${{ steps.decision.outputs.action }}
+      current-version: ${{ steps.version.outputs.current-version }}
+      new-version: ${{ steps.version.outputs.new-version }}
+      should-proceed: ${{ steps.decision.outputs.should-proceed }}
+      change-type: ${{ steps.analyze.outputs.change-type }}
+      release-notes: ${{ steps.analyze.outputs.release-notes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Shorebird (for verification)
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Analyze Code Changes
+        id: analyze
+        shell: powershell
+        run: |
+          Write-Output "🔍 Analisando mudanças no código..."
+          
+          # Analisar commits desde o último push
+          $commits = git log --oneline -10 --format="%s"
+          $changedFiles = git diff --name-only HEAD~1..HEAD
+          
+          Write-Output "📝 Commits recentes:"
+          $commits | ForEach-Object { Write-Output "  - $_" }
+          
+          Write-Output "📁 Arquivos modificados:"
+          $changedFiles | ForEach-Object { Write-Output "  - $_" }
+          
+          # Inicializar flags de análise
+          $isBreakingChange = $false
+          $isMajorFeature = $false
+          $hasNewDependencies = $false
+          $hasNativeChanges = $false
+          $hasInfraChanges = $false
+          $isPatchOnly = $true
+          
+          # Analisar arquivos modificados
+          foreach ($file in $changedFiles) {
+            switch -Regex ($file) {
+              "^pubspec\.yaml$" { 
+                $hasNewDependencies = $true
+                $isPatchOnly = $false
+                Write-Output "  📦 Dependências detectadas"
+              }
+              "^(android|ios|windows|macos|linux)/" { 
+                $hasNativeChanges = $true
+                $isPatchOnly = $false
+                Write-Output "  🔧 Mudanças nativas detectadas"
+              }
+              "^lib/main\.dart$|^lib/core/di/" { 
+                $hasInfraChanges = $true
+                $isPatchOnly = $false
+                Write-Output "  🏗️ Mudanças de infraestrutura detectadas"
+              }
+              "^\.github/workflows/" {
+                $hasInfraChanges = $true
+                Write-Output "  ⚙️ Mudanças de CI/CD detectadas"
+              }
+            }
+          }
+          
+          # Analisar commits para padrões
+          foreach ($commit in $commits) {
+            switch -Regex ($commit) {
+              "(BREAKING|!:)" { 
+                $isBreakingChange = $true
+                $isPatchOnly = $false
+                Write-Output "  💥 Breaking change detectado: $commit"
+              }
+              "^(feat|feature):" { 
+                $isMajorFeature = $true
+                $isPatchOnly = $false
+                Write-Output "  ✨ Nova feature detectada: $commit"
+              }
+              "^(fix|bugfix):" {
+                Write-Output "  🐛 Bug fix detectado: $commit"
+              }
+              "^(style|refactor|perf|docs):" {
+                Write-Output "  🔧 Melhoria detectada: $commit"
+              }
+            }
+          }
+          
+          # Determinar tipo de mudança
+          if ($isBreakingChange) {
+            $changeType = "major"
+            Write-Output "📊 Resultado: MAJOR RELEASE (breaking change)"
+          } elseif ($isMajorFeature -or $hasNewDependencies -or $hasNativeChanges) {
+            $changeType = "minor"
+            Write-Output "📊 Resultado: MINOR RELEASE (nova feature/dependência)"
+          } else {
+            $changeType = "patch"
+            Write-Output "📊 Resultado: PATCH (correção/melhoria)"
+          }
+          
+          # Gerar notas da release
+          $releaseNotes = @()
+          $releaseNotes += "### Mudanças nesta versão"
+          $releaseNotes += ""
+          
+          foreach ($commit in $commits) {
+            if ($commit -notlike "*chore:*" -and $commit -notlike "*docs:*") {
+              $icon = switch -Regex ($commit) {
+                "^feat" { "✨" }
+                "^fix" { "🐛" }
+                "^perf" { "⚡" }
+                "^style" { "💄" }
+                "^refactor" { "♻️" }
+                default { "📝" }
+              }
+              $releaseNotes += "- $icon $commit"
+            }
+          }
+          
+          $releaseNotesText = $releaseNotes -join "`n"
+          
+          # Set outputs
+          echo "change-type=$changeType" >> $env:GITHUB_OUTPUT
+          echo "is-patch-only=$isPatchOnly" >> $env:GITHUB_OUTPUT
+          echo "has-breaking-changes=$isBreakingChange" >> $env:GITHUB_OUTPUT
+          echo "has-new-dependencies=$hasNewDependencies" >> $env:GITHUB_OUTPUT
+          echo "has-native-changes=$hasNativeChanges" >> $env:GITHUB_OUTPUT
+          
+          echo "release-notes<<EOF" >> $env:GITHUB_OUTPUT
+          echo $releaseNotesText >> $env:GITHUB_OUTPUT
+          echo "EOF" >> $env:GITHUB_OUTPUT
+
+      - name: Get Current Version
+        id: version
+        shell: powershell
+        run: |
+          Write-Output "📋 Obtendo versão atual do pubspec.yaml..."
+          
+          try {
+            $pubspecContent = Get-Content pubspec.yaml -Raw -ErrorAction Stop
+            $versionMatch = $pubspecContent | Select-String 'version:\s*(.+)'
+            
+            if ($versionMatch) {
+              $currentVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
+              Write-Output "✅ Versão atual encontrada: $currentVersion"

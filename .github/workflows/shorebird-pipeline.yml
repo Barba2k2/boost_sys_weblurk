@@ -1,0 +1,90 @@
+name: Shorebird Main Pipeline
+
+on:
+  push:
+    branches:
+      - master
+      - main
+      - "1.0.14+1"
+    paths-ignore:
+      - 'pubspec.yaml'
+      - 'CHANGELOG.md'
+      - '**.md'
+  workflow_dispatch:
+    inputs:
+      force_action:
+        description: "Forçar ação específica"
+        required: false
+        type: choice
+        options:
+          - "release"
+          - "patch"
+      force_version:
+        description: "Forçar versão específica"
+        required: false
+        type: string
+
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+jobs:
+  # Job 1: Análise de Mudanças
+  analyze:
+    uses: ./.github/workflows/analyze-changes.yml
+    with:
+      force_action: ${{ github.event.inputs.force_action || '' }}
+      force_version: ${{ github.event.inputs.force_version || '' }}
+      branch_name: ${{ github.ref_name }}
+    secrets:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+  # Job 2: Versionamento (se necessário)
+  versioning:
+    needs: analyze
+    if: needs.analyze.outputs.should-proceed == 'true'
+    uses: ./.github/workflows/version-management.yml
+    with:
+      current_version: ${{ needs.analyze.outputs.current-version }}
+      new_version: ${{ needs.analyze.outputs.new-version }}
+      change_type: ${{ needs.analyze.outputs.change-type }}
+      release_notes: ${{ needs.analyze.outputs.release-notes }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job 3: Shorebird Release (se for release)
+  shorebird-release:
+    needs: [analyze, versioning]
+    if: needs.analyze.outputs.action == 'release'
+    uses: ./.github/workflows/shorebird-release.yml
+    with:
+      version: ${{ needs.analyze.outputs.new-version }}
+      release_notes: ${{ needs.analyze.outputs.release-notes }}
+    secrets:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job 4: Shorebird Patch (se for patch)
+  shorebird-patch:
+    needs: [analyze, versioning]
+    if: needs.analyze.outputs.action == 'patch'
+    uses: ./.github/workflows/shorebird-patch.yml
+    with:
+      version: ${{ needs.analyze.outputs.new-version }}
+      change_type: ${{ needs.analyze.outputs.change-type }}
+    secrets:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+  # Job 5: Notificações e Cleanup
+  notify:
+    needs: [analyze, versioning, shorebird-release, shorebird-patch]
+    if: always()
+    uses: ./.github/workflows/notify-results.yml
+    with:
+      action: ${{ needs.analyze.outputs.action }}
+      version: ${{ needs.analyze.outputs.new-version }}
+      change_type: ${{ needs.analyze.outputs.change-type }}
+      release_success: ${{ needs.shorebird-release.result == 'success' }}
+      patch_success: ${{ needs.shorebird-patch.result == 'success' }}
+      version_updated: ${{ needs.versioning.outputs.version-updated }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
