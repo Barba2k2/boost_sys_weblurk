@@ -41,7 +41,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.2'
+          flutter-version: "3.29.2"
           cache: true
 
       - name: Setup Shorebird
@@ -52,29 +52,29 @@ jobs:
       - name: Verify Shorebird Configuration
         shell: powershell
         run: |
-          Write-Output "🔍 Verificando configuração do Shorebird para patches..."
-          
+          Write-Output "Verificando configuracao do Shorebird para patches..."
+
           try {
             # Verificar versão
             $shorebirdVersion = shorebird --version
-            Write-Output "✅ Shorebird versão: $shorebirdVersion"
+            Write-Output "Shorebird versao: $shorebirdVersion"
             
             # Verificar se há releases disponíveis
-            Write-Output "📋 Verificando releases disponíveis..."
+            Write-Output "Verificando releases disponiveis..."
             $releases = shorebird releases list 2>$null
             
             if (-not $releases) {
-              Write-Output "❌ Nenhuma release encontrada!"
-              Write-Output "⚠️ É necessário ter pelo menos uma release base para criar patches"
-              throw "Nenhuma release base disponível"
+              Write-Output "Nenhuma release encontrada!"
+              Write-Output "E necessario ter pelo menos uma release base para criar patches"
+              throw "Nenhuma release base disponivel"
             }
             
-            Write-Output "✅ Releases encontradas:"
+            Write-Output "Releases encontradas:"
             $releases | head -5 | Write-Output
             
           } catch {
-            Write-Output "❌ Erro na verificação do Shorebird: $_"
-            throw "Configuração do Shorebird inválida para patches"
+            Write-Output "Erro na verificacao do Shorebird: $_"
+            throw "Configuracao do Shorebird invalida para patches"
           }
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -82,19 +82,19 @@ jobs:
       - name: Install Dependencies
         shell: powershell
         run: |
-          Write-Output "📦 Instalando dependências Flutter..."
-          
+          Write-Output "Instalando dependencias Flutter..."
+
           try {
             flutter pub get
-            Write-Output "✅ Dependências instaladas com sucesso"
+            Write-Output "Dependencias instaladas com sucesso"
             
             # Verificação rápida sem bloquear por warnings
-            Write-Output "🔍 Verificação rápida do código..."
+            Write-Output "Verificacao rapida do codigo..."
             flutter analyze --no-fatal-warnings 2>$null
-            Write-Output "✅ Código verificado"
+            Write-Output "Codigo verificado"
             
           } catch {
-            Write-Output "⚠️ Aviso durante preparação: $_"
+            Write-Output "Aviso durante preparacao: $_"
             # Patches podem ser mais tolerantes a warnings
           }
 
@@ -102,8 +102,8 @@ jobs:
         id: target-release
         shell: powershell
         run: |
-          Write-Output "🎯 Determinando release base para o patch..."
-          
+          Write-Output "Determinando release base para o patch..."
+
           try {
             # Buscar releases disponíveis
             $releasesJson = shorebird releases list --json 2>$null
@@ -117,8 +117,8 @@ jobs:
                 $targetVersion = $latestRelease.version
                 $releaseDate = $latestRelease.created_at
                 
-                Write-Output "✅ Release base encontrada:"
-                Write-Output "  Versão: $targetVersion"
+                Write-Output "Release base encontrada:"
+                Write-Output "  Versao: $targetVersion"
                 Write-Output "  Data: $releaseDate"
                 
                 # Verificar patches existentes para esta release
@@ -128,34 +128,34 @@ jobs:
                   if ($existingPatches) {
                     $patches = $existingPatches | ConvertFrom-Json
                     $patchCount = $patches.Count
-                    Write-Output "📋 Patches existentes para esta release: $patchCount"
+                    Write-Output "Patches existentes para esta release: $patchCount"
                   } else {
-                    Write-Output "📋 Nenhum patch existente para esta release"
+                    Write-Output "Nenhum patch existente para esta release"
                   }
                 } catch {
-                  Write-Output "⚠️ Não foi possível verificar patches existentes"
+                  Write-Output "Nao foi possivel verificar patches existentes"
                 }
                 
               } else {
                 # Fallback para versão padrão
                 $targetVersion = "1.0.14+2"
-                Write-Output "⚠️ Lista de releases vazia, usando fallback: $targetVersion"
+                Write-Output "Lista de releases vazia, usando fallback: $targetVersion"
               }
               
             } else {
               # Fallback para versão padrão
               $targetVersion = "1.0.14+2"
-              Write-Output "⚠️ Erro ao buscar releases, usando fallback: $targetVersion"
+              Write-Output "Erro ao buscar releases, usando fallback: $targetVersion"
             }
             
             echo "target-release=$targetVersion" >> $env:GITHUB_OUTPUT
-            Write-Output "🎯 Release alvo para patch: $targetVersion"
+            Write-Output "Release alvo para patch: $targetVersion"
             
           } catch {
             # Último fallback
             $targetVersion = "1.0.14+2"
-            Write-Output "❌ Erro na determinação da release base: $_"
-            Write-Output "🔄 Usando fallback final: $targetVersion"
+            Write-Output "Erro na determinacao da release base: $_"
+            Write-Output "Usando fallback final: $targetVersion"
             echo "target-release=$targetVersion" >> $env:GITHUB_OUTPUT
           }
         env:
@@ -167,36 +167,36 @@ jobs:
           $version = "${{ inputs.version }}"
           $targetRelease = "${{ steps.target-release.outputs.target-release }}"
           $changeType = "${{ inputs.change_type }}"
-          
-          Write-Output "🔍 Validação pré-patch..."
-          Write-Output "  Versão do patch: $version"
+
+          Write-Output "Validação pré-patch..."
+          Write-Output "  Versao do patch: $version"
           Write-Output "  Release base: $targetRelease"
-          Write-Output "  Tipo de mudança: $changeType"
-          
+          Write-Output "  Tipo de mudanca: $changeType"
+
           # Verificar se o tipo de mudança é apropriado para patch
           if ($changeType -eq "major") {
-            Write-Output "⚠️ Mudança major detectada, mas criando patch conforme solicitado"
-            Write-Output "💡 Considere criar uma release ao invés de patch para mudanças major"
+            Write-Output "Mudanca major detectada, mas criando patch conforme solicitado"
+            Write-Output "Considere criar uma release ao inves de patch para mudancas major"
           } elseif ($changeType -eq "minor") {
-            Write-Output "⚠️ Mudança minor detectada, mas criando patch conforme solicitado"
-            Write-Output "💡 Patches são ideais para mudanças patch (bug fixes, melhorias pequenas)"
+            Write-Output "Mudanca minor detectada, mas criando patch conforme solicitado"
+            Write-Output "Patches sao ideais para mudancas patch (bug fixes, melhorias pequenas)"
           } else {
-            Write-Output "✅ Tipo de mudança apropriado para patch"
+            Write-Output "Tipo de mudanca apropriado para patch"
           }
-          
+
           # Verificar se a release base existe
           try {
             $releases = shorebird releases list --json 2>$null | ConvertFrom-Json
             $targetReleaseExists = $releases | Where-Object { $_.version -eq $targetRelease }
             
             if ($targetReleaseExists) {
-              Write-Output "✅ Release base $targetRelease confirmada"
+              Write-Output "Release base $targetRelease confirmada"
             } else {
-              Write-Output "⚠️ Release base $targetRelease não encontrada na lista"
-              Write-Output "🔄 Prosseguindo com tentativa de criação..."
+              Write-Output "Release base $targetRelease nao encontrada na lista"
+              Write-Output "Prosseguindo com tentativa de criacao..."
             }
           } catch {
-            Write-Output "⚠️ Não foi possível validar release base: $_"
+            Write-Output "Nao foi possivel validar release base: $_"
           }
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -208,29 +208,29 @@ jobs:
           $version = "${{ inputs.version }}"
           $targetRelease = "${{ steps.target-release.outputs.target-release }}"
           $changeType = "${{ inputs.change_type }}"
-          
-          Write-Output "🔧 Criando patch Shorebird para Windows..."
-          Write-Output "  Versão do patch: $version"
+
+          Write-Output "Criando patch Shorebird para Windows..."
+          Write-Output "  Versao do patch: $version"
           Write-Output "  Release base: $targetRelease"
           Write-Output "  Tipo: $changeType"
           Write-Output "  Timestamp: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-          
+
           try {
             # Criar patch com verbose para debug
             if ($targetRelease -and $targetRelease -ne "") {
-              Write-Output "🎯 Criando patch para release específica: $targetRelease"
+              Write-Output "Criando patch para release especifica: $targetRelease"
               $patchOutput = shorebird patch windows --release-version=$targetRelease --verbose 2>&1
             } else {
-              Write-Output "🎯 Criando patch para release mais recente"
+              Write-Output "Criando patch para release mais recente"
               $patchOutput = shorebird patch windows --verbose 2>&1
             }
             
-            Write-Output "📋 Output da criação do patch:"
+            Write-Output "Output da criacao do patch:"
             $patchOutput | Write-Output
             
             # Verificar sucesso
             if ($LASTEXITCODE -eq 0) {
-              Write-Output "✅ Patch Shorebird criado com sucesso!"
+              Write-Output "Patch Shorebird criado com sucesso!"
               echo "patch-created=true" >> $env:GITHUB_OUTPUT
               
               # Tentar extrair número do patch do output
@@ -238,37 +238,37 @@ jobs:
               if ($patchNumberMatch) {
                 $patchNumber = $patchNumberMatch.Matches[0].Groups[1].Value
                 echo "patch-number=$patchNumber" >> $env:GITHUB_OUTPUT
-                Write-Output "📊 Número do patch: $patchNumber"
+                Write-Output "Numero do patch: $patchNumber"
               } else {
                 echo "patch-number=unknown" >> $env:GITHUB_OUTPUT
-                Write-Output "📊 Número do patch: não identificado"
+                Write-Output "Numero do patch: nao identificado"
               }
               
             } else {
-              Write-Output "❌ Falha na criação do patch (Exit code: $LASTEXITCODE)"
+              Write-Output "Falha na criacao do patch (Exit code: $LASTEXITCODE)"
               echo "patch-created=false" >> $env:GITHUB_OUTPUT
               echo "patch-number=failed" >> $env:GITHUB_OUTPUT
               throw "Shorebird patch falhou"
             }
             
           } catch {
-            Write-Output "❌ Erro durante criação do patch: $_"
+            Write-Output "Erro durante criacao do patch: $_"
             echo "patch-created=false" >> $env:GITHUB_OUTPUT
             echo "patch-number=error" >> $env:GITHUB_OUTPUT
             
             # Tentar diagnóstico adicional
             try {
-              Write-Output "🔍 Diagnóstico adicional:"
+              Write-Output "Diagnostico adicional:"
               shorebird doctor 2>$null
               
-              Write-Output "📋 Status das releases:"
+              Write-Output "Status das releases:"
               shorebird releases list 2>$null | head -3
               
             } catch {
-              Write-Output "⚠️ Não foi possível executar diagnóstico adicional"
+              Write-Output "Nao foi possivel executar diagnostico adicional"
             }
             
-            throw "Falha na criação do patch Shorebird"
+            throw "Falha na criacao do patch Shorebird"
           }
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -279,43 +279,43 @@ jobs:
         run: |
           $targetRelease = "${{ steps.target-release.outputs.target-release }}"
           $patchNumber = "${{ steps.shorebird-patch.outputs.patch-number }}"
-          
-          Write-Output "🔍 Validação pós-patch..."
-          
+
+          Write-Output "Validação pós-patch..."
+
           try {
             # Verificar se o patch aparece na lista
-            Write-Output "📋 Verificando patches para release $targetRelease..."
+            Write-Output "Verificando patches para release $targetRelease..."
             
             $patches = shorebird patches list --release-version=$targetRelease 2>$null
             
             if ($patches) {
-              Write-Output "✅ Patches encontrados para release $targetRelease:"
+              Write-Output "Patches encontrados para release $targetRelease:"
               $patches | Write-Output
               
               # Verificar se nosso patch específico está lá
               if ($patchNumber -and $patchNumber -ne "unknown" -and $patchNumber -ne "failed") {
                 $patchFound = $patches | Select-String "Patch $patchNumber"
                 if ($patchFound) {
-                  Write-Output "✅ Patch $patchNumber confirmado na lista"
+                  Write-Output "Patch $patchNumber confirmado na lista"
                 } else {
-                  Write-Output "⚠️ Patch $patchNumber não encontrado na lista ainda"
+                  Write-Output "Patch $patchNumber nao encontrado na lista ainda"
                 }
               }
               
             } else {
-              Write-Output "⚠️ Nenhum patch encontrado (pode ser delay na propagação)"
+              Write-Output "Nenhum patch encontrado (pode ser delay na propagacao)"
             }
             
             # Listar todos os patches para debug
-            Write-Output "📋 Todos os patches do projeto:"
+            Write-Output "Todos os patches do projeto:"
             try {
               shorebird patches list 2>$null | head -10
             } catch {
-              Write-Output "⚠️ Não foi possível listar todos os patches"
+              Write-Output "Nao foi possivel listar todos os patches"
             }
             
           } catch {
-            Write-Output "⚠️ Erro na validação pós-patch: $_"
+            Write-Output "Erro na validação pós-patch: $_"
             # Não falhar por erro de validação
           }
         env:
@@ -328,31 +328,31 @@ jobs:
           $version = "${{ inputs.version }}"
           $targetRelease = "${{ steps.target-release.outputs.target-release }}"
           $patchNumber = "${{ steps.shorebird-patch.outputs.patch-number }}"
-          
+
           Write-Output ""
-          Write-Output "📡 INFORMAÇÕES DE DISTRIBUIÇÃO"
+          Write-Output "INFORMAÇÕES DE DISTRIBUIÇÃO"
           Write-Output "=============================="
-          Write-Output "🎯 Patch criado e pronto para distribuição!"
+          Write-Output "Patch criado e pronto para distribuição!"
           Write-Output ""
-          Write-Output "📋 Detalhes do Patch:"
-          Write-Output "  📦 Versão: $version"
+          Write-Output "Detalhes do Patch:"
+          Write-Output "  📦 Versao: $version"
           Write-Output "  🏗️ Release base: $targetRelease"
-          Write-Output "  🔢 Número do patch: $patchNumber"
+          Write-Output "  �� Numero do patch: $patchNumber"
           Write-Output "  ⏰ Criado em: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
           Write-Output ""
-          Write-Output "📱 Como os usuários receberão:"
-          Write-Output "  1. 🔄 Usuários com release $targetRelease instalada"
-          Write-Output "  2. 📥 Receberão update automático na próxima abertura do app"
-          Write-Output "  3. ⏳ Detecção em 30-60 segundos após abrir o app"
+          Write-Output "Como os usuarios receberao:"
+          Write-Output "  1. 🔄 Usuarios com release $targetRelease instalada"
+          Write-Output "  2. 📥 Receberao update automatico na proxima abertura do app"
+          Write-Output "  3. ⏳ Detecção em 30-60 segundos apos abrir o app"
           Write-Output "  4. 💾 Download do patch (tipicamente < 1MB)"
-          Write-Output "  5. 🔄 Aplicação automática após aceitar o update"
+          Write-Output "  5. 🔄 Aplicacao automática apos aceitar o update"
           Write-Output ""
-          Write-Output "🔍 Monitoramento:"
-          Write-Output "  • Verificar logs de update nos dispositivos dos usuários"
-          Write-Output "  • Acompanhar métricas no Shorebird dashboard"
-          Write-Output "  • Monitorar crash reports após distribuição"
+          Write-Output "Monitoramento:"
+          Write-Output "  • Verificar logs de update nos dispositivos dos usuarios"
+          Write-Output "  • Acompanhar metricas no Shorebird dashboard"
+          Write-Output "  • Monitorar crash reports apos distribuicao"
           Write-Output ""
-          Write-Output "🛠️ Comandos úteis:"
+          Write-Output "Comandos úteis:"
           Write-Output "  shorebird patches list --release-version=$targetRelease"
           Write-Output "  shorebird releases list"
           Write-Output "=============================="
@@ -361,34 +361,34 @@ jobs:
         shell: powershell
         run: |
           Write-Output ""
-          Write-Output "📋 RESUMO DO PATCH"
+          Write-Output "RESUMO DO PATCH"
           Write-Output "=================="
-          Write-Output "🔧 Versão: ${{ inputs.version }}"
-          Write-Output "🎯 Release base: ${{ steps.target-release.outputs.target-release }}"
-          Write-Output "📦 Patch criado: ${{ steps.shorebird-patch.outputs.patch-created }}"
-          Write-Output "🔢 Número: ${{ steps.shorebird-patch.outputs.patch-number }}"
-          Write-Output "📊 Tipo: ${{ inputs.change_type }}"
-          Write-Output "⏰ Concluído em: $(Get-Date -Format 'HH:mm:ss')"
+          Write-Output "Versao: ${{ inputs.version }}"
+          Write-Output "Release base: ${{ steps.target-release.outputs.target-release }}"
+          Write-Output "Patch criado: ${{ steps.shorebird-patch.outputs.patch-created }}"
+          Write-Output "Numero: ${{ steps.shorebird-patch.outputs.patch-number }}"
+          Write-Output "Tipo: ${{ inputs.change_type }}"
+          Write-Output "Concluido em: $(Get-Date -Format 'HH:mm:ss')"
           Write-Output "=================="
-          
+
           if ("${{ steps.shorebird-patch.outputs.patch-created }}" -eq "true") {
             Write-Output ""
-            Write-Output "🎉 PATCH CRIADO COM SUCESSO!"
+            Write-Output "PATCH CRIADO COM SUCESSO!"
             Write-Output ""
-            Write-Output "📋 Próximos passos automáticos:"
-            Write-Output "  1. ✅ Patch disponível no Shorebird"
-            Write-Output "  2. 📡 Distribuição automática para usuários"
-            Write-Output "  3. 🔄 Updates automáticos na próxima abertura do app"
-            Write-Output "  4. 📊 Monitoramento de adoção disponível"
+            Write-Output "Proximos passos automaticos:"
+            Write-Output "  1. ✅ Patch disponivel no Shorebird"
+            Write-Output "  2. 📡 Distribuicao automatica para usuarios"
+            Write-Output "  3. 🔄 Updates automaticos na proxima abertura do app"
+            Write-Output "  4. 📊 Monitoramento de adoção disponivel"
             Write-Output ""
-            Write-Output "🎯 Usuários alvo:"
+            Write-Output "Usuarios alvo:"
             Write-Output "  • Dispositivos com release ${{ steps.target-release.outputs.target-release }}"
             Write-Output "  • Aplicativo instalado e funcional"
-            Write-Output "  • Conexão com internet ativa"
+            Write-Output "  • Conexao com internet ativa"
             Write-Output ""
           } else {
             Write-Output ""
-            Write-Output "❌ FALHA NA CRIAÇÃO DO PATCH"
-            Write-Output "⚠️ Verifique logs acima para detalhes do erro"
+            Write-Output "FALHA NA CRIAÇÃO DO PATCH"
+            Write-Output "Verifique logs acima para detalhes do erro"
             Write-Output ""
           }
