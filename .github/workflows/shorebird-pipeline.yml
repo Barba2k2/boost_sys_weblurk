@@ -52,7 +52,34 @@ jobs:
         with:
           cache: true
 
-      - name: Auto Version Management
+      - name: Configure Git for Long Paths
+        shell: powershell
+        run: |
+          Write-Host "Configurando Git para long paths ANTES de qualquer comando Shorebird..."
+          
+          try {
+            git config --global core.longpaths true
+            git config --global core.autocrlf false
+            git config --global core.filemode false
+            
+            git config --system core.longpaths true 2>$null
+            
+            $longPathsConfig = git config --global core.longpaths
+            Write-Host "Git long paths configurado: $longPathsConfig"
+            
+            if ($longPathsConfig -ne "true") {
+              Write-Host "Tentando configuracao alternativa..."
+              $env:GIT_CONFIG_GLOBAL = "$env:USERPROFILE\.gitconfig"
+              git config --global core.longpaths true
+            }
+            
+            Write-Host "Configuracao Git concluida com sucesso"
+          } catch {
+            Write-Host "Aviso: Erro na configuracao do Git: $_"
+            Write-Host "Continuando mesmo assim..."
+          }
+
+      - name: Auto Version Management with Correct Shorebird Commands
         id: auto-version
         shell: powershell
         run: |
@@ -60,7 +87,6 @@ jobs:
           Write-Host "INICIANDO GERENCIAMENTO AUTOMATICO DE VERSAO"
           Write-Host "========================================"
           
-          # 1. Ler versao atual do pubspec.yaml
           Write-Host "1. Lendo versao atual do pubspec.yaml..."
           try {
             $pubspecContent = Get-Content pubspec.yaml -Raw -ErrorAction Stop
@@ -77,39 +103,52 @@ jobs:
             throw "Falha ao ler versao do pubspec.yaml"
           }
           
-          # 2. Verificar releases existentes no Shorebird
           Write-Host ""
           Write-Host "2. Verificando releases existentes no Shorebird..."
           $existingReleases = @()
           $releaseExists = $false
           
           try {
-            $releasesOutput = shorebird releases list 2>&1
-            Write-Host "   Comando shorebird releases executado"
+            Write-Host "   Tentando comando: shorebird releases"
+            $releasesOutput1 = shorebird releases 2>&1
             
             if ($LASTEXITCODE -eq 0) {
-              $existingReleases = $releasesOutput
-              Write-Host "   Releases encontradas:"
-              $releasesOutput | ForEach-Object { Write-Host "     $_" }
+              Write-Host "   Comando 'shorebird releases' executado com sucesso"
+              $existingReleases = $releasesOutput1
+              Write-Host "   Releases encontradas via 'shorebird releases':"
+              $releasesOutput1 | ForEach-Object { Write-Host "     $_" }
               
-              # Verificar se versao atual ja existe
-              if ($releasesOutput -like "*$currentVersion*") {
+              if ($releasesOutput1 -like "*$currentVersion*") {
                 $releaseExists = $true
                 Write-Host "   ALERTA: Release $currentVersion JA EXISTE!"
               } else {
                 Write-Host "   OK: Release $currentVersion nao existe ainda"
               }
             } else {
-              Write-Host "   Aviso: Erro ao listar releases (exit code: $LASTEXITCODE)"
-              Write-Host "   Output: $releasesOutput"
-              Write-Host "   Assumindo que nao ha releases existentes"
+              Write-Host "   'shorebird releases' falhou, tentando comandos alternativos..."
+              
+              try {
+                Write-Host "   Tentando comando: shorebird apps list"
+                $appsOutput = shorebird apps list 2>&1
+                
+                if ($LASTEXITCODE -eq 0) {
+                  Write-Host "   Apps list executado com sucesso:"
+                  $appsOutput | ForEach-Object { Write-Host "     $_" }
+                  
+                  Write-Host "   Assumindo que nao ha releases existentes (projeto novo)"
+                } else {
+                  throw "Todos os comandos Shorebird falharam"
+                }
+              } catch {
+                Write-Host "   Erro ao verificar com comandos alternativos: $_"
+                Write-Host "   Continuando assumindo que nao ha conflito..."
+              }
             }
           } catch {
-            Write-Host "   Erro ao verificar releases: $_"
+            Write-Host "   Erro geral ao verificar releases: $_"
             Write-Host "   Continuando assumindo que nao ha conflito..."
           }
           
-          # 3. Calcular nova versao se necessario
           $finalVersion = $currentVersion
           $versionWasUpdated = $false
           
@@ -118,14 +157,12 @@ jobs:
             Write-Host "3. Release ja existe - calculando nova versao..."
             
             try {
-              # Parse da versao atual
               $versionParts = $currentVersion -split '\+'
-              $semverPart = $versionParts[0]  # ex: 1.0.14
+              $semverPart = $versionParts[0]
               $buildPart = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 1 }
               
               Write-Host "   Versao atual: $semverPart+$buildPart"
               
-              # Incrementar build number ate encontrar versao disponivel
               $maxAttempts = 10
               $attempts = 0
               
@@ -136,7 +173,6 @@ jobs:
                 
                 Write-Host "   Testando versao: $candidateVersion"
                 
-                # Verificar se esta versao candidata ja existe
                 $candidateExists = $existingReleases -like "*$candidateVersion*"
                 
                 if (-not $candidateExists) {
@@ -163,34 +199,27 @@ jobs:
             Write-Host "3. Versao atual esta disponivel - nenhuma mudanca necessaria"
           }
           
-          # 4. Atualizar pubspec.yaml se necessario
           if ($versionWasUpdated) {
             Write-Host ""
             Write-Host "4. Atualizando pubspec.yaml..."
             
             try {
-              # Ler conteudo atual
               $pubspecContent = Get-Content pubspec.yaml -Raw
               
-              # Fazer backup
               $backupContent = $pubspecContent
               
-              # Atualizar versao
               $updatedContent = $pubspecContent -replace "version:\s*.+", "version: $finalVersion"
               
-              # Salvar arquivo atualizado
               Set-Content pubspec.yaml $updatedContent -Encoding UTF8
               
               Write-Host "   pubspec.yaml atualizado: $currentVersion -> $finalVersion"
               
-              # Verificar se arquivo foi realmente modificado
               $hasChanges = git diff --name-only pubspec.yaml
               
               if ($hasChanges) {
                 Write-Host "   Mudanca confirmada pelo Git"
               } else {
                 Write-Host "   ERRO: Arquivo nao foi modificado pelo Git"
-                # Restaurar backup
                 Set-Content pubspec.yaml $backupContent -Encoding UTF8
                 throw "Falha na modificacao do pubspec.yaml"
               }
@@ -204,28 +233,22 @@ jobs:
             Write-Host "4. Nenhuma atualizacao do pubspec.yaml necessaria"
           }
           
-          # 5. Commitar mudancas se houve atualizacao
           if ($versionWasUpdated) {
             Write-Host ""
             Write-Host "5. Commitando mudancas de versao..."
             
             try {
-              # Configurar Git
               git config --global user.email "action@github.com"
               git config --global user.name "GitHub Action Auto-Versioning"
               
-              # Adicionar mudancas
               git add pubspec.yaml
               
-              # Verificar se ha mudancas para commitar
               $stagedChanges = git diff --cached --name-only
               
               if ($stagedChanges) {
-                # Fazer commit
                 $commitMessage = "chore: auto-bump version to $finalVersion [skip ci]"
                 git commit -m $commitMessage
                 
-                # Push das mudancas
                 git push origin HEAD
                 
                 Write-Host "   Commit realizado: $commitMessage"
@@ -243,7 +266,6 @@ jobs:
             Write-Host "5. Nenhum commit necessario"
           }
           
-          # Output dos resultados
           echo "final-version=$finalVersion" >> $env:GITHUB_OUTPUT
           echo "version-was-updated=$versionWasUpdated" >> $env:GITHUB_OUTPUT
           
@@ -268,7 +290,6 @@ jobs:
           Write-Host "Versao foi atualizada: $versionWasUpdated"
           Write-Host "Acao forcada: $forceAction"
           
-          # Analisar commits para decidir acao
           try {
             $commits = git log --oneline -5 --format="%s" 2>$null
             Write-Host "Commits recentes:"
@@ -277,7 +298,6 @@ jobs:
             $commits = @()
           }
           
-          # Logica de decisao
           if ($forceAction -eq "release") {
             $action = "release"
             Write-Host "Decisao: RELEASE (forcado)"
@@ -285,14 +305,12 @@ jobs:
             $action = "patch"
             Write-Host "Decisao: PATCH (forcado)"
           } else {
-            # Auto-detectar baseado nos commits e contexto
             $hasBreaking = $commits | Where-Object { $_ -match "(BREAKING|!):" }
             $hasFeature = $commits | Where-Object { $_ -match "^feat" }
             $hasFix = $commits | Where-Object { $_ -match "^fix" }
             $isVersionBump = $commits | Where-Object { $_ -match "auto-bump version" }
             
             if ($versionWasUpdated -eq "true" -and $isVersionBump) {
-              # Se acabamos de fazer auto-bump e foi isso, criar patch
               $action = "patch"
               Write-Host "Decisao: PATCH (apos auto-bump de versao)"
             } elseif ($hasBreaking) {
@@ -302,7 +320,6 @@ jobs:
               $action = "release"
               Write-Host "Decisao: RELEASE (nova feature detectada)"
             } else {
-              # Default para patch (mais seguro)
               $action = "patch"
               Write-Host "Decisao: PATCH (default/bug fixes)"
             }
@@ -314,7 +331,6 @@ jobs:
           Write-Host ""
           Write-Host "DECISAO FINAL: $action para versao $finalVersion"
 
-  # Job de Release
   shorebird-release:
     needs: auto-version-manager
     if: needs.auto-version-manager.outputs.action == 'release' && needs.auto-version-manager.outputs.should-proceed == 'true'
@@ -344,6 +360,9 @@ jobs:
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
+
+      - name: Configure Git Long Paths
+        run: git config --global core.longpaths true
 
       - name: Install Dependencies
         run: flutter pub get
@@ -400,7 +419,6 @@ jobs:
           }
           Write-Host "================================================"
 
-  # Job de Patch
   shorebird-patch:
     needs: auto-version-manager
     if: needs.auto-version-manager.outputs.action == 'patch' && needs.auto-version-manager.outputs.should-proceed == 'true'
@@ -430,6 +448,9 @@ jobs:
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
+
+      - name: Configure Git Long Paths
+        run: git config --global core.longpaths true
 
       - name: Install Dependencies
         run: flutter pub get
