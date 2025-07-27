@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../app_colors.dart';
 
 class LiveUrlBar extends StatelessWidget {
@@ -21,7 +20,7 @@ class LiveUrlBar extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: Text(
           currentChannel ?? 'https://www.twitch.tv/BootTeam_',
-          style: GoogleFonts.inter(
+          style: const TextStyle(
             fontSize: 16.0,
             color: AppColors.cardHeaderText,
           ),
