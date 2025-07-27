@@ -208,15 +208,6 @@ jobs:
 
           Write-Output "Analise de mudancas concluida"
 
-      - name: Version Management
-        id: version
-        uses: ./.github/actions/version-action
-        with:
-          pubspec-path: "pubspec.yaml"
-          auto-commit: "true"
-          auto-push: "true"
-          change-type: "${{ steps.analyze.outputs.change-type }}"
-
       - name: Determine Action
         id: decision
         shell: powershell
@@ -262,7 +253,6 @@ jobs:
           Write-Output "Decisao final:"
           Write-Output "  Acao: $action"
           Write-Output "  Prosseguir: $shouldProceed"
-          Write-Output "  Versao alvo: ${{ steps.version.outputs.new-version }}"
 
       - name: Summary
         shell: powershell
@@ -272,7 +262,7 @@ jobs:
           Write-Output "=================="
           Write-Output "Acao: ${{ steps.decision.outputs.action }}"
           Write-Output "Tipo: ${{ steps.analyze.outputs.change-type }}"
-          Write-Output "Versao: ${{ steps.version.outputs.current-version-only }} -> ${{ steps.version.outputs.new-version }}"
+
           Write-Output "Branch: ${{ inputs.branch_name }}"
           Write-Output "Prosseguir: ${{ steps.decision.outputs.should-proceed }}"
           Write-Output "=================="
