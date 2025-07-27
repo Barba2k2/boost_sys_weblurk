@@ -40,7 +40,6 @@ class _HomePageState extends State<HomePage>
     );
     widget.viewModel.loadSchedulesCommand.addListener(_handleLoadingChange);
 
-    // Carregar dados iniciais
     widget.viewModel.loadSchedulesCommand.execute();
     widget.viewModel.fetchCurrentChannelCommand.execute();
 
@@ -54,7 +53,6 @@ class _HomePageState extends State<HomePage>
     if (isLoading) {
       _rotationController.repeat();
     } else {
-      // Ao parar, anima até o final do ciclo com bounce
       final currentValue = _rotationController.value;
       if (currentValue != 0.0) {
         _rotationController.stop();
@@ -102,7 +100,6 @@ class _HomePageState extends State<HomePage>
       ),
       body: Column(
         children: [
-          // Abas customizadas
           Expanded(
             child: ScheduleTabsWidget(viewModel: widget.viewModel),
           ),
