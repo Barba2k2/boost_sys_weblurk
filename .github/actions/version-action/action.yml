@@ -7,11 +7,6 @@ inputs:
     required: false
     default: 'pubspec.yaml'
   
-  github-env-path:
-    description: 'Caminho para o arquivo GITHUB_ENV'
-    required: false
-    default: '${{ env.GITHUB_ENV }}'
-  
   auto-push:
     description: 'Realizar push automático das mudanças'
     required: false
@@ -150,11 +145,11 @@ runs:
         echo "should-increment-patch=$SHOULD_INCREMENT_PATCH" >> $GITHUB_OUTPUT
 
         # Exportar variáveis de ambiente
-        echo "NEW_TAG=$NEW_TAG" >> ${{ inputs.github-env-path }}
-        echo "NEW_VERSION=$NEW_VERSION" >> ${{ inputs.github-env-path }}
-        echo "NEW_BUILD=$NEW_BUILD" >> ${{ inputs.github-env-path }}
-        echo "CURRENT_VERSION_ONLY=$CURRENT_VERSION_ONLY" >> ${{ inputs.github-env-path }}
-        echo "SHOULD_INCREMENT_PATCH=$SHOULD_INCREMENT_PATCH" >> ${{ inputs.github-env-path }}
+        echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        echo "NEW_BUILD=$NEW_BUILD" >> $GITHUB_ENV
+        echo "CURRENT_VERSION_ONLY=$CURRENT_VERSION_ONLY" >> $GITHUB_ENV
+        echo "SHOULD_INCREMENT_PATCH=$SHOULD_INCREMENT_PATCH" >> $GITHUB_ENV
 
         echo "✅ Versionamento processado com sucesso!"
         echo "📦 Nova tag: $NEW_TAG"
