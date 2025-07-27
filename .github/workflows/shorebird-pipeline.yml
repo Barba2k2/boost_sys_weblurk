@@ -6,12 +6,13 @@ on:
       - "1.0.14+1"
       - "main"
       - "master"
+      - "develop-*"
     paths-ignore:
       - "README.md"
       - "docs/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/pull_request_template.md"
-  
+
   # Adicionar trigger manual para debug
   workflow_dispatch:
     inputs:
@@ -39,16 +40,16 @@ jobs:
       - name: Debug Pipeline Trigger
         shell: powershell
         run: |
-          Write-Output "🔍 DEBUG: Pipeline foi disparada!"
-          Write-Output "📋 Informações do trigger:"
+          Write-Output "DEBUG: Pipeline foi disparada!"
+          Write-Output "Informacoes do trigger:"
           Write-Output "  Branch: ${{ github.ref_name }}"
           Write-Output "  Event: ${{ github.event_name }}"
           Write-Output "  SHA: ${{ github.sha }}"
           Write-Output "  Actor: ${{ github.actor }}"
           Write-Output "  Workflow: ${{ github.workflow }}"
           Write-Output "  Repository: ${{ github.repository }}"
-          
-          Write-Output "📁 Arquivos modificados neste push:"
+
+          Write-Output "Arquivos modificados neste push:"
           try {
             $changedFiles = git diff --name-only HEAD~1..HEAD
             if ($changedFiles) {
@@ -59,12 +60,12 @@ jobs:
           } catch {
             Write-Output "  (Erro ao obter arquivos modificados)"
           }
-          
-          Write-Output "🔐 Verificação de secrets:"
+
+          Write-Output "Verificacao de secrets:"
           if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
-            Write-Output "  ✅ SHOREBIRD_TOKEN configurado"
+            Write-Output "  OK: SHOREBIRD_TOKEN configurado"
           } else {
-            Write-Output "  ❌ SHOREBIRD_TOKEN NÃO configurado"
+            Write-Output "  ERROR: SHOREBIRD_TOKEN NAO configurado"
           }
 
   # Job 1: Análise de Mudanças

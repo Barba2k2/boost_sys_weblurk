@@ -5,96 +5,96 @@ on:
     branches:
       - master
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.29.2'  # Updated to 3.29.2 which includes Dart SDK 3.7.0+
-        cache: true
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.2" # Updated to 3.29.2 which includes Dart SDK 3.7.0+
+          cache: true
 
-    # Passo para gerar a versão
-    - name: Generate Version
-      id: version
-      shell: bash
-      run: |
-        # Pegar a última tag
-        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-        
-        # Remove 'v' prefix if present for calculations
-        VERSION=${LATEST_TAG#v}
-        
-        # Incrementar a versão patch
-        MAJOR=$(echo $VERSION | cut -d. -f1)
-        MINOR=$(echo $VERSION | cut -d. -f2)
-        PATCH=$(echo $VERSION | cut -d. -f3)
-        NEW_PATCH=$((PATCH + 1))
-        NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
-        NEW_TAG="v${NEW_VERSION}"  # Ensure only one 'v' prefix
-        
-        # Definir as variáveis para uso posterior
-        echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
-        echo "::set-output name=version::${NEW_VERSION}"
+      # Passo para gerar a versão
+      - name: Generate Version
+        id: version
+        shell: bash
+        run: |
+          # Pegar a última tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
 
-    - name: Install dependencies
-      run: flutter pub get
+          # Remove 'v' prefix if present for calculations
+          VERSION=${LATEST_TAG#v}
 
-    - name: Build Windows
-      run: flutter build windows --release
+          # Incrementar a versão patch
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+          PATCH=$(echo $VERSION | cut -d. -f3)
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
+          NEW_TAG="v${NEW_VERSION}"  # Ensure only one 'v' prefix
 
-    - name: Create Release ZIP
-      run: |
-        cd build\windows\x64\runner\Release
-        7z a -tzip ../../../../../Boost-SysWebLurk-${{ env.NEW_TAG }}.zip *
+          # Definir as variáveis para uso posterior
+          echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
+          echo "::set-output name=version::${NEW_VERSION}"
 
-    - name: Create Installer ZIP
-      run: 7z a -tzip installers/boost_sys_weblurk-${{ env.NEW_TAG }}.zip installers/boost_sys_weblurk.exe
+      - name: Install dependencies
+        run: flutter pub get
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Boost-SysWebLurk-${{ env.NEW_TAG }}
-        path: build/windows/x64/runner/Release/
-        retention-days: 90
+      - name: Build Windows
+        run: flutter build windows --release
 
-    - name: Create Tag
-      if: github.ref == 'refs/heads/master'
-      run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
-        git tag -a ${{ env.NEW_TAG }} -m "Release ${{ env.NEW_TAG }}"
-        git push origin ${{ env.NEW_TAG }}
+      - name: Create Release ZIP
+        run: |
+          cd build\windows\x64\runner\Release
+          7z a -tzip ../../../../../Boost-SysWebLurk-${{ env.NEW_TAG }}.zip *
 
-    - name: Create GitHub Release
-      if: github.ref == 'refs/heads/master'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          Boost-SysWebLurk-${{ env.NEW_TAG }}.zip
-          installers/boost_sys_weblurk-${{ env.NEW_TAG }}.zip
-        tag_name: ${{ env.NEW_TAG }}
-        name: Boost-SysWebLurk ${{ env.NEW_TAG }}
-        draft: false
-        prerelease: false
-        body: |
-          # SysBrowser Weblurk Versão ${{ env.NEW_TAG }}
-          
-          ### Mudanças nesta versão
-          - Ajustes no salvamento do score
-          - Retirada de janela adicional exibindo as lives
-          - Adicionado botao de recarregar, diremante na tela principal do sistema
-          
-          ### Screenshots
-          ![Screenshot 2025-03-30 135502](https://github.com/user-attachments/assets/f2411a33-c5fa-43db-bd4f-1f1e3f0c191f)
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Installer ZIP
+        run: 7z a -tzip installers/boost_sys_weblurk-${{ env.NEW_TAG }}.zip installers/boost_sys_weblurk.exe
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Boost-SysWebLurk-${{ env.NEW_TAG }}
+          path: build/windows/x64/runner/Release/
+          retention-days: 90
+
+      - name: Create Tag
+        if: github.ref == 'refs/heads/master'
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git tag -a ${{ env.NEW_TAG }} -m "Release ${{ env.NEW_TAG }}"
+          git push origin ${{ env.NEW_TAG }}
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            Boost-SysWebLurk-${{ env.NEW_TAG }}.zip
+            installers/boost_sys_weblurk-${{ env.NEW_TAG }}.zip
+          tag_name: ${{ env.NEW_TAG }}
+          name: Boost-SysWebLurk ${{ env.NEW_TAG }}
+          draft: false
+          prerelease: false
+          body: |
+            # SysBrowser Weblurk Versão ${{ env.NEW_TAG }}
+
+            ### Mudanças nesta versão
+            - Ajustes no salvamento do score
+            - Retirada de janela adicional exibindo as lives
+            - Adicionado botao de recarregar, diremante na tela principal do sistema
+
+            ### Screenshots
+            ![Screenshot 2025-03-30 135502](https://github.com/user-attachments/assets/f2411a33-c5fa-43db-bd4f-1f1e3f0c191f)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
