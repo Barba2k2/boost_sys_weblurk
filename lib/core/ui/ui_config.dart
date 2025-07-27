@@ -4,9 +4,8 @@ import 'app_colors.dart';
 class UiConfig {
   UiConfig._();
 
-  static String title = 'Painel de Agendamento';
+  static String title = 'Boost Sys Weblurk';
 
-  // Tema claro
   static ThemeData get lightTheme => ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -39,7 +38,6 @@ class UiConfig {
         ),
       );
 
-  // Tema escuro
   static ThemeData get darkTheme => ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -73,6 +71,5 @@ class UiConfig {
         ),
       );
 
-  // Tema padrão (baseado no sistema)
   static ThemeData get theme => lightTheme;
 }
