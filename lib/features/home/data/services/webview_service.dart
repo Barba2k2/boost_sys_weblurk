@@ -1,4 +1,3 @@
-// lib/features/home/data/services/webview_service.dart
 import 'dart:async';
 import 'package:webview_windows/webview_windows.dart';
 import '../../../../core/logger/app_logger.dart';
@@ -90,7 +89,6 @@ class WebViewServiceImpl implements WebViewService {
         }
       ''';
 
-      // ✅ CORREÇÃO: Verificar se os controllers estão disponíveis
       if (_controllerA != null) {
         await _controllerA!.executeScript(muteScript);
       }
@@ -156,7 +154,6 @@ class WebViewServiceImpl implements WebViewService {
         }
       ''';
 
-      // ✅ CORREÇÃO: Verificar se os controllers estão disponíveis
       if (_controllerA != null) {
         await _controllerA!.executeScript(unmuteScript);
       }
@@ -238,7 +235,7 @@ class WebViewServiceImpl implements WebViewService {
     _controllerB = null;
   }
 
-  // ✅ NOVO: Método para verificar e corrigir estado de mute
+  @override
   Future<void> verifyAndFixMuteState(bool shouldBeMuted) async {
     try {
       if (shouldBeMuted && !_isMuted) {
