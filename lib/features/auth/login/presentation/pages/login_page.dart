@@ -47,7 +47,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Configura o contexto global para mensagens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Messages.setGlobalContext(context);
     });
@@ -55,7 +54,6 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Align(
             child: Image.asset(
               'assets/images/background.png',
@@ -65,8 +63,6 @@ class _LoginPageState extends State<LoginPage> {
               fit: BoxFit.cover,
             ),
           ),
-
-          // Login Form Container with Rotating Border Light
           Align(
             child: Container(
               decoration: BoxDecoration(
@@ -74,7 +70,6 @@ class _LoginPageState extends State<LoginPage> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: AppColors.menuItemIconInactive.withValues(alpha: 0.8),
-                  // width: 1,
                 ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -85,7 +80,6 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo/Título
                     const Text(
                       'Boost Team SysWebLurk',
                       style: TextStyle(
@@ -97,16 +91,12 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Campo de usuário
                     BoostTextFormField(
                       controller: _nicknameEC,
                       label: 'Usuário',
                       validator: widget.viewModel.validateUser,
                     ),
                     const SizedBox(height: 16),
-
-                    // Campo de senha
                     BoostTextFormField(
                       controller: _passwordEC,
                       label: 'Password',
@@ -114,8 +104,6 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: true,
                     ),
                     const SizedBox(height: 20),
-
-                    // Botão de login
                     ListenableBuilder(
                       listenable: widget.viewModel.loginCommand,
                       builder: (context, child) {
@@ -159,14 +147,11 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-
-          // Listener para navegação e erros
           ListenableBuilder(
             listenable: widget.viewModel.loginCommand,
             builder: (context, child) {
               final command = widget.viewModel.loginCommand;
 
-              // Reagir ao resultado do comando
               if (command.completed) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   context.go(AppRoutes.home);
@@ -177,7 +162,6 @@ class _LoginPageState extends State<LoginPage> {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   final error = command.result?.errorOrNull;
 
-                  // Usar o ErrorMessageService para tratar o erro
                   log('error: $error');
                   ErrorMessageService.instance.handleLoginError(error);
                 });
