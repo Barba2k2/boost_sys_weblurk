@@ -36,7 +36,6 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
 
     widget.viewModel.addListener(_onViewModelChanged);
 
-    // Listener para atualizar o arredondamento ao trocar de aba
     _tabController.addListener(() {
       setState(() {});
     });
@@ -72,7 +71,6 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
     }
     return Column(
       children: [
-        // TabBar
         Container(
           decoration: BoxDecoration(
             color: AppColors.menuButton,
@@ -112,8 +110,6 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
             ],
           ),
         ),
-
-        // TabBarView
         Expanded(
           child: TabBarView(
             controller: _tabController,
