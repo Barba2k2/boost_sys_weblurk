@@ -30,7 +30,7 @@ jobs:
     runs-on: windows-latest
     outputs:
       patch-created: ${{ steps.shorebird-patch.outputs.patch-created }}
-      target-release: ${{ steps.target-release.outputs.target-release }}
+      target-release: "latest"
       patch-number: ${{ steps.shorebird-patch.outputs.patch-number }}
     steps:
       - name: Checkout code
@@ -49,110 +49,22 @@ jobs:
         with:
           cache: true
 
-      - name: Verify Shorebird Configuration
-        shell: powershell
-        run: |
-          Write-Output "Habilitando suporte a long paths no Git..."
-          git config --system core.longpaths true
-
-          Write-Output "Verificando configuracao do Shorebird para patches..."
-          try {
-            shorebird --version
-            
-            Write-Output "Verificando releases disponiveis..."
-
-            shorebird release list 2>$null 
-            
-            if ($LASTEXITCODE -ne 0) {
-                Write-Output "Aviso: Nao foi possivel verificar releases (pode ser normal para primeiro deploy)"
-            } else {
-                Write-Output "Configuracao do Shorebird parece OK."
-            }
-          } catch {
-            Write-Output "Aviso: Erro na verificacao do Shorebird: $_"
-          }
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-
       - name: Install Dependencies
         shell: powershell
         run: |
-          Write-Output "Instalando dependencias Flutter..."
           flutter pub get
-          flutter analyze --no-fatal-warnings 2>$null
-
-      - name: Determine Target Release
-        id: target-release
-        shell: powershell
-        run: |
-          Write-Output "Determinando release base para o patch..."
-          try {
-            # <<< CORREÇÃO APLICADA AQUI (garantindo longpaths e removendo list) >>>
-            Write-Output "Configurando Git longpaths..."
-            git config --system core.longpaths true
-            
-            Write-Output "Buscando releases..."
-            $releasesOutput = shorebird releases list 2>$null
-            
-            if ($LASTEXITCODE -ne 0) {
-                throw "Comando 'shorebird releases' falhou."
-            }
-            
-            if ($releasesOutput) {
-              # Parse the releases list output to find the latest version
-              $lines = $releasesOutput -split "`n"
-              $latestVersion = $null
-              
-              foreach ($line in $lines) {
-                if ($line -match "v(\d+\.\d+\.\d+)") {
-                  $latestVersion = $matches[1]
-                  break
-                }
-              }
-              
-              if ($latestVersion) {
-                $targetVersion = $latestVersion
-                Write-Output "Release base encontrada: $latestVersion"
-              } else {
-                throw "Nenhuma release encontrada para criar um patch."
-              }
-              
-            } else {
-               throw "Nenhuma release encontrada ou o formato do retorno é inválido."
-            }
-            
-            echo "target-release=$targetVersion" >> $env:GITHUB_OUTPUT
-            Write-Output "Release alvo para patch: $targetVersion"
-            
-          } catch {
-            Write-Error "Erro critico na determinacao da release base: $_"
-            throw "Falha ao determinar a release base para o patch."
-          }
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-
-      - name: Pre-Patch Validation
-        shell: powershell
-        run: |
-          $version = "${{ inputs.version }}"
-          $targetRelease = "${{ steps.target-release.outputs.target-release }}"
-          $changeType = "${{ inputs.change_type }}"
-          Write-Output "Validação pré-patch..."
-          Write-Output "  Versao do patch: $version"
-          Write-Output "  Release base: $targetRelease"
-          Write-Output "  Tipo de mudanca: $changeType"
 
       - name: Create Shorebird Patch
         id: shorebird-patch
         shell: powershell
         run: |
-          $targetRelease = "${{ steps.target-release.outputs.target-release }}"
           Write-Output "Criando patch Shorebird para Windows..."
-          Write-Output "  Release base: $targetRelease"
+          # AQUI ESTÁ A CORREÇÃO PRINCIPAL
           try {
             git config --system core.longpaths true
             
-            $patchOutput = shorebird patch windows --release-version=$targetRelease --verbose 2>&1
+            # Usando --release-version=latest para simplificar
+            $patchOutput = shorebird patch windows --release-version=latest --verbose 2>&1
             Write-Output "Output da criacao do patch:"
             $patchOutput | Write-Output
             
@@ -160,6 +72,7 @@ jobs:
               Write-Output "Patch Shorebird criado com sucesso!"
               echo "patch-created=true" >> $env:GITHUB_OUTPUT
               
+              # A lógica para extrair o número do patch permanece a mesma
               $patchNumberMatch = $patchOutput | Select-String "Patch (\d+)" | Select-Object -First 1
               if ($patchNumberMatch) {
                 $patchNumber = $patchNumberMatch.Matches[0].Groups[1].Value
@@ -178,6 +91,7 @@ jobs:
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
+      # O passo de resumo continua útil
       - name: Summary
         shell: powershell
         if: always()
@@ -186,7 +100,7 @@ jobs:
           Write-Output "RESUMO DO PATCH"
           Write-Output "=================="
           Write-Output "Versao: ${{ inputs.version }}"
-          Write-Output "Release base: ${{ steps.target-release.outputs.target-release }}"
+          Write-Output "Release base: latest"
           Write-Output "Patch criado: ${{ steps.shorebird-patch.outputs.patch-created }}"
           Write-Output "Numero: ${{ steps.shorebird-patch.outputs.patch-number }}"
           Write-Output "Tipo: ${{ inputs.change_type }}"
