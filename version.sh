@@ -35,12 +35,23 @@ CURRENT_VERSION=$(extract_version_from_pubspec)
 CURRENT_VERSION_ONLY=$(extract_version_only)
 CURRENT_BUILD=$(extract_build_number)
 
-# Incrementar o build number
-NEW_BUILD=$((CURRENT_BUILD + 1))
-NEW_VERSION="${CURRENT_VERSION_ONLY}+${NEW_BUILD}"
-
-# Criar tag no formato vX.Y.Z
-NEW_TAG="v${CURRENT_VERSION_ONLY}"
+# Verificar se precisa incrementar a versão ou apenas o build
+if [ $CURRENT_BUILD -ge 9 ]; then
+    # Se build >= 9, incrementar o patch version
+    IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION_ONLY"
+    NEW_PATCH=$((PATCH + 1))
+    NEW_VERSION_ONLY="${MAJOR}.${MINOR}.${NEW_PATCH}"
+    NEW_BUILD=1
+    NEW_VERSION="${NEW_VERSION_ONLY}+${NEW_BUILD}"
+    NEW_TAG="v${NEW_VERSION_ONLY}"
+    echo "Build number atingiu limite (9), incrementando patch version"
+else
+    # Se build < 9, apenas incrementar o build number
+    NEW_BUILD=$((CURRENT_BUILD + 1))
+    NEW_VERSION="${CURRENT_VERSION_ONLY}+${NEW_BUILD}"
+    NEW_TAG="v${CURRENT_VERSION_ONLY}"
+    echo "Incrementando apenas o build number"
+fi
 
 # Exibe informações para debug
 echo "Versão atual do pubspec: $CURRENT_VERSION"
