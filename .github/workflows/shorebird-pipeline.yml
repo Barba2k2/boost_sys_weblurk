@@ -52,32 +52,29 @@ jobs:
         with:
           cache: true
 
+      # =================================================================
+      # SOLUÇÃO IMPLEMENTADA AQUI
+      # Esta etapa verifica a autenticação antes de qualquer outra coisa.
+      # =================================================================
+      - name: Verify Shorebird Authentication
+        shell: powershell
+        run: |
+          Write-Host "Verifying Shorebird authentication..."
+          shorebird apps list 2>&1 | Out-Null # Tenta um comando simples e ignora a saída
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::error::FALHA DE AUTENTICAÇÃO COM O SHOREBIRD!"
+            Write-Host "::error::O segredo 'SHOREBIRD_TOKEN' está inválido ou expirado."
+            Write-Host "::error::Ação necessária: Gere um novo token com 'shorebird login:ci' e atualize o segredo nas configurações do repositório no GitHub."
+            exit 1 # Para a pipeline imediatamente
+          }
+
+          Write-Host "Authentication successful. Proceeding with version management."
+
       - name: Configure Git for Long Paths
         shell: powershell
         run: |
-          Write-Host "Configurando Git para long paths ANTES de qualquer comando Shorebird..."
-          
-          try {
-            git config --global core.longpaths true
-            git config --global core.autocrlf false
-            git config --global core.filemode false
-            
-            git config --system core.longpaths true 2>$null
-            
-            $longPathsConfig = git config --global core.longpaths
-            Write-Host "Git long paths configurado: $longPathsConfig"
-            
-            if ($longPathsConfig -ne "true") {
-              Write-Host "Tentando configuracao alternativa..."
-              $env:GIT_CONFIG_GLOBAL = "$env:USERPROFILE\.gitconfig"
-              git config --global core.longpaths true
-            }
-            
-            Write-Host "Configuracao Git concluida com sucesso"
-          } catch {
-            Write-Host "Aviso: Erro na configuracao do Git: $_"
-            Write-Host "Continuando mesmo assim..."
-          }
+          git config --global core.longpaths true
 
       - name: Auto Version Management with Correct Shorebird Commands
         id: auto-version
@@ -86,196 +83,73 @@ jobs:
           Write-Host "========================================"
           Write-Host "INICIANDO GERENCIAMENTO AUTOMATICO DE VERSAO"
           Write-Host "========================================"
-          
+
           Write-Host "1. Lendo versao atual do pubspec.yaml..."
-          try {
-            $pubspecContent = Get-Content pubspec.yaml -Raw -ErrorAction Stop
-            $versionMatch = $pubspecContent | Select-String 'version:\s*(.+)'
-            
-            if ($versionMatch) {
-              $currentVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
-              Write-Host "   Versao encontrada: $currentVersion"
-            } else {
-              throw "Versao nao encontrada no pubspec.yaml"
-            }
-          } catch {
-            Write-Host "   ERRO: Nao foi possivel ler o pubspec.yaml: $_"
-            throw "Falha ao ler versao do pubspec.yaml"
-          }
-          
+          $pubspecContent = Get-Content pubspec.yaml -Raw
+          $versionMatch = $pubspecContent | Select-String 'version:\s*(.+)'
+          $currentVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
+          Write-Host "   Versao encontrada: $currentVersion"
+
           Write-Host ""
           Write-Host "2. Verificando releases existentes no Shorebird..."
-          $existingReleases = @()
-          $releaseExists = $false
-          
-          try {
-            Write-Host "   Tentando comando: shorebird releases"
-            $releasesOutput1 = shorebird releases 2>&1
-            
-            if ($LASTEXITCODE -eq 0) {
-              Write-Host "   Comando 'shorebird releases' executado com sucesso"
-              $existingReleases = $releasesOutput1
-              Write-Host "   Releases encontradas via 'shorebird releases':"
-              $releasesOutput1 | ForEach-Object { Write-Host "     $_" }
-              
-              if ($releasesOutput1 -like "*$currentVersion*") {
-                $releaseExists = $true
-                Write-Host "   ALERTA: Release $currentVersion JA EXISTE!"
-              } else {
-                Write-Host "   OK: Release $currentVersion nao existe ainda"
-              }
-            } else {
-              Write-Host "   'shorebird releases' falhou, tentando comandos alternativos..."
-              
-              try {
-                Write-Host "   Tentando comando: shorebird apps list"
-                $appsOutput = shorebird apps list 2>&1
-                
-                if ($LASTEXITCODE -eq 0) {
-                  Write-Host "   Apps list executado com sucesso:"
-                  $appsOutput | ForEach-Object { Write-Host "     $_" }
-                  
-                  Write-Host "   Assumindo que nao ha releases existentes (projeto novo)"
-                } else {
-                  throw "Todos os comandos Shorebird falharam"
-                }
-              } catch {
-                Write-Host "   Erro ao verificar com comandos alternativos: $_"
-                Write-Host "   Continuando assumindo que nao ha conflito..."
-              }
-            }
-          } catch {
-            Write-Host "   Erro geral ao verificar releases: $_"
-            Write-Host "   Continuando assumindo que nao ha conflito..."
-          }
-          
+          $existingReleases = shorebird releases list
+          $releaseExists = $existingReleases -like "*$currentVersion*"
+
           $finalVersion = $currentVersion
           $versionWasUpdated = $false
-          
+
           if ($releaseExists) {
-            Write-Host ""
+            Write-Host "   ALERTA: Release $currentVersion JA EXISTE!"
             Write-Host "3. Release ja existe - calculando nova versao..."
             
-            try {
-              $versionParts = $currentVersion -split '\+'
-              $semverPart = $versionParts[0]
-              $buildPart = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 1 }
-              
-              Write-Host "   Versao atual: $semverPart+$buildPart"
-              
-              $maxAttempts = 10
-              $attempts = 0
-              
-              do {
-                $buildPart += 1
-                $candidateVersion = "$semverPart+$buildPart"
-                $attempts += 1
-                
-                Write-Host "   Testando versao: $candidateVersion"
-                
-                $candidateExists = $existingReleases -like "*$candidateVersion*"
-                
-                if (-not $candidateExists) {
-                  $finalVersion = $candidateVersion
-                  $versionWasUpdated = $true
-                  Write-Host "   ENCONTRADA: Versao disponivel: $finalVersion"
-                  break
-                }
-                
-                Write-Host "   Versao $candidateVersion tambem ja existe, tentando proxima..."
-                
-              } while ($attempts -lt $maxAttempts)
-              
-              if ($attempts -ge $maxAttempts) {
-                throw "Nao foi possivel encontrar versao disponivel apos $maxAttempts tentativas"
+            $versionParts = $currentVersion -split '\+'
+            $semverPart = $versionParts[0]
+            $buildPart = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 0 }
+            
+            $maxAttempts = 10
+            for ($i = 1; $i -le $maxAttempts; $i++) {
+              $buildPart += 1
+              $candidateVersion = "$semverPart+$buildPart"
+              Write-Host "   Testando versao: $candidateVersion"
+              if (-not ($existingReleases -like "*$candidateVersion*")) {
+                $finalVersion = $candidateVersion
+                $versionWasUpdated = $true
+                Write-Host "   ENCONTRADA: Versao disponivel: $finalVersion"
+                break
               }
-              
-            } catch {
-              Write-Host "   ERRO ao calcular nova versao: $_"
-              throw "Falha no calculo da nova versao"
             }
           } else {
-            Write-Host ""
+            Write-Host "   OK: Release $currentVersion nao existe ainda."
             Write-Host "3. Versao atual esta disponivel - nenhuma mudanca necessaria"
           }
-          
+
           if ($versionWasUpdated) {
             Write-Host ""
             Write-Host "4. Atualizando pubspec.yaml..."
+            $updatedContent = $pubspecContent -replace "version:\s*.+", "version: $finalVersion"
+            Set-Content pubspec.yaml $updatedContent -Encoding UTF8
+            Write-Host "   pubspec.yaml atualizado: $currentVersion -> $finalVersion"
             
-            try {
-              $pubspecContent = Get-Content pubspec.yaml -Raw
-              
-              $backupContent = $pubspecContent
-              
-              $updatedContent = $pubspecContent -replace "version:\s*.+", "version: $finalVersion"
-              
-              Set-Content pubspec.yaml $updatedContent -Encoding UTF8
-              
-              Write-Host "   pubspec.yaml atualizado: $currentVersion -> $finalVersion"
-              
-              $hasChanges = git diff --name-only pubspec.yaml
-              
-              if ($hasChanges) {
-                Write-Host "   Mudanca confirmada pelo Git"
-              } else {
-                Write-Host "   ERRO: Arquivo nao foi modificado pelo Git"
-                Set-Content pubspec.yaml $backupContent -Encoding UTF8
-                throw "Falha na modificacao do pubspec.yaml"
-              }
-              
-            } catch {
-              Write-Host "   ERRO ao atualizar pubspec.yaml: $_"
-              throw "Falha na atualizacao do pubspec.yaml"
-            }
+            Write-Host ""
+            Write-Host "5. Commitando mudancas de versao..."
+            git config --global user.email "action@github.com"
+            git config --global user.name "GitHub Action Auto-Versioning"
+            git add pubspec.yaml
+            $commitMessage = "chore: auto-bump version to $finalVersion [skip ci]"
+            git commit -m $commitMessage
+            git push origin HEAD
+            Write-Host "   Commit e Push concluidos com sucesso."
           } else {
             Write-Host ""
             Write-Host "4. Nenhuma atualizacao do pubspec.yaml necessaria"
-          }
-          
-          if ($versionWasUpdated) {
-            Write-Host ""
-            Write-Host "5. Commitando mudancas de versao..."
-            
-            try {
-              git config --global user.email "action@github.com"
-              git config --global user.name "GitHub Action Auto-Versioning"
-              
-              git add pubspec.yaml
-              
-              $stagedChanges = git diff --cached --name-only
-              
-              if ($stagedChanges) {
-                $commitMessage = "chore: auto-bump version to $finalVersion [skip ci]"
-                git commit -m $commitMessage
-                
-                git push origin HEAD
-                
-                Write-Host "   Commit realizado: $commitMessage"
-                Write-Host "   Push concluido com sucesso"
-              } else {
-                Write-Host "   Nenhuma mudanca para commitar"
-              }
-              
-            } catch {
-              Write-Host "   ERRO no commit/push: $_"
-              throw "Falha ao commitar mudancas de versao"
-            }
-          } else {
-            Write-Host ""
             Write-Host "5. Nenhum commit necessario"
           }
-          
+
           echo "final-version=$finalVersion" >> $env:GITHUB_OUTPUT
           echo "version-was-updated=$versionWasUpdated" >> $env:GITHUB_OUTPUT
-          
-          Write-Host ""
+
           Write-Host "========================================"
           Write-Host "GERENCIAMENTO DE VERSAO CONCLUIDO"
-          Write-Host "========================================"
-          Write-Host "Versao original: $currentVersion"
-          Write-Host "Versao final: $finalVersion"
-          Write-Host "Foi atualizada: $versionWasUpdated"
           Write-Host "========================================"
 
       - name: Determine Action
@@ -285,208 +159,37 @@ jobs:
           $forceAction = "${{ github.event.inputs.force_action }}"
           $finalVersion = "${{ steps.auto-version.outputs.final-version }}"
           $versionWasUpdated = "${{ steps.auto-version.outputs.version-was-updated }}"
-          
-          Write-Host "Determinando acao para versao: $finalVersion"
-          Write-Host "Versao foi atualizada: $versionWasUpdated"
-          Write-Host "Acao forcada: $forceAction"
-          
-          try {
-            $commits = git log --oneline -5 --format="%s" 2>$null
-            Write-Host "Commits recentes:"
-            $commits | ForEach-Object { Write-Host "  - $_" }
-          } catch {
-            $commits = @()
-          }
-          
-          if ($forceAction -eq "release") {
-            $action = "release"
-            Write-Host "Decisao: RELEASE (forcado)"
-          } elseif ($forceAction -eq "patch") {
-            $action = "patch"
-            Write-Host "Decisao: PATCH (forcado)"
+          $action = "patch" # Default to patch
+
+          if ($forceAction -eq 'release' -or $forceAction -eq 'patch') {
+              $action = $forceAction
           } else {
-            $hasBreaking = $commits | Where-Object { $_ -match "(BREAKING|!):" }
-            $hasFeature = $commits | Where-Object { $_ -match "^feat" }
-            $hasFix = $commits | Where-Object { $_ -match "^fix" }
-            $isVersionBump = $commits | Where-Object { $_ -match "auto-bump version" }
-            
-            if ($versionWasUpdated -eq "true" -and $isVersionBump) {
-              $action = "patch"
-              Write-Host "Decisao: PATCH (apos auto-bump de versao)"
-            } elseif ($hasBreaking) {
-              $action = "release"
-              Write-Host "Decisao: RELEASE (breaking change detectado)"
-            } elseif ($hasFeature) {
-              $action = "release"
-              Write-Host "Decisao: RELEASE (nova feature detectada)"
-            } else {
-              $action = "patch"
-              Write-Host "Decisao: PATCH (default/bug fixes)"
-            }
+              $commits = git log --oneline -5 --format="%s"
+              if ($commits | Where-Object { $_ -match "(BREAKING|!):" -or $_ -match "^feat" }) {
+                  $action = "release"
+              }
           }
-          
+
+          Write-Host "DECISAO FINAL: $action para versao $finalVersion"
           echo "action=$action" >> $env:GITHUB_OUTPUT
           echo "should-proceed=true" >> $env:GITHUB_OUTPUT
-          
-          Write-Host ""
-          Write-Host "DECISAO FINAL: $action para versao $finalVersion"
 
   shorebird-release:
     needs: auto-version-manager
     if: needs.auto-version-manager.outputs.action == 'release' && needs.auto-version-manager.outputs.should-proceed == 'true'
-    runs-on: windows-latest
-    steps:
-      - name: Checkout Latest
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-
-      - name: Pull Latest Changes
-        run: git pull origin ${{ github.ref_name }}
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.29.2'
-          cache: true
-
-      - name: Setup Shorebird
-        uses: shorebirdtech/setup-shorebird@v1
-        with:
-          cache: true
-
-      - name: Configure Git Long Paths
-        run: git config --global core.longpaths true
-
-      - name: Install Dependencies
-        run: flutter pub get
-
-      - name: Create Shorebird Release
-        id: release
-        uses: shorebirdtech/shorebird-release@v0
-        with:
-          platform: windows
-          args: "--verbose"
-
-      - name: Create Git Tag
-        if: steps.release.outputs.success == 'true'
-        shell: powershell
-        run: |
-          $version = "${{ needs.auto-version-manager.outputs.final-version }}"
-          $tag = "v$version"
-          
-          try {
-            git config --global user.email "action@github.com"
-            git config --global user.name "GitHub Action"
-            
-            git tag -a $tag -m "Release $tag - Auto-generated"
-            git push origin $tag
-            Write-Host "Tag criada: $tag"
-          } catch {
-            Write-Host "Erro ao criar tag: $_"
-          }
-
-      - name: Release Summary
-        shell: powershell
-        run: |
-          $success = "${{ steps.release.outputs.success }}"
-          $version = "${{ needs.auto-version-manager.outputs.final-version }}"
-          $wasUpdated = "${{ needs.auto-version-manager.outputs.version-was-updated }}"
-          
-          Write-Host ""
-          Write-Host "================================================"
-          if ($success -eq "true") {
-            Write-Host "RELEASE CRIADA COM SUCESSO!"
-            Write-Host "================================================"
-            Write-Host "Versao: $version"
-            if ($wasUpdated -eq "true") {
-              Write-Host "Versao foi auto-incrementada"
-            }
-            Write-Host "Release base disponivel para patches futuros"
-            Write-Host "Publique os artefatos gerados na app store"
-          } else {
-            Write-Host "FALHA NA CRIACAO DA RELEASE"
-            Write-Host "================================================"
-            Write-Host "Versao tentada: $version"
-            Write-Host "Verifique os logs acima para detalhes"
-            exit 1
-          }
-          Write-Host "================================================"
+    uses: ./.github/workflows/shorebird-release.yml
+    with:
+      version: ${{ needs.auto-version-manager.outputs.final-version }}
+      release_notes: "Release automática"
+    secrets:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
   shorebird-patch:
     needs: auto-version-manager
     if: needs.auto-version-manager.outputs.action == 'patch' && needs.auto-version-manager.outputs.should-proceed == 'true'
-    runs-on: windows-latest
-    steps:
-      - name: Checkout Latest
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-
-      - name: Pull Latest Changes
-        run: git pull origin ${{ github.ref_name }}
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.29.2'
-          cache: true
-
-      - name: Setup Shorebird
-        uses: shorebirdtech/setup-shorebird@v1
-        with:
-          cache: true
-
-      - name: Configure Git Long Paths
-        run: git config --global core.longpaths true
-
-      - name: Install Dependencies
-        run: flutter pub get
-
-      - name: Create Shorebird Patch
-        id: patch
-        uses: shorebirdtech/shorebird-patch@v0
-        with:
-          platform: windows
-          args: "--verbose"
-
-      - name: Patch Summary
-        shell: powershell
-        run: |
-          $success = "${{ steps.patch.outputs.success }}"
-          $version = "${{ needs.auto-version-manager.outputs.final-version }}"
-          $patchNumber = "${{ steps.patch.outputs.patch-number }}"
-          $wasUpdated = "${{ needs.auto-version-manager.outputs.version-was-updated }}"
-          
-          Write-Host ""
-          Write-Host "=============================================="
-          if ($success -eq "true") {
-            Write-Host "PATCH CRIADO COM SUCESSO!"
-            Write-Host "=============================================="
-            Write-Host "Versao base: $version"
-            Write-Host "Numero do patch: $patchNumber"
-            if ($wasUpdated -eq "true") {
-              Write-Host "Versao foi auto-incrementada"
-            }
-            Write-Host "Patch sera distribuido automaticamente"
-            Write-Host "Usuarios receberao update na proxima abertura"
-          } else {
-            Write-Host "FALHA NA CRIACAO DO PATCH"
-            Write-Host "=============================================="
-            Write-Host "Versao base: $version"
-            Write-Host "Verifique os logs acima para detalhes"
-            exit 1
-          }
-          Write-Host "=============================================="
+    uses: ./.github/workflows/shorebird-patch.yml
+    with:
+      version: ${{ needs.auto-version-manager.outputs.final-version }}
+      change_type: "patch"
+    secrets:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
