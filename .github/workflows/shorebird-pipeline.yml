@@ -9,19 +9,15 @@ on:
     paths-ignore:
       - "README.md"
       - "docs/**"
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/pull_request_template.md"
   
-  # Adicionar trigger manual para debug
   workflow_dispatch:
     inputs:
       force_run:
-        description: "Forçar execução da pipeline"
+        description: "Forcar execucao da pipeline"
         required: false
         default: true
         type: boolean
 
-# Adicionar permissões necessárias
 permissions:
   contents: write
   issues: write
@@ -32,11 +28,10 @@ env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
-  # Job de verificação inicial
   debug-trigger:
     runs-on: windows-latest
     steps:
-      - name: Checkout with Full History
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -45,98 +40,58 @@ jobs:
       - name: Debug Pipeline Trigger
         shell: powershell
         run: |
-          Write-Output "🔍 DEBUG: Pipeline foi disparada!"
-          Write-Output "📋 Informações do trigger:"
-          Write-Output "  Branch: ${{ github.ref_name }}"
-          Write-Output "  Event: ${{ github.event_name }}"
-          Write-Output "  SHA: ${{ github.sha }}"
-          Write-Output "  Actor: ${{ github.actor }}"
-          Write-Output "  Workflow: ${{ github.workflow }}"
-          Write-Output "  Repository: ${{ github.repository }}"
-          Write-Output "  Run ID: ${{ github.run_id }}"
-          Write-Output "  Run Number: ${{ github.run_number }}"
-          Write-Output ""
+          Write-Output "DEBUG: Pipeline foi disparada!"
+          Write-Output "Branch: ${{ github.ref_name }}"
+          Write-Output "Event: ${{ github.event_name }}"
+          Write-Output "SHA: ${{ github.sha }}"
+          Write-Output "Actor: ${{ github.actor }}"
+          Write-Output "Repository: ${{ github.repository }}"
+          Write-Output "Run ID: ${{ github.run_id }}"
           
-          # Verificar status do Git de forma mais robusta
-          Write-Output "🔍 Verificando contexto Git:"
+          Write-Output "Verificando Git..."
+          $gitWorking = $false
           try {
-            $gitDir = git rev-parse --git-dir 2>$null
+            git --version | Out-Null
             if ($LASTEXITCODE -eq 0) {
-              Write-Output "  ✅ Git repository detectado: $gitDir"
-              
-              $currentBranch = git branch --show-current 2>$null
-              Write-Output "  🌟 Branch atual: $currentBranch"
-              
-              $lastCommit = git log -1 --oneline 2>$null
-              Write-Output "  📝 Último commit: $lastCommit"
-              
-              # Tentar múltiplas formas de obter arquivos modificados
-              Write-Output "📁 Tentativas de obter arquivos modificados:"
-              
-              # Método 1: diff com commit anterior
-              try {
-                $method1 = git diff --name-only HEAD~1..HEAD 2>$null
-                if ($method1) {
-                  Write-Output "  ✅ Método 1 (HEAD~1..HEAD):"
-                  $method1 | ForEach-Object { Write-Output "    - $_" }
-                } else {
-                  Write-Output "  ⚠️ Método 1: Nenhum arquivo retornado"
-                }
-              } catch {
-                Write-Output "  ❌ Método 1 falhou: $_"
-              }
-              
-              # Método 2: show do commit atual
-              try {
-                $method2 = git show --name-only --format="" HEAD 2>$null
-                if ($method2) {
-                  Write-Output "  ✅ Método 2 (show HEAD):"
-                  $method2 | ForEach-Object { Write-Output "    - $_" }
-                } else {
-                  Write-Output "  ⚠️ Método 2: Nenhum arquivo retornado"
-                }
-              } catch {
-                Write-Output "  ❌ Método 2 falhou: $_"
-              }
-              
-              # Método 3: usando evento do GitHub
-              Write-Output "  📋 Método 3 (GitHub Event):"
-              $eventFiles = "${{ github.event.commits[0].added }}" + "${{ github.event.commits[0].modified }}"
-              if ($eventFiles -and $eventFiles -ne "") {
-                Write-Output "    - Arquivos do evento: $eventFiles"
-              } else {
-                Write-Output "    - Nenhum arquivo no evento GitHub"
-              }
-              
-            } else {
-              Write-Output "  ❌ Não é um repositório Git válido"
+              Write-Output "Git: OK"
+              $gitWorking = $true
             }
           } catch {
-            Write-Output "  ❌ Erro ao verificar Git: $_"
+            Write-Output "Git: ERRO"
           }
           
-          Write-Output ""
-          Write-Output "🔐 Verificação de secrets:"
-          if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
-            Write-Output "  ✅ SHOREBIRD_TOKEN configurado"
+          if ($gitWorking) {
+            Write-Output "Testando git status..."
+            try {
+              git status --porcelain | Out-Null
+              Write-Output "Git repository: OK"
+            } catch {
+              Write-Output "Git repository: PROBLEMA"
+            }
+          }
+          
+          Write-Output "Verificando estrutura..."
+          if (Test-Path "pubspec.yaml") {
+            Write-Output "pubspec.yaml: OK"
           } else {
-            Write-Output "  ❌ SHOREBIRD_TOKEN NÃO configurado"
+            Write-Output "pubspec.yaml: NAO ENCONTRADO"
           }
           
-          Write-Output ""
-          Write-Output "📂 Estrutura do projeto:"
-          try {
-            if (Test-Path "pubspec.yaml") { Write-Output "  ✅ pubspec.yaml" }
-            if (Test-Path "lib") { Write-Output "  ✅ lib/" }
-            if (Test-Path ".github/workflows") { Write-Output "  ✅ .github/workflows/" }
-            
-            Write-Output "  📁 Conteúdo da raiz:"
-            Get-ChildItem -Name | ForEach-Object { Write-Output "    - $_" }
-          } catch {
-            Write-Output "  ❌ Erro ao verificar estrutura: $_"
+          if (Test-Path "lib") {
+            Write-Output "lib/: OK"
+          } else {
+            Write-Output "lib/: NAO ENCONTRADO"
           }
+          
+          Write-Output "Verificando secrets..."
+          if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
+            Write-Output "SHOREBIRD_TOKEN: OK"
+          } else {
+            Write-Output "SHOREBIRD_TOKEN: NAO CONFIGURADO"
+          }
+          
+          Write-Output "Debug concluido com sucesso!"
 
-  # Job 1: Análise de Mudanças
   analyze:
     needs: debug-trigger
     uses: ./.github/workflows/analyze-changes.yml
@@ -145,7 +100,6 @@ jobs:
     secrets:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
-  # Job 2: Versionamento (se necessário)
   versioning:
     needs: analyze
     if: needs.analyze.outputs.should-proceed == 'true'
@@ -156,7 +110,6 @@ jobs:
       change_type: ${{ needs.analyze.outputs.change-type }}
       release_notes: ${{ needs.analyze.outputs.release-notes }}
 
-  # Job 3: Shorebird Release (se for release)
   shorebird-release:
     needs: [analyze, versioning]
     if: needs.analyze.outputs.action == 'release'
@@ -167,7 +120,6 @@ jobs:
     secrets:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
-  # Job 4: Shorebird Patch (se for patch)
   shorebird-patch:
     needs: [analyze, versioning]
     if: needs.analyze.outputs.action == 'patch'
@@ -178,7 +130,6 @@ jobs:
     secrets:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
-  # Job 5: Notificações e Cleanup
   notify:
     needs: [analyze, versioning, shorebird-release, shorebird-patch]
     if: always()
