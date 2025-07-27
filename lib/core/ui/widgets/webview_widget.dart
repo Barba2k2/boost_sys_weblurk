@@ -1,10 +1,8 @@
-// lib/core/ui/widgets/webview_widget.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart';
 import '../../logger/app_logger.dart';
 
-// ✅ CORREÇÃO: Enum para gerenciar os estados do widget de forma clara.
 enum _WebViewState { initializing, ready, error }
 
 class MyWebviewWidget extends StatefulWidget {
@@ -28,14 +26,12 @@ class MyWebviewWidget extends StatefulWidget {
   State<MyWebviewWidget> createState() => _MyWebviewWidgetState();
 }
 
-// ✅ CORREÇÃO: Adicionado AutomaticKeepAliveClientMixin para manter o estado nas abas.
 class _MyWebviewWidgetState extends State<MyWebviewWidget>
     with AutomaticKeepAliveClientMixin {
   final WebviewController _controller = WebviewController();
 
-  // ✅ CORREÇÃO: Variáveis de estado para um controle mais robusto.
   _WebViewState _viewState = _WebViewState.initializing;
-  bool _isNavigationLoading = false; // Controla apenas o loading de navegação
+  bool _isNavigationLoading = false;
   String? _errorMessage;
   String _currentUrl = '';
 
@@ -44,7 +40,6 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
   StreamSubscription? _loadingStateSubscription;
   bool _isOperationInProgress = false;
 
-  // ✅ CORREÇÃO: Garante que o estado da aba seja preservado.
   @override
   bool get wantKeepAlive => true;
 
@@ -68,14 +63,10 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
 
   Future<void> _loadNewUrl(String url) async {
     if (_isOperationInProgress) {
-      widget.logger?.warning(
-        'Operação em andamento, aguardando para carregar nova URL: $url',
-      );
       return;
     }
 
     try {
-      widget.logger?.info('Carregando nova URL: $url');
       await _controller.loadUrl(url);
     } catch (e, s) {
       widget.logger?.error('Erro ao carregar nova URL: $url', e, s);
@@ -84,21 +75,11 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
 
   Future<void> _initPlatformState() async {
     if (_isOperationInProgress) {
-      widget.logger?.warning(
-        'Operação já em andamento, ignorando inicialização',
-      );
       return;
     }
 
     try {
       _isOperationInProgress = true;
-      widget.logger?.info('Inicializando WebView Windows');
-
-      // ✅ CORREÇÃO CRÍTICA: Removida verificação incorreta. A verificação de suporte
-      // é feita no widget pai (schedule_tabs_widget.dart) antes de criar este.
-      // if (!WebviewController.supported) {
-      //   throw Exception('WebView não é suportado nesta plataforma');
-      // }
 
       await _controller.initialize();
       await _controller.setBackgroundColor(Colors.transparent);
@@ -115,7 +96,6 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
         });
       }
     } catch (e, s) {
-      widget.logger?.error('Erro na inicialização do WebView:', e, s);
       if (mounted) {
         setState(
           () {
@@ -137,36 +117,36 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
 
   Future<void> _disableJavaScriptDialogs() async {
     try {
-      await _controller.executeScript('''
-        window.alert = function(message) { 
-          console.log("[Alert interceptado]: " + message);
-          return true;
-        };
-        
-        window.confirm = function(message) {
-          console.log("[Confirm interceptado]: " + message);
-          return true;
-        };
-        
-        window.prompt = function(message, defaultValue) {
-          console.log("[Prompt interceptado]: " + message);
-          return defaultValue || "";
-        };
-        
-        window.onbeforeunload = null;
-        
-        try {
-          const originalOpen = window.open;
-          window.open = function() {
-            console.log("[window.open interceptado]");
-            return null;
+      await _controller.executeScript(
+        '''
+          window.alert = function(message) { 
+            console.log("[Alert interceptado]: " + message);
+            return true;
           };
-        } catch(e) {
-          console.error("Erro ao substituir window.open:", e);
-        }
-      ''');
-
-      widget.logger?.info('Diálogos JavaScript desabilitados com sucesso');
+          
+          window.confirm = function(message) {
+            console.log("[Confirm interceptado]: " + message);
+            return true;
+          };
+          
+          window.prompt = function(message, defaultValue) {
+            console.log("[Prompt interceptado]: " + message);
+            return defaultValue || "";
+          };
+          
+          window.onbeforeunload = null;
+          
+          try {
+            const originalOpen = window.open;
+            window.open = function() {
+              console.log("[window.open interceptado]");
+              return null;
+            };
+          } catch(e) {
+            console.error("Erro ao substituir window.open:", e);
+          }
+        ''',
+      );
     } catch (e) {
       widget.logger?.error('Erro ao desabilitar diálogos JavaScript: $e');
     }
@@ -186,8 +166,6 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
         });
       }
 
-      widget.logger?.info('Estado de carregamento: $state');
-
       if (state == LoadingState.navigationCompleted) {
         _captureCurrentUrl();
       }
@@ -206,11 +184,13 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
 
   Future<void> _captureCurrentUrl() async {
     try {
-      await _controller.executeScript('''
-        if (window.chrome && window.chrome.webview) {
-          window.chrome.webview.postMessage('current_url:' + window.location.href);
-        }
-      ''');
+      await _controller.executeScript(
+        '''
+          if (window.chrome && window.chrome.webview) {
+            window.chrome.webview.postMessage('current_url:' + window.location.href);
+          }
+        ''',
+      );
     } catch (e) {
       widget.logger?.error('Erro ao capturar URL atual: $e');
     }
@@ -218,10 +198,8 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
 
   @override
   Widget build(BuildContext context) {
-    // ✅ CORREÇÃO: Necessário para AutomaticKeepAliveClientMixin
     super.build(context);
 
-    // ✅ CORREÇÃO: Lógica de build baseada no estado para evitar recriar o WebView.
     switch (_viewState) {
       case _WebViewState.initializing:
         return Container(
