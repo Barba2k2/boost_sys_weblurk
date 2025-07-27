@@ -71,6 +71,11 @@ jobs:
       - name: Verify Shorebird Configuration
         shell: powershell
         run: |
+          # <<< CORREÇÃO ADICIONADA AQUI >>>
+          # Habilita o suporte a caminhos de arquivo longos no Git, um requisito do Shorebird no Windows.
+          Write-Output "Habilitando suporte a long paths no Git..."
+          git config --system core.longpaths true
+
           Write-Output "Verificando configuracao do Shorebird..."
           try {
             shorebird --version
@@ -116,7 +121,6 @@ jobs:
         run: |
           Write-Output "Criando release Shorebird para Windows..."
           try {
-            # O --force é útil em CI para não haver prompts interativos
             shorebird release windows --force 
             Write-Output "Release Shorebird criada com sucesso!"
             echo "release-created=true" >> $env:GITHUB_OUTPUT
