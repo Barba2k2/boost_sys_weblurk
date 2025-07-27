@@ -50,8 +50,6 @@ jobs:
         id: analyze
         shell: powershell
         run: |
-          # Este passo permanece o mesmo: analisa commits para determinar o tipo de mudança.
-          # ... (script original de análise de commits e arquivos)
           Write-Output "Analisando mudancas no codigo..."
           git config --global core.autocrlf false; git config --global --add safe.directory '*'
           $commits = git log --oneline -5 --format="%s" 2>$null
@@ -71,9 +69,16 @@ jobs:
           if ($isBreakingChange) { $changeType = "major" }
           elseif ($isMajorFeature -or $hasNewDependencies -or $hasNativeChanges) { $changeType = "minor" }
           else { $changeType = "patch" }
+          
+          # Construindo a string de notas da release
           $releaseNotes = "### Mudanças nesta versão`n`n" + ($commits | Where-Object { $_ -notlike "*chore*" -and $_ -notlike "*ci*" } | ForEach-Object { "- $_" }) -join "`n"
+          
           echo "change-type=$changeType" >> $env:GITHUB_OUTPUT
-          echo "release-notes=$releaseNotes" >> $env:GITHUB_OUTPUT
+          
+          echo "release-notes<<EOF" >> $env:GITHUB_OUTPUT
+          echo $releaseNotes >> $env:GITHUB_OUTPUT
+          echo "EOF" >> $env:GITHUB_OUTPUT
+          
           Write-Output "Analise de mudancas concluida. Tipo detectado: $changeType"
 
       - name: Get Current Version
