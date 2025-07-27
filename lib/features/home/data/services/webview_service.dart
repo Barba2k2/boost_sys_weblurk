@@ -93,12 +93,10 @@ class WebViewServiceImpl implements WebViewService {
       // ✅ CORREÇÃO: Verificar se os controllers estão disponíveis
       if (_controllerA != null) {
         await _controllerA!.executeScript(muteScript);
-        _logger.info('Script de mute executado no WebView A');
       }
 
       if (_controllerB != null) {
         await _controllerB!.executeScript(muteScript);
-        _logger.info('Script de mute executado no WebView B');
       }
 
       _isMuted = true;
@@ -161,12 +159,10 @@ class WebViewServiceImpl implements WebViewService {
       // ✅ CORREÇÃO: Verificar se os controllers estão disponíveis
       if (_controllerA != null) {
         await _controllerA!.executeScript(unmuteScript);
-        _logger.info('Script de unmute executado no WebView A');
       }
 
       if (_controllerB != null) {
         await _controllerB!.executeScript(unmuteScript);
-        _logger.info('Script de unmute executado no WebView B');
       }
 
       _isMuted = false;
@@ -247,10 +243,8 @@ class WebViewServiceImpl implements WebViewService {
     try {
       if (shouldBeMuted && !_isMuted) {
         await muteWebView();
-        _logger.info('Estado de mute corrigido para mutado');
       } else if (!shouldBeMuted && _isMuted) {
         await unmuteWebView();
-        _logger.info('Estado de mute corrigido para desmutado');
       }
     } catch (e, s) {
       _logger.error('Erro ao verificar e corrigir estado de mute', e, s);
