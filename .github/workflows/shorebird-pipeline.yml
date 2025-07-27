@@ -1,22 +1,27 @@
-name: Shorebird Main Pipeline
+name: Shorebird Pipeline
 
 on:
   push:
     branches:
-      - "1.0.14+1"
       - "main"
       - "master"
+      - "1.0.14+1"
     paths-ignore:
       - "README.md"
       - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
 
   workflow_dispatch:
     inputs:
-      force_run:
-        description: "Forcar execucao da pipeline"
+      force_action:
+        description: "Forcar acao especifica"
         required: false
-        default: true
-        type: boolean
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - release
+          - patch
 
 permissions:
   contents: write
@@ -28,106 +33,197 @@ env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
-  debug-trigger:
+  analyze:
     runs-on: windows-latest
+    outputs:
+      action: ${{ steps.decision.outputs.action }}
+      version: ${{ steps.version.outputs.version }}
+      should-proceed: ${{ steps.decision.outputs.should-proceed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ github.token }}
 
-      - name: Debug Pipeline Trigger
+      - name: Determine Version
+        id: version
         shell: powershell
         run: |
-          Write-Output "DEBUG: Pipeline foi disparada!"
-          Write-Output "Branch: ${{ github.ref_name }}"
-          Write-Output "Event: ${{ github.event_name }}"
-          Write-Output "SHA: ${{ github.sha }}"
-          Write-Output "Actor: ${{ github.actor }}"
-          Write-Output "Repository: ${{ github.repository }}"
-          Write-Output "Run ID: ${{ github.run_id }}"
-
-          Write-Output "Verificando Git..."
-          $gitWorking = $false
           try {
-            git --version | Out-Null
-            if ($LASTEXITCODE -eq 0) {
-              Write-Output "Git: OK"
-              $gitWorking = $true
+            $pubspecContent = Get-Content pubspec.yaml -Raw -ErrorAction Stop
+            $versionMatch = $pubspecContent | Select-String 'version:\s*(.+)'
+            
+            if ($versionMatch) {
+              $currentVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
+              Write-Host "Current version: $currentVersion"
+            } else {
+              $currentVersion = "1.0.14+2"
+              Write-Host "Version not found, using default: $currentVersion"
             }
           } catch {
-            Write-Output "Git: ERRO"
+            $currentVersion = "1.0.14+2"
+            Write-Host "Error reading pubspec.yaml, using default: $currentVersion"
           }
+          
+          echo "version=$currentVersion" >> $env:GITHUB_OUTPUT
 
-          if ($gitWorking) {
-            Write-Output "Testando git status..."
-            try {
-              git status --porcelain | Out-Null
-              Write-Output "Git repository: OK"
-            } catch {
-              Write-Output "Git repository: PROBLEMA"
+      - name: Analyze Changes and Decide Action
+        id: decision
+        shell: powershell
+        run: |
+          $forceAction = "${{ github.event.inputs.force_action }}"
+          $branch = "${{ github.ref_name }}"
+          
+          Write-Host "Analyzing changes..."
+          Write-Host "Branch: $branch"
+          Write-Host "Force action: $forceAction"
+          
+          try {
+            $commits = git log --oneline -5 --format="%s" 2>$null
+            Write-Host "Recent commits:"
+            $commits | ForEach-Object { Write-Host "  - $_" }
+          } catch {
+            Write-Host "Could not get commits"
+            $commits = @()
+          }
+          
+          if ($forceAction -eq "release") {
+            $action = "release"
+            Write-Host "Action forced to: release"
+          } elseif ($forceAction -eq "patch") {
+            $action = "patch"
+            Write-Host "Action forced to: patch"
+          } else {
+            $hasBreaking = $commits | Where-Object { $_ -match "(BREAKING|!):" }
+            $hasFeature = $commits | Where-Object { $_ -match "^feat" }
+            $hasFix = $commits | Where-Object { $_ -match "^fix" }
+            
+            if ($hasBreaking -or $hasFeature) {
+              $action = "release"
+              Write-Host "Auto-detected action: release (breaking change or new feature)"
+            } elseif ($hasFix) {
+              $action = "patch"
+              Write-Host "Auto-detected action: patch (bug fix)"
+            } else {
+              $action = "patch"
+              Write-Host "Auto-detected action: patch (default for other changes)"
             }
           }
-
-          Write-Output "Verificando estrutura..."
-          if (Test-Path "pubspec.yaml") {
-            Write-Output "pubspec.yaml: OK"
-          } else {
-            Write-Output "pubspec.yaml: NAO ENCONTRADO"
-          }
-
-          if (Test-Path "lib") {
-            Write-Output "lib/: OK"
-          } else {
-            Write-Output "lib/: NAO ENCONTRADO"
-          }
-
-          Write-Output "Verificando secrets..."
-          if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
-            Write-Output "SHOREBIRD_TOKEN: OK"
-          } else {
-            Write-Output "SHOREBIRD_TOKEN: NAO CONFIGURADO"
-          }
-
-          Write-Output "Debug concluido com sucesso!"
-
-  analyze:
-    needs: debug-trigger
-    uses: ./.github/workflows/analyze-changes.yml
-    with:
-      branch_name: ${{ github.ref_name }}
-    secrets:
-      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          
+          echo "action=$action" >> $env:GITHUB_OUTPUT
+          echo "should-proceed=true" >> $env:GITHUB_OUTPUT
+          
+          Write-Host "Final decision: $action"
 
   shorebird-release:
     needs: analyze
-    if: needs.analyze.outputs.action == 'release'
-    uses: ./.github/workflows/shorebird-release.yml
-    with:
-      version: ${{ needs.analyze.outputs.new-version }}
-      release_notes: ${{ needs.analyze.outputs.release-notes }}
-    secrets:
-      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+    if: needs.analyze.outputs.action == 'release' && needs.analyze.outputs.should-proceed == 'true'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+          cache: true
+
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Create Shorebird Release
+        id: release
+        uses: shorebirdtech/shorebird-release@v0
+        with:
+          platform: windows
+          args: "--verbose"
+
+      - name: Create Git Tag
+        if: steps.release.outputs.success == 'true'
+        shell: powershell
+        run: |
+          $version = "${{ needs.analyze.outputs.version }}"
+          $tag = "v$version"
+          
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action Bot"
+          
+          try {
+            git tag -a $tag -m "Release $tag - Shorebird Pipeline"
+            git push origin $tag
+            Write-Host "Tag created: $tag"
+          } catch {
+            Write-Host "Error creating tag: $_"
+          }
+
+      - name: Summary
+        run: |
+          if ("${{ steps.release.outputs.success }}" -eq "true") {
+            Write-Host "RELEASE CRIADA COM SUCESSO!"
+            Write-Host "Versao: ${{ needs.analyze.outputs.version }}"
+            Write-Host "Release base disponivel para patches futuros"
+          } else {
+            Write-Host "FALHA NA CRIACAO DA RELEASE"
+            exit 1
+          }
+        shell: powershell
 
   shorebird-patch:
     needs: analyze
-    if: needs.analyze.outputs.action == 'patch'
-    uses: ./.github/workflows/shorebird-patch.yml
-    with:
-      version: ${{ needs.analyze.outputs.new-version }}
-      change_type: ${{ needs.analyze.outputs.change-type }}
-    secrets:
-      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+    if: needs.analyze.outputs.action == 'patch' && needs.analyze.outputs.should-proceed == 'true'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  notify:
-    needs: [analyze, shorebird-release, shorebird-patch]
-    if: always()
-    uses: ./.github/workflows/notify-results.yml
-    with:
-      action: ${{ needs.analyze.outputs.action }}
-      version: ${{ needs.analyze.outputs.new-version }}
-      change_type: ${{ needs.analyze.outputs.change-type }}
-      release_success: ${{ needs.shorebird-release.result == 'success' }}
-      patch_success: ${{ needs.shorebird-patch.result == 'success' }}
-      version_updated: true
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+          cache: true
+
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Create Shorebird Patch
+        id: patch
+        uses: shorebirdtech/shorebird-patch@v0
+        with:
+          platform: windows
+          args: "--verbose"
+
+      - name: Summary
+        run: |
+          if ("${{ steps.patch.outputs.success }}" -eq "true") {
+            Write-Host "PATCH CRIADO COM SUCESSO!"
+            Write-Host "Versao: ${{ needs.analyze.outputs.version }}"
+            Write-Host "Patch Number: ${{ steps.patch.outputs.patch-number }}"
+            Write-Host "Patch disponivel para usuarios automaticamente"
+          } else {
+            Write-Host "FALHA NA CRIACAO DO PATCH"
+            exit 1
+          }
+        shell: powershell

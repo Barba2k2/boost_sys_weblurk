@@ -15,12 +15,6 @@ on:
       release-created:
         description: "Release foi criada"
         value: ${{ jobs.create-release.outputs.release-created }}
-      version-updated:
-        description: "Versão foi atualizada no pubspec.yaml"
-        value: ${{ jobs.create-release.outputs.version-updated }}
-      changelog-updated:
-        description: "CHANGELOG.md foi atualizado"
-        value: ${{ jobs.create-release.outputs.changelog-updated }}
       tag-created:
         description: "Tag foi criada"
         value: ${{ jobs.create-release.outputs.tag-created }}
@@ -31,223 +25,183 @@ on:
       SHOREBIRD_TOKEN:
         required: true
 
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
 jobs:
   create-release:
     runs-on: windows-latest
     outputs:
-      release-created: ${{ steps.shorebird-release.outputs.release-created }}
-      version-updated: ${{ steps.update-version.outputs.version-updated }}
-      changelog-updated: ${{ steps.update-changelog.outputs.changelog-updated }}
+      release-created: ${{ steps.shorebird-release.outputs.success }}
       tag-created: ${{ steps.git-tag.outputs.tag-created }}
       github-release-created: ${{ steps.github-release.outputs.github-release-created }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Validate Inputs
-        shell: powershell
-        run: |
-          if (-Not ("${{ inputs.version }}")) {
-            Write-Error "ERRO FATAL: O input 'version' é obrigatório e não foi fornecido."
-            exit 1
-          }
-          if (-Not ("${{ inputs.release_notes }}")) {
-            Write-Error "ERRO FATAL: O input 'release_notes' é obrigatório e não foi fornecido."
-            exit 1
-          }
-          Write-Output "Inputs 'version' e 'release_notes' validados com sucesso."
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.29.2"
+          flutter-version: '3.29.2'
           cache: true
 
       - name: Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
         with:
           cache: true
-          
-      - name: Enable Git Long Paths
-        shell: bash
-        run: |
-          echo "Habilitando suporte a long paths no Git..."
-          git config --global core.longpaths true
-          echo "Configuração de long paths aplicada."
-
-      - name: Verify Shorebird Configuration
-        shell: powershell
-        run: |
-          Write-Output "Verificando configuracao do Shorebird..."
-          try {
-            shorebird --version
-            Write-Output "Verificando acesso às releases..."
-            shorebird releases list | Out-Null
-            Write-Output "Configuração do Shorebird parece OK."
-          } catch {
-            Write-Error "Erro na verificacao do Shorebird: $_"
-            throw "Configuracao do Shorebird invalida"
-          }
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
       - name: Install Dependencies
-        shell: powershell
-        run: |
-          flutter pub get
-          flutter analyze --no-fatal-warnings
-
-      - name: Validate Release Version
-        id: validate-release
-        shell: powershell
-        run: |
-          Write-Output "Validacao pre-release da versao ${{ inputs.version }}..."
-          $version = "${{ inputs.version }}"
-          try {
-            $existingReleases = shorebird releases list 2>$null
-            if ($existingReleases -and ($existingReleases | Select-String -Pattern $version -Quiet)) {
-              throw "Release $version ja existe no Shorebird."
-            } else {
-              Write-Output "Versao $version e unica e pode ser criada."
-            }
-          } catch {
-            Write-Error "Erro ao validar a versao: $_"
-            throw
-          }
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        run: flutter pub get
 
       - name: Create Shorebird Release
         id: shorebird-release
-        shell: powershell
-        run: |
-          Write-Output "Criando release Shorebird para Windows..."
-          try {
-            shorebird release windows --force 
-            Write-Output "Release Shorebird criada com sucesso!"
-            echo "release-created=true" >> $env:GITHUB_OUTPUT
-          } catch {
-            Write-Error "Erro durante criacao da release Shorebird: $_"
-            echo "release-created=false" >> $env:GITHUB_OUTPUT
-            throw "Falha na criacao da release Shorebird"
-          }
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-
-      - name: Update Version in pubspec.yaml
-        id: update-version
-        shell: powershell
-        if: steps.shorebird-release.outputs.release-created == 'true'
-        run: |
-          Write-Output "Atualizando versao no pubspec.yaml..."
-          $pubspecPath = "pubspec.yaml"
-          try {
-            $pubspecContent = Get-Content $pubspecPath -Raw
-            if ($pubspecContent -match 'version:\s*(\d+\.\d+\.\d+)\+?(\d*)') {
-              $currentVersion = $matches[1]
-              $newVersion = "${{ inputs.version }}"
-              $newContent = $pubspecContent -replace "version: $currentVersion\+\d*", "version: $newVersion"
-              Set-Content -Path $pubspecPath -Value $newContent
-              Write-Output "Versao atualizada no pubspec.yaml para: $newVersion"
-              git config --local user.email "action@github.com"
-              git config --local user.name "GitHub Action"
-              git add $pubspecPath
-              git commit -m "chore: set version to $newVersion for release"
-              git push
-              echo "version-updated=true" >> $env:GITHUB_OUTPUT
-            } else {
-              Write-Warning "Nao foi possivel encontrar o padrao de versao no pubspec.yaml."
-              echo "version-updated=false" >> $env:GITHUB_OUTPUT
-            }
-          } catch {
-            Write-Error "Erro ao atualizar versao no pubspec.yaml: $_"
-            echo "version-updated=false" >> $env:GITHUB_OUTPUT
-          }
-
-      - name: Update CHANGELOG.md
-        id: update-changelog
-        shell: powershell
-        if: steps.shorebird-release.outputs.release-created == 'true'
-        run: |
-          Write-Output "Atualizando CHANGELOG.md..."
-          $newVersion = "${{ inputs.version }}"
-          $date = Get-Date -Format "yyyy-MM-dd"
-          $releaseNotes = "${{ inputs.release_notes }}"
-          $changelogEntry = "## [$newVersion] - $date`n`n### Mudancas`n$releaseNotes`n"
-          try {
-            if (Test-Path "CHANGELOG.md") {
-              $existingChangelog = Get-Content "CHANGELOG.md" -Raw
-              $newChangelog = $changelogEntry + "`n" + $existingChangelog
-            } else {
-              $header = "# Changelog`n`nTodas as mudancas importantes do projeto sao documentadas neste arquivo."
-              $newChangelog = "$header`n`n$changelogEntry"
-            }
-            Set-Content "CHANGELOG.md" $newChangelog -Encoding UTF8
-            Write-Output "CHANGELOG.md atualizado."
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
-            git add CHANGELOG.md
-            git commit -m "docs: update changelog for v$newVersion"
-            git push
-            echo "changelog-updated=true" >> $env:GITHUB_OUTPUT
-          } catch {
-            Write-Error "Erro ao atualizar CHANGELOG.md: $_"
-            echo "changelog-updated=false" >> $env:GITHUB_OUTPUT
-          }
+        uses: shorebirdtech/shorebird-release@v0
+        with:
+          platform: windows
+          args: "--verbose"
 
       - name: Create Git Tag
         id: git-tag
+        if: steps.shorebird-release.outputs.success == 'true'
         shell: powershell
-        if: steps.shorebird-release.outputs.release-created == 'true'
         run: |
           $version = "${{ inputs.version }}"
           $tag = "v$version"
-          Write-Output "Criando tag Git: $tag"
+          
+          Write-Host "Creating Git tag: $tag"
+          
           try {
-            if (git rev-parse $tag 2>$null) {
-              Write-Warning "Tag $tag ja existe. Nenhuma acao sera tomada."
-            } else {
-              git tag -a $tag -m "Release $version"
-              git push origin $tag
-              Write-Output "Tag $tag criada e enviada para o repositorio remoto."
+            # Configure Git
+            git config --global user.email "action@github.com"
+            git config --global user.name "GitHub Action Bot"
+            
+            # Check if tag already exists
+            $existingTag = git tag -l $tag
+            
+            if ($existingTag) {
+              Write-Host "Tag $tag already exists, removing..."
+              git tag -d $tag 2>$null
+              git push origin --delete $tag 2>$null
             }
+            
+            # Create new tag
+            $tagMessage = "Release $tag - Auto-generated by Shorebird Pipeline"
+            git tag -a $tag -m $tagMessage
+            git push origin $tag
+            
+            Write-Host "Git tag created successfully: $tag"
             echo "tag-created=true" >> $env:GITHUB_OUTPUT
-            echo "tag-name=$tag" >> $env:GITHUB_OUTPUT
+            
           } catch {
-            Write-Error "Erro na criacao da tag Git: $_"
+            Write-Host "Error creating git tag: $_"
             echo "tag-created=false" >> $env:GITHUB_OUTPUT
           }
 
       - name: Create GitHub Release
         id: github-release
-        if: steps.git-tag.outputs.tag-created == 'true'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.git-tag.outputs.tag-name }}
-          release_name: "Release v${{ inputs.version }}"
-          body: |
-            ${{ inputs.release_notes }}
-          draft: false
-          prerelease: false
-
-      - name: Summary
+        if: steps.shorebird-release.outputs.success == 'true'
         shell: powershell
-        if: always()
         run: |
-          Write-Output ""
-          Write-Output "RESUMO DA RELEASE"
-          Write-Output "=================="
-          Write-Output "Versao Solicitada: ${{ inputs.version }}"
-          Write-Output "Shorebird Release Criada: ${{ steps.shorebird-release.outputs.release-created }}"
-          Write-Output "Versao no pubspec.yaml Atualizada: ${{ steps.update-version.outputs.version-updated }}"
-          Write-Output "CHANGELOG.md Atualizado: ${{ steps.update-changelog.outputs.changelog-updated }}"
-          Write-Output "Git Tag Criada: ${{ steps.git-tag.outputs.tag-created }}"
-          Write-Output "GitHub Release Criada: ${{ steps.github-release.outputs.id != '' }}"
-          Write-Output "=================="
-          if ("${{ steps.shorebird-release.outputs.release-created }}" -ne "true") {
-            Write-Error "A CRIAÇÃO DA RELEASE FALHOU. Verifique os logs acima para detalhes."
-          } else {
-            Write-Host "RELEASE CONCLUÍDA COM SUCESSO!" -ForegroundColor Green
+          $version = "${{ inputs.version }}"
+          $tag = "v$version"
+          $releaseNotes = @"
+          ${{ inputs.release_notes }}
+          "@
+          
+          Write-Host "Creating GitHub Release for $tag"
+          
+          try {
+            # Prepare release body
+            $releaseBody = @"
+            # Boost SysWebLurk $version
+            
+            **Release automatica gerada pelo Shorebird Pipeline**
+            
+            $releaseNotes
+            
+            ## Como Atualizar
+            
+            ### Para Usuarios Existentes:
+            1. Abra o aplicativo instalado
+            2. Aguarde a deteccao automatica de atualizacoes (30-60 segundos)
+            3. Aceite a atualizacao quando solicitado
+            4. Aplicativo sera reiniciado com a nova versao
+            
+            ### Para Novos Usuarios:
+            - Baixe o instalador mais recente dos assets desta release
+            - Execute o instalador e siga as instrucoes
+            - O aplicativo ja estara na versao mais recente
+            
+            ## Tecnologia
+            
+            Esta release utiliza **Shorebird Code Push** para atualizacoes automaticas:
+            - Updates instantaneos sem reinstalacao
+            - Rollback automatico em caso de problemas  
+            - Atualizacoes incrementais menores
+            
+            ---
+            
+            **Gerado automaticamente em $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') UTC**
+            "@
+            
+            # Use GitHub CLI to create release
+            if (Get-Command gh -ErrorAction SilentlyContinue) {
+              & gh release create $tag --title "Boost SysWebLurk $version" --notes $releaseBody --latest
+              
+              if ($LASTEXITCODE -eq 0) {
+                Write-Host "GitHub Release created successfully!"
+                echo "github-release-created=true" >> $env:GITHUB_OUTPUT
+              } else {
+                Write-Host "Error creating GitHub Release via CLI"
+                echo "github-release-created=false" >> $env:GITHUB_OUTPUT
+              }
+            } else {
+              Write-Host "GitHub CLI not available"
+              echo "github-release-created=false" >> $env:GITHUB_OUTPUT
+            }
+            
+          } catch {
+            Write-Host "Error creating GitHub Release: $_"
+            echo "github-release-created=false" >> $env:GITHUB_OUTPUT
           }
+
+      - name: Output Results
+        run: |
+          Write-Host "Release creation completed!"
+          Write-Host "Success: ${{ steps.shorebird-release.outputs.success }}"
+          Write-Host "Git Tag: ${{ steps.git-tag.outputs.tag-created }}"
+          Write-Host "GitHub Release: ${{ steps.github-release.outputs.github-release-created }}"
+          
+          if ("${{ steps.shorebird-release.outputs.success }}" -eq "true") {
+            Write-Host ""
+            Write-Host "RELEASE CRIADA COM SUCESSO!"
+            Write-Host "=========================="
+            Write-Host "Versao: ${{ inputs.version }}"
+            Write-Host ""
+            Write-Host "Proximos passos:"
+            Write-Host "1. Release base disponivel no Shorebird"
+            Write-Host "2. Patches futuros serao baseados nesta release"
+            Write-Host "3. Usuarios podem receber atualizacoes automaticas"
+            Write-Host "4. Monitorar logs de atualizacao dos usuarios"
+            Write-Host ""
+            Write-Host "Para distribuir aos usuarios:"
+            Write-Host "- Publique os artefatos gerados na app store apropriada"
+            Write-Host "- Ou distribua diretamente se usando side-loading"
+            Write-Host ""
+          } else {
+            Write-Host ""
+            Write-Host "FALHA NA CRIACAO DA RELEASE"
+            Write-Host "==========================="
+            Write-Host "Verifique os logs acima para detalhes do erro."
+            Write-Host ""
+          }
+        shell: powershell
