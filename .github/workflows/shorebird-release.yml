@@ -15,6 +15,12 @@ on:
       release-created:
         description: "Release foi criada"
         value: ${{ jobs.create-release.outputs.release-created }}
+      version-updated:
+        description: "Versão foi atualizada no pubspec.yaml"
+        value: ${{ jobs.create-release.outputs.version-updated }}
+      changelog-updated:
+        description: "CHANGELOG.md foi atualizado"
+        value: ${{ jobs.create-release.outputs.changelog-updated }}
       tag-created:
         description: "Tag foi criada"
         value: ${{ jobs.create-release.outputs.tag-created }}
@@ -30,6 +36,8 @@ jobs:
     runs-on: windows-latest
     outputs:
       release-created: ${{ steps.shorebird-release.outputs.release-created }}
+      version-updated: ${{ steps.update-version.outputs.version-updated }}
+      changelog-updated: ${{ steps.update-changelog.outputs.changelog-updated }}
       tag-created: ${{ steps.git-tag.outputs.tag-created }}
       github-release-created: ${{ steps.github-release.outputs.github-release-created }}
     steps:
@@ -189,6 +197,109 @@ jobs:
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
+      - name: Update Version in pubspec.yaml
+        id: update-version
+        shell: powershell
+        if: steps.shorebird-release.outputs.release-created == 'true'
+        run: |
+          Write-Output "Atualizando versao no pubspec.yaml..."
+
+          $version = "${{ inputs.version }}"
+          $pubspecPath = "pubspec.yaml"
+
+          try {
+            # Ler o arquivo pubspec.yaml
+            $pubspecContent = Get-Content $pubspecPath -Raw
+            
+            # Atualizar a versão usando regex
+            $newContent = $pubspecContent -replace 'version:\s*\d+\.\d+\.\d+\+\d+', "version: $version"
+            
+            # Verificar se a substituição foi feita
+            if ($newContent -eq $pubspecContent) {
+              Write-Output "Aviso: Versao nao foi alterada no pubspec.yaml"
+            } else {
+              # Salvar o arquivo atualizado
+              Set-Content -Path $pubspecPath -Value $newContent -NoNewline
+              Write-Output "Versao atualizada no pubspec.yaml para: $version"
+              
+              # Commit da alteração
+              git config --local user.email "action@github.com"
+              git config --local user.name "GitHub Action"
+              git add $pubspecPath
+              git commit -m "chore: update version to $version after successful Shorebird release"
+              git push
+              
+              echo "version-updated=true" >> $env:GITHUB_OUTPUT
+              echo "new-version=$version" >> $env:GITHUB_OUTPUT
+            }
+            
+          } catch {
+            Write-Output "Erro ao atualizar versao no pubspec.yaml: $_"
+            echo "version-updated=false" >> $env:GITHUB_OUTPUT
+            echo "new-version=failed" >> $env:GITHUB_OUTPUT
+            # Não falhar o workflow por erro na atualização da versão
+          }
+
+      - name: Update CHANGELOG.md
+        id: update-changelog
+        shell: powershell
+        if: steps.shorebird-release.outputs.release-created == 'true'
+        run: |
+          Write-Output "Atualizando CHANGELOG.md..."
+
+          $newVersion = "${{ inputs.version }}"
+          $changeType = "${{ inputs.change_type }}"
+          $releaseNotes = "### Mudancas nesta versao"
+
+          try {
+            $date = Get-Date -Format "yyyy-MM-dd"
+            
+            $changelogEntry = "## [$newVersion] - $date`n`n$releaseNotes`n"
+            
+            if (Test-Path "CHANGELOG.md") {
+              Write-Output "CHANGELOG.md encontrado, atualizando..."
+              
+              $existingChangelog = Get-Content "CHANGELOG.md" -Raw -ErrorAction Stop
+              
+              if ($existingChangelog -like "*# Changelog*") {
+                $newChangelog = $existingChangelog -replace "(# Changelog)", "`$1`n$changelogEntry"
+              } else {
+                $newChangelog = "# Changelog`n`n$changelogEntry$existingChangelog"
+              }
+            } else {
+              Write-Output "Criando novo CHANGELOG.md..."
+              
+              $header = "# Changelog`n`nTodas as mudanças importantes do projeto são documentadas neste arquivo.`n`nO formato é baseado em [Keep a Changelog](https://keepachangelog.com/),`ne este projeto adere ao [Semantic Versioning](https://semver.org/).`n"
+              $newChangelog = "$header$changelogEntry"
+            }
+            
+            Set-Content "CHANGELOG.md" $newChangelog -Encoding UTF8
+            
+            $changelogModified = git diff --name-only CHANGELOG.md
+            
+            if ($changelogModified) {
+              Write-Output "CHANGELOG.md atualizado com sucesso"
+              echo "changelog-updated=true" >> $env:GITHUB_OUTPUT
+              
+              Write-Output "Nova entrada adicionada:"
+              Write-Output $changelogEntry
+              
+              # Commit da alteração
+              git config --local user.email "action@github.com"
+              git config --local user.name "GitHub Action"
+              git add CHANGELOG.md
+              git commit -m "docs: update changelog for version $newVersion"
+              git push
+            } else {
+              Write-Output "CHANGELOG.md não foi modificado"
+              echo "changelog-updated=false" >> $env:GITHUB_OUTPUT
+            }
+            
+          } catch {
+            Write-Output "Erro ao atualizar CHANGELOG.md: $_"
+            echo "changelog-updated=false" >> $env:GITHUB_OUTPUT
+          }
+
       - name: Create Git Tag
         id: git-tag
         shell: powershell
@@ -308,6 +419,8 @@ jobs:
           Write-Output "=================="
           Write-Output "Versao: ${{ inputs.version }}"
           Write-Output "Shorebird Release: ${{ steps.shorebird-release.outputs.release-created }}"
+          Write-Output "Versao atualizada no pubspec: ${{ steps.update-version.outputs.version-updated }}"
+          Write-Output "CHANGELOG atualizado: ${{ steps.update-changelog.outputs.changelog-updated }}"
           Write-Output "Git Tag: ${{ steps.git-tag.outputs.tag-created }}"
           Write-Output "Tipo: ${{ inputs.change_type }}"
           Write-Output "=================="
@@ -318,13 +431,17 @@ jobs:
             Write-Output ""
             Write-Output "Proximos passos:"
             Write-Output "  1. Release base disponivel no Shorebird"
-            Write-Output "  2. Patches futuros serao baseados nesta release"
-            Write-Output "  3. Usuarios podem receber atualizacoes automaticas"
-            Write-Output "  4. Monitorar logs de atualizacao dos usuarios"
+            Write-Output "  2. Versao atualizada no pubspec.yaml"
+            Write-Output "  3. CHANGELOG.md atualizado com as mudancas"
+            Write-Output "  4. Patches futuros serao baseados nesta release"
+            Write-Output "  5. Usuarios podem receber atualizacoes automaticas"
+            Write-Output "  6. Monitorar logs de atualizacao dos usuarios"
             Write-Output ""
           } else {
             Write-Output ""
             Write-Output "FALHA NA CRIAÇÃO DA RELEASE"
             Write-Output "Verifique logs acima para detalhes do erro"
+            Write-Output "Versao no pubspec.yaml nao foi alterada"
+            Write-Output "CHANGELOG.md nao foi atualizado"
             Write-Output ""
           }
