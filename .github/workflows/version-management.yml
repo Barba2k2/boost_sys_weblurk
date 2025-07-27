@@ -4,15 +4,15 @@ on:
   workflow_call:
     inputs:
       current_version:
-        description: "Versao atual"
+        description: "Versão atual"
         required: true
         type: string
       new_version:
-        description: "Nova versao"
+        description: "Nova versão"
         required: true
         type: string
       change_type:
-        description: "Tipo de mudanca"
+        description: "Tipo de mudança"
         required: true
         type: string
       release_notes:
@@ -21,7 +21,7 @@ on:
         type: string
     outputs:
       version-updated:
-        description: "Versao foi atualizada"
+        description: "Versão foi atualizada"
         value: ${{ jobs.update-version.outputs.version-updated }}
       changelog-updated:
         description: "Changelog foi atualizado"
@@ -36,115 +36,258 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
 
       - name: Configure Git
         shell: powershell
         run: |
-          Write-Output "Configurando Git para commits automaticos..."
+          Write-Output "Configurando Git para commits automáticos..."
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action Bot"
           git config --global core.longpaths true
+          git config pull.rebase false
+
+      - name: Sync with Remote
+        shell: powershell
+        run: |
+          Write-Output "Sincronizando com repositório remoto..."
+          
+          try {
+            git fetch origin
+            git pull origin ${{ github.ref_name }} --no-edit
+            
+            Write-Output "Sincronização concluída"
+            
+            $status = git status --porcelain
+            if ($status) {
+              Write-Output "Status do repositório:"
+              $status | Write-Output
+            } else {
+              Write-Output "Repositório limpo após sincronização"
+            }
+            
+          } catch {
+            Write-Output "Erro durante sincronização: $_"
+            Write-Output "Tentando reset para estado limpo..."
+            
+            git reset --hard origin/${{ github.ref_name }}
+            Write-Output "Reset realizado"
+          }
 
       - name: Update pubspec.yaml
         id: update-pubspec
         shell: powershell
         run: |
+          $currentVersion = "${{ inputs.current_version }}"
+          $newVersion = "${{ inputs.new_version }}"
+          
           Write-Output "Atualizando pubspec.yaml..."
-
-          $pubspecContent = Get-Content pubspec.yaml -Raw -ErrorAction Stop
-          $newContent = $pubspecContent -replace 'version:\s*[\d\.]+\+\d+', "version: ${{ inputs.new_version }}"
-
-          if ($newContent -eq $pubspecContent) {
-            Write-Output "Nenhuma mudanca necessaria no pubspec.yaml"
+          Write-Output "  De: $currentVersion"
+          Write-Output "  Para: $newVersion"
+          
+          try {
+            $pubspecContent = Get-Content pubspec.yaml -Raw -ErrorAction Stop
+            $backupContent = $pubspecContent
+            $updatedContent = $pubspecContent -replace "version:\s*.+", "version: $newVersion"
+            
+            if ($pubspecContent -eq $updatedContent) {
+              Write-Output "Nenhuma mudança necessária no pubspec.yaml"
+              echo "version-updated=false" >> $env:GITHUB_OUTPUT
+              return
+            }
+            
+            Set-Content pubspec.yaml $updatedContent -Encoding UTF8
+            
+            $hasChanges = git diff --name-only pubspec.yaml
+            
+            if ($hasChanges) {
+              Write-Output "pubspec.yaml atualizado com sucesso"
+              echo "version-updated=true" >> $env:GITHUB_OUTPUT
+              
+              Write-Output "Mudanças realizadas:"
+              git diff pubspec.yaml | Write-Output
+            } else {
+              Write-Output "Arquivo não foi modificado pelo Git"
+              echo "version-updated=false" >> $env:GITHUB_OUTPUT
+            }
+            
+          } catch {
+            Write-Output "Erro ao atualizar pubspec.yaml: $_"
+            
+            if ($backupContent) {
+              Set-Content pubspec.yaml $backupContent -Encoding UTF8
+              Write-Output "Backup restaurado"
+            }
+            
             echo "version-updated=false" >> $env:GITHUB_OUTPUT
-          } else {
-            $newContent | Set-Content pubspec.yaml -NoNewline
-            git add pubspec.yaml
-            
-            Write-Output "pubspec.yaml atualizado com sucesso"
-            echo "version-updated=true" >> $env:GITHUB_OUTPUT
-            
-            Write-Output "Mudancas realizadas:"
-            git diff --cached pubspec.yaml
+            throw "Falha na atualização do pubspec.yaml"
           }
 
       - name: Update CHANGELOG.md
         id: update-changelog
         shell: powershell
         run: |
-          Write-Output "Atualizando CHANGELOG.md..."
-
+          $newVersion = "${{ inputs.new_version }}"
           $changeType = "${{ inputs.change_type }}"
-          $icon = switch ($changeType) {
-            "major" { "[MAJOR]" }
-            "minor" { "[FEAT]" }
-            "patch" { "[FIX]" }
-            default { "[CHANGE]" }
+          $releaseNotes = @"
+          ${{ inputs.release_notes }}
+          "@
+          
+          Write-Output "Atualizando CHANGELOG.md..."
+          
+          try {
+            $date = Get-Date -Format "yyyy-MM-dd"
+            
+            $changelogEntry = @"
+            
+            ## [$newVersion] - $date
+            
+            $releaseNotes
+            
+            "@
+            
+            if (Test-Path "CHANGELOG.md") {
+              Write-Output "CHANGELOG.md encontrado, atualizando..."
+              
+              $existingChangelog = Get-Content "CHANGELOG.md" -Raw -ErrorAction Stop
+              
+              if ($existingChangelog -like "*# Changelog*") {
+                $newChangelog = $existingChangelog -replace "(# Changelog)", "`$1$changelogEntry"
+              } else {
+                $newChangelog = "# Changelog$changelogEntry$existingChangelog"
+              }
+            } else {
+              Write-Output "Criando novo CHANGELOG.md..."
+              
+              $newChangelog = @"
+              # Changelog
+              
+              Todas as mudanças importantes do projeto são documentadas neste arquivo.
+              
+              O formato é baseado em [Keep a Changelog](https://keepachangelog.com/),
+              e este projeto adere ao [Semantic Versioning](https://semver.org/).
+              $changelogEntry
+              "@
+            }
+            
+            Set-Content "CHANGELOG.md" $newChangelog -Encoding UTF8
+            
+            $changelogModified = git diff --name-only CHANGELOG.md
+            
+            if ($changelogModified) {
+              Write-Output "CHANGELOG.md atualizado com sucesso"
+              echo "changelog-updated=true" >> $env:GITHUB_OUTPUT
+              
+              Write-Output "Nova entrada adicionada:"
+              Write-Output $changelogEntry
+            } else {
+              Write-Output "CHANGELOG.md não foi modificado"
+              echo "changelog-updated=false" >> $env:GITHUB_OUTPUT
+            }
+            
+          } catch {
+            Write-Output "Erro ao atualizar CHANGELOG.md: $_"
+            echo "changelog-updated=false" >> $env:GITHUB_OUTPUT
           }
 
-          $date = Get-Date -Format "yyyy-MM-dd"
-          $newEntry = "## [${{ inputs.new_version }}] - $date`n`n$icon ${{ inputs.release_notes }}`n`n"
-
-          if (Test-Path "CHANGELOG.md") {
-            Write-Output "CHANGELOG.md encontrado, atualizando..."
-            $changelogContent = Get-Content CHANGELOG.md -Raw
-            $newContent = $newEntry + $changelogContent
-            $newContent | Set-Content CHANGELOG.md -NoNewline
-          } else {
-            Write-Output "Criando novo CHANGELOG.md..."
-            $header = "# Changelog`n`nTodas as mudancas notaveis neste projeto serao documentadas neste arquivo.`n`nO formato e baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),`ne este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).`n`n"
-            $newContent = $header + $newEntry
-            $newContent | Set-Content CHANGELOG.md -NoNewline
-          }
-
-          git add CHANGELOG.md
-
-          Write-Output "CHANGELOG.md atualizado com sucesso"
-          echo "changelog-updated=true" >> $env:GITHUB_OUTPUT
-
-          Write-Output "Nova entrada adicionada:"
-          git diff --cached CHANGELOG.md
-
-      - name: Commit and Push Changes
+      - name: Commit and Push Version Changes
+        if: steps.update-pubspec.outputs.version-updated == 'true'
         shell: powershell
         run: |
-          $commitMessage = "chore: bump version to ${{ inputs.new_version }}"
-
-          if (git diff --cached --quiet) {
-            Write-Output "Nenhuma mudanca para commitar"
-          } else {
-            Write-Output "Arquivos que serao commitados:"
-            git diff --cached --name-only
-            
-            git commit -m $commitMessage
-            Write-Output "Commit realizado: $commitMessage"
-            
-            git push origin HEAD:${{ github.ref_name }}
-            Write-Output "Mudancas enviadas com sucesso"
+          $newVersion = "${{ inputs.new_version }}"
+          $changeType = "${{ inputs.change_type }}"
+          $maxRetries = 3
+          $retryCount = 0
+          
+          Write-Output "Fazendo commit das mudanças de versão..."
+          
+          while ($retryCount -lt $maxRetries) {
+            try {
+              Write-Output "Tentativa $($retryCount + 1) de $maxRetries"
+              
+              git fetch origin
+              git pull origin ${{ github.ref_name }} --no-edit
+              
+              git add pubspec.yaml
+              
+              if ("${{ steps.update-changelog.outputs.changelog-updated }}" -eq "true") {
+                git add CHANGELOG.md
+                Write-Output "CHANGELOG.md incluído no commit"
+              }
+              
+              if (git diff --cached --quiet) {
+                Write-Output "Nenhuma mudança para commitar"
+                break
+              }
+              
+              Write-Output "Arquivos que serão commitados:"
+              git diff --cached --name-only | ForEach-Object { Write-Output "  - $_" }
+              
+              $commitMessage = "chore: bump version to $newVersion [$changeType] [skip ci]"
+              git commit -m $commitMessage
+              
+              Write-Output "Commit realizado: $commitMessage"
+              
+              Write-Output "Enviando mudanças para repositório remoto..."
+              git push origin HEAD:${{ github.ref_name }}
+              
+              Write-Output "Mudanças enviadas com sucesso"
+              break
+              
+            } catch {
+              $retryCount++
+              Write-Output "Erro na tentativa $retryCount : $_"
+              
+              if ($retryCount -ge $maxRetries) {
+                Write-Output "Número máximo de tentativas excedido"
+                
+                git reset --hard HEAD~1 2>$null
+                git reset --hard origin/${{ github.ref_name }}
+                Write-Output "Reset realizado devido ao erro"
+                
+                throw "Falha no commit/push após $maxRetries tentativas"
+              }
+              
+              Write-Output "Aguardando 5 segundos antes da próxima tentativa..."
+              Start-Sleep -Seconds 5
+              
+              git reset --soft HEAD~1 2>$null
+            }
           }
 
       - name: Validate Version Update
+        if: steps.update-pubspec.outputs.version-updated == 'true'
         shell: powershell
         run: |
-          Write-Output "Validando atualizacao de versao..."
-
-          Start-Sleep -Seconds 2
-
-          $pubspecContent = Get-Content pubspec.yaml -Raw -ErrorAction Stop
-          $versionMatch = $pubspecContent | Select-String 'version:\s*(.+)'
-
-          if ($versionMatch) {
-            $actualVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
+          $expectedVersion = "${{ inputs.new_version }}"
+          
+          Write-Output "Validando atualização de versão..."
+          
+          try {
+            $pubspecContent = Get-Content pubspec.yaml -Raw
+            $versionMatch = $pubspecContent | Select-String 'version:\s*(.+)'
             
-            if ($actualVersion -eq "${{ inputs.new_version }}") {
-              Write-Output "Versao validada com sucesso: $actualVersion"
+            if ($versionMatch) {
+              $actualVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
+              
+              if ($actualVersion -eq $expectedVersion) {
+                Write-Output "Versão validada com sucesso: $actualVersion"
+              } else {
+                Write-Output "Versão não confere!"
+                Write-Output "  Esperada: $expectedVersion"
+                Write-Output "  Atual: $actualVersion"
+                throw "Validação de versão falhou"
+              }
             } else {
-              Write-Output "Versao nao confere!"
-              Write-Output "Esperado: ${{ inputs.new_version }}"
-              Write-Output "Atual: $actualVersion"
+              Write-Output "Não foi possível encontrar versão no pubspec.yaml"
+              throw "Versão não encontrada após atualização"
             }
-          } else {
-            Write-Output "Nao foi possivel encontrar versao no pubspec.yaml"
+            
+          } catch {
+            Write-Output "Erro na validação: $_"
+            throw "Falha na validação da versão"
           }
 
       - name: Summary
@@ -153,14 +296,14 @@ jobs:
           Write-Output ""
           Write-Output "RESUMO DO VERSIONAMENTO"
           Write-Output "======================="
-          Write-Output "Versao: ${{ inputs.current_version }} → ${{ inputs.new_version }}"
+          Write-Output "Versão: ${{ inputs.current_version }} -> ${{ inputs.new_version }}"
           Write-Output "pubspec.yaml: ${{ steps.update-pubspec.outputs.version-updated }}"
           Write-Output "CHANGELOG.md: ${{ steps.update-changelog.outputs.changelog-updated }}"
           Write-Output "Tipo: ${{ inputs.change_type }}"
           Write-Output "======================="
-
-          if ("${{ steps.update-pubspec.outputs.version-updated }}" -eq "true" -or "${{ steps.update-changelog.outputs.changelog-updated }}" -eq "true") {
-            Write-Output "Versionamento concluido com sucesso!"
+          
+          if ("${{ steps.update-pubspec.outputs.version-updated }}" -eq "true") {
+            Write-Output "Versionamento concluído com sucesso!"
           } else {
-            Write-Output "Nenhuma atualizacao de versao necessaria"
+            Write-Output "Nenhuma atualização de versão necessária"
           }
