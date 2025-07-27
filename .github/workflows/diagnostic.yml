@@ -27,30 +27,30 @@ jobs:
         shell: powershell
         run: |
           if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
-            Write-Output "✅ SHOREBIRD_TOKEN está configurado"
+            Write-Output "OK: SHOREBIRD_TOKEN esta configurado"
           } else {
-            Write-Output "❌ SHOREBIRD_TOKEN não está configurado"
+            Write-Output "ERROR: SHOREBIRD_TOKEN nao esta configurado"
           }
 
           if ("${{ secrets.GITHUB_TOKEN }}" -ne "") {
-            Write-Output "✅ GITHUB_TOKEN está configurado"
+            Write-Output "OK: GITHUB_TOKEN esta configurado"
           } else {
-            Write-Output "❌ GITHUB_TOKEN não está configurado"
+            Write-Output "ERROR: GITHUB_TOKEN nao esta configurado"
           }
 
       - name: Check Workflow Files
         shell: powershell
         run: |
-          Write-Output "📁 Workflow files:"
+          Write-Output "Workflow files:"
           Get-ChildItem .github/workflows/
 
-          Write-Output "📄 Content of simple-test.yml:"
+          Write-Output "Content of simple-test.yml:"
           Get-Content .github/workflows/simple-test.yml
 
       - name: Check Git Status
         shell: powershell
         run: |
-          Write-Output "🔍 Git status:"
+          Write-Output "Git status:"
           git status
-          Write-Output "📝 Last commits:"
+          Write-Output "Last commits:"
           git log --oneline -5
