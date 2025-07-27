@@ -60,16 +60,16 @@ jobs:
             shorebird --version
             
             Write-Output "Verificando releases disponiveis..."
-            shorebird releases list 2>$null
+
+            shorebird release list 2>$null 
             
             if ($LASTEXITCODE -ne 0) {
-                Write-Output "Aviso: Não foi possível verificar releases (pode ser normal para primeiro deploy)"
+                Write-Output "Aviso: Nao foi possivel verificar releases (pode ser normal para primeiro deploy)"
             } else {
-                Write-Output "Configuração do Shorebird parece OK."
+                Write-Output "Configuracao do Shorebird parece OK."
             }
           } catch {
             Write-Output "Aviso: Erro na verificacao do Shorebird: $_"
-            # Não falhar aqui, apenas logar o aviso
           }
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
