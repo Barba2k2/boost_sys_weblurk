@@ -25,14 +25,11 @@ class AuthViewModel extends ChangeNotifier {
 
   Future<void> _loadUserLogged() async {
     try {
-      // Garante que o logout seja feito apenas na primeira inicialização
       if (!_hasInitialized) {
         _hasInitialized = true;
         await logout();
         return;
       }
-
-      _logger.info('Carregando dados do usuário...');
 
       final userModelJson = await _localStorage.read<String>(
         Constants.LOCAL_SOTRAGE_USER_LOGGED_DATA_KEY,
@@ -49,11 +46,9 @@ class AuthViewModel extends ChangeNotifier {
           );
           notifyListeners();
         } else {
-          _logger.warning('Token não encontrado');
           await logout();
         }
       } else {
-        _logger.info('Nenhum usuário encontrado no storage');
         await logout();
       }
     } catch (e, s) {
