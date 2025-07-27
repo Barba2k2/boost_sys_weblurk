@@ -12,18 +12,11 @@ class UpdateService {
   bool _isChecking = false;
   bool _hasShownDialog = false;
 
-  /// Inicializa o serviço de atualizações
-  /// Verifica automaticamente no startup e quando o app volta do background
   Future<void> initialize() async {
-    log('Inicializando serviço de atualizações...');
-
-    // Aguarda um pouco para garantir que o app está totalmente carregado
     await Future.delayed(const Duration(seconds: 2));
 
-    // Verifica atualização no startup
     await checkForUpdateOnStartup();
 
-    // Configura listener para quando o app volta do background
     SystemChannels.lifecycle.setMessageHandler((msg) async {
       if (msg == AppLifecycleState.resumed.toString()) {
         log('App resumed: verificando atualizações...');
@@ -33,84 +26,67 @@ class UpdateService {
     });
   }
 
-  /// Verifica atualização no startup do app
   Future<void> checkForUpdateOnStartup() async {
     if (_isChecking || _hasShownDialog) return;
 
     _isChecking = true;
     try {
-      log('Verificando atualizações no startup...');
       final status = await _updater.checkForUpdate();
 
       if (status == UpdateStatus.outdated) {
-        log('Atualização disponível no startup');
         _showUpdateDialog(
           title: 'Nova Atualização Disponível',
           message:
               'Uma nova versão do aplicativo está disponível. Deseja atualizar agora?',
           isStartup: true,
         );
-      } else {
-        log('Aplicativo está atualizado no startup');
       }
     } catch (e) {
       log('Erro ao verificar atualização no startup: $e');
-      debugPrint('Erro ao verificar atualização no startup: $e');
     } finally {
       _isChecking = false;
     }
   }
 
-  /// Verifica atualização quando o app volta do background
   Future<void> checkForUpdateOnResume() async {
     if (_isChecking || _hasShownDialog) return;
 
     _isChecking = true;
     try {
-      log('Verificando atualizações no resume...');
       final status = await _updater.checkForUpdate();
 
       if (status == UpdateStatus.outdated) {
-        log('Atualização disponível no resume');
         _showUpdateDialog(
           title: 'Atualização Disponível',
           message: 'Uma nova versão foi encontrada. Deseja atualizar agora?',
           isStartup: false,
         );
-      } else {
-        log('Aplicativo está atualizado no resume');
       }
     } catch (e) {
       log('Erro ao verificar atualização no resume: $e');
-      debugPrint('Erro ao verificar atualização no resume: $e');
     } finally {
       _isChecking = false;
     }
   }
 
-  /// Verifica atualização manualmente (pode ser chamado de um botão na UI)
   Future<void> checkForUpdateManually() async {
     if (_isChecking) return;
 
     _isChecking = true;
     try {
-      log('Verificação manual de atualizações...');
       final status = await _updater.checkForUpdate();
 
       if (status == UpdateStatus.outdated) {
-        log('Atualização disponível na verificação manual');
         _showUpdateDialog(
           title: 'Atualização Disponível',
           message: 'Uma nova versão foi encontrada. Deseja atualizar agora?',
           isStartup: false,
         );
       } else {
-        log('Aplicativo está atualizado na verificação manual');
         _showNoUpdateDialog();
       }
     } catch (e) {
       log('Erro na verificação manual: $e');
-      debugPrint('Erro na verificação manual: $e');
       _showErrorDialog();
     } finally {
       _isChecking = false;
@@ -127,7 +103,6 @@ class UpdateService {
 
     final context = NavigationService.navigatorKey.currentContext;
     if (context == null) {
-      log('Contexto não disponível para mostrar diálogo de atualização');
       _hasShownDialog = false;
       return;
     }
@@ -141,16 +116,12 @@ class UpdateService {
         isStartup: isStartup,
         onConfirm: () async {
           try {
-            log('Iniciando atualização...');
             await _updater.update();
             if (dialogContext.mounted) {
               Navigator.pop(dialogContext);
             }
-            log('Atualização aplicada, reiniciando app...');
             SystemNavigator.pop();
-          } on UpdateException catch (e) {
-            log('Erro ao aplicar atualização: $e');
-            debugPrint('Erro ao aplicar atualização: $e');
+          } on UpdateException {
             if (dialogContext.mounted) {
               Navigator.pop(dialogContext);
               _showErrorDialog();
@@ -160,7 +131,6 @@ class UpdateService {
           }
         },
         onCancel: () {
-          log('Usuário cancelou atualização');
           Navigator.pop(dialogContext);
           _hasShownDialog = false;
         },
@@ -196,7 +166,8 @@ class UpdateService {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Erro na Atualização'),
         content: const Text(
-            'Não foi possível verificar ou aplicar a atualização. Tente novamente mais tarde.'),
+          'Não foi possível verificar ou aplicar a atualização. Tente novamente mais tarde.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
@@ -207,7 +178,6 @@ class UpdateService {
     );
   }
 
-  /// Reseta o estado para permitir nova verificação
   void resetState() {
     _hasShownDialog = false;
     _isChecking = false;
