@@ -4,17 +4,72 @@ on:
   push:
     branches:
       - "1.0.14+1"
+      - "main"
+      - "master"
     paths-ignore:
-      - "pubspec.yaml"
-      - "CHANGELOG.md"
-      - "**.md"
+      - "README.md"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
+  
+  # Adicionar trigger manual para debug
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: "Forçar execução da pipeline"
+        required: false
+        default: true
+        type: boolean
+
+# Adicionar permissões necessárias
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
 
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
+  # Job de verificação inicial
+  debug-trigger:
+    runs-on: windows-latest
+    steps:
+      - name: Debug Pipeline Trigger
+        shell: powershell
+        run: |
+          Write-Output "🔍 DEBUG: Pipeline foi disparada!"
+          Write-Output "📋 Informações do trigger:"
+          Write-Output "  Branch: ${{ github.ref_name }}"
+          Write-Output "  Event: ${{ github.event_name }}"
+          Write-Output "  SHA: ${{ github.sha }}"
+          Write-Output "  Actor: ${{ github.actor }}"
+          Write-Output "  Workflow: ${{ github.workflow }}"
+          Write-Output "  Repository: ${{ github.repository }}"
+          
+          Write-Output "📁 Arquivos modificados neste push:"
+          try {
+            $changedFiles = git diff --name-only HEAD~1..HEAD
+            if ($changedFiles) {
+              $changedFiles | ForEach-Object { Write-Output "  - $_" }
+            } else {
+              Write-Output "  (Nenhum arquivo detectado ou primeiro commit)"
+            }
+          } catch {
+            Write-Output "  (Erro ao obter arquivos modificados)"
+          }
+          
+          Write-Output "🔐 Verificação de secrets:"
+          if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
+            Write-Output "  ✅ SHOREBIRD_TOKEN configurado"
+          } else {
+            Write-Output "  ❌ SHOREBIRD_TOKEN NÃO configurado"
+          }
+
   # Job 1: Análise de Mudanças
   analyze:
+    needs: debug-trigger
     uses: ./.github/workflows/analyze-changes.yml
     with:
       branch_name: ${{ github.ref_name }}

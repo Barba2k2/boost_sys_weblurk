@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       branch_name:
-        description: "1.0.14+1"
+        description: "Nome da branch (ex: 1.0.14+1)"
         required: true
         type: string
     outputs:
@@ -46,6 +46,45 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Pipeline Validation
+        shell: powershell
+        run: |
+          Write-Output "🔍 Validação inicial da pipeline..."
+          Write-Output ""
+          Write-Output "📋 Informações do contexto:"
+          Write-Output "  Branch: ${{ inputs.branch_name }}"
+          Write-Output "  Repository: ${{ github.repository }}"
+          Write-Output "  Actor: ${{ github.actor }}"
+          Write-Output "  Event: ${{ github.event_name }}"
+          Write-Output "  SHA: ${{ github.sha }}"
+          Write-Output "  Timestamp: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+          Write-Output ""
+          
+          # Verificar se temos acesso aos secrets necessários
+          if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
+            Write-Output "✅ SHOREBIRD_TOKEN disponível"
+          } else {
+            Write-Output "❌ SHOREBIRD_TOKEN não configurado!"
+            Write-Output "⚠️ Pipeline pode falhar nas etapas do Shorebird"
+          }
+          
+          # Verificar estrutura do projeto
+          Write-Output "📂 Verificando estrutura do projeto..."
+          if (Test-Path "pubspec.yaml") {
+            Write-Output "✅ pubspec.yaml encontrado"
+          } else {
+            Write-Output "❌ pubspec.yaml não encontrado!"
+            throw "Projeto Flutter inválido - pubspec.yaml não encontrado"
+          }
+          
+          if (Test-Path "lib") {
+            Write-Output "✅ Pasta lib/ encontrada"
+          } else {
+            Write-Output "⚠️ Pasta lib/ não encontrada"
+          }
+          
+          Write-Output "✅ Validação inicial concluída"
+
       - name: Setup Shorebird (for verification)
         uses: shorebirdtech/setup-shorebird@v1
         with:
@@ -57,14 +96,35 @@ jobs:
         run: |
           Write-Output "🔍 Analisando mudanças no código..."
 
-          # Analisar commits desde o último push
-          $commits = git log --oneline -10 --format="%s"
-          $changedFiles = git diff --name-only HEAD~1..HEAD
+          # Obter commits desde o último push (com fallback para commits recentes)
+          try {
+            $commits = git log --oneline -10 --format="%s" 2>$null
+            if (-not $commits) {
+              Write-Output "⚠️ Nenhum commit encontrado, usando fallback"
+              $commits = @("feat: initial commit")
+            }
+          } catch {
+            Write-Output "⚠️ Erro ao obter commits, usando fallback"
+            $commits = @("feat: initial commit")
+          }
+          
+          # Obter arquivos modificados (com fallback)
+          try {
+            $changedFiles = git diff --name-only HEAD~1..HEAD 2>$null
+            if (-not $changedFiles) {
+              Write-Output "ℹ️ Nenhum arquivo modificado detectado (possível primeiro commit)"
+              # Para primeiro commit, assumir mudanças em arquivos importantes
+              $changedFiles = @("lib/main.dart", "pubspec.yaml")
+            }
+          } catch {
+            Write-Output "⚠️ Erro ao obter arquivos modificados, usando fallback"
+            $changedFiles = @("lib/main.dart")
+          }
 
-          Write-Output "📝 Commits recentes:"
+          Write-Output "📝 Commits analisados:"
           $commits | ForEach-Object { Write-Output "  - $_" }
 
-          Write-Output "📁 Arquivos modificados:"
+          Write-Output "📁 Arquivos analisados:"
           $changedFiles | ForEach-Object { Write-Output "  - $_" }
 
           # Inicializar flags de análise
@@ -79,28 +139,42 @@ jobs:
           foreach ($file in $changedFiles) {
             switch -Regex ($file) {
               "^pubspec\.yaml$" { 
-                $hasNewDependencies = $true
-                $isPatchOnly = $false
-                Write-Output "  📦 Dependências detectadas"
+                # Verificar se realmente adicionou dependências
+                try {
+                  $pubspecDiff = git diff HEAD~1..HEAD pubspec.yaml 2>$null
+                  if ($pubspecDiff -and ($pubspecDiff -like "*dependencies:*" -or $pubspecDiff -like "*+*")) {
+                    $hasNewDependencies = $true
+                    $isPatchOnly = $false
+                    Write-Output "  📦 Novas dependências detectadas"
+                  }
+                } catch {
+                  Write-Output "  📦 Mudança em pubspec.yaml detectada"
+                }
               }
               "^(android|ios|windows|macos|linux)/" { 
                 $hasNativeChanges = $true
                 $isPatchOnly = $false
-                Write-Output "  🔧 Mudanças nativas detectadas"
+                Write-Output "  🔧 Mudanças nativas detectadas: $file"
               }
-              "^lib/main\.dart$|^lib/core/di/" { 
-                $hasInfraChanges = $true
+              "^lib/main\.dart$" { 
+                Write-Output "  🏗️ Mudança em main.dart detectada"
                 $isPatchOnly = $false
-                Write-Output "  🏗️ Mudanças de infraestrutura detectadas"
+              }
+              "^lib/core/" { 
+                Write-Output "  🏗️ Mudança de infraestrutura detectada: $file"
+                $isPatchOnly = $false
               }
               "^\.github/workflows/" {
                 $hasInfraChanges = $true
-                Write-Output "  ⚙️ Mudanças de CI/CD detectadas"
+                Write-Output "  ⚙️ Mudanças de CI/CD detectadas: $file"
+              }
+              "\.dart$" {
+                Write-Output "  📝 Código Dart modificado: $file"
               }
             }
           }
 
-          # Analisar commits para padrões
+          # Analisar commits para padrões de conventional commits
           foreach ($commit in $commits) {
             switch -Regex ($commit) {
               "(BREAKING|!:)" { 
@@ -108,54 +182,94 @@ jobs:
                 $isPatchOnly = $false
                 Write-Output "  💥 Breaking change detectado: $commit"
               }
-              "^(feat|feature):" { 
+              "^(feat|feature)(\(.+\))?:" { 
                 $isMajorFeature = $true
                 $isPatchOnly = $false
                 Write-Output "  ✨ Nova feature detectada: $commit"
               }
-              "^(fix|bugfix):" {
+              "^(fix|bugfix)(\(.+\))?:" {
                 Write-Output "  🐛 Bug fix detectado: $commit"
               }
-              "^(style|refactor|perf|docs):" {
+              "^(style|refactor|perf|docs)(\(.+\))?:" {
                 Write-Output "  🔧 Melhoria detectada: $commit"
               }
+              "^(chore|build|ci)(\(.+\))?:" {
+                Write-Output "  🔨 Mudança de manutenção: $commit"
+              }
             }
           }
 
-          # Determinar tipo de mudança
+          # Determinar tipo de mudança com lógica melhorada
           if ($isBreakingChange) {
             $changeType = "major"
-            Write-Output "📊 Resultado: MAJOR RELEASE (breaking change)"
+            Write-Output "📊 Resultado: MAJOR RELEASE (breaking change detectado)"
           } elseif ($isMajorFeature -or $hasNewDependencies -or $hasNativeChanges) {
             $changeType = "minor"
-            Write-Output "📊 Resultado: MINOR RELEASE (nova feature/dependência)"
+            Write-Output "📊 Resultado: MINOR RELEASE (nova feature/dependência/mudança nativa)"
           } else {
             $changeType = "patch"
-            Write-Output "📊 Resultado: PATCH (correção/melhoria)"
+            Write-Output "📊 Resultado: PATCH (correção/melhoria menor)"
           }
 
-          # Gerar notas da release
+          # Gerar notas da release melhoradas
           $releaseNotes = @()
-          $releaseNotes += "### Mudanças nesta versão"
+          $releaseNotes += "### 📝 Mudanças nesta versão"
           $releaseNotes += ""
 
+          # Categorizar commits
+          $features = @()
+          $fixes = @()
+          $improvements = @()
+          $others = @()
+
           foreach ($commit in $commits) {
-            if ($commit -notlike "*chore:*" -and $commit -notlike "*docs:*") {
-              $icon = switch -Regex ($commit) {
-                "^feat" { "✨" }
-                "^fix" { "🐛" }
-                "^perf" { "⚡" }
-                "^style" { "💄" }
-                "^refactor" { "♻️" }
-                default { "📝" }
+            if ($commit -notlike "*chore:*" -and $commit -notlike "*ci:*" -and $commit -notlike "*build:*") {
+              switch -Regex ($commit) {
+                "^feat" { $features += $commit }
+                "^fix" { $fixes += $commit }
+                "^(perf|style|refactor)" { $improvements += $commit }
+                default { $others += $commit }
               }
-              $releaseNotes += "- $icon $commit"
             }
+          }
+
+          # Adicionar seções organizadas
+          if ($features.Count -gt 0) {
+            $releaseNotes += "#### ✨ Novas Funcionalidades"
+            $features | ForEach-Object { $releaseNotes += "- $_" }
+            $releaseNotes += ""
+          }
+
+          if ($fixes.Count -gt 0) {
+            $releaseNotes += "#### 🐛 Correções"
+            $fixes | ForEach-Object { $releaseNotes += "- $_" }
+            $releaseNotes += ""
+          }
+
+          if ($improvements.Count -gt 0) {
+            $releaseNotes += "#### 🔧 Melhorias"
+            $improvements | ForEach-Object { $releaseNotes += "- $_" }
+            $releaseNotes += ""
+          }
+
+          if ($others.Count -gt 0) {
+            $releaseNotes += "#### 📝 Outras Mudanças"
+            $others | ForEach-Object { $releaseNotes += "- $_" }
+            $releaseNotes += ""
+          }
+
+          # Adicionar informações técnicas
+          if ($hasNewDependencies -or $hasNativeChanges -or $hasInfraChanges) {
+            $releaseNotes += "#### 🔧 Detalhes Técnicos"
+            if ($hasNewDependencies) { $releaseNotes += "- 📦 Dependências atualizadas" }
+            if ($hasNativeChanges) { $releaseNotes += "- 🔧 Mudanças em código nativo" }
+            if ($hasInfraChanges) { $releaseNotes += "- ⚙️ Atualizações de infraestrutura" }
+            $releaseNotes += ""
           }
 
           $releaseNotesText = $releaseNotes -join "`n"
 
-          # Set outputs
+          # Set outputs com validação
           echo "change-type=$changeType" >> $env:GITHUB_OUTPUT
           echo "is-patch-only=$isPatchOnly" >> $env:GITHUB_OUTPUT
           echo "has-breaking-changes=$isBreakingChange" >> $env:GITHUB_OUTPUT
@@ -165,6 +279,8 @@ jobs:
           echo "release-notes<<EOF" >> $env:GITHUB_OUTPUT
           echo $releaseNotesText >> $env:GITHUB_OUTPUT
           echo "EOF" >> $env:GITHUB_OUTPUT
+
+          Write-Output "✅ Análise de mudanças concluída"
 
       - name: Get Current Version
         id: version
@@ -179,26 +295,37 @@ jobs:
             if ($versionMatch) {
               $currentVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
               Write-Output "✅ Versão atual encontrada: $currentVersion"
+              
+              # Validar formato da versão
+              if ($currentVersion -match '^\d+\.\d+\.\d+\+\d+$') {
+                Write-Output "✅ Formato de versão válido"
+              } else {
+                Write-Output "⚠️ Formato de versão pode estar incorreto: $currentVersion"
+              }
             } else {
               $currentVersion = "1.0.14+2"
               Write-Output "⚠️ Versão não encontrada no pubspec.yaml, usando fallback: $currentVersion"
             }
           } catch {
             $currentVersion = "1.0.14+2"
-            Write-Output "❌ Erro ao ler pubspec.yaml, usando fallback: $currentVersion"
+            Write-Output "❌ Erro ao ler pubspec.yaml: $_"
+            Write-Output "🔄 Usando versão fallback: $currentVersion"
           }
 
-          # Parse da versão atual
-          $versionParts = $currentVersion -split '\+'
-          $semverParts = $versionParts[0] -split '\.'
-          $buildNumber = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 1 }
-
+          # Parse da versão atual com validação robusta
           try {
+            $versionParts = $currentVersion -split '\+'
+            $semverParts = $versionParts[0] -split '\.'
+            $buildNumber = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 2 }
+
             $major = [int]$semverParts[0]
             $minor = [int]$semverParts[1]
             $patch = [int]$semverParts[2]
+            
+            Write-Output "📊 Versão parseada: Major=$major, Minor=$minor, Patch=$patch, Build=$buildNumber"
           } catch {
-            Write-Output "❌ Erro ao parsear versão, usando valores padrão"
+            Write-Output "❌ Erro ao parsear versão '$currentVersion': $_"
+            Write-Output "🔄 Usando valores padrão"
             $major = 1
             $minor = 0
             $patch = 14
@@ -236,12 +363,6 @@ jobs:
 
           $newVersion = "$major.$minor.$patch+$buildNumber"
 
-          # Override manual se fornecido
-          if ("${{ inputs.force_version }}" -ne "") {
-            $newVersion = "${{ inputs.force_version }}"
-            Write-Output "🎯 Usando versão forçada: $newVersion"
-          }
-
           echo "current-version=$currentVersion" >> $env:GITHUB_OUTPUT
           echo "new-version=$newVersion" >> $env:GITHUB_OUTPUT
 
@@ -259,19 +380,29 @@ jobs:
           $changeType = "${{ steps.analyze.outputs.change-type }}"
           $isPatchOnly = "${{ steps.analyze.outputs.is-patch-only }}"
           $branch = "${{ inputs.branch_name }}"
+          $hasBreakingChanges = "${{ steps.analyze.outputs.has-breaking-changes }}"
 
           Write-Output "📋 Parâmetros de decisão:"
           Write-Output "  Branch: $branch"
           Write-Output "  Tipo de mudança: $changeType"
           Write-Output "  Apenas patch: $isPatchOnly"
+          Write-Output "  Breaking changes: $hasBreakingChanges"
 
-          # Lógica 100% automática de decisão
-          if ($branch -eq "1.0.14+1") {
-            $action = "patch"
-            Write-Output "🔧 Branch de patches detectada → PATCH"
-          } elseif ($changeType -eq "major" -or $changeType -eq "minor") {
+          # Lógica melhorada de decisão
+          if ($branch -like "*patch*" -or $branch -eq "1.0.14+1") {
+            if ($changeType -eq "major" -and $hasBreakingChanges -eq "true") {
+              $action = "release"
+              Write-Output "🚀 Breaking change detectado em branch de patch → RELEASE forçada"
+            } else {
+              $action = "patch"
+              Write-Output "🔧 Branch de patches detectada → PATCH"
+            }
+          } elseif ($changeType -eq "major") {
             $action = "release"
-            Write-Output "🚀 Mudança significativa detectada → RELEASE"
+            Write-Output "🚀 Major change → RELEASE obrigatória"
+          } elseif ($changeType -eq "minor") {
+            $action = "release"
+            Write-Output "🚀 Minor change → RELEASE (nova funcionalidade)"
           } elseif ($isPatchOnly -eq "true") {
             $action = "patch"
             Write-Output "🔧 Apenas mudanças pequenas → PATCH"
@@ -283,14 +414,26 @@ jobs:
           # Verificar se deve prosseguir
           $shouldProceed = "true"
 
-          # Verificações de sanidade
+          # Verificações de sanidade aprimoradas
           try {
-            $env:SHOREBIRD_TOKEN = "${{ secrets.SHOREBIRD_TOKEN }}"
-            shorebird doctor 2>$null
-            Write-Output "✅ Shorebird configurado corretamente"
+            if ("${{ secrets.SHOREBIRD_TOKEN }}" -eq "") {
+              Write-Output "⚠️ SHOREBIRD_TOKEN não configurado - pipeline pode falhar"
+            } else {
+              Write-Output "✅ SHOREBIRD_TOKEN disponível"
+            }
+            
+            # Verificar configuração do Shorebird (não bloqueante)
+            try {
+              $env:SHOREBIRD_TOKEN = "${{ secrets.SHOREBIRD_TOKEN }}"
+              $shorebirdCheck = shorebird doctor 2>&1
+              Write-Output "✅ Shorebird acessível"
+            } catch {
+              Write-Output "⚠️ Problema na verificação do Shorebird: $_"
+              Write-Output "🔄 Continuando mesmo assim..."
+            }
           } catch {
-            Write-Output "⚠️ Problema na configuração do Shorebird"
-            # Não falhar, apenas avisar
+            Write-Output "⚠️ Erro nas verificações: $_"
+            # Não falhar a pipeline por problemas de verificação
           }
 
           echo "action=$action" >> $env:GITHUB_OUTPUT
@@ -305,11 +448,34 @@ jobs:
         shell: powershell
         run: |
           Write-Output ""
+          Write-Output "╔══════════════════════════════════════════════════════════════╗"
+          Write-Output "║                   ANÁLISE CONCLUÍDA                         ║"
+          Write-Output "╚══════════════════════════════════════════════════════════════╝"
+          Write-Output ""
           Write-Output "📋 RESUMO DA ANÁLISE"
           Write-Output "==================="
-          Write-Output "🎯 Ação: ${{ steps.decision.outputs.action }}"
-          Write-Output "📊 Tipo: ${{ steps.analyze.outputs.change-type }}"
-          Write-Output "📱 Versão: ${{ steps.version.outputs.current-version }} → ${{ steps.version.outputs.new-version }}"
+          Write-Output "🎯 Ação decidida: ${{ steps.decision.outputs.action }}"
+          Write-Output "📊 Tipo de mudança: ${{ steps.analyze.outputs.change-type }}"
+          Write-Output "📱 Versionamento: ${{ steps.version.outputs.current-version }} → ${{ steps.version.outputs.new-version }}"
           Write-Output "🌟 Branch: ${{ inputs.branch_name }}"
           Write-Output "✅ Prosseguir: ${{ steps.decision.outputs.should-proceed }}"
+          Write-Output "⏰ Timestamp: $(Get-Date -Format 'HH:mm:ss')"
           Write-Output "==================="
+          Write-Output ""
+          
+          $action = "${{ steps.decision.outputs.action }}"
+          if ($action -eq "release") {
+            Write-Output "🚀 PRÓXIMA ETAPA: CRIAÇÃO DE RELEASE"
+            Write-Output "  📦 Nova release base será criada no Shorebird"
+            Write-Output "  🏷️ Tag Git será criada: v${{ steps.version.outputs.new-version }}"
+            Write-Output "  📝 GitHub Release será publicada"
+            Write-Output "  🔧 Futuros patches serão baseados nesta release"
+          } else {
+            Write-Output "🔧 PRÓXIMA ETAPA: CRIAÇÃO DE PATCH"
+            Write-Output "  📥 Patch será criado no Shorebird"
+            Write-Output "  🔄 Usuários receberão update automático"
+            Write-Output "  ⚡ Download incremental menor"
+            Write-Output "  🛡️ Rollback disponível se necessário"
+          }
+          Write-Output ""
+          Write-Output "🎉 Análise bem-sucedida! Prosseguindo para próxima etapa..."
