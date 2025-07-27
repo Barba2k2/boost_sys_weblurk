@@ -71,37 +71,19 @@ jobs:
       - name: Verify Shorebird Configuration
         shell: powershell
         run: |
-          # <<< CORREÇÃO ADICIONADA AQUI >>>
-          # Habilita o suporte a caminhos de arquivo longos no Git, um requisito do Shorebird no Windows.
           Write-Output "Habilitando suporte a long paths no Git..."
-          git config --system core.longpaths true
+          git config --global core.longpaths true
 
           Write-Output "Verificando configuracao do Shorebird..."
-
-          # Verificar versão do Shorebird
           try {
-            $shorebirdVersion = shorebird --version
-            Write-Output "Shorebird versao: $shorebirdVersion"
-          } catch {
-            Write-Output "Erro ao verificar versao do Shorebird: $_"
-            # Não falhar aqui, apenas logar o erro
-          }
-
-          # Verificar acesso às releases (opcional)
-          try {
+            shorebird --version
             Write-Output "Verificando acesso às releases..."
-            $releases = shorebird releases list 2>$null
-            if ($releases) {
-              Write-Output "Acesso às releases OK"
-            } else {
-              Write-Output "Nenhuma release encontrada (pode ser normal para primeiro deploy)"
-            }
+            shorebird releases list | Out-Null
+            Write-Output "Configuração do Shorebird parece OK."
           } catch {
-            Write-Output "Aviso: Não foi possível verificar releases existentes: $_"
-            # Não falhar aqui, apenas logar o aviso
+            Write-Error "Erro na verificacao do Shorebird: $_"
+            throw "Configuracao do Shorebird invalida"
           }
-
-          Write-Output "Configuração do Shorebird verificada"
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 

@@ -52,9 +52,8 @@ jobs:
       - name: Verify Shorebird Configuration
         shell: powershell
         run: |
-          # <<< CORREÇÃO ADICIONADA AQUI >>>
           Write-Output "Habilitando suporte a caminhos de arquivo longos no Git..."
-          git config --system core.longpaths true
+          git config --global core.longpaths true
         
           Write-Output "Verificando configuracao do Shorebird para patches..."
           try {
