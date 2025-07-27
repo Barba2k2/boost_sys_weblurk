@@ -42,15 +42,11 @@ class UserServiceImpl implements UserService {
       );
 
       await _updateLoginStatus('ON');
-      _logger.info(
-        'Login completo realizado com sucesso: ${userModel.nickname}',
-      );
     } catch (e, s) {
       _logger.error('Service - Failed to login user', e, s);
 
       await _clearAllData();
 
-      // Usar o ErrorMessageService para extrair mensagem amigável
       final userFriendlyMessage =
           ErrorMessageService.instance.extractUserFriendlyMessage(e);
       throw Failure(message: userFriendlyMessage);
@@ -74,8 +70,6 @@ class UserServiceImpl implements UserService {
       );
     } catch (e) {
       _logger.error('Error clearing secure storage data', e);
-      // No macOS, pode haver problemas de permissão com flutter_secure_storage
-      // Mas não devemos falhar o login por isso
     }
   }
 
@@ -86,11 +80,10 @@ class UserServiceImpl implements UserService {
         await _updateLoginStatus('OFF');
         await _saveLastSeen();
       } catch (e) {
-        _logger.warning('Error updating status during logout', e);
+        _logger.error('Error updating status during logout', e);
       }
 
       await _clearAllData();
-      _logger.info('Logout completed successfully');
     } catch (e, s) {
       _logger.error('Service - Failed to logout user', e, s);
       throw Failure(message: 'Failed to logout user');
@@ -103,7 +96,6 @@ class UserServiceImpl implements UserService {
         Constants.LOCAL_STORAGE_ACCESS_TOKEN_KEY,
         accessToken,
       );
-      _logger.info('Access token saved successfully');
     } catch (e, s) {
       _logger.error('Failed to save access token on local storage', e, s);
       throw Failure(message: 'Failed to save access token');
@@ -115,7 +107,6 @@ class UserServiceImpl implements UserService {
       final userModel = await _userRepository.getUserLogged();
       await _userRepository.updateLoginStatus(userModel.id, status);
       await _saveLastSeen();
-      _logger.info('Login status updated to: $status');
     } catch (e, s) {
       _logger.error('Failed to update login status', e, s);
       throw Failure(message: 'Failed to update login status');
@@ -135,7 +126,6 @@ class UserServiceImpl implements UserService {
         );
 
         if (userData == null) {
-          _logger.warning('Token found but no user data');
           await _clearAllData();
           return null;
         }
