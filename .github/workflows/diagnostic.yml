@@ -13,40 +13,44 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check GitHub Context
+        shell: powershell
         run: |
-          echo "GitHub Event: ${{ github.event_name }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "SHA: ${{ github.sha }}"
-          echo "Actor: ${{ github.actor }}"
-          echo "Repository: ${{ github.repository }}"
-          echo "Workflow: ${{ github.workflow }}"
-          echo "Run ID: ${{ github.run_id }}"
+          Write-Output "GitHub Event: ${{ github.event_name }}"
+          Write-Output "Branch: ${{ github.ref_name }}"
+          Write-Output "SHA: ${{ github.sha }}"
+          Write-Output "Actor: ${{ github.actor }}"
+          Write-Output "Repository: ${{ github.repository }}"
+          Write-Output "Workflow: ${{ github.workflow }}"
+          Write-Output "Run ID: ${{ github.run_id }}"
 
       - name: Check Secrets
+        shell: powershell
         run: |
-          if [ -n "${{ secrets.SHOREBIRD_TOKEN }}" ]; then
-            echo "✅ SHOREBIRD_TOKEN está configurado"
-          else
-            echo "❌ SHOREBIRD_TOKEN não está configurado"
-          fi
+          if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
+            Write-Output "✅ SHOREBIRD_TOKEN está configurado"
+          } else {
+            Write-Output "❌ SHOREBIRD_TOKEN não está configurado"
+          }
 
-          if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
-            echo "✅ GITHUB_TOKEN está configurado"
-          else
-            echo "❌ GITHUB_TOKEN não está configurado"
-          fi
+          if ("${{ secrets.GITHUB_TOKEN }}" -ne "") {
+            Write-Output "✅ GITHUB_TOKEN está configurado"
+          } else {
+            Write-Output "❌ GITHUB_TOKEN não está configurado"
+          }
 
       - name: Check Workflow Files
+        shell: powershell
         run: |
-          echo "📁 Workflow files:"
-          ls -la .github/workflows/
+          Write-Output "📁 Workflow files:"
+          Get-ChildItem .github/workflows/
 
-          echo "📄 Content of simple-test.yml:"
-          cat .github/workflows/simple-test.yml
+          Write-Output "📄 Content of simple-test.yml:"
+          Get-Content .github/workflows/simple-test.yml
 
       - name: Check Git Status
+        shell: powershell
         run: |
-          echo "🔍 Git status:"
+          Write-Output "🔍 Git status:"
           git status
-          echo "📝 Last commits:"
+          Write-Output "📝 Last commits:"
           git log --oneline -5

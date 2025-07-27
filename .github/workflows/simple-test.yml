@@ -10,4 +10,5 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Hello World
-        run: echo "Hello World! Pipeline is working!"
+        shell: powershell
+        run: Write-Output "Hello World! Pipeline is working!"

@@ -21,28 +21,30 @@ jobs:
 
       - name: Basic Test
         if: inputs.test_type == 'basic'
+        shell: powershell
         run: |
-          echo "✅ Teste básico executado com sucesso!"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Event: ${{ github.event_name }}"
+          Write-Output "✅ Teste básico executado com sucesso!"
+          Write-Output "Branch: ${{ github.ref_name }}"
+          Write-Output "Event: ${{ github.event_name }}"
 
       - name: Full Test
         if: inputs.test_type == 'full'
+        shell: powershell
         run: |
-          echo "🔍 Teste completo iniciado..."
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Event: ${{ github.event_name }}"
-          echo "SHA: ${{ github.sha }}"
-          echo "Actor: ${{ github.actor }}"
+          Write-Output "🔍 Teste completo iniciado..."
+          Write-Output "Branch: ${{ github.ref_name }}"
+          Write-Output "Event: ${{ github.event_name }}"
+          Write-Output "SHA: ${{ github.sha }}"
+          Write-Output "Actor: ${{ github.actor }}"
 
-          echo "📁 Verificando arquivos de workflow:"
-          ls -la .github/workflows/
+          Write-Output "📁 Verificando arquivos de workflow:"
+          Get-ChildItem .github/workflows/
 
-          echo "📝 Últimos commits:"
+          Write-Output "📝 Últimos commits:"
           git log --oneline -5
 
-          if [ -n "${{ secrets.SHOREBIRD_TOKEN }}" ]; then
-            echo "✅ SHOREBIRD_TOKEN configurado"
-          else
-            echo "❌ SHOREBIRD_TOKEN não configurado"
-          fi
+          if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
+            Write-Output "✅ SHOREBIRD_TOKEN configurado"
+          } else {
+            Write-Output "❌ SHOREBIRD_TOKEN não configurado"
+          }
