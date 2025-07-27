@@ -1,4 +1,3 @@
-// Sealed class para resultados
 sealed class Result<T> {
   const Result();
   factory Result.ok(T value) = Ok._;
@@ -15,7 +14,6 @@ final class Error<T> extends Result<T> {
   final Exception error;
 }
 
-// Extensões para facilitar o uso
 extension ResultExtensions<T> on Result<T> {
   bool get isOk => this is Ok<T>;
   bool get isError => this is Error<T>;
