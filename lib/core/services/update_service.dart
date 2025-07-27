@@ -222,7 +222,7 @@ class _UpdateDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -230,14 +230,14 @@ class _UpdateDialog extends StatelessWidget {
                 Icon(
                   Icons.info_outline,
                   size: 20,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'O aplicativo será reiniciado automaticamente após a atualização.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                   ),
                 ),

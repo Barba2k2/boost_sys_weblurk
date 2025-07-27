@@ -8,10 +8,12 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import '../di/injector.dart';
 import '../logger/app_logger.dart';
+import '../services/navigation_service.dart';
 import 'app_routes.dart';
 
 class AppRouter {
   static GoRouter get router => GoRouter(
+        navigatorKey: NavigationService.navigatorKey,
         redirect: (context, state) => _redirect(context, state, injector()),
         refreshListenable: injector<AuthViewModel>(),
         initialLocation: AppRoutes.splash,
