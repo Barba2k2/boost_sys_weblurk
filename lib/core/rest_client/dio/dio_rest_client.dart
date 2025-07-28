@@ -20,6 +20,10 @@ class DioRestClient implements RestClient {
     BaseOptions? baseOptions,
   }) {
     _dio = Dio(baseOptions ?? _defaultOptions);
+
+    // Configurações específicas para macOS
+    _dio.httpClientAdapter = _dio.httpClientAdapter;
+
     _dio.interceptors.addAll(
       [
         AuthInterceptors(
@@ -41,15 +45,20 @@ class DioRestClient implements RestClient {
 
   final _defaultOptions = BaseOptions(
     baseUrl: Environments.param(Constants.ENV_BASE_URL_KEY) ?? '',
-    connectTimeout: const Duration(milliseconds: 60000),
-    receiveTimeout: const Duration(milliseconds: 60000),
-    sendTimeout: const Duration(milliseconds: 60000),
+    connectTimeout: const Duration(milliseconds: 30000), // Reduzido para 30s
+    receiveTimeout: const Duration(milliseconds: 30000), // Reduzido para 30s
+    sendTimeout: const Duration(milliseconds: 30000), // Reduzido para 30s
     validateStatus: (status) {
       return status != null && status < 500;
     },
-    // Adicionar configurações para melhorar a conectividade
+    // Configurações mais permissivas para macOS
     followRedirects: true,
-    maxRedirects: 5,
+    maxRedirects: 10,
+    // Configurações específicas para contornar problemas de permissão
+    extra: {
+      'retry': 3,
+      'retryDelay': 1000,
+    },
   );
 
   @override
@@ -85,17 +94,13 @@ class DioRestClient implements RestClient {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
   }) async {
-    try {
-      final response = await _dio.get(
+    return _executeWithRetry(
+      () => _dio.get(
         path,
         queryParameters: queryParameters,
         options: Options(headers: headers),
-      );
-
-      return _dioResponseConverter(response);
-    } on DioException catch (e) {
-      _throwRestClientException(e);
-    }
+      ),
+    );
   }
 
   @override
@@ -126,18 +131,14 @@ class DioRestClient implements RestClient {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
   }) async {
-    try {
-      final response = await _dio.post(
+    return _executeWithRetry(
+      () => _dio.post(
         path,
         data: data,
         queryParameters: queryParameters,
         options: Options(headers: headers),
-      );
-
-      return _dioResponseConverter(response);
-    } on DioException catch (e) {
-      _throwRestClientException(e);
-    }
+      ),
+    );
   }
 
   @override
@@ -213,6 +214,49 @@ class DioRestClient implements RestClient {
       log('Connectivity test failed: $e');
       return false;
     }
+  }
+
+  /// Executa requisições com retry automático
+  Future<RestClientResponse<T>> _executeWithRetry<T>(
+    Future<Response<dynamic>> Function() request,
+  ) async {
+    int retryCount = 0;
+    const maxRetries = 3;
+    const retryDelay = Duration(milliseconds: 1000);
+
+    while (retryCount < maxRetries) {
+      try {
+        final response = await request();
+        return _dioResponseConverter(response);
+      } on DioException catch (e) {
+        retryCount++;
+
+        // Log detalhado do erro
+        log('=== DIO ERROR (Attempt $retryCount/$maxRetries) ===');
+        log('Type: ${e.type}');
+        log('Message: ${e.message}');
+        log('Error: ${e.error}');
+        log('========================');
+
+        if (retryCount >= maxRetries) {
+          _throwRestClientException(e);
+        }
+
+        // Aguardar antes de tentar novamente
+        await Future.delayed(retryDelay);
+      }
+    }
+
+    throw RestClientException(
+      error: Exception('Max retries exceeded'),
+      message: 'Erro de conexão após múltiplas tentativas',
+      statusCode: null,
+      response: RestClientResponse(
+        data: null,
+        statusCode: null,
+        statusMessage: 'Erro de conexão após múltiplas tentativas',
+      ),
+    );
   }
 
   Future<RestClientResponse<T>> _dioResponseConverter<T>(
