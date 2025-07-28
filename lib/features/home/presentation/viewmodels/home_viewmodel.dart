@@ -57,8 +57,8 @@ class HomeViewModel extends ChangeNotifier {
   String get currentChannelListA => _currentChannelListA;
   String get currentChannelListB => _currentChannelListB;
 
-  WebviewController? _webviewControllerA;
-  WebviewController? _webviewControllerB;
+  dynamic _webviewControllerA;
+  dynamic _webviewControllerB;
 
   late final loadSchedulesCommand =
       Command0<List<ScheduleListModel>>(_loadSchedules);
@@ -75,7 +75,7 @@ class HomeViewModel extends ChangeNotifier {
     _currentChannelListB = 'https://twitch.tv/BoostTeam_';
   }
 
-  void onWebViewCreated(WebviewController controller, String identifier) {
+  void onWebViewCreated(dynamic controller, String identifier) {
     try {
       if (identifier == 'listaA') {
         _webviewControllerA = controller;
@@ -300,8 +300,13 @@ class HomeViewModel extends ChangeNotifier {
   void dispose() {
     _stopMuteStateCheck();
 
-    _webviewControllerA?.dispose();
-    _webviewControllerB?.dispose();
+    // Apenas chama dispose se for WebviewController (Windows)
+    if (_webviewControllerA is WebviewController) {
+      _webviewControllerA?.dispose();
+    }
+    if (_webviewControllerB is WebviewController) {
+      _webviewControllerB?.dispose();
+    }
     super.dispose();
   }
 }
