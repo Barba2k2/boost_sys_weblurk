@@ -191,5 +191,5 @@ jobs:
     with:
       version: ${{ needs.auto-version-manager.outputs.final-version }}
       change_type: "patch"
-    secrets:
+    secrets: 
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
