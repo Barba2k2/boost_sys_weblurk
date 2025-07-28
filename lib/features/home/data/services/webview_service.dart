@@ -9,8 +9,8 @@ abstract class WebViewService {
   Future<void> setWebViewVolume(double volume);
   Future<void> verifyAndFixMuteState(bool shouldBeMuted);
   void setWebViewControllers(
-    WebviewController? controllerA,
-    WebviewController? controllerB,
+    dynamic controllerA,
+    dynamic controllerB,
   );
   void dispose();
 }
@@ -21,8 +21,8 @@ class WebViewServiceImpl implements WebViewService {
   }) : _logger = logger;
 
   final AppLogger _logger;
-  WebviewController? _controllerA;
-  WebviewController? _controllerB;
+  dynamic _controllerA;
+  dynamic _controllerB;
   bool _isMuted = false;
   double _currentVolume = 1.0;
 
@@ -31,11 +31,28 @@ class WebViewServiceImpl implements WebViewService {
 
   @override
   void setWebViewControllers(
-    WebviewController? controllerA,
-    WebviewController? controllerB,
+    dynamic controllerA,
+    dynamic controllerB,
   ) {
     _controllerA = controllerA;
     _controllerB = controllerB;
+  }
+
+  Future<void> _executeScript(dynamic controller, String script) async {
+    try {
+      if (controller == null) {
+        return;
+      }
+
+      if (controller is WebviewController) {
+        await controller.executeScript(script);
+      } else {
+        // Para InAppWebViewController (macOS)
+        await controller.evaluateJavascript(source: script);
+      }
+    } catch (e) {
+      _logger.error('Erro ao executar script no WebView', e);
+    }
   }
 
   @override
@@ -90,11 +107,11 @@ class WebViewServiceImpl implements WebViewService {
       ''';
 
       if (_controllerA != null) {
-        await _controllerA!.executeScript(muteScript);
+        await _executeScript(_controllerA, muteScript);
       }
 
       if (_controllerB != null) {
-        await _controllerB!.executeScript(muteScript);
+        await _executeScript(_controllerB, muteScript);
       }
 
       _isMuted = true;
@@ -155,11 +172,11 @@ class WebViewServiceImpl implements WebViewService {
       ''';
 
       if (_controllerA != null) {
-        await _controllerA!.executeScript(unmuteScript);
+        await _executeScript(_controllerA, unmuteScript);
       }
 
       if (_controllerB != null) {
-        await _controllerB!.executeScript(unmuteScript);
+        await _executeScript(_controllerB, unmuteScript);
       }
 
       _isMuted = false;
@@ -218,11 +235,11 @@ class WebViewServiceImpl implements WebViewService {
       ''';
 
       if (_controllerA != null) {
-        await _controllerA!.executeScript(volumeScript);
+        await _executeScript(_controllerA, volumeScript);
       }
 
       if (_controllerB != null) {
-        await _controllerB!.executeScript(volumeScript);
+        await _executeScript(_controllerB, volumeScript);
       }
     } catch (e, s) {
       _logger.error('Error setting WebView volume', e, s);
