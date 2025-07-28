@@ -1,6 +1,8 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 
 import '../../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
 import '../../helpers/constants.dart';
@@ -22,7 +24,16 @@ class DioRestClient implements RestClient {
     _dio = Dio(baseOptions ?? _defaultOptions);
 
     // Configurações específicas para macOS
-    _dio.httpClientAdapter = _dio.httpClientAdapter;
+    if (Platform.isMacOS) {
+      final httpClient = HttpClient();
+      httpClient.connectionTimeout = const Duration(seconds: 30);
+      httpClient.idleTimeout = const Duration(seconds: 30);
+
+      // Configurações para contornar problemas de certificado
+      httpClient.badCertificateCallback = (cert, host, port) => true;
+
+      _dio.httpClientAdapter = IOHttpClientAdapter();
+    }
 
     _dio.interceptors.addAll(
       [
@@ -34,9 +45,6 @@ class DioRestClient implements RestClient {
         LogInterceptor(
           requestBody: true,
           responseBody: true,
-          error: true,
-          requestHeader: true,
-          responseHeader: true,
         ),
       ],
     );
@@ -200,6 +208,28 @@ class DioRestClient implements RestClient {
       log('Base URL: ${_defaultOptions.baseUrl}');
       log('Full URL: ${_defaultOptions.baseUrl}/auth/login');
 
+      // Teste usando HttpClient diretamente para macOS
+      if (Platform.isMacOS) {
+        final httpClient = HttpClient();
+        httpClient.connectionTimeout = const Duration(seconds: 10);
+        httpClient.idleTimeout = const Duration(seconds: 10);
+
+        try {
+          final request = await httpClient.getUrl(
+            Uri.parse('${_defaultOptions.baseUrl}/auth/login'),
+          );
+          final response = await request.close();
+          log('Direct HttpClient test successful: ${response.statusCode}');
+          return true;
+        } catch (e) {
+          log('Direct HttpClient test failed: $e');
+          return false;
+        } finally {
+          httpClient.close();
+        }
+      }
+
+      // Teste usando Dio
       final response = await _dio.get(
         '/auth/login',
         options: Options(
@@ -250,10 +280,8 @@ class DioRestClient implements RestClient {
     throw RestClientException(
       error: Exception('Max retries exceeded'),
       message: 'Erro de conexão após múltiplas tentativas',
-      statusCode: null,
       response: RestClientResponse(
         data: null,
-        statusCode: null,
         statusMessage: 'Erro de conexão após múltiplas tentativas',
       ),
     );
