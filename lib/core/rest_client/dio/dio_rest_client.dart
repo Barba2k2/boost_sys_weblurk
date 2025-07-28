@@ -281,7 +281,6 @@ class DioRestClient implements RestClient {
       error: Exception('Max retries exceeded'),
       message: 'Erro de conexão após múltiplas tentativas',
       response: RestClientResponse(
-        data: null,
         statusMessage: 'Erro de conexão após múltiplas tentativas',
       ),
     );
