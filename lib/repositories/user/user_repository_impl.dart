@@ -7,6 +7,7 @@ import '../../core/exceptions/failure.dart';
 import '../../core/logger/app_logger.dart';
 import '../../core/rest_client/rest_client.dart';
 import '../../core/rest_client/rest_client_exception.dart';
+import '../../core/rest_client/dio/dio_rest_client.dart';
 import '../../models/confirm_login_model.dart';
 import '../../models/user_model.dart';
 import 'user_repository.dart';
@@ -24,6 +25,17 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<String> login(String nickname, String password) async {
     try {
+      // Testar conectividade antes de tentar login
+      if (_restClient is DioRestClient) {
+        final dioClient = _restClient as DioRestClient;
+        final isConnected = await dioClient.testConnectivity();
+        if (!isConnected) {
+          throw Failure(
+              message:
+                  'Erro de conectividade. Verifique sua conexão com a internet.');
+        }
+      }
+
       final result = await _restClient.unAuth().post(
         '/auth/login',
         data: {
@@ -48,6 +60,14 @@ class UserRepositoryImpl implements UserRepository {
           );
         }
       }
+
+      // Tratamento específico para erros de conexão
+      if (e.error != null && e.error.toString().contains('SocketException')) {
+        throw Failure(
+            message:
+                'Erro de conexão. Verifique sua internet e tente novamente.');
+      }
+
       _logger.error('Repository - Failed to login user', e, s);
       throw Failure(message: 'Erro ao realizar login');
     } catch (e, s) {
