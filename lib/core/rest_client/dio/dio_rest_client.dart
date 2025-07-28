@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 
 import '../../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
@@ -28,6 +30,9 @@ class DioRestClient implements RestClient {
         LogInterceptor(
           requestBody: true,
           responseBody: true,
+          error: true,
+          requestHeader: true,
+          responseHeader: true,
         ),
       ],
     );
@@ -38,9 +43,13 @@ class DioRestClient implements RestClient {
     baseUrl: Environments.param(Constants.ENV_BASE_URL_KEY) ?? '',
     connectTimeout: const Duration(milliseconds: 60000),
     receiveTimeout: const Duration(milliseconds: 60000),
+    sendTimeout: const Duration(milliseconds: 60000),
     validateStatus: (status) {
       return status != null && status < 500;
     },
+    // Adicionar configurações para melhorar a conectividade
+    followRedirects: true,
+    maxRedirects: 5,
   );
 
   @override
@@ -183,6 +192,29 @@ class DioRestClient implements RestClient {
     return this;
   }
 
+  /// Testa a conectividade com a API
+  Future<bool> testConnectivity() async {
+    try {
+      log('=== TESTING CONNECTIVITY ===');
+      log('Base URL: ${_defaultOptions.baseUrl}');
+      log('Full URL: ${_defaultOptions.baseUrl}/auth/login');
+
+      final response = await _dio.get(
+        '/auth/login',
+        options: Options(
+          validateStatus: (status) => true, // Aceita qualquer status para teste
+        ),
+      );
+
+      log('Connectivity test successful');
+      log('Status: ${response.statusCode}');
+      return true;
+    } catch (e) {
+      log('Connectivity test failed: $e');
+      return false;
+    }
+  }
+
   Future<RestClientResponse<T>> _dioResponseConverter<T>(
     Response<dynamic> response,
   ) async {
@@ -195,6 +227,19 @@ class DioRestClient implements RestClient {
 
   Never _throwRestClientException(DioException dioException) {
     final response = dioException.response;
+
+    // Log detalhado do erro para debug
+    log('=== DIO ERROR DETAILS ===');
+    log('Type: ${dioException.type}');
+    log('Message: ${dioException.message}');
+    log('Error: ${dioException.error}');
+    log('Response Status: ${response?.statusCode}');
+    log('Response Message: ${response?.statusMessage}');
+    log('Request URL: ${dioException.requestOptions.uri}');
+    log('Request Method: ${dioException.requestOptions.method}');
+    log('Request Headers: ${dioException.requestOptions.headers}');
+    log('Request Data: ${dioException.requestOptions.data}');
+    log('========================');
 
     throw RestClientException(
       error: dioException.error,
