@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import '../../logger/app_logger.dart';
 
 enum _WebViewState { initializing, ready, error }
@@ -15,7 +17,7 @@ class MyWebviewWidget extends StatefulWidget {
     super.key,
   });
 
-  final Function(WebviewController, String) onWebViewCreated;
+  final Function(dynamic controller, String) onWebViewCreated;
   final String tabIdentifier;
 
   final String initialUrl;
@@ -28,7 +30,8 @@ class MyWebviewWidget extends StatefulWidget {
 
 class _MyWebviewWidgetState extends State<MyWebviewWidget>
     with AutomaticKeepAliveClientMixin {
-  final WebviewController _controller = WebviewController();
+  dynamic? _controller;
+  bool _isMacOS = false;
 
   _WebViewState _viewState = _WebViewState.initializing;
   bool _isNavigationLoading = false;
@@ -47,7 +50,18 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
   void initState() {
     super.initState();
     _currentUrl = widget.currentUrl ?? widget.initialUrl;
+    _isMacOS = Platform.isMacOS;
+    _initController();
     _initPlatformState();
+  }
+
+  void _initController() {
+    if (!_isMacOS) {
+      _controller = WebviewController();
+    } else {
+      // Para macOS, o controller será inicializado no InAppWebView
+      _controller = null;
+    }
   }
 
   @override
@@ -62,12 +76,18 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
   }
 
   Future<void> _loadNewUrl(String url) async {
-    if (_isOperationInProgress) {
+    if (_isOperationInProgress || _controller == null) {
       return;
     }
 
     try {
-      await _controller.loadUrl(url);
+      if (_isMacOS) {
+        await _controller.loadUrl(
+          urlRequest: URLRequest(url: WebUri(url)),
+        );
+      } else {
+        await _controller.loadUrl(url);
+      }
     } catch (e, s) {
       widget.logger?.error('Erro ao carregar nova URL: $url', e, s);
     }
@@ -81,14 +101,19 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
     try {
       _isOperationInProgress = true;
 
-      await _controller.initialize();
-      await _controller.setBackgroundColor(Colors.transparent);
-      await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
-      await _disableJavaScriptDialogs();
-      _setupEventListeners();
-      await _controller.loadUrl(_currentUrl);
+      if (_isMacOS) {
+        await _initMacOSWebView();
+      } else {
+        if (_controller != null) {
+          await _initWindowsWebView();
+        } else {
+          throw Exception('Controller não inicializado');
+        }
+      }
 
-      widget.onWebViewCreated(_controller, widget.tabIdentifier);
+      if (_controller != null) {
+        widget.onWebViewCreated(_controller, widget.tabIdentifier);
+      }
 
       if (mounted) {
         setState(() {
@@ -115,10 +140,35 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
     }
   }
 
+  Future<void> _initMacOSWebView() async {
+    // Para macOS, a inicialização é feita no InAppWebView widget
+    // O controller é passado via onWebViewCreated
+    setState(() {
+      _viewState = _WebViewState.ready;
+    });
+  }
+
+  Future<void> _initWindowsWebView() async {
+    if (_controller == null) {
+      throw Exception('Controller não inicializado');
+    }
+
+    await _controller.initialize();
+    await _controller.setBackgroundColor(Colors.transparent);
+    await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+    await _disableJavaScriptDialogs();
+    _setupEventListeners();
+    await _controller.loadUrl(_currentUrl);
+  }
+
   Future<void> _disableJavaScriptDialogs() async {
+    if (_controller == null) {
+      return;
+    }
+
     try {
-      await _controller.executeScript(
-        '''
+      if (_isMacOS) {
+        await _controller.evaluateJavascript(source: '''
           window.alert = function(message) { 
             console.log("[Alert interceptado]: " + message);
             return true;
@@ -145,8 +195,39 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
           } catch(e) {
             console.error("Erro ao substituir window.open:", e);
           }
-        ''',
-      );
+        ''');
+      } else {
+        await _controller.executeScript(
+          '''
+            window.alert = function(message) { 
+              console.log("[Alert interceptado]: " + message);
+              return true;
+            };
+            
+            window.confirm = function(message) {
+              console.log("[Confirm interceptado]: " + message);
+              return true;
+            };
+            
+            window.prompt = function(message, defaultValue) {
+              console.log("[Prompt interceptado]: " + message);
+              return defaultValue || "";
+            };
+            
+            window.onbeforeunload = null;
+            
+            try {
+              const originalOpen = window.open;
+              window.open = function() {
+                console.log("[window.open interceptado]");
+                return null;
+              };
+            } catch(e) {
+              console.error("Erro ao substituir window.open:", e);
+            }
+          ''',
+        );
+      }
     } catch (e) {
       widget.logger?.error('Erro ao desabilitar diálogos JavaScript: $e');
     }
@@ -156,20 +237,22 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
     _loadingStateSubscription?.cancel();
     _progressTimer?.cancel();
 
-    _loadingStateSubscription = _controller.loadingState.listen((state) {
-      if (!mounted) return;
+    if (!_isMacOS && _controller != null) {
+      _loadingStateSubscription = _controller.loadingState.listen((state) {
+        if (!mounted) return;
 
-      final isLoading = state != LoadingState.navigationCompleted;
-      if (_isNavigationLoading != isLoading) {
-        setState(() {
-          _isNavigationLoading = isLoading;
-        });
-      }
+        final isLoading = state != LoadingState.navigationCompleted;
+        if (_isNavigationLoading != isLoading) {
+          setState(() {
+            _isNavigationLoading = isLoading;
+          });
+        }
 
-      if (state == LoadingState.navigationCompleted) {
-        _captureCurrentUrl();
-      }
-    });
+        if (state == LoadingState.navigationCompleted) {
+          _captureCurrentUrl();
+        }
+      });
+    }
 
     _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (_isNavigationLoading) {
@@ -183,14 +266,26 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
   }
 
   Future<void> _captureCurrentUrl() async {
+    if (_controller == null) {
+      return;
+    }
+
     try {
-      await _controller.executeScript(
-        '''
-          if (window.chrome && window.chrome.webview) {
-            window.chrome.webview.postMessage('current_url:' + window.location.href);
+      if (_isMacOS) {
+        await _controller.evaluateJavascript(source: '''
+          if (window.webkit && window.webkit.messageHandlers) {
+            window.webkit.messageHandlers.urlHandler.postMessage(window.location.href);
           }
-        ''',
-      );
+        ''');
+      } else {
+        await _controller.executeScript(
+          '''
+            if (window.chrome && window.chrome.webview) {
+              window.chrome.webview.postMessage('current_url:' + window.location.href);
+            }
+          ''',
+        );
+      }
     } catch (e) {
       widget.logger?.error('Erro ao capturar URL atual: $e');
     }
@@ -250,7 +345,39 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
         return Stack(
           children: [
             SizedBox.expand(
-              child: Webview(_controller),
+              child: _isMacOS
+                  ? InAppWebView(
+                      initialUrlRequest: URLRequest(url: WebUri(_currentUrl)),
+                      onWebViewCreated: (controller) {
+                        widget.onWebViewCreated(
+                            controller, widget.tabIdentifier);
+                      },
+                      onLoadStart: (controller, url) {
+                        setState(() {
+                          _isNavigationLoading = true;
+                        });
+                      },
+                      onLoadStop: (controller, url) {
+                        setState(() {
+                          _isNavigationLoading = false;
+                        });
+                        _captureCurrentUrl();
+                      },
+                      onLoadError: (controller, url, code, message) {
+                        widget.logger?.error(
+                            'Erro ao carregar URL: $url, Código: $code, Mensagem: $message');
+                      },
+                      initialSettings: InAppWebViewSettings(
+                        javaScriptEnabled: true,
+                        allowsInlineMediaPlayback: true,
+                        mediaPlaybackRequiresUserGesture: false,
+                        allowsBackForwardNavigationGestures: true,
+                        supportZoom: false,
+                        useShouldOverrideUrlLoading: true,
+                        useOnLoadResource: true,
+                      ),
+                    )
+                  : Webview(_controller),
             ),
             if (_isNavigationLoading)
               ValueListenableBuilder<double>(
@@ -272,7 +399,9 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
   void dispose() {
     _progressTimer?.cancel();
     _loadingStateSubscription?.cancel();
-    _controller.dispose();
+    if (!_isMacOS && _controller != null) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 }
