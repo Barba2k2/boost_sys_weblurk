@@ -27,7 +27,7 @@ class UserRepositoryImpl implements UserRepository {
     try {
       // Testar conectividade antes de tentar login
       if (_restClient is DioRestClient) {
-        final dioClient = _restClient as DioRestClient;
+        final dioClient = _restClient;
         final isConnected = await dioClient.testConnectivity();
         if (!isConnected) {
           throw Failure(
