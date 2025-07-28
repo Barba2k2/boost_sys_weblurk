@@ -28,10 +28,6 @@ class SettingsService {
 
   Future<void> muteAppAudio() async {
     try {
-      if (!_volumeService.isVolumeControlAvailable) {
-        Messages.info('Controle de volume não disponível nesta plataforma');
-        return;
-      }
       await _volumeService.toggleMute();
       final status = _volumeService.isMuted ? 'mutado' : 'desmutado';
       Messages.info('Áudio $status');
