@@ -30,7 +30,7 @@ class MyWebviewWidget extends StatefulWidget {
 
 class _MyWebviewWidgetState extends State<MyWebviewWidget>
     with AutomaticKeepAliveClientMixin {
-  dynamic? _controller;
+  dynamic _controller;
   bool _isMacOS = false;
 
   _WebViewState _viewState = _WebViewState.initializing;
@@ -368,10 +368,8 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
                             'Erro ao carregar URL: $url, Código: $code, Mensagem: $message');
                       },
                       initialSettings: InAppWebViewSettings(
-                        javaScriptEnabled: true,
                         allowsInlineMediaPlayback: true,
                         mediaPlaybackRequiresUserGesture: false,
-                        allowsBackForwardNavigationGestures: true,
                         supportZoom: false,
                         useShouldOverrideUrlLoading: true,
                         useOnLoadResource: true,
