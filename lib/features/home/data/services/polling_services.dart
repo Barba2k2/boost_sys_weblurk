@@ -255,7 +255,7 @@ class PollingServiceImpl implements PollingService {
 
       if (_lastScoreUpdate != null) {
         final timeDiff = now.difference(_lastScoreUpdate!);
-        if (timeDiff.inMinutes < 1) {
+        if (timeDiff.inMinutes < 5) {
           return;
         }
       }
