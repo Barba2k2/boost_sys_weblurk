@@ -1,8 +1,6 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 
 import '../../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
 import '../../helpers/constants.dart';
@@ -23,18 +21,6 @@ class DioRestClient implements RestClient {
   }) {
     _dio = Dio(baseOptions ?? _defaultOptions);
 
-    // Configurações específicas para macOS
-    if (Platform.isMacOS) {
-      final httpClient = HttpClient();
-      httpClient.connectionTimeout = const Duration(seconds: 30);
-      httpClient.idleTimeout = const Duration(seconds: 30);
-
-      // Configurações para contornar problemas de certificado
-      httpClient.badCertificateCallback = (cert, host, port) => true;
-
-      _dio.httpClientAdapter = IOHttpClientAdapter();
-    }
-
     _dio.interceptors.addAll(
       [
         AuthInterceptors(
@@ -53,16 +39,14 @@ class DioRestClient implements RestClient {
 
   final _defaultOptions = BaseOptions(
     baseUrl: Environments.param(Constants.ENV_BASE_URL_KEY) ?? '',
-    connectTimeout: const Duration(milliseconds: 30000), // Reduzido para 30s
-    receiveTimeout: const Duration(milliseconds: 30000), // Reduzido para 30s
-    sendTimeout: const Duration(milliseconds: 30000), // Reduzido para 30s
+    connectTimeout: const Duration(milliseconds: 30000),
+    receiveTimeout: const Duration(milliseconds: 30000),
+    sendTimeout: const Duration(milliseconds: 30000),
     validateStatus: (status) {
       return status != null && status < 500;
     },
-    // Configurações mais permissivas para macOS
     followRedirects: true,
     maxRedirects: 10,
-    // Configurações específicas para contornar problemas de permissão
     extra: {
       'retry': 3,
       'retryDelay': 1000,
@@ -199,51 +183,6 @@ class DioRestClient implements RestClient {
   RestClient unAuth() {
     _defaultOptions.extra[Constants.REST_CLIENT_AUTH_REQUIRED_KEY] = false;
     return this;
-  }
-
-  /// Testa a conectividade com a API
-  Future<bool> testConnectivity() async {
-    try {
-      log('=== TESTING CONNECTIVITY ===');
-      log('Base URL: ${_defaultOptions.baseUrl}');
-      log('Full URL: ${_defaultOptions.baseUrl}/auth/login');
-
-      // Teste usando HttpClient diretamente para macOS
-      if (Platform.isMacOS) {
-        final httpClient = HttpClient();
-        httpClient.connectionTimeout = const Duration(seconds: 10);
-        httpClient.idleTimeout = const Duration(seconds: 10);
-
-        try {
-          final request = await httpClient.getUrl(
-            Uri.parse('${_defaultOptions.baseUrl}/auth/login'),
-          );
-          final response = await request.close();
-          log('Direct HttpClient test successful: ${response.statusCode}');
-          return true;
-        } catch (e) {
-          log('Direct HttpClient test failed: $e');
-          return false;
-        } finally {
-          httpClient.close();
-        }
-      }
-
-      // Teste usando Dio
-      final response = await _dio.get(
-        '/auth/login',
-        options: Options(
-          validateStatus: (status) => true, // Aceita qualquer status para teste
-        ),
-      );
-
-      log('Connectivity test successful');
-      log('Status: ${response.statusCode}');
-      return true;
-    } catch (e) {
-      log('Connectivity test failed: $e');
-      return false;
-    }
   }
 
   /// Executa requisições com retry automático
