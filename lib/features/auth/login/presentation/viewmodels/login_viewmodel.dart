@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:validatorless/validatorless.dart';
 
 import '../../../../../core/helpers/sentry_mixin.dart';
-import '../../../../../core/helpers/network_debug.dart';
 import '../../../../../core/services/error_message_service.dart';
 import '../../../../../core/utils/command.dart';
 import '../../../../../core/utils/result.dart';
@@ -24,24 +23,28 @@ class LoginViewModel extends ChangeNotifier with SentryMixin {
 
   UserModel? get userLogged => _authStore.userLogged;
 
-  late final loginCommand =
-      Command1<UserModel, LoginParams>((params) => _login(params));
+  late final loginCommand = Command1<UserModel, LoginParams>(
+    (params) => _login(params),
+  );
   late final logoutCommand = Command0<void>(() => _logout());
 
   Future<Result<UserModel>> _login(LoginParams params) async {
     try {
-      await captureInfo('Iniciando login', data: {'email': params.email});
-      
-      // Executar diagnóstico de rede antes do login
-      await NetworkDebug.runNetworkDiagnostics();
-      
+      await captureInfo(
+        'Iniciando login',
+        data: {'email': params.email},
+      );
+
       await _userService.login(params.email, params.password);
 
       await _authStore.reloadUserData();
 
       final user = _authStore.userLogged;
       if (user != null) {
-        await captureInfo('Login realizado com sucesso', data: {'userId': user.id});
+        await captureInfo(
+          'Login realizado com sucesso',
+          data: {'userId': user.id},
+        );
         await setUserContext(
           id: user.id.toString(),
           username: user.nickname,
@@ -57,7 +60,9 @@ class LoginViewModel extends ChangeNotifier with SentryMixin {
       await captureError(e, StackTrace.current, context: 'login_error');
       final errorMessage =
           ErrorMessageService.instance.extractUserFriendlyMessage(e);
-      return Result.error(Exception(errorMessage));
+      return Result.error(
+        Exception(errorMessage),
+      );
     }
   }
 
@@ -70,7 +75,9 @@ class LoginViewModel extends ChangeNotifier with SentryMixin {
       return Result.ok(null);
     } catch (e) {
       await captureError(e, StackTrace.current, context: 'logout_error');
-      return Result.error(Exception('Erro no logout: $e'));
+      return Result.error(
+        Exception('Erro no logout: $e'),
+      );
     }
   }
 
