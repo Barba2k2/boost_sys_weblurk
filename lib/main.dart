@@ -26,7 +26,7 @@ Future<void> main() async {
     appRunner: () async {
       await ApplicationConfig().consfigureApp();
       await windowManager.ensureInitialized();
-      WindowOptions windowOptions = const WindowOptions(
+      final WindowOptions windowOptions = const WindowOptions(
         size: Size(1014, 624),
         center: true,
       );
