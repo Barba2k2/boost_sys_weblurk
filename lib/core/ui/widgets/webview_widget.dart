@@ -57,11 +57,8 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
     for (int i = 0; i < maxRetries; i++) {
       try {
         await _controller.initialize();
-        widget.logger?.info('WebView inicializado com sucesso na tentativa ${i + 1}');
         return;
       } catch (e) {
-        widget.logger?.warning('Tentativa ${i + 1} de $maxRetries falhou: $e');
-        
         if (i == maxRetries - 1) {
           // Última tentativa - melhorar mensagem de erro
           if (e.toString().contains('unsupported_platform')) {
@@ -81,7 +78,7 @@ Erro original: $e
           }
           rethrow;
         }
-        
+
         // Aguardar antes da próxima tentativa
         await Future.delayed(Duration(milliseconds: 500 * (i + 1)));
       }
@@ -161,6 +158,7 @@ $s
 
   Future<void> _disableJavaScriptDialogs() async {
     try {
+      widget.logger?.debug('Desabilitando diálogos JavaScript');
       await _controller.executeScript(
         '''
           window.alert = function(message) { 
@@ -191,6 +189,7 @@ $s
           }
         ''',
       );
+      widget.logger?.debug('Diálogos JavaScript desabilitados com sucesso');
     } catch (e) {
       widget.logger?.error('Erro ao desabilitar diálogos JavaScript: $e');
     }
@@ -215,19 +214,23 @@ $s
       }
     });
 
-    _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (_isNavigationLoading) {
-        _loadingProgress.value =
-            (_loadingProgress.value + 0.02).clamp(0.0, 0.95);
-      } else {
-        _loadingProgress.value = 1.0;
-        timer.cancel();
-      }
-    });
+    _progressTimer = Timer.periodic(
+      const Duration(milliseconds: 100),
+      (timer) {
+        if (_isNavigationLoading) {
+          _loadingProgress.value =
+              (_loadingProgress.value + 0.02).clamp(0.0, 0.95);
+        } else {
+          _loadingProgress.value = 1.0;
+          timer.cancel();
+        }
+      },
+    );
   }
 
   Future<void> _captureCurrentUrl() async {
     try {
+      widget.logger?.debug('Capturando URL atual do WebView');
       await _controller.executeScript(
         '''
           if (window.chrome && window.chrome.webview) {
