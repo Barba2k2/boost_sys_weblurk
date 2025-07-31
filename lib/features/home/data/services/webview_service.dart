@@ -9,8 +9,8 @@ abstract class WebViewService {
   Future<void> setWebViewVolume(double volume);
   Future<void> verifyAndFixMuteState(bool shouldBeMuted);
   void setWebViewControllers(
-    dynamic controllerA,
-    dynamic controllerB,
+    WebviewController? controllerA,
+    WebviewController? controllerB,
   );
   void dispose();
 }
@@ -21,38 +21,20 @@ class WebViewServiceImpl implements WebViewService {
   }) : _logger = logger;
 
   final AppLogger _logger;
-  dynamic _controllerA;
-  dynamic _controllerB;
+  WebviewController? _controllerA;
+  WebviewController? _controllerB;
   bool _isMuted = false;
-  double _currentVolume = 1.0;
 
   @override
   bool get isVolumeControlAvailable => true;
 
   @override
   void setWebViewControllers(
-    dynamic controllerA,
-    dynamic controllerB,
+    WebviewController? controllerA,
+    WebviewController? controllerB,
   ) {
     _controllerA = controllerA;
     _controllerB = controllerB;
-  }
-
-  Future<void> _executeScript(dynamic controller, String script) async {
-    try {
-      if (controller == null) {
-        return;
-      }
-
-      if (controller is WebviewController) {
-        await controller.executeScript(script);
-      } else {
-        // Para InAppWebViewController (macOS)
-        await controller.evaluateJavascript(source: script);
-      }
-    } catch (e) {
-      _logger.error('Erro ao executar script no WebView', e);
-    }
   }
 
   @override
@@ -60,22 +42,18 @@ class WebViewServiceImpl implements WebViewService {
     try {
       const muteScript = '''
         try {
-          // Mutar todos os elementos de áudio
           const audioElements = document.querySelectorAll('audio');
           audioElements.forEach(audio => {
             audio.muted = true;
             audio.volume = 0;
-            audio.pause();
           });
           
-          // Mutar todos os elementos de vídeo
           const videoElements = document.querySelectorAll('video');
           videoElements.forEach(video => {
             video.muted = true;
             video.volume = 0;
           });
           
-          // Suspender AudioContext se existir
           if (window.AudioContext || window.webkitAudioContext) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             if (window.currentAudioContext) {
@@ -83,7 +61,6 @@ class WebViewServiceImpl implements WebViewService {
             }
           }
           
-          // Mutar player específico do Twitch
           const twitchPlayer = document.querySelector('[data-a-target="twitch-player"]');
           if (twitchPlayer) {
             const video = twitchPlayer.querySelector('video');
@@ -93,7 +70,6 @@ class WebViewServiceImpl implements WebViewService {
             }
           }
           
-          // Mutar vídeos em iframes
           const iframes = document.querySelectorAll('iframe');
           iframes.forEach(iframe => {
             try {
@@ -104,22 +80,8 @@ class WebViewServiceImpl implements WebViewService {
                 video.volume = 0;
               });
             } catch (e) {
-              // Ignorar erros de CORS
             }
           });
-          
-          // Mutar elementos com data-a-target específicos do Twitch
-          const twitchElements = document.querySelectorAll('[data-a-target]');
-          twitchElements.forEach(element => {
-            const videos = element.querySelectorAll('video');
-            videos.forEach(video => {
-              video.muted = true;
-              video.volume = 0;
-            });
-          });
-          
-          // Definir estado global de mute
-          window.isWebViewMuted = true;
           
         } catch (e) {
           console.error('Erro ao mutar WebView:', e);
@@ -127,11 +89,11 @@ class WebViewServiceImpl implements WebViewService {
       ''';
 
       if (_controllerA != null) {
-        await _executeScript(_controllerA, muteScript);
+        await _controllerA!.executeScript(muteScript);
       }
 
       if (_controllerB != null) {
-        await _executeScript(_controllerB, muteScript);
+        await _controllerB!.executeScript(muteScript);
       }
 
       _isMuted = true;
@@ -145,21 +107,18 @@ class WebViewServiceImpl implements WebViewService {
     try {
       const unmuteScript = '''
         try {
-          // Desmutar todos os elementos de áudio
           const audioElements = document.querySelectorAll('audio');
           audioElements.forEach(audio => {
             audio.muted = false;
             audio.volume = 1;
           });
           
-          // Desmutar todos os elementos de vídeo
           const videoElements = document.querySelectorAll('video');
           videoElements.forEach(video => {
             video.muted = false;
             video.volume = 1;
           });
           
-          // Resumir AudioContext se existir
           if (window.AudioContext || window.webkitAudioContext) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             if (window.currentAudioContext) {
@@ -167,7 +126,6 @@ class WebViewServiceImpl implements WebViewService {
             }
           }
           
-          // Desmutar player específico do Twitch
           const twitchPlayer = document.querySelector('[data-a-target="twitch-player"]');
           if (twitchPlayer) {
             const video = twitchPlayer.querySelector('video');
@@ -177,7 +135,6 @@ class WebViewServiceImpl implements WebViewService {
             }
           }
           
-          // Desmutar vídeos em iframes
           const iframes = document.querySelectorAll('iframe');
           iframes.forEach(iframe => {
             try {
@@ -188,22 +145,8 @@ class WebViewServiceImpl implements WebViewService {
                 video.volume = 1;
               });
             } catch (e) {
-              // Ignorar erros de CORS
             }
           });
-          
-          // Desmutar elementos com data-a-target específicos do Twitch
-          const twitchElements = document.querySelectorAll('[data-a-target]');
-          twitchElements.forEach(element => {
-            const videos = element.querySelectorAll('video');
-            videos.forEach(video => {
-              video.muted = false;
-              video.volume = 1;
-            });
-          });
-          
-          // Definir estado global de mute
-          window.isWebViewMuted = false;
           
         } catch (e) {
           console.error('Erro ao desmutar WebView:', e);
@@ -211,11 +154,11 @@ class WebViewServiceImpl implements WebViewService {
       ''';
 
       if (_controllerA != null) {
-        await _executeScript(_controllerA, unmuteScript);
+        await _controllerA!.executeScript(unmuteScript);
       }
 
       if (_controllerB != null) {
-        await _executeScript(_controllerB, unmuteScript);
+        await _controllerB!.executeScript(unmuteScript);
       }
 
       _isMuted = false;
@@ -228,28 +171,23 @@ class WebViewServiceImpl implements WebViewService {
   Future<void> setWebViewVolume(double volume) async {
     try {
       final clampedVolume = volume.clamp(0.0, 1.0);
-      _currentVolume = clampedVolume;
-      _isMuted = clampedVolume == 0.0;
 
       final volumeScript = '''
         try {
           const targetVolume = $clampedVolume;
           
-          // Definir volume para todos os elementos de áudio
           const audioElements = document.querySelectorAll('audio');
           audioElements.forEach(audio => {
             audio.volume = targetVolume;
             audio.muted = targetVolume === 0;
           });
           
-          // Definir volume para todos os elementos de vídeo
           const videoElements = document.querySelectorAll('video');
           videoElements.forEach(video => {
             video.volume = targetVolume;
             video.muted = targetVolume === 0;
           });
           
-          // Definir volume para player específico do Twitch
           const twitchPlayer = document.querySelector('[data-a-target="twitch-player"]');
           if (twitchPlayer) {
             const video = twitchPlayer.querySelector('video');
@@ -259,7 +197,6 @@ class WebViewServiceImpl implements WebViewService {
             }
           }
           
-          // Definir volume para vídeos em iframes
           const iframes = document.querySelectorAll('iframe');
           iframes.forEach(iframe => {
             try {
@@ -270,23 +207,8 @@ class WebViewServiceImpl implements WebViewService {
                 video.muted = targetVolume === 0;
               });
             } catch (e) {
-              // Ignorar erros de CORS
             }
           });
-          
-          // Definir volume para elementos com data-a-target específicos do Twitch
-          const twitchElements = document.querySelectorAll('[data-a-target]');
-          twitchElements.forEach(element => {
-            const videos = element.querySelectorAll('video');
-            videos.forEach(video => {
-              video.volume = targetVolume;
-              video.muted = targetVolume === 0;
-            });
-          });
-          
-          // Atualizar estado global
-          window.isWebViewMuted = targetVolume === 0;
-          window.currentWebViewVolume = targetVolume;
           
         } catch (e) {
           console.error('Erro ao definir volume do WebView:', e);
@@ -294,11 +216,11 @@ class WebViewServiceImpl implements WebViewService {
       ''';
 
       if (_controllerA != null) {
-        await _executeScript(_controllerA, volumeScript);
+        await _controllerA!.executeScript(volumeScript);
       }
 
       if (_controllerB != null) {
-        await _executeScript(_controllerB, volumeScript);
+        await _controllerB!.executeScript(volumeScript);
       }
     } catch (e, s) {
       _logger.error('Error setting WebView volume', e, s);
