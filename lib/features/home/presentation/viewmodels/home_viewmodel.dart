@@ -13,6 +13,7 @@ import '../../../../models/user_model.dart';
 import '../../../../service/home/home_service.dart';
 import '../../../auth/login/presentation/viewmodels/auth_viewmodel.dart';
 import '../../data/services/webview_service.dart';
+import '../../data/services/polling_services.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
@@ -21,14 +22,18 @@ class HomeViewModel extends ChangeNotifier {
     required AppLogger logger,
     required WebViewService webViewService,
     required VolumeService volumeService,
+    required PollingService pollingService,
   })  : _homeService = homeService,
         _authViewmodel = authViewmodel,
         _logger = logger,
         _webViewService = webViewService,
-        _volumeService = volumeService {
+        _volumeService = volumeService,
+        _pollingService = pollingService {
     _authViewmodel.addListener(() => notifyListeners());
 
     _initializeChannels();
+    _initializeCorrectChannel();
+    _startPollingIfLoggedIn();
 
     _startMuteStateCheck();
   }
@@ -38,6 +43,7 @@ class HomeViewModel extends ChangeNotifier {
   final AppLogger _logger;
   final WebViewService _webViewService;
   final VolumeService _volumeService;
+  final PollingService _pollingService;
 
   Timer? _muteStateCheckTimer;
 
@@ -73,6 +79,55 @@ class HomeViewModel extends ChangeNotifier {
     _currentChannel = 'https://twitch.tv/BoostTeam_';
     _currentChannelListA = 'https://twitch.tv/BoostTeam_';
     _currentChannelListB = 'https://twitch.tv/BoostTeam_';
+  }
+
+  void _startPollingIfLoggedIn() {
+    if (_authViewmodel.userLogged != null) {
+      _pollingService.startPolling(_authViewmodel.userLogged!.id);
+    }
+  }
+
+  Future<void> _initializeCorrectChannel() async {
+    try {
+      // Buscar canal atual imediatamente
+      final correctChannel = await _homeService.fetchCurrentChannel();
+      if (correctChannel != null && correctChannel.isNotEmpty) {
+        _currentChannel = correctChannel;
+      }
+
+      // Buscar canais das listas
+      final channelA = await _homeService.fetchCurrentChannelForList('Lista A');
+      final channelB = await _homeService.fetchCurrentChannelForList('Lista B');
+
+      if (channelA != null && channelA.isNotEmpty) {
+        _currentChannelListA = channelA;
+      }
+
+      if (channelB != null && channelB.isNotEmpty) {
+        _currentChannelListB = channelB;
+      }
+
+      // Atualizar canal atual baseado na aba ativa
+      final newCurrentChannel =
+          _currentTabIndex == 0 ? _currentChannelListA : _currentChannelListB;
+      if (_currentChannel != newCurrentChannel) {
+        _currentChannel = newCurrentChannel;
+      }
+
+      // Notificar imediatamente para atualizar a UI
+      notifyListeners();
+
+      // Aguardar um pouco e verificar novamente para garantir
+      await Future.delayed(const Duration(milliseconds: 1000));
+      await _updateChannels();
+
+      // Forçar atualização do WebView se necessário
+      if (_webviewControllerA != null || _webviewControllerB != null) {
+        await _reloadWebView();
+      }
+    } catch (e, s) {
+      _logger.error('Erro ao inicializar canais corretos', e, s);
+    }
   }
 
   void onWebViewCreated(WebviewController controller, String identifier) {
@@ -129,6 +184,11 @@ class HomeViewModel extends ChangeNotifier {
 
       if (shouldNotify) {
         notifyListeners();
+
+        // Forçar recarregamento do WebView se necessário
+        if (_webviewControllerA != null || _webviewControllerB != null) {
+          await _reloadWebView();
+        }
       }
 
       return Result.ok(null);
@@ -141,8 +201,8 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void onInit() {
+    // O canal já foi inicializado no construtor, apenas atualizar se necessário
     updateChannels();
-    fetchCurrentChannelCommand.execute();
   }
 
   void reloadWebView() {
@@ -159,7 +219,9 @@ class HomeViewModel extends ChangeNotifier {
       return Result.ok(null);
     } catch (e, s) {
       _logger.error('Erro ao verificar atualização', e, s);
-      return Result.error(Exception('Erro ao verificar atualização: $e'));
+      return Result.error(
+        Exception('Erro ao verificar atualização: $e'),
+      );
     }
   }
 
@@ -170,9 +232,16 @@ class HomeViewModel extends ChangeNotifier {
           : _webviewControllerB;
 
       if (activeController != null) {
-        await activeController.reload();
-      } else {
-        _logger.warning('Nenhum controller ativo para recarregar');
+        // Buscar canal atual da API primeiro
+        final apiChannel = await _homeService.fetchCurrentChannel();
+        final currentUrl = (apiChannel?.isNotEmpty == true
+                ? apiChannel
+                : (_currentTabIndex == 0
+                    ? _currentChannelListA
+                    : _currentChannelListB)) ??
+            'https://twitch.tv/BoostTeam_';
+
+        await activeController.loadUrl(currentUrl);
       }
 
       return Result.ok(null);
@@ -194,6 +263,12 @@ class HomeViewModel extends ChangeNotifier {
       await updateChannels();
 
       notifyListeners();
+
+      // Forçar atualização do WebView se necessário
+      if (_webviewControllerA != null || _webviewControllerB != null) {
+        await _reloadWebView();
+      }
+
       return Result.ok(schedules);
     } catch (e, s) {
       _logger.error('Erro ao carregar agendamentos', e, s);
@@ -217,13 +292,19 @@ class HomeViewModel extends ChangeNotifier {
 
       _currentTabIndex = index;
 
-      _currentChannel = index == 0 //
+      final newChannel = index == 0 //
           ? _currentChannelListA
           : _currentChannelListB;
+      _currentChannel = newChannel;
 
       await _volumeService.syncMuteState();
 
       notifyListeners();
+
+      // Forçar atualização do WebView se necessário
+      if (_webviewControllerA != null || _webviewControllerB != null) {
+        await _reloadWebView();
+      }
 
       if (_scheduleLists.isEmpty) {
         await loadSchedulesCommand.execute();
@@ -239,12 +320,19 @@ class HomeViewModel extends ChangeNotifier {
   Future<Result<String>> _fetchCurrentChannel() async {
     try {
       final channel = await _homeService.fetchCurrentChannel();
+
       if (channel != null && channel.isNotEmpty) {
         _currentChannel = channel;
 
         await updateChannels();
 
         notifyListeners();
+
+        // Forçar atualização do WebView se necessário
+        if (_webviewControllerA != null || _webviewControllerB != null) {
+          await _reloadWebView();
+        }
+
         return Result.ok(_currentChannel);
       } else {
         _currentChannel = 'https://twitch.tv/BoostTeam_';
@@ -299,6 +387,7 @@ class HomeViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _stopMuteStateCheck();
+    _pollingService.stopPolling();
 
     _webviewControllerA?.dispose();
     _webviewControllerB?.dispose();
