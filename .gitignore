@@ -49,3 +49,9 @@ app.*.map.json
 sentry.properties
 
 sentry.properties
+
+# Claude AI
+.claude/
+
+# Sentry Native
+.sentry-native/
