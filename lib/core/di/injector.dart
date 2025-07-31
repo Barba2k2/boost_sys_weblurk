@@ -167,6 +167,7 @@ class Injector {
         authViewmodel: i(),
         webViewService: i(),
         volumeService: i(),
+        pollingService: i(),
       ),
     );
   }
