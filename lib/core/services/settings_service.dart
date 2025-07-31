@@ -31,7 +31,6 @@ class SettingsService {
       await _volumeService.toggleMute();
       final status = _volumeService.isMuted ? 'mutado' : 'desmutado';
       Messages.info('Áudio $status');
-      _logger.info('Áudio alternado para: $status');
     } catch (e) {
       _logger.error('Erro ao alternar o áudio do aplicativo: $e');
       Messages.alert('Erro ao alternar o áudio do aplicativo');
