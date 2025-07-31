@@ -23,7 +23,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _rotationController;
-  late Animation<double> _rotationAnimation;
 
   @override
   void initState() {
@@ -31,10 +30,6 @@ class _HomePageState extends State<HomePage>
     _rotationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
-    );
-    _rotationAnimation = CurvedAnimation(
-      parent: _rotationController,
-      curve: Curves.linear,
     );
     widget.viewModel.loadSchedulesCommand.addListener(_handleLoadingChange);
 
@@ -54,10 +49,6 @@ class _HomePageState extends State<HomePage>
       final currentValue = _rotationController.value;
       if (currentValue != 0.0) {
         _rotationController.stop();
-        _rotationAnimation = CurvedAnimation(
-          parent: _rotationController,
-          curve: Curves.elasticOut,
-        );
         _rotationController
             .animateTo(
           1.0,
@@ -66,10 +57,6 @@ class _HomePageState extends State<HomePage>
             .then(
           (_) {
             _rotationController.value = 0.0;
-            _rotationAnimation = CurvedAnimation(
-              parent: _rotationController,
-              curve: Curves.linear,
-            );
           },
         );
       } else {
