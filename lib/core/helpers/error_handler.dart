@@ -2,20 +2,25 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
-import 'sentry_config.dart';
+import '../services/sentry_service.dart';
 
 class ErrorHandler {
   static void setupErrorHandling() {
     FlutterError.onError = (FlutterErrorDetails details) {
-      SentryConfig.captureException(
+      SentryService.captureException(
         details.exception,
-        details.stack,
+        stackTrace: details.stack,
+        hint: 'Flutter Error',
       );
     };
 
     // Captura erros não tratados
     PlatformDispatcher.instance.onError = (error, stack) {
-      SentryConfig.captureException(error, stack);
+      SentryService.captureException(
+        error, 
+        stackTrace: stack,
+        hint: 'Platform Error',
+      );
       return true;
     };
   }
@@ -25,43 +30,51 @@ class ErrorHandler {
     StackTrace? stackTrace, {
     String? context,
   }) async {
-    await SentryConfig.addBreadcrumb(
+    SentryService.addBreadcrumb(
       'Error captured',
       data: {'context': context ?? 'Unknown'},
       category: 'error',
       level: SentryLevel.error,
     );
 
-    await SentryConfig.captureException(error, stackTrace);
+    SentryService.captureException(
+      error, 
+      stackTrace: stackTrace,
+      hint: context,
+    );
   }
 
   static Future<void> captureInfo(
     String message, {
     Map<String, dynamic>? data,
   }) async {
-    await SentryConfig.addBreadcrumb(
+    SentryService.addBreadcrumb(
       message,
       data: data,
       category: 'info',
     );
 
-    await SentryConfig.captureMessage(message);
+    SentryService.captureMessage(
+      message,
+      extra: data,
+    );
   }
 
   static Future<void> captureWarning(
     String message, {
     Map<String, dynamic>? data,
   }) async {
-    await SentryConfig.addBreadcrumb(
+    SentryService.addBreadcrumb(
       message,
       data: data,
       category: 'warning',
       level: SentryLevel.warning,
     );
 
-    await SentryConfig.captureMessage(
+    SentryService.captureMessage(
       message,
       level: SentryLevel.warning,
+      extra: data,
     );
   }
 }
