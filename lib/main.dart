@@ -1,28 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'core/application_config.dart';
 import 'core/di/injector.dart';
 import 'core/helpers/error_handler.dart';
 import 'core/routes/router_config.dart';
+import 'core/services/sentry_service.dart';
+import 'core/services/shorebird_update_service.dart';
 import 'core/ui/ui_config.dart';
 
 Future<void> main() async {
-  await SentryFlutter.init(
-    (options) {
-      options.dsn =
-          'https://580a020e1bae72626f33e68ae69ea9be@o4509748376371200.ingest.us.sentry.io/4509748377747456';
-      // Adds request headers and IP for users, for more info visit:
-      // https://docs.sentry.io/platforms/dart/guides/flutter/data-management/data-collected/
-      options.sendDefaultPii = true;
-      // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
-      // We recommend adjusting this value in production.
-      options.tracesSampleRate = 1.0;
-      // Configure Session Replay
-      options.replay.sessionSampleRate = 0.1;
-      options.replay.onErrorSampleRate = 1.0;
-    },
+  await SentryService.init(
     appRunner: () async {
       await ApplicationConfig().consfigureApp();
       await windowManager.ensureInitialized();
@@ -41,8 +29,32 @@ Future<void> main() async {
   );
 }
 
-class Weblurk extends StatelessWidget {
+class Weblurk extends StatefulWidget {
   const Weblurk({super.key});
+
+  @override
+  State<Weblurk> createState() => _WeblurklState();
+}
+
+class _WeblurklState extends State<Weblurk> {
+  @override
+  void initState() {
+    super.initState();
+    _checkForUpdates();
+  }
+
+  Future<void> _checkForUpdates() async {
+    // Aguarda um pequeno delay para garantir que a UI esteja pronta
+    await Future.delayed(const Duration(seconds: 2));
+    
+    // Executar diagnóstico primeiro
+    await ShorebirdUpdateService.debugShorebird();
+    
+    final hasUpdate = await ShorebirdUpdateService.checkForUpdates();
+    if (hasUpdate && mounted) {
+      await ShorebirdUpdateService.showUpdateDialog(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
