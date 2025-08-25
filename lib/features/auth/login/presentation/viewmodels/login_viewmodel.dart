@@ -30,12 +30,7 @@ class LoginViewModel extends ChangeNotifier with SentryMixin {
 
   Future<Result<UserModel>> _login(LoginParams params) async {
     try {
-      await captureInfo(
-        'Iniciando login',
-        data: {'email': params.email},
-      );
-
-      await _userService.login(params.email, params.password);
+      await _userService.login(params.nickname, params.password);
 
       await _authStore.reloadUserData();
 
@@ -92,9 +87,9 @@ class LoginViewModel extends ChangeNotifier with SentryMixin {
 
 class LoginParams {
   LoginParams({
-    required this.email,
+    required this.nickname,
     required this.password,
   });
-  final String email;
+  final String nickname;
   final String password;
 }

@@ -38,8 +38,8 @@ class _LoginPageState extends State<LoginPage> {
     final formValid = _formKey.currentState?.validate() ?? false;
     if (formValid) {
       final params = LoginParams(
-        email: _nicknameEC.text.trim(),
-        password: _passwordEC.text.trim(),
+        nickname: _nicknameEC.text,
+        password: _passwordEC.text,
       );
       widget.viewModel.loginCommand.execute(params);
     }
