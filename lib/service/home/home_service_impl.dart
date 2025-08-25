@@ -81,7 +81,9 @@ class HomeServiceImpl implements HomeService {
       }
 
       for (final scheduleList in scheduleLists) {
-        if (scheduleList.schedules.isEmpty) continue;
+        if (scheduleList.schedules.isEmpty) {
+          continue;
+        }
 
         final currentSchedule = scheduleList.schedules.firstWhere(
           (schedule) {
@@ -94,7 +96,9 @@ class HomeServiceImpl implements HomeService {
               final cleanEndTime =
                   endTimeStr.replaceAll('Time(', '').replaceAll(')', '');
 
-              if (cleanStartTime.isEmpty || cleanEndTime.isEmpty) return false;
+              if (cleanStartTime.isEmpty || cleanEndTime.isEmpty) {
+                return false;
+              }
 
               final startTimeParts = cleanStartTime.split(':');
               final endTimeParts = cleanEndTime.split(':');
@@ -120,7 +124,10 @@ class HomeServiceImpl implements HomeService {
                 endTimeParts.length > 2 ? int.parse(endTimeParts[2]) : 0,
               );
 
-              return now.isAfter(startDateTime) && now.isBefore(endDateTime);
+              final isCurrent =
+                  now.isAfter(startDateTime) && now.isBefore(endDateTime);
+              if (isCurrent) {}
+              return isCurrent;
             } catch (e) {
               _logger.warning('Erro ao processar horário do agendamento: $e');
               return false;

@@ -48,6 +48,14 @@ class UserRepositoryImpl implements UserRepository {
           );
         }
       }
+
+      // Tratamento específico para erros de conexão
+      if (e.error != null && e.error.toString().contains('SocketException')) {
+        throw Failure(
+            message:
+                'Erro de conexão. Verifique sua internet e tente novamente.');
+      }
+
       _logger.error('Repository - Failed to login user', e, s);
       throw Failure(message: 'Erro ao realizar login');
     } catch (e, s) {

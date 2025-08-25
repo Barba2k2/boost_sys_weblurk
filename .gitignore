@@ -46,3 +46,12 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+sentry.properties
+
+sentry.properties
+
+# Claude AI
+.claude/
+
+# Sentry Native
+.sentry-native/

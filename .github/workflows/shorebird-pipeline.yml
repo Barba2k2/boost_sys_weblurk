@@ -1,28 +1,28 @@
-name: Shorebird Main Pipeline
+name: Shorebird Pipeline
 
 on:
   push:
     branches:
-      - "1.0.14+1"
       - "main"
       - "master"
-      - "develop-*"
+      - "1.0.14+1"
     paths-ignore:
       - "README.md"
       - "docs/**"
       - ".github/ISSUE_TEMPLATE/**"
-      - ".github/pull_request_template.md"
 
-  # Adicionar trigger manual para debug
   workflow_dispatch:
     inputs:
-      force_run:
-        description: "Forçar execução da pipeline"
+      force_action:
+        description: "Forcar acao especifica"
         required: false
-        default: true
-        type: boolean
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - release
+          - patch
 
-# Adicionar permissões necessárias
 permissions:
   contents: write
   issues: write
@@ -33,92 +33,163 @@ env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
-  # Job de verificação inicial
-  debug-trigger:
+  auto-version-manager:
     runs-on: windows-latest
+    outputs:
+      action: ${{ steps.decision.outputs.action }}
+      final-version: ${{ steps.auto-version.outputs.final-version }}
+      version-was-updated: ${{ steps.auto-version.outputs.version-was-updated }}
+      should-proceed: ${{ steps.decision.outputs.should-proceed }}
     steps:
-      - name: Debug Pipeline Trigger
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      # =================================================================
+      # SOLUÇÃO IMPLEMENTADA AQUI
+      # Esta etapa verifica a autenticação antes de qualquer outra coisa.
+      # =================================================================
+      - name: Verify Shorebird Authentication
         shell: powershell
         run: |
-          Write-Output "DEBUG: Pipeline foi disparada!"
-          Write-Output "Informacoes do trigger:"
-          Write-Output "  Branch: ${{ github.ref_name }}"
-          Write-Output "  Event: ${{ github.event_name }}"
-          Write-Output "  SHA: ${{ github.sha }}"
-          Write-Output "  Actor: ${{ github.actor }}"
-          Write-Output "  Workflow: ${{ github.workflow }}"
-          Write-Output "  Repository: ${{ github.repository }}"
+          Write-Host "Verifying Shorebird authentication..."
+          shorebird apps list 2>&1 | Out-Null # Tenta um comando simples e ignora a saída
 
-          Write-Output "Arquivos modificados neste push:"
-          try {
-            $changedFiles = git diff --name-only HEAD~1..HEAD
-            if ($changedFiles) {
-              $changedFiles | ForEach-Object { Write-Output "  - $_" }
-            } else {
-              Write-Output "  (Nenhum arquivo detectado ou primeiro commit)"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::error::FALHA DE AUTENTICAÇÃO COM O SHOREBIRD!"
+            Write-Host "::error::O segredo 'SHOREBIRD_TOKEN' está inválido ou expirado."
+            Write-Host "::error::Ação necessária: Gere um novo token com 'shorebird login:ci' e atualize o segredo nas configurações do repositório no GitHub."
+            exit 1 # Para a pipeline imediatamente
+          }
+
+          Write-Host "Authentication successful. Proceeding with version management."
+
+      - name: Configure Git for Long Paths
+        shell: powershell
+        run: |
+          git config --global core.longpaths true
+
+      - name: Auto Version Management with Correct Shorebird Commands
+        id: auto-version
+        shell: powershell
+        run: |
+          Write-Host "========================================"
+          Write-Host "INICIANDO GERENCIAMENTO AUTOMATICO DE VERSAO"
+          Write-Host "========================================"
+
+          Write-Host "1. Lendo versao atual do pubspec.yaml..."
+          $pubspecContent = Get-Content pubspec.yaml -Raw
+          $versionMatch = $pubspecContent | Select-String 'version:\s*(.+)'
+          $currentVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
+          Write-Host "   Versao encontrada: $currentVersion"
+
+          Write-Host ""
+          Write-Host "2. Verificando releases existentes no Shorebird..."
+          $existingReleases = shorebird releases list
+          $releaseExists = $existingReleases -like "*$currentVersion*"
+
+          $finalVersion = $currentVersion
+          $versionWasUpdated = $false
+
+          if ($releaseExists) {
+            Write-Host "   ALERTA: Release $currentVersion JA EXISTE!"
+            Write-Host "3. Release ja existe - calculando nova versao..."
+            
+            $versionParts = $currentVersion -split '\+'
+            $semverPart = $versionParts[0]
+            $buildPart = if ($versionParts.Length -gt 1) { [int]$versionParts[1] } else { 0 }
+            
+            $maxAttempts = 10
+            for ($i = 1; $i -le $maxAttempts; $i++) {
+              $buildPart += 1
+              $candidateVersion = "$semverPart+$buildPart"
+              Write-Host "   Testando versao: $candidateVersion"
+              if (-not ($existingReleases -like "*$candidateVersion*")) {
+                $finalVersion = $candidateVersion
+                $versionWasUpdated = $true
+                Write-Host "   ENCONTRADA: Versao disponivel: $finalVersion"
+                break
+              }
             }
-          } catch {
-            Write-Output "  (Erro ao obter arquivos modificados)"
-          }
-
-          Write-Output "Verificacao de secrets:"
-          if ("${{ secrets.SHOREBIRD_TOKEN }}" -ne "") {
-            Write-Output "  OK: SHOREBIRD_TOKEN configurado"
           } else {
-            Write-Output "  ERROR: SHOREBIRD_TOKEN NAO configurado"
+            Write-Host "   OK: Release $currentVersion nao existe ainda."
+            Write-Host "3. Versao atual esta disponivel - nenhuma mudanca necessaria"
           }
 
-  # Job 1: Análise de Mudanças
-  analyze:
-    needs: debug-trigger
-    uses: ./.github/workflows/analyze-changes.yml
-    with:
-      branch_name: ${{ github.ref_name }}
-    secrets:
-      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          if ($versionWasUpdated) {
+            Write-Host ""
+            Write-Host "4. Atualizando pubspec.yaml..."
+            $updatedContent = $pubspecContent -replace "version:\s*.+", "version: $finalVersion"
+            Set-Content pubspec.yaml $updatedContent -Encoding UTF8
+            Write-Host "   pubspec.yaml atualizado: $currentVersion -> $finalVersion"
+            
+            Write-Host ""
+            Write-Host "5. Commitando mudancas de versao..."
+            git config --global user.email "action@github.com"
+            git config --global user.name "GitHub Action Auto-Versioning"
+            git add pubspec.yaml
+            $commitMessage = "chore: auto-bump version to $finalVersion [skip ci]"
+            git commit -m $commitMessage
+            git push origin HEAD
+            Write-Host "   Commit e Push concluidos com sucesso."
+          } else {
+            Write-Host ""
+            Write-Host "4. Nenhuma atualizacao do pubspec.yaml necessaria"
+            Write-Host "5. Nenhum commit necessario"
+          }
 
-  # Job 2: Versionamento (se necessário)
-  versioning:
-    needs: analyze
-    if: needs.analyze.outputs.should-proceed == 'true'
-    uses: ./.github/workflows/version-management.yml
-    with:
-      current_version: ${{ needs.analyze.outputs.current-version }}
-      new_version: ${{ needs.analyze.outputs.new-version }}
-      change_type: ${{ needs.analyze.outputs.change-type }}
-      release_notes: ${{ needs.analyze.outputs.release-notes }}
+          echo "final-version=$finalVersion" >> $env:GITHUB_OUTPUT
+          echo "version-was-updated=$versionWasUpdated" >> $env:GITHUB_OUTPUT
 
-  # Job 3: Shorebird Release (se for release)
+          Write-Host "========================================"
+          Write-Host "GERENCIAMENTO DE VERSAO CONCLUIDO"
+          Write-Host "========================================"
+
+      - name: Determine Action
+        id: decision
+        shell: powershell
+        run: |
+          $forceAction = "${{ github.event.inputs.force_action }}"
+          $finalVersion = "${{ steps.auto-version.outputs.final-version }}"
+          $versionWasUpdated = "${{ steps.auto-version.outputs.version-was-updated }}"
+          $action = "patch" # Default to patch
+
+          if ($forceAction -eq 'release' -or $forceAction -eq 'patch') {
+              $action = $forceAction
+          } else {
+              $commits = git log --oneline -5 --format="%s"
+              if ($commits | Where-Object { $_ -match "(BREAKING|!):" -or $_ -match "^feat" }) {
+                  $action = "release"
+              }
+          }
+
+          Write-Host "DECISAO FINAL: $action para versao $finalVersion"
+          echo "action=$action" >> $env:GITHUB_OUTPUT
+          echo "should-proceed=true" >> $env:GITHUB_OUTPUT
+
   shorebird-release:
-    needs: [analyze, versioning]
-    if: needs.analyze.outputs.action == 'release'
+    needs: auto-version-manager
+    if: needs.auto-version-manager.outputs.action == 'release' && needs.auto-version-manager.outputs.should-proceed == 'true'
     uses: ./.github/workflows/shorebird-release.yml
     with:
-      version: ${{ needs.analyze.outputs.new-version }}
-      release_notes: ${{ needs.analyze.outputs.release-notes }}
+      version: ${{ needs.auto-version-manager.outputs.final-version }}
+      release_notes: "Release automática"
     secrets:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
-  # Job 4: Shorebird Patch (se for patch)
   shorebird-patch:
-    needs: [analyze, versioning]
-    if: needs.analyze.outputs.action == 'patch'
+    needs: auto-version-manager
+    if: needs.auto-version-manager.outputs.action == 'patch' && needs.auto-version-manager.outputs.should-proceed == 'true'
     uses: ./.github/workflows/shorebird-patch.yml
     with:
-      version: ${{ needs.analyze.outputs.new-version }}
-      change_type: ${{ needs.analyze.outputs.change-type }}
-    secrets:
+      version: ${{ needs.auto-version-manager.outputs.final-version }}
+      change_type: "patch"
+    secrets: 
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-
-  # Job 5: Notificações e Cleanup
-  notify:
-    needs: [analyze, versioning, shorebird-release, shorebird-patch]
-    if: always()
-    uses: ./.github/workflows/notify-results.yml
-    with:
-      action: ${{ needs.analyze.outputs.action }}
-      version: ${{ needs.analyze.outputs.new-version }}
-      change_type: ${{ needs.analyze.outputs.change-type }}
-      release_success: ${{ needs.shorebird-release.result == 'success' }}
-      patch_success: ${{ needs.shorebird-patch.result == 'success' }}
-      version_updated: ${{ needs.versioning.outputs.version-updated }}

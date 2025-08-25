@@ -82,7 +82,11 @@ class PollingServiceImpl implements PollingService {
   @override
   Future<void> startPolling(int streamerId) async {
     try {
+      // Forçar verificação imediata do canal correto
       await checkAndUpdateChannel();
+
+      // Aguardar um pouco para garantir que o canal foi atualizado
+      await Future.delayed(const Duration(milliseconds: 500));
 
       _startTimers(streamerId);
       _startWatchdog(streamerId);
@@ -103,6 +107,9 @@ class PollingServiceImpl implements PollingService {
     _backgroundWatcherTimer =
         Timer.periodic(const Duration(minutes: 10), (timer) {
       if (!isPollingActive()) {
+        _logger.warning(
+          'Background watcher detectou polling inativo, reiniciando timers',
+        );
         _startTimers(streamerId);
       }
 
@@ -119,18 +126,23 @@ class PollingServiceImpl implements PollingService {
 
     _channelTimer = Timer.periodic(
       _channelCheckInterval,
-      (_) => checkAndUpdateChannel(),
+      (_) {
+        checkAndUpdateChannel();
+      },
     );
 
     _scoreTimer = Timer.periodic(
       _pollingInterval,
-      (_) => checkAndUpdateScore(streamerId),
+      (_) {
+        checkAndUpdateScore(streamerId);
+      },
     );
   }
 
   void _startWatchdog(int streamerId) {
     _watchdogTimer?.cancel();
     _watchdogTimer = Timer.periodic(_watchdogInterval, (_) {
+      _logger.debug('Executando verificação do watchdog');
       _checkAndRestartIfNeeded(streamerId);
     });
   }
@@ -144,7 +156,7 @@ class PollingServiceImpl implements PollingService {
 
       if (channelUpdateDiff > _maxTimeSinceLastUpdate) {
         _logger.warning(
-          'Watchdog: Atualizações de canal paradas, reiniciando polling... $now',
+          'Watchdog: Atualizações de canal paradas há ${channelUpdateDiff.inMinutes} minutos, reiniciando polling... $now',
         );
         needsRestart = true;
       }
@@ -160,7 +172,7 @@ class PollingServiceImpl implements PollingService {
 
       if (scoreUpdateDiff > _maxTimeSinceLastUpdate) {
         _logger.warning(
-          'Watchdog: Atualizações de score paradas, reiniciando polling... $now',
+          'Watchdog: Atualizações de score paradas há ${scoreUpdateDiff.inMinutes} minutos, reiniciando polling... $now',
         );
         needsRestart = true;
       }
@@ -246,7 +258,7 @@ class PollingServiceImpl implements PollingService {
       if (_scoreErrorCount > 0) {
         final backoffTime = _calculateBackoffTime(_scoreErrorCount);
         _logger.warning(
-          'Backoff aplicado após erros: esperando ${backoffTime.inSeconds} segundos antes de tentar novamente',
+          'Backoff aplicado após $_scoreErrorCount erros: esperando ${backoffTime.inSeconds} segundos antes de tentar novamente',
         );
         await Future.delayed(backoffTime);
       }
@@ -255,11 +267,14 @@ class PollingServiceImpl implements PollingService {
 
       if (_lastScoreUpdate != null) {
         final timeDiff = now.difference(_lastScoreUpdate!);
-        if (timeDiff.inMinutes < 1) {
+        if (timeDiff.inMinutes < 5) {
+          _logger.debug(
+              'Score atualizado recentemente (${timeDiff.inMinutes} minutos atrás), pulando atualização');
           return;
         }
       }
 
+      _logger.debug('Atualizando score para streamerId: $streamerId');
       await _homeService.saveScore(
         streamerId,
         DateTime(now.year, now.month, now.day),
@@ -307,9 +322,11 @@ class PollingServiceImpl implements PollingService {
   }
 
   bool isPollingActive() {
-    return _channelTimer?.isActive == true &&
+    final isActive = _channelTimer?.isActive == true &&
         _scoreTimer?.isActive == true &&
         _watchdogTimer?.isActive == true;
+
+    return isActive;
   }
 
   void dispose() {

@@ -24,7 +24,6 @@ class WebViewServiceImpl implements WebViewService {
   WebviewController? _controllerA;
   WebviewController? _controllerB;
   bool _isMuted = false;
-  double _currentVolume = 1.0;
 
   @override
   bool get isVolumeControlAvailable => true;
@@ -172,7 +171,6 @@ class WebViewServiceImpl implements WebViewService {
   Future<void> setWebViewVolume(double volume) async {
     try {
       final clampedVolume = volume.clamp(0.0, 1.0);
-      _currentVolume = clampedVolume;
 
       final volumeScript = '''
         try {

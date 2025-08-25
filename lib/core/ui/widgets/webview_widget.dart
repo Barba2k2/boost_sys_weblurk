@@ -46,8 +46,43 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
   @override
   void initState() {
     super.initState();
-    _currentUrl = widget.currentUrl ?? widget.initialUrl;
+    _currentUrl = (widget.currentUrl?.isNotEmpty ?? false)
+        ? widget.currentUrl!
+        : widget.initialUrl;
     _initPlatformState();
+  }
+
+  Future<void> _initializeWebViewWithRetry() async {
+    final int maxRetries = 3;
+    for (int i = 0; i < maxRetries; i++) {
+      try {
+        await _controller.initialize();
+        return;
+      } catch (e) {
+        if (i == maxRetries - 1) {
+          // Última tentativa - melhorar mensagem de erro
+          if (e.toString().contains('unsupported_platform')) {
+            throw Exception('''
+WebView2 Runtime não encontrado ou não suportado.
+            
+Soluções:
+1. Baixe e instale o Microsoft Edge WebView2 Runtime em:
+   https://developer.microsoft.com/en-us/microsoft-edge/webview2/
+   
+2. Execute o aplicativo como administrador
+   
+3. Verifique se o antivírus não está bloqueando
+
+Erro original: $e
+            ''');
+          }
+          rethrow;
+        }
+
+        // Aguardar antes da próxima tentativa
+        await Future.delayed(Duration(milliseconds: 500 * (i + 1)));
+      }
+    }
   }
 
   @override
@@ -81,7 +116,8 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
     try {
       _isOperationInProgress = true;
 
-      await _controller.initialize();
+      // Tentar inicializar com retry
+      await _initializeWebViewWithRetry();
       await _controller.setBackgroundColor(Colors.transparent);
       await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
       await _disableJavaScriptDialogs();
@@ -96,19 +132,24 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
         });
       }
     } catch (e, s) {
-      if (mounted) {
-        setState(
-          () {
-            _viewState = _WebViewState.error;
-            _errorMessage = '''
-              Erro ao inicializar WebView:
-              ${e.toString()}
+      widget.logger?.error('Erro na inicialização do WebView: $e', e, s);
 
-              StackTrace:
-              $s
+      if (mounted) {
+        setState(() {
+          _viewState = _WebViewState.error;
+          _errorMessage = '''
+Erro ao inicializar WebView:
+${e.toString()}
+
+Possíveis soluções:
+• Instale o Microsoft Edge WebView2 Runtime
+• Execute como administrador  
+• Verifique antivírus/firewall
+
+StackTrace:
+$s
             ''';
-          },
-        );
+        });
       }
     } finally {
       _isOperationInProgress = false;
@@ -117,6 +158,7 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
 
   Future<void> _disableJavaScriptDialogs() async {
     try {
+      widget.logger?.debug('Desabilitando diálogos JavaScript');
       await _controller.executeScript(
         '''
           window.alert = function(message) { 
@@ -147,6 +189,7 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
           }
         ''',
       );
+      widget.logger?.debug('Diálogos JavaScript desabilitados com sucesso');
     } catch (e) {
       widget.logger?.error('Erro ao desabilitar diálogos JavaScript: $e');
     }
@@ -171,19 +214,23 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
       }
     });
 
-    _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (_isNavigationLoading) {
-        _loadingProgress.value =
-            (_loadingProgress.value + 0.02).clamp(0.0, 0.95);
-      } else {
-        _loadingProgress.value = 1.0;
-        timer.cancel();
-      }
-    });
+    _progressTimer = Timer.periodic(
+      const Duration(milliseconds: 100),
+      (timer) {
+        if (_isNavigationLoading) {
+          _loadingProgress.value =
+              (_loadingProgress.value + 0.02).clamp(0.0, 0.95);
+        } else {
+          _loadingProgress.value = 1.0;
+          timer.cancel();
+        }
+      },
+    );
   }
 
   Future<void> _captureCurrentUrl() async {
     try {
+      widget.logger?.debug('Capturando URL atual do WebView');
       await _controller.executeScript(
         '''
           if (window.chrome && window.chrome.webview) {
@@ -214,7 +261,10 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
                 SizedBox(height: 16),
                 Text(
                   'Inicializando WebView...',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
                 ),
               ],
             ),
@@ -228,11 +278,17 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 48,
+                  ),
                   const SizedBox(height: 16),
                   SelectableText(
                     _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
+                    style: const TextStyle(
+                      color: Colors.red,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(

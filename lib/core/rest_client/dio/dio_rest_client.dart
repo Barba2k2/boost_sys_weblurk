@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 
 import '../../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
@@ -18,6 +20,7 @@ class DioRestClient implements RestClient {
     BaseOptions? baseOptions,
   }) {
     _dio = Dio(baseOptions ?? _defaultOptions);
+
     _dio.interceptors.addAll(
       [
         AuthInterceptors(
@@ -36,10 +39,17 @@ class DioRestClient implements RestClient {
 
   final _defaultOptions = BaseOptions(
     baseUrl: Environments.param(Constants.ENV_BASE_URL_KEY) ?? '',
-    connectTimeout: const Duration(milliseconds: 60000),
-    receiveTimeout: const Duration(milliseconds: 60000),
+    connectTimeout: const Duration(milliseconds: 30000),
+    receiveTimeout: const Duration(milliseconds: 30000),
+    sendTimeout: const Duration(milliseconds: 30000),
     validateStatus: (status) {
       return status != null && status < 500;
+    },
+    followRedirects: true,
+    maxRedirects: 10,
+    extra: {
+      'retry': 3,
+      'retryDelay': 1000,
     },
   );
 
@@ -76,17 +86,13 @@ class DioRestClient implements RestClient {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
   }) async {
-    try {
-      final response = await _dio.get(
+    return _executeWithRetry(
+      () => _dio.get(
         path,
         queryParameters: queryParameters,
         options: Options(headers: headers),
-      );
-
-      return _dioResponseConverter(response);
-    } on DioException catch (e) {
-      _throwRestClientException(e);
-    }
+      ),
+    );
   }
 
   @override
@@ -117,18 +123,14 @@ class DioRestClient implements RestClient {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
   }) async {
-    try {
-      final response = await _dio.post(
+    return _executeWithRetry(
+      () => _dio.post(
         path,
         data: data,
         queryParameters: queryParameters,
         options: Options(headers: headers),
-      );
-
-      return _dioResponseConverter(response);
-    } on DioException catch (e) {
-      _throwRestClientException(e);
-    }
+      ),
+    );
   }
 
   @override
@@ -183,6 +185,46 @@ class DioRestClient implements RestClient {
     return this;
   }
 
+  /// Executa requisições com retry automático
+  Future<RestClientResponse<T>> _executeWithRetry<T>(
+    Future<Response<dynamic>> Function() request,
+  ) async {
+    int retryCount = 0;
+    const maxRetries = 3;
+    const retryDelay = Duration(milliseconds: 1000);
+
+    while (retryCount < maxRetries) {
+      try {
+        final response = await request();
+        return _dioResponseConverter(response);
+      } on DioException catch (e) {
+        retryCount++;
+
+        // Log detalhado do erro
+        log('=== DIO ERROR (Attempt $retryCount/$maxRetries) ===');
+        log('Type: ${e.type}');
+        log('Message: ${e.message}');
+        log('Error: ${e.error}');
+        log('========================');
+
+        if (retryCount >= maxRetries) {
+          _throwRestClientException(e);
+        }
+
+        // Aguardar antes de tentar novamente
+        await Future.delayed(retryDelay);
+      }
+    }
+
+    throw RestClientException(
+      error: Exception('Max retries exceeded'),
+      message: 'Erro de conexão após múltiplas tentativas',
+      response: RestClientResponse(
+        statusMessage: 'Erro de conexão após múltiplas tentativas',
+      ),
+    );
+  }
+
   Future<RestClientResponse<T>> _dioResponseConverter<T>(
     Response<dynamic> response,
   ) async {
@@ -195,6 +237,19 @@ class DioRestClient implements RestClient {
 
   Never _throwRestClientException(DioException dioException) {
     final response = dioException.response;
+
+    // Log detalhado do erro para debug
+    log('=== DIO ERROR DETAILS ===');
+    log('Type: ${dioException.type}');
+    log('Message: ${dioException.message}');
+    log('Error: ${dioException.error}');
+    log('Response Status: ${response?.statusCode}');
+    log('Response Message: ${response?.statusMessage}');
+    log('Request URL: ${dioException.requestOptions.uri}');
+    log('Request Method: ${dioException.requestOptions.method}');
+    log('Request Headers: ${dioException.requestOptions.headers}');
+    log('Request Data: ${dioException.requestOptions.data}');
+    log('========================');
 
     throw RestClientException(
       error: dioException.error,

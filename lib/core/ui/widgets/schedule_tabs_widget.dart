@@ -115,7 +115,8 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
             controller: _tabController,
             children: [
               MyWebviewWidget(
-                key: const ValueKey('webview_lista_a'),
+                key: ValueKey(
+                    'webview_lista_a_${widget.viewModel.currentChannelListA}'),
                 initialUrl: widget.viewModel.currentChannelListA.isNotEmpty
                     ? widget.viewModel.currentChannelListA
                     : 'https://twitch.tv/BoostTeam_',
@@ -125,7 +126,8 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
                 tabIdentifier: 'listaA',
               ),
               MyWebviewWidget(
-                key: const ValueKey('webview_lista_b'),
+                key: ValueKey(
+                    'webview_lista_b_${widget.viewModel.currentChannelListB}'),
                 initialUrl: widget.viewModel.currentChannelListB.isNotEmpty
                     ? widget.viewModel.currentChannelListB
                     : 'https://twitch.tv/BoostTeam_',
