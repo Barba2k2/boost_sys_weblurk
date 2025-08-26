@@ -47,6 +47,10 @@ class DioRestClient implements RestClient {
     },
     followRedirects: true,
     maxRedirects: 10,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
     extra: {
       'retry': 3,
       'retryDelay': 1000,
