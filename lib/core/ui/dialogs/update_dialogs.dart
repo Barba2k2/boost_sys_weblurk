@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../models/update_progress_model.dart';
+import '../app_colors.dart';
 
 /// Collection of update-related dialogs following Material Design
 class UpdateDialogs {
@@ -68,11 +69,23 @@ class _UpdateAvailableDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Dialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -81,58 +94,65 @@ class _UpdateAvailableDialog extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
               child: const Icon(
                 Icons.system_update_alt_rounded,
                 size: 32,
-                color: Colors.blue,
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 20),
             
             // Title
-            const Text(
+            Text(
               'Nova Atualização',
-              style: TextStyle(
-                fontSize: 24,
+              style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 12),
             
             // Description
-            const Text(
+            Text(
               'Uma nova versão do Weblurk está disponível com melhorias e correções.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.8),
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             
             // Info badge
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.success.withValues(alpha: 0.3),
+                ),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.check_circle_outline, size: 16, color: Colors.green),
-                  SizedBox(width: 8),
+                  const Icon(
+                    Icons.check_circle_outline, 
+                    size: 16, 
+                    color: AppColors.success,
+                  ),
+                  const SizedBox(width: 8),
                   Text(
                     'Atualização rápida e automática',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.green,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: AppColors.success,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -148,18 +168,19 @@ class _UpdateAvailableDialog extends StatelessWidget {
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(false),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(
+                        color: colorScheme.outline,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      side: const BorderSide(color: Colors.grey),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Agora Não',
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
-                        color: Colors.grey,
                       ),
                     ),
                   ),
@@ -169,18 +190,18 @@ class _UpdateAvailableDialog extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(true),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                       elevation: 2,
                     ),
-                    child: const Text(
+                    child: Text(
                       'Atualizar',
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -203,11 +224,23 @@ class _DownloadProgressDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Dialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 380),
         padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
         child: ValueListenableBuilder<UpdateProgressModel>(
           valueListenable: progressNotifier,
           builder: (context, progress, child) {
@@ -219,8 +252,12 @@ class _DownloadProgressDialog extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(40),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
                   ),
                   child: Stack(
                     alignment: Alignment.center,
@@ -231,10 +268,15 @@ class _DownloadProgressDialog extends StatelessWidget {
                         child: CircularProgressIndicator(
                           strokeWidth: 3,
                           value: progress.showDeterminate ? progress.value : null,
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                          valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          backgroundColor: AppColors.primary.withValues(alpha: 0.2),
                         ),
                       ),
-                      Icon(progress.icon, size: 20, color: Colors.blue),
+                      Icon(
+                        progress.icon, 
+                        size: 20, 
+                        color: AppColors.primary,
+                      ),
                     ],
                   ),
                 ),
@@ -243,10 +285,9 @@ class _DownloadProgressDialog extends StatelessWidget {
                 // Title
                 Text(
                   progress.title,
-                  style: const TextStyle(
-                    fontSize: 20,
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -255,9 +296,8 @@ class _DownloadProgressDialog extends StatelessWidget {
                 Text(
                   progress.description,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.8),
                     height: 1.4,
                   ),
                 ),
@@ -265,17 +305,21 @@ class _DownloadProgressDialog extends StatelessWidget {
                 
                 // Linear progress bar
                 Container(
-                  height: 6,
+                  height: 8,
                   decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(3),
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(3),
+                    borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: progress.showDeterminate ? progress.value : null,
                       backgroundColor: Colors.transparent,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
                     ),
                   ),
                 ),
@@ -283,10 +327,9 @@ class _DownloadProgressDialog extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     '${(progress.value * 100).round()}%',
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Colors.blue,
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
@@ -311,11 +354,23 @@ class _RestartDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Dialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 380),
         padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.success.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -324,24 +379,27 @@ class _RestartDialog extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: AppColors.success.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
               child: const Icon(
                 Icons.check_circle,
                 size: 32,
-                color: Colors.green,
+                color: AppColors.success,
               ),
             ),
             const SizedBox(height: 20),
             
             // Title
-            const Text(
+            Text(
               'Atualização Concluída!',
-              style: TextStyle(
-                fontSize: 22,
+              style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 12),
@@ -350,32 +408,36 @@ class _RestartDialog extends StatelessWidget {
             Text(
               restartMessage,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 15,
-                color: Colors.black54,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.8),
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             
             // Info badge
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
+                color: AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.warning.withValues(alpha: 0.3),
+                ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.restart_alt, size: 18, color: Colors.orange),
-                  SizedBox(width: 8),
+                  const Icon(
+                    Icons.restart_alt, 
+                    size: 18, 
+                    color: AppColors.warning,
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Reinicialização necessária para aplicar mudanças',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.orange,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: AppColors.warning,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -393,17 +455,18 @@ class _RestartDialog extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(false),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(
+                        color: colorScheme.outline,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      side: const BorderSide(color: Colors.grey),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Depois',
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
-                        color: Colors.grey,
                       ),
                     ),
                   ),
@@ -416,7 +479,7 @@ class _RestartDialog extends StatelessWidget {
                       onRestart();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: AppColors.success,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -425,10 +488,10 @@ class _RestartDialog extends StatelessWidget {
                       elevation: 2,
                     ),
                     icon: const Icon(Icons.restart_alt, size: 20),
-                    label: const Text(
+                    label: Text(
                       'Reiniciar',
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -457,11 +520,23 @@ class _ErrorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Dialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 380),
         padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.error.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -470,13 +545,17 @@ class _ErrorDialog extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: AppColors.error.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
               child: const Icon(
                 Icons.error_outline,
                 size: 32,
-                color: Colors.red,
+                color: AppColors.error,
               ),
             ),
             const SizedBox(height: 20),
@@ -484,10 +563,9 @@ class _ErrorDialog extends StatelessWidget {
             // Title
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 22,
+              style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 12),
@@ -496,9 +574,8 @@ class _ErrorDialog extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 15,
-                color: Colors.black54,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.8),
                 height: 1.4,
               ),
             ),
@@ -510,29 +587,27 @@ class _ErrorDialog extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.1),
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.grey.withValues(alpha: 0.3),
+                    color: colorScheme.outline.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Detalhes técnicos:',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: theme.textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w500,
-                        color: Colors.grey,
+                        color: colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       technicalDetails!,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
                         fontFamily: 'monospace',
                       ),
                     ),
@@ -548,7 +623,7 @@ class _ErrorDialog extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.error,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -556,10 +631,10 @@ class _ErrorDialog extends StatelessWidget {
                   ),
                   elevation: 2,
                 ),
-                child: const Text(
+                child: Text(
                   'Fechar',
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
