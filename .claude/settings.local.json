@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter clean:*)",
+      "Bash(flutter pub:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(shorebird release:*)",
+      "Bash(flutter build:*)",
+      "Bash(shorebird patch:*)",
+      "Bash(flutter:*)",
+      "Bash(shorebird apps:*)",
+      "WebFetch(domain:pub.dev)",
+      "WebFetch(domain:docs.shorebird.dev)",
+      "Bash(dart run:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}
