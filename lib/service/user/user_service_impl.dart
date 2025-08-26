@@ -41,7 +41,10 @@ class UserServiceImpl implements UserService {
         userModel.toJson(),
       );
 
-      await _updateLoginStatus('ON');
+      // Update login status in background - don't block login if this fails
+      _updateLoginStatus('ON').catchError((e) {
+        _logger.error('Failed to update login status (non-blocking)', e);
+      });
     } catch (e, s) {
       _logger.error('Service - Failed to login user', e, s);
 
