@@ -1,0 +1,1218 @@
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:28:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 === LOGIN DEBUG START ===
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:29:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Attempting login with nickname: GriingoBRasileiro
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:30:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Password length: 8
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:31:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Nickname contains underscore: false
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:32:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Nickname original case: GriingoBRasileiro
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:33:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 ========================
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+*** Request ***
+uri: https://api.boostapi.com.br/auth/login
+method: POST
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: false}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+data:
+{nickname: GriingoBRasileiro, password: boost123}
+
+*** Response ***
+uri: https://api.boostapi.com.br/auth/login
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:29 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 259
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"access_token":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg"}
+
+*** Request ***
+uri: https://api.boostapi.com.br/auth/confirm
+method: PATCH
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+{windows_token: 0f2a94ae-3bb5-41b9-bab7-f8dcbf7b1e85}
+
+*** Response ***
+uri: https://api.boostapi.com.br/auth/confirm
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:31 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 805
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"access_token":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg","refresh_token":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc5NDEyOTAsImlhdCI6MTc1NjIxMzI5MCwiaXNzIjoiZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmxlSEFpT2pFM05UWTRNVGd3T0Rrc0ltbGhkQ0k2TVRjMU5qSXhNekk0T1N3aWFYTnpJam9pWW05dmMzUXRkSGRwZEdOb0lpd2libUptSWpveE56VTJNakV6TWpnNUxDSnliMnhsSWpvaWRYTmxjaUlzSW5OMGNtVmhiV1Z5U1dRaU9qSTNMQ0p6ZFdJaU9pSXlPU0o5LkFmNVZLYy1rckFUc3B1dWhlWlhYRFItYVNyb2V6Sm1ELWNsTWRYeWl1TGciLCJuYmYiOjE3NTYyNTY0OTAsInJvbGUiOiJ1c2VyIiwic3ViIjoiUmVmcmVzaFRva2VuIn0.8t5USoBAQbK3XngjHqsjFJr83HTPm27NVwfjjXxlZYM"}
+
+*** Request ***
+uri: https://api.boostapi.com.br/user/
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/user/
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:31 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 54
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"id":29,"nickname":"GriingoBRasileiro","role":"user"}
+
+*** Request ***
+uri: https://api.boostapi.com.br/user/
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 24820 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 20404 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 23940 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 26088 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 10780 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 14144 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 19428 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 17568 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 21540 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 17304 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 21932 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 33040 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 28700 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 17232 (stack reserve: 128KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 4976 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 28216 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 38928 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 5056 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   _MyWebviewWidgetState._disableJavaScriptDialogs (package:boost_sys_weblurk/core/ui/widgets/webview_widget.dart:161:22)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Desabilitando diálogos JavaScript
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   _MyWebviewWidgetState._disableJavaScriptDialogs (package:boost_sys_weblurk/core/ui/widgets/webview_widget.dart:192:22)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Diálogos JavaScript desabilitados com sucesso
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+*** Response ***
+uri: https://api.boostapi.com.br/user/
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:32 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 54
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"id":29,"nickname":"GriingoBRasileiro","role":"user"}
+
+*** Request ***
+uri: https://api.boostapi.com.br/streamer/status/update
+method: POST
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+{streamerId: 29, status: ON}
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:33 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:34 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** DioException ***:
+uri: https://api.boostapi.com.br/streamer/status/update
+DioException [bad response]: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
+The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
+Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
+
+uri: https://api.boostapi.com.br/streamer/status/update
+statusCode: 500
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:34 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 146
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"error":"Internal Server Error","message":"DatabaseException(message: Falha ao atualizar status do streamer, exception: null, stackTrace: null)"}
+
+[log] === DIO ERROR (Attempt 1/3) ===
+[log] Type: DioExceptionType.badResponse
+[log] Error: null
+[log] ========================
+[log] Message: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
+      The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
+      Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+      In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:34 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:34 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:34 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:34 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Request ***
+uri: https://api.boostapi.com.br/streamer/status/update
+method: POST
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+{streamerId: 29, status: ON}
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:35 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[]}
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:35 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:35 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:35 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[]}
+
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   PollingServiceImpl.checkAndUpdateScore (package:boost_sys_weblurk/features/home/data/services/polling_services.dart:277:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Atualizando score para streamerId: 29
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+*** Request ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Request ***
+uri: https://api.boostapi.com.br/score/save
+method: POST
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+{streamerId: 29, date: 2025-08-26, hour: 10, minute: 1, points: 1, nickname: null}
+
+*** DioException ***:
+uri: https://api.boostapi.com.br/streamer/status/update
+DioException [bad response]: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
+The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
+Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
+
+uri: https://api.boostapi.com.br/streamer/status/update
+statusCode: 500
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:36 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 146
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"error":"Internal Server Error","message":"DatabaseException(message: Falha ao atualizar status do streamer, exception: null, stackTrace: null)"}
+
+[log] === DIO ERROR (Attempt 2/3) ===
+[log] Type: DioExceptionType.badResponse
+[log] Error: null
+[log] ========================
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+[log] Message: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
+      The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
+      Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+      In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:36 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[]}
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:37 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:37 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/score/save
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:37 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"message":"Score saved successfully"}
+
+*** Request ***
+uri: https://api.boostapi.com.br/streamer/status/update
+method: POST
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+{streamerId: 29, status: ON}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:37 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:38 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[]}
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:38 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** DioException ***:
+uri: https://api.boostapi.com.br/streamer/status/update
+DioException [bad response]: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
+The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
+Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
+
+uri: https://api.boostapi.com.br/streamer/status/update
+statusCode: 500
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:38 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 146
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"error":"Internal Server Error","message":"DatabaseException(message: Falha ao atualizar status do streamer, exception: null, stackTrace: null)"}
+
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ RestClientException(message: Internal Server Error, statusCode: 500, error: null, response: Instance of 'RestClientResponse<dynamic>')
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ #0   DioRestClient._throwRestClientException (package:boost_sys_weblurk/core/rest_client/dio/dio_rest_client.dart:264:5)
+[log] === DIO ERROR (Attempt 3/3) ===
+│ #1   DioRestClient._executeWithRetry (package:boost_sys_weblurk/core/rest_client/dio/dio_rest_client.dart:221:11)
+│ #2   <asynchronous suspension>
+│ #3   UserRepositoryImpl.updateLoginStatus (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:120:7)
+│ #4   <asynchronous suspension>
+│ #5   UserServiceImpl._updateLoginStatus (package:boost_sys_weblurk/service/user/user_service_impl.dart:111:7)
+│ #6   <asynchronous suspension>
+[log] Type: DioExceptionType.badResponse
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ ⛔ Failed to update login status
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ Instance of 'Failure'
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ #0   UserRepositoryImpl.updateLoginStatus (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:129:7)
+│ #1   <asynchronous suspension>
+│ #2   UserServiceImpl._updateLoginStatus (package:boost_sys_weblurk/service/user/user_service_impl.dart:111:7)
+│ #3   <asynchronous suspension>
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ ⛔ Failed to update login status
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ Instance of 'Failure'
+[log] Error: null
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ #0   LoggerAppLoggerImpl.error (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:73:14)
+│ #1   UserServiceImpl.login.<anonymous closure> (package:boost_sys_weblurk/service/user/user_service_impl.dart:46:17)
+│ #2   _FutureListener.handleError (dart:async/future_impl.dart:245:22)
+[log] ========================
+│ #3   Future._propagateToListeners.handleError (dart:async/future_impl.dart:963:47)
+│ #4   Future._propagateToListeners (dart:async/future_impl.dart:984:13)
+│ #5   Future._completeErrorObject (dart:async/future_impl.dart:741:5)
+│ #6   Future._completeError (dart:async/future_impl.dart:745:5)
+│ #7   <asynchronous suspension>
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+[log] === DIO ERROR DETAILS ===
+[log] Type: DioExceptionType.badResponse
+│ ⛔ Failed to update login status (non-blocking)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+*** Response ***
+[log] Error: null
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+[log] Response Status: 500
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:38 GMT
+[log] Response Message: Internal Server Error
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+[log] Request URL: https://api.boostapi.com.br/streamer/status/update
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[]}
+
+[log] Request Method: POST
+[log] Request Data: {streamerId: 29, status: ON}
+[log] ========================
+[log] Message: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
+      The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
+      Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+      In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
+[log] Message: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
+      The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
+      Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+      In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
+[log] Request Headers: {Content-Type: application/json, Accept: application/json, Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg, content-length: 31}
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   _MyWebviewWidgetState._captureCurrentUrl (package:boost_sys_weblurk/core/ui/widgets/webview_widget.dart:233:22)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Capturando URL atual do WebView
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:39 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:39 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+data:
+null
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Tue, 26 Aug 2025 13:01:40 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[]}
+
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   _MyWebviewWidgetState._captureCurrentUrl (package:boost_sys_weblurk/core/ui/widgets/webview_widget.dart:233:22)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Capturando URL atual do WebView
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   _MyWebviewWidgetState._captureCurrentUrl (package:boost_sys_weblurk/core/ui/widgets/webview_widget.dart:233:22)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Capturando URL atual do WebView
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
