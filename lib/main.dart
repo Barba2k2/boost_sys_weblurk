@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'core/application_config.dart';
+import 'core/controllers/update_controller.dart';
 import 'core/di/injector.dart';
 import 'core/helpers/error_handler.dart';
 import 'core/routes/router_config.dart';
@@ -47,12 +48,17 @@ class _WeblurklState extends State<Weblurk> {
     // Aguarda um pequeno delay para garantir que a UI esteja pronta
     await Future.delayed(const Duration(seconds: 2));
     
-    // Executar diagnóstico primeiro
-    await ShorebirdUpdateService.debugShorebird();
+    // Use the new MVVM structure through UpdateController
+    final updateService = ShorebirdUpdateService();
     
-    final hasUpdate = await ShorebirdUpdateService.checkForUpdates();
+    // Executar diagnóstico primeiro
+    await updateService.debugShorebird();
+    
+    final hasUpdate = await updateService.checkForUpdates();
     if (hasUpdate && mounted) {
-      await ShorebirdUpdateService.showUpdateDialog(context);
+      // Use the new MVVM UpdateController
+      final updateController = UpdateController();
+      await updateController.checkAndShowUpdateDialog(context);
     }
   }
 
