@@ -51,7 +51,7 @@ sentry.properties
 sentry.properties
 
 # Claude AI
-.claude/
+# .claude/
 
 # Sentry Native
 .sentry-native/
