@@ -12,7 +12,8 @@
       "WebFetch(domain:pub.dev)",
       "WebFetch(domain:docs.shorebird.dev)",
       "Bash(dart run:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }
