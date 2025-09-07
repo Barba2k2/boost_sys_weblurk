@@ -58,6 +58,11 @@ class WebViewAndroidController implements WebViewControllerInterface {
   }
 
   @override
+  Future<void> setUserAgent(String userAgent) async {
+    await _controller.setUserAgent(userAgent);
+  }
+
+  @override
   Stream<dynamic> get loadingState => _loadingStateController.stream;
 
   @override
