@@ -147,9 +147,14 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
                         GestureDetector(
-                          onTap: () {
-                            print('Botão Cadastrar clicado - navegando para: ${AppRoutes.register}');
-                            GoRouter.of(context).go(AppRoutes.register);
+                          onTap: () async {
+                            print(
+                                'Botão Cadastrar clicado - navegando para: ${AppRoutes.register}');
+                            await Future.delayed(
+                                const Duration(milliseconds: 100));
+                            if (mounted) {
+                              GoRouter.of(context).go(AppRoutes.register);
+                            }
                           },
                           child: Container(
                             width: 150,
