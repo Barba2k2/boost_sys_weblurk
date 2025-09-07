@@ -130,12 +130,14 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(alpha: 0.5),
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.5),
                                   width: 2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withValues(alpha: 0.3),
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 20,
                                     spreadRadius: 2,
                                   ),
@@ -143,16 +145,9 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               child: Column(
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Image.asset(
-                                      'assets/images/logo-cla-boost.png',
-                                      height: 70,
-                                    ),
+                                  Image.asset(
+                                    'assets/images/logo-cla-boost.png',
+                                    height: 100,
                                   ),
                                   const SizedBox(height: 20),
                                   ShaderMask(
@@ -189,7 +184,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                             const SizedBox(height: 40),
-                            
+
                             // Login Form with enhanced styling
                             Container(
                               padding: const EdgeInsets.all(24),
@@ -197,7 +192,8 @@ class _LoginPageState extends State<LoginPage> {
                                 color: AppColors.cardBackgroundOpacity,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(alpha: 0.2),
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.2),
                                 ),
                               ),
                               child: Column(
@@ -213,7 +209,7 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 24),
-                                  
+
                                   BoostTextFormField(
                                     controller: _nicknameEC,
                                     label: 'Usuário',
@@ -223,16 +219,18 @@ class _LoginPageState extends State<LoginPage> {
                                   BoostTextFormField(
                                     controller: _passwordEC,
                                     label: 'Senha',
-                                    validator: widget.viewModel.validatePassword,
+                                    validator:
+                                        widget.viewModel.validatePassword,
                                     obscureText: true,
                                   ),
                                   const SizedBox(height: 32),
-                                  
+
                                   // Login Button with enhanced styling
                                   ListenableBuilder(
                                     listenable: widget.viewModel.loginCommand,
                                     builder: (context, child) {
-                                      final command = widget.viewModel.loginCommand;
+                                      final command =
+                                          widget.viewModel.loginCommand;
 
                                       return Container(
                                         width: double.infinity,
@@ -246,31 +244,40 @@ class _LoginPageState extends State<LoginPage> {
                                               AppColors.accent,
                                             ],
                                           ),
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: AppColors.primary.withValues(alpha: 0.4),
+                                              color: AppColors.primary
+                                                  .withValues(alpha: 0.4),
                                               blurRadius: 12,
                                               offset: const Offset(0, 6),
                                             ),
                                           ],
                                         ),
                                         child: ElevatedButton(
-                                          onPressed: command.running ? null : _handleLogin,
+                                          onPressed: command.running
+                                              ? null
+                                              : _handleLogin,
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.transparent,
                                             shadowColor: Colors.transparent,
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
                                             ),
                                           ),
                                           child: command.running
                                               ? const SizedBox(
                                                   width: 24,
                                                   height: 24,
-                                                  child: CircularProgressIndicator(
+                                                  child:
+                                                      CircularProgressIndicator(
                                                     strokeWidth: 3,
-                                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation<
+                                                                Color>(
+                                                            Colors.white),
                                                   ),
                                                 )
                                               : const Text(
@@ -291,15 +298,17 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            
+
                             // Register Link with enhanced styling
                             Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 24),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(alpha: 0.3),
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Row(
@@ -308,7 +317,8 @@ class _LoginPageState extends State<LoginPage> {
                                   Text(
                                     'Não tem conta? ',
                                     style: TextStyle(
-                                      color: AppColors.cardHeaderText.withValues(alpha: 0.8),
+                                      color: AppColors.cardHeaderText
+                                          .withValues(alpha: 0.8),
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                     ),

@@ -131,12 +131,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(alpha: 0.5),
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.5),
                                   width: 2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withValues(alpha: 0.3),
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 20,
                                     spreadRadius: 2,
                                   ),
@@ -144,16 +146,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               child: Column(
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Image.asset(
-                                      'assets/images/logo-cla-boost.png',
-                                      height: 70,
-                                    ),
+                                  Image.asset(
+                                    'assets/images/logo-cla-boost.png',
+                                    height: 100,
                                   ),
                                   const SizedBox(height: 20),
                                   ShaderMask(
@@ -190,7 +185,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                             ),
                             const SizedBox(height: 40),
-                            
+
                             // Register Form with enhanced styling
                             Container(
                               padding: const EdgeInsets.all(24),
@@ -198,7 +193,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 color: AppColors.cardBackgroundOpacity,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(alpha: 0.2),
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.2),
                                 ),
                               ),
                               child: Column(
@@ -214,36 +210,41 @@ class _RegisterPageState extends State<RegisterPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 24),
-                                  
+
                                   BoostTextFormField(
                                     controller: _nicknameEC,
                                     label: 'Nickname',
-                                    validator: widget.viewModel.validateNickname,
+                                    validator:
+                                        widget.viewModel.validateNickname,
                                   ),
                                   const SizedBox(height: 20),
                                   BoostTextFormField(
                                     controller: _passwordEC,
                                     label: 'Senha',
-                                    validator: widget.viewModel.validatePassword,
+                                    validator:
+                                        widget.viewModel.validatePassword,
                                     obscureText: true,
                                   ),
                                   const SizedBox(height: 20),
                                   BoostTextFormField(
                                     controller: _confirmPasswordEC,
                                     label: 'Confirmar Senha',
-                                    validator: (value) => widget.viewModel.validateConfirmPassword(
+                                    validator: (value) => widget.viewModel
+                                        .validateConfirmPassword(
                                       value,
                                       _passwordEC.text,
                                     ),
                                     obscureText: true,
                                   ),
                                   const SizedBox(height: 32),
-                                  
+
                                   // Register Button with enhanced styling
                                   ListenableBuilder(
-                                    listenable: widget.viewModel.registerCommand,
+                                    listenable:
+                                        widget.viewModel.registerCommand,
                                     builder: (context, child) {
-                                      final command = widget.viewModel.registerCommand;
+                                      final command =
+                                          widget.viewModel.registerCommand;
                                       final isLoading = command.running;
 
                                       return Container(
@@ -258,31 +259,40 @@ class _RegisterPageState extends State<RegisterPage> {
                                               AppColors.accent,
                                             ],
                                           ),
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: AppColors.primary.withValues(alpha: 0.4),
+                                              color: AppColors.primary
+                                                  .withValues(alpha: 0.4),
                                               blurRadius: 12,
                                               offset: const Offset(0, 6),
                                             ),
                                           ],
                                         ),
                                         child: ElevatedButton(
-                                          onPressed: isLoading ? null : _handleRegister,
+                                          onPressed: isLoading
+                                              ? null
+                                              : _handleRegister,
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.transparent,
                                             shadowColor: Colors.transparent,
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
                                             ),
                                           ),
                                           child: isLoading
                                               ? const SizedBox(
                                                   width: 24,
                                                   height: 24,
-                                                  child: CircularProgressIndicator(
+                                                  child:
+                                                      CircularProgressIndicator(
                                                     strokeWidth: 3,
-                                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation<
+                                                                Color>(
+                                                            Colors.white),
                                                   ),
                                                 )
                                               : const Text(
@@ -303,15 +313,17 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            
+
                             // Login Link with enhanced styling
                             Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 24),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(alpha: 0.3),
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Row(
@@ -320,7 +332,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   Text(
                                     'Já tem conta? ',
                                     style: TextStyle(
-                                      color: AppColors.cardHeaderText.withValues(alpha: 0.8),
+                                      color: AppColors.cardHeaderText
+                                          .withValues(alpha: 0.8),
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                     ),
