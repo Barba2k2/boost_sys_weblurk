@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import '../../services/settings_service.dart';
+import '../../services/timezone_service.dart';
 import '../../services/url_launcher_service.dart';
 import '../../services/volume_service.dart';
 import '../app_colors.dart';
@@ -9,6 +10,7 @@ import 'combined_menu_button.dart';
 class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
   final HomeViewModel viewModel;
   final SettingsService settingsService;
+  final TimezoneService timezoneService;
   final UrlLauncherService urlLauncherService;
   final VolumeService volumeService;
   final String? username;
@@ -17,6 +19,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.viewModel,
     required this.settingsService,
+    required this.timezoneService,
     required this.urlLauncherService,
     required this.volumeService,
     this.username,
@@ -59,6 +62,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
             CombinedMenuButton(
               viewModel: viewModel,
               settingsService: settingsService,
+              timezoneService: timezoneService,
               urlLauncherService: urlLauncherService,
               volumeService: volumeService,
             ),
