@@ -1,112 +1,3 @@
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
-│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:28:15)
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ 💡 === LOGIN DEBUG START ===
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
-│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:29:15)
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ 💡 Attempting login with nickname: GriingoBRasileiro
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
-│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:30:15)
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ 💡 Password length: 8
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
-│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:31:15)
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ 💡 Nickname contains underscore: false
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
-│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:32:15)
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ 💡 Nickname original case: GriingoBRasileiro
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
-│ #1   UserRepositoryImpl.login (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:33:15)
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ 💡 ========================
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-*** Request ***
-uri: https://api.boostapi.com.br/auth/login
-method: POST
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: false}
-headers:
- Content-Type: application/json
- Accept: application/json
-data:
-{nickname: GriingoBRasileiro, password: boost123}
-
-*** Response ***
-uri: https://api.boostapi.com.br/auth/login
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:29 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 259
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"access_token":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg"}
-
-*** Request ***
-uri: https://api.boostapi.com.br/auth/confirm
-method: PATCH
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-{windows_token: 0f2a94ae-3bb5-41b9-bab7-f8dcbf7b1e85}
-
-*** Response ***
-uri: https://api.boostapi.com.br/auth/confirm
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:31 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 805
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"access_token":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg","refresh_token":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc5NDEyOTAsImlhdCI6MTc1NjIxMzI5MCwiaXNzIjoiZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmxlSEFpT2pFM05UWTRNVGd3T0Rrc0ltbGhkQ0k2TVRjMU5qSXhNekk0T1N3aWFYTnpJam9pWW05dmMzUXRkSGRwZEdOb0lpd2libUptSWpveE56VTJNakV6TWpnNUxDSnliMnhsSWpvaWRYTmxjaUlzSW5OMGNtVmhiV1Z5U1dRaU9qSTNMQ0p6ZFdJaU9pSXlPU0o5LkFmNVZLYy1rckFUc3B1dWhlWlhYRFItYVNyb2V6Sm1ELWNsTWRYeWl1TGciLCJuYmYiOjE3NTYyNTY0OTAsInJvbGUiOiJ1c2VyIiwic3ViIjoiUmVmcmVzaFRva2VuIn0.8t5USoBAQbK3XngjHqsjFJr83HTPm27NVwfjjXxlZYM"}
-
 *** Request ***
 uri: https://api.boostapi.com.br/user/
 method: GET
@@ -121,31 +12,12 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
-*** Response ***
-uri: https://api.boostapi.com.br/user/
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:31 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 54
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"id":29,"nickname":"GriingoBRasileiro","role":"user"}
-
 *** Request ***
-uri: https://api.boostapi.com.br/user/
+uri: https://api.boostapi.com.br/list-a/get?date=2025-09-06
 method: GET
 responseType: ResponseType.json
 followRedirects: true
@@ -158,12 +30,12 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
 *** Request ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-a/get?date=2025-09-06
 method: GET
 responseType: ResponseType.json
 followRedirects: true
@@ -176,12 +48,12 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
 *** Request ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-a/get?date=2025-09-07
 method: GET
 responseType: ResponseType.json
 followRedirects: true
@@ -194,12 +66,12 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
 *** Request ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-a/get?date=2025-09-06
 method: GET
 responseType: ResponseType.json
 followRedirects: true
@@ -212,46 +84,10 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
-*** Request ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
-
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 24820 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 20404 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 23940 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 26088 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 10780 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 14144 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 19428 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 17568 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 21540 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 17304 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 21932 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 33040 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 28700 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 17232 (stack reserve: 128KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 4976 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 28216 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 38928 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
-[sentry] WARN Cannot set handler stack guarantee of 64KiB for thread 5056 (stack reserve: 64KiB, expected factor: 10x, actual: 10.00x)
 ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 │ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
 │ #1   _MyWebviewWidgetState._disableJavaScriptDialogs (package:boost_sys_weblurk/core/ui/widgets/webview_widget.dart:161:22)
@@ -272,16 +108,16 @@ headers:
  x-powered-by: Dart with package:shelf
  access-control-allow-headers: content-type, authorization
  access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:32 GMT
+ date: Sun, 07 Sep 2025 00:16:47 GMT
  access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 54
+ content-length: 45
  x-frame-options: SAMEORIGIN
  content-type: application/json;charset=utf-8
  x-xss-protection: 1; mode=block
  x-content-type-options: nosniff
  server: nginx/1.24.0 (Ubuntu)
 Response Text:
-{"id":29,"nickname":"GriingoBRasileiro","role":"user"}
+{"id":2,"nickname":"barba_09a","role":"user"}
 
 *** Request ***
 uri: https://api.boostapi.com.br/streamer/status/update
@@ -297,31 +133,37 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
-{streamerId: 29, status: ON}
+{streamerId: 2, status: ON}
 
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   _MyWebviewWidgetState._captureCurrentUrl (package:boost_sys_weblurk/core/ui/widgets/webview_widget.dart:233:22)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Capturando URL atual do WebView
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 *** Response ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-a/get?date=2025-09-06
 statusCode: 200
 headers:
  connection: keep-alive
  x-powered-by: Dart with package:shelf
  access-control-allow-headers: content-type, authorization
  access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:33 GMT
+ date: Sun, 07 Sep 2025 00:16:48 GMT
  access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
+ content-length: 3613
  x-frame-options: SAMEORIGIN
  content-type: application/json;charset=utf-8
  x-xss-protection: 1; mode=block
  x-content-type-options: nosniff
  server: nginx/1.24.0 (Ubuntu)
 Response Text:
-{"list_name":"lista_a","schedules":[]}
+{"list_name":"lista_a","schedules":[{"id":1249,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(00:00:00","end_time":"Time(01:00:00"},{"id":1250,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(01:00:00","end_time":"Time(02:00:00"},{"id":1251,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(02:00:00","end_time":"Time(03:00:00"},{"id":1252,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(03:00:00","end_time":"Time(04:00:00"},{"id":1253,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(04:00:00","end_time":"Time(05:00:00"},{"id":1254,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(05:00:00","end_time":"Time(06:00:00"},{"id":1255,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(06:00:00","end_time":"Time(07:00:00"},{"id":1256,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(07:00:00","end_time":"Time(08:00:00"},{"id":1257,"streamer_url":"https://twitch.tv/DanDarth","date":"2025-09-06T00:00:00.000Z","start_time":"Time(08:00:00","end_time":"Time(09:00:00"},{"id":1258,"streamer_url":"https://twitch.tv/DanDarth","date":"2025-09-06T00:00:00.000Z","start_time":"Time(09:00:00","end_time":"Time(10:00:00"},{"id":1259,"streamer_url":"https://twitch.tv/Headshot_BR","date":"2025-09-06T00:00:00.000Z","start_time":"Time(10:00:00","end_time":"Time(11:00:00"},{"id":1260,"streamer_url":"https://twitch.tv/Headshot_BR","date":"2025-09-06T00:00:00.000Z","start_time":"Time(11:00:00","end_time":"Time(12:00:00"},{"id":1261,"streamer_url":"https://twitch.tv/Lizandro_play","date":"2025-09-06T00:00:00.000Z","start_time":"Time(12:00:00","end_time":"Time(13:00:00"},{"id":1262,"streamer_url":"https://twitch.tv/Lizandro_play","date":"2025-09-06T00:00:00.000Z","start_time":"Time(13:00:00","end_time":"Time(14:00:00"},{"id":1263,"streamer_url":"https://twitch.tv/Rezendewithz","date":"2025-09-06T00:00:00.000Z","start_time":"Time(14:00:00","end_time":"Time(15:00:00"},{"id":1264,"streamer_url":"https://twitch.tv/Rezendewithz","date":"2025-09-06T00:00:00.000Z","start_time":"Time(15:00:00","end_time":"Time(16:00:00"},{"id":1265,"streamer_url":"https://twitch.tv/bruce_wayne_rp","date":"2025-09-06T00:00:00.000Z","start_time":"Time(16:00:00","end_time":"Time(17:00:00"},{"id":1266,"streamer_url":"https://twitch.tv/bruce_wayne_rp","date":"2025-09-06T00:00:00.000Z","start_time":"Time(17:00:00","end_time":"Time(18:00:00"},{"id":1267,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(18:00:00","end_time":"Time(19:00:00"},{"id":1268,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(19:00:00","end_time":"Time(20:00:00"},{"id":1269,"streamer_url":"https://twitch.tv/EuEuMoreira","date":"2025-09-06T00:00:00.000Z","start_time":"Time(20:00:00","end_time":"Time(21:00:00"},{"id":1270,"streamer_url":"https://twitch.tv/EuEuMoreira","date":"2025-09-06T00:00:00.000Z","start_time":"Time(21:00:00","end_time":"Time(22:00:00"},{"id":1271,"streamer_url":"https://twitch.tv/jhpgames","date":"2025-09-06T00:00:00.000Z","start_time":"Time(22:00:00","end_time":"Time(23:00:00"},{"id":1272,"streamer_url":"https://twitch.tv/jhpgames","date":"2025-09-06T00:00:00.000Z","start_time":"Time(23:00:00","end_time":"Time(24:00:00"}]}
 
 *** Request ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-06
 method: GET
 responseType: ResponseType.json
 followRedirects: true
@@ -334,31 +176,31 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
 *** Response ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-a/get?date=2025-09-06
 statusCode: 200
 headers:
  connection: keep-alive
  x-powered-by: Dart with package:shelf
  access-control-allow-headers: content-type, authorization
  access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:34 GMT
+ date: Sun, 07 Sep 2025 00:16:48 GMT
  access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
+ content-length: 3613
  x-frame-options: SAMEORIGIN
  content-type: application/json;charset=utf-8
  x-xss-protection: 1; mode=block
  x-content-type-options: nosniff
  server: nginx/1.24.0 (Ubuntu)
 Response Text:
-{"list_name":"lista_a","schedules":[]}
+{"list_name":"lista_a","schedules":[{"id":1249,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(00:00:00","end_time":"Time(01:00:00"},{"id":1250,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(01:00:00","end_time":"Time(02:00:00"},{"id":1251,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(02:00:00","end_time":"Time(03:00:00"},{"id":1252,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(03:00:00","end_time":"Time(04:00:00"},{"id":1253,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(04:00:00","end_time":"Time(05:00:00"},{"id":1254,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(05:00:00","end_time":"Time(06:00:00"},{"id":1255,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(06:00:00","end_time":"Time(07:00:00"},{"id":1256,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(07:00:00","end_time":"Time(08:00:00"},{"id":1257,"streamer_url":"https://twitch.tv/DanDarth","date":"2025-09-06T00:00:00.000Z","start_time":"Time(08:00:00","end_time":"Time(09:00:00"},{"id":1258,"streamer_url":"https://twitch.tv/DanDarth","date":"2025-09-06T00:00:00.000Z","start_time":"Time(09:00:00","end_time":"Time(10:00:00"},{"id":1259,"streamer_url":"https://twitch.tv/Headshot_BR","date":"2025-09-06T00:00:00.000Z","start_time":"Time(10:00:00","end_time":"Time(11:00:00"},{"id":1260,"streamer_url":"https://twitch.tv/Headshot_BR","date":"2025-09-06T00:00:00.000Z","start_time":"Time(11:00:00","end_time":"Time(12:00:00"},{"id":1261,"streamer_url":"https://twitch.tv/Lizandro_play","date":"2025-09-06T00:00:00.000Z","start_time":"Time(12:00:00","end_time":"Time(13:00:00"},{"id":1262,"streamer_url":"https://twitch.tv/Lizandro_play","date":"2025-09-06T00:00:00.000Z","start_time":"Time(13:00:00","end_time":"Time(14:00:00"},{"id":1263,"streamer_url":"https://twitch.tv/Rezendewithz","date":"2025-09-06T00:00:00.000Z","start_time":"Time(14:00:00","end_time":"Time(15:00:00"},{"id":1264,"streamer_url":"https://twitch.tv/Rezendewithz","date":"2025-09-06T00:00:00.000Z","start_time":"Time(15:00:00","end_time":"Time(16:00:00"},{"id":1265,"streamer_url":"https://twitch.tv/bruce_wayne_rp","date":"2025-09-06T00:00:00.000Z","start_time":"Time(16:00:00","end_time":"Time(17:00:00"},{"id":1266,"streamer_url":"https://twitch.tv/bruce_wayne_rp","date":"2025-09-06T00:00:00.000Z","start_time":"Time(17:00:00","end_time":"Time(18:00:00"},{"id":1267,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(18:00:00","end_time":"Time(19:00:00"},{"id":1268,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(19:00:00","end_time":"Time(20:00:00"},{"id":1269,"streamer_url":"https://twitch.tv/EuEuMoreira","date":"2025-09-06T00:00:00.000Z","start_time":"Time(20:00:00","end_time":"Time(21:00:00"},{"id":1270,"streamer_url":"https://twitch.tv/EuEuMoreira","date":"2025-09-06T00:00:00.000Z","start_time":"Time(21:00:00","end_time":"Time(22:00:00"},{"id":1271,"streamer_url":"https://twitch.tv/jhpgames","date":"2025-09-06T00:00:00.000Z","start_time":"Time(22:00:00","end_time":"Time(23:00:00"},{"id":1272,"streamer_url":"https://twitch.tv/jhpgames","date":"2025-09-06T00:00:00.000Z","start_time":"Time(23:00:00","end_time":"Time(24:00:00"}]}
 
 *** Request ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-06
 method: GET
 responseType: ResponseType.json
 followRedirects: true
@@ -371,64 +213,105 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
-*** DioException ***:
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-09-07
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Sun, 07 Sep 2025 00:16:48 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-09-06
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Sun, 07 Sep 2025 00:16:48 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 3613
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[{"id":1249,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(00:00:00","end_time":"Time(01:00:00"},{"id":1250,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(01:00:00","end_time":"Time(02:00:00"},{"id":1251,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(02:00:00","end_time":"Time(03:00:00"},{"id":1252,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(03:00:00","end_time":"Time(04:00:00"},{"id":1253,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(04:00:00","end_time":"Time(05:00:00"},{"id":1254,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(05:00:00","end_time":"Time(06:00:00"},{"id":1255,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(06:00:00","end_time":"Time(07:00:00"},{"id":1256,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(07:00:00","end_time":"Time(08:00:00"},{"id":1257,"streamer_url":"https://twitch.tv/DanDarth","date":"2025-09-06T00:00:00.000Z","start_time":"Time(08:00:00","end_time":"Time(09:00:00"},{"id":1258,"streamer_url":"https://twitch.tv/DanDarth","date":"2025-09-06T00:00:00.000Z","start_time":"Time(09:00:00","end_time":"Time(10:00:00"},{"id":1259,"streamer_url":"https://twitch.tv/Headshot_BR","date":"2025-09-06T00:00:00.000Z","start_time":"Time(10:00:00","end_time":"Time(11:00:00"},{"id":1260,"streamer_url":"https://twitch.tv/Headshot_BR","date":"2025-09-06T00:00:00.000Z","start_time":"Time(11:00:00","end_time":"Time(12:00:00"},{"id":1261,"streamer_url":"https://twitch.tv/Lizandro_play","date":"2025-09-06T00:00:00.000Z","start_time":"Time(12:00:00","end_time":"Time(13:00:00"},{"id":1262,"streamer_url":"https://twitch.tv/Lizandro_play","date":"2025-09-06T00:00:00.000Z","start_time":"Time(13:00:00","end_time":"Time(14:00:00"},{"id":1263,"streamer_url":"https://twitch.tv/Rezendewithz","date":"2025-09-06T00:00:00.000Z","start_time":"Time(14:00:00","end_time":"Time(15:00:00"},{"id":1264,"streamer_url":"https://twitch.tv/Rezendewithz","date":"2025-09-06T00:00:00.000Z","start_time":"Time(15:00:00","end_time":"Time(16:00:00"},{"id":1265,"streamer_url":"https://twitch.tv/bruce_wayne_rp","date":"2025-09-06T00:00:00.000Z","start_time":"Time(16:00:00","end_time":"Time(17:00:00"},{"id":1266,"streamer_url":"https://twitch.tv/bruce_wayne_rp","date":"2025-09-06T00:00:00.000Z","start_time":"Time(17:00:00","end_time":"Time(18:00:00"},{"id":1267,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(18:00:00","end_time":"Time(19:00:00"},{"id":1268,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(19:00:00","end_time":"Time(20:00:00"},{"id":1269,"streamer_url":"https://twitch.tv/EuEuMoreira","date":"2025-09-06T00:00:00.000Z","start_time":"Time(20:00:00","end_time":"Time(21:00:00"},{"id":1270,"streamer_url":"https://twitch.tv/EuEuMoreira","date":"2025-09-06T00:00:00.000Z","start_time":"Time(21:00:00","end_time":"Time(22:00:00"},{"id":1271,"streamer_url":"https://twitch.tv/jhpgames","date":"2025-09-06T00:00:00.000Z","start_time":"Time(22:00:00","end_time":"Time(23:00:00"},{"id":1272,"streamer_url":"https://twitch.tv/jhpgames","date":"2025-09-06T00:00:00.000Z","start_time":"Time(23:00:00","end_time":"Time(24:00:00"}]}
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-07
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
+data:
+null
+
+*** Request ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-06
+method: GET
+responseType: ResponseType.json
+followRedirects: true
+persistentConnection: true
+connectTimeout: 0:00:30.000000
+sendTimeout: 0:00:30.000000
+receiveTimeout: 0:00:30.000000
+receiveDataWhenStatusError: true
+extra: {retry: 3, retryDelay: 1000, auth_required: true}
+headers:
+ Content-Type: application/json
+ Accept: application/json
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
+data:
+null
+
+*** Response ***
 uri: https://api.boostapi.com.br/streamer/status/update
-DioException [bad response]: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
-The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
-Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
-
-uri: https://api.boostapi.com.br/streamer/status/update
-statusCode: 500
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:34 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 146
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"error":"Internal Server Error","message":"DatabaseException(message: Falha ao atualizar status do streamer, exception: null, stackTrace: null)"}
-
-[log] === DIO ERROR (Attempt 1/3) ===
-[log] Type: DioExceptionType.badResponse
-[log] Error: null
-[log] ========================
-[log] Message: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
-      The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
-      Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-      In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
-*** Response ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
 statusCode: 200
 headers:
  connection: keep-alive
  x-powered-by: Dart with package:shelf
  access-control-allow-headers: content-type, authorization
  access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:34 GMT
+ date: Sun, 07 Sep 2025 00:16:48 GMT
  access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
+ content-length: 41
  x-frame-options: SAMEORIGIN
  content-type: application/json;charset=utf-8
  x-xss-protection: 1; mode=block
  x-content-type-options: nosniff
  server: nginx/1.24.0 (Ubuntu)
 Response Text:
-{"list_name":"lista_a","schedules":[]}
+{"message":"Status updated successfully"}
 
 *** Request ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+uri: https://api.boostapi.com.br/user/
 method: GET
 responseType: ResponseType.json
 followRedirects: true
@@ -441,31 +324,145 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
 *** Response ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-06
 statusCode: 200
 headers:
  connection: keep-alive
  x-powered-by: Dart with package:shelf
  access-control-allow-headers: content-type, authorization
  access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:34 GMT
+ date: Sun, 07 Sep 2025 00:16:49 GMT
  access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
+ content-length: 3596
  x-frame-options: SAMEORIGIN
  content-type: application/json;charset=utf-8
  x-xss-protection: 1; mode=block
  x-content-type-options: nosniff
  server: nginx/1.24.0 (Ubuntu)
 Response Text:
-{"list_name":"lista_a","schedules":[]}
+{"list_name":"lista_b","schedules":[{"id":985,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(00:00:00","end_time":"Time(01:00:00"},{"id":986,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(01:00:00","end_time":"Time(02:00:00"},{"id":987,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(02:00:00","end_time":"Time(03:00:00"},{"id":988,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(03:00:00","end_time":"Time(04:00:00"},{"id":989,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(04:00:00","end_time":"Time(05:00:00"},{"id":990,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(05:00:00","end_time":"Time(06:00:00"},{"id":991,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(06:00:00","end_time":"Time(07:00:00"},{"id":992,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(07:00:00","end_time":"Time(08:00:00"},{"id":993,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(08:00:00","end_time":"Time(09:00:00"},{"id":994,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(09:00:00","end_time":"Time(10:00:00"},{"id":995,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(10:00:00","end_time":"Time(11:00:00"},{"id":996,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(11:00:00","end_time":"Time(12:00:00"},{"id":997,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(12:00:00","end_time":"Time(13:00:00"},{"id":998,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(13:00:00","end_time":"Time(14:00:00"},{"id":999,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(14:00:00","end_time":"Time(15:00:00"},{"id":1000,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(15:00:00","end_time":"Time(16:00:00"},{"id":1001,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(16:00:00","end_time":"Time(17:00:00"},{"id":1002,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(17:00:00","end_time":"Time(18:00:00"},{"id":1003,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(18:00:00","end_time":"Time(19:00:00"},{"id":1004,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(19:00:00","end_time":"Time(20:00:00"},{"id":1005,"streamer_url":"https://twitch.tv/griingobrasileiro","date":"2025-09-06T00:00:00.000Z","start_time":"Time(20:00:00","end_time":"Time(21:00:00"},{"id":1006,"streamer_url":"https://twitch.tv/griingobrasileiro","date":"2025-09-06T00:00:00.000Z","start_time":"Time(21:00:00","end_time":"Time(22:00:00"},{"id":1007,"streamer_url":"https://twitch.tv/kob_natsu","date":"2025-09-06T00:00:00.000Z","start_time":"Time(22:00:00","end_time":"Time(23:00:00"},{"id":1008,"streamer_url":"https://twitch.tv/kob_natsu","date":"2025-09-06T00:00:00.000Z","start_time":"Time(23:00:00","end_time":"Time(24:00:00"}]}
 
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:64:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Verificando agendamento: Time(00:00:00 - Time(01:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 0:0 (Machine GMT+2) -> 19:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 1:0 (Machine GMT+2) -> 20:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:79:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horários convertidos: 19:00:00 - 20:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:112:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horário atual: 21:16, Agendamento: 19:0 - 20:0, É atual: false
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:64:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Verificando agendamento: Time(01:00:00 - Time(02:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 1:0 (Machine GMT+2) -> 20:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 2:0 (Machine GMT+2) -> 21:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:79:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horários convertidos: 20:00:00 - 21:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:112:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horário atual: 21:16, Agendamento: 20:0 - 21:0, É atual: false
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:64:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Verificando agendamento: Time(02:00:00 - Time(03:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 2:0 (Machine GMT+2) -> 21:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 3:0 (Machine GMT+2) -> 22:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:79:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horários convertidos: 21:00:00 - 22:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:112:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horário atual: 21:16, Agendamento: 21:0 - 22:0, É atual: true
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:227:23)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Agendamento atual encontrado: https://twitch.tv/BoostTeam_
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:242:21)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Canal selecionado: https://twitch.tv/BoostTeam_
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:252:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Canal final retornado: https://twitch.tv/BoostTeam_
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannelForList (package:boost_sys_weblurk/service/home/home_service_impl.dart:280:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Buscando canal da Lista A da API
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 *** Request ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-a/get?date=2025-09-07
 method: GET
 responseType: ResponseType.json
 followRedirects: true
@@ -478,204 +475,19 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
 *** Response ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-07
 statusCode: 200
 headers:
  connection: keep-alive
  x-powered-by: Dart with package:shelf
  access-control-allow-headers: content-type, authorization
  access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:34 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_b","schedules":[]}
-
-*** Request ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
-
-*** Response ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:34 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_b","schedules":[]}
-
-*** Request ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
-
-*** Request ***
-uri: https://api.boostapi.com.br/streamer/status/update
-method: POST
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-{streamerId: 29, status: ON}
-
-*** Response ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:35 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_b","schedules":[]}
-
-*** Response ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:35 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_a","schedules":[]}
-
-*** Response ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:35 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_a","schedules":[]}
-
-*** Request ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
-
-*** Request ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
-
-*** Response ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:35 GMT
+ date: Sun, 07 Sep 2025 00:16:50 GMT
  access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
  content-length: 38
  x-frame-options: SAMEORIGIN
@@ -688,12 +500,316 @@ Response Text:
 
 ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 │ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
-│ #1   PollingServiceImpl.checkAndUpdateScore (package:boost_sys_weblurk/features/home/data/services/polling_services.dart:277:15)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:197:17)
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ 🐛 Atualizando score para streamerId: 29
+│ 🐛 Retornando canal atual do cache
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-06
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Sun, 07 Sep 2025 00:16:50 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 3596
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[{"id":985,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(00:00:00","end_time":"Time(01:00:00"},{"id":986,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(01:00:00","end_time":"Time(02:00:00"},{"id":987,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(02:00:00","end_time":"Time(03:00:00"},{"id":988,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(03:00:00","end_time":"Time(04:00:00"},{"id":989,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(04:00:00","end_time":"Time(05:00:00"},{"id":990,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(05:00:00","end_time":"Time(06:00:00"},{"id":991,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(06:00:00","end_time":"Time(07:00:00"},{"id":992,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(07:00:00","end_time":"Time(08:00:00"},{"id":993,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(08:00:00","end_time":"Time(09:00:00"},{"id":994,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(09:00:00","end_time":"Time(10:00:00"},{"id":995,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(10:00:00","end_time":"Time(11:00:00"},{"id":996,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(11:00:00","end_time":"Time(12:00:00"},{"id":997,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(12:00:00","end_time":"Time(13:00:00"},{"id":998,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(13:00:00","end_time":"Time(14:00:00"},{"id":999,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(14:00:00","end_time":"Time(15:00:00"},{"id":1000,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(15:00:00","end_time":"Time(16:00:00"},{"id":1001,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(16:00:00","end_time":"Time(17:00:00"},{"id":1002,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(17:00:00","end_time":"Time(18:00:00"},{"id":1003,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(18:00:00","end_time":"Time(19:00:00"},{"id":1004,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(19:00:00","end_time":"Time(20:00:00"},{"id":1005,"streamer_url":"https://twitch.tv/griingobrasileiro","date":"2025-09-06T00:00:00.000Z","start_time":"Time(20:00:00","end_time":"Time(21:00:00"},{"id":1006,"streamer_url":"https://twitch.tv/griingobrasileiro","date":"2025-09-06T00:00:00.000Z","start_time":"Time(21:00:00","end_time":"Time(22:00:00"},{"id":1007,"streamer_url":"https://twitch.tv/kob_natsu","date":"2025-09-06T00:00:00.000Z","start_time":"Time(22:00:00","end_time":"Time(23:00:00"},{"id":1008,"streamer_url":"https://twitch.tv/kob_natsu","date":"2025-09-06T00:00:00.000Z","start_time":"Time(23:00:00","end_time":"Time(24:00:00"}]}
+
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:64:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Verificando agendamento: Time(00:00:00 - Time(01:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 0:0 (Machine GMT+2) -> 19:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 1:0 (Machine GMT+2) -> 20:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:79:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horários convertidos: 19:00:00 - 20:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:112:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horário atual: 21:16, Agendamento: 19:0 - 20:0, É atual: false
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:64:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Verificando agendamento: Time(01:00:00 - Time(02:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 1:0 (Machine GMT+2) -> 20:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 2:0 (Machine GMT+2) -> 21:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:79:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horários convertidos: 20:00:00 - 21:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:112:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horário atual: 21:16, Agendamento: 20:0 - 21:0, É atual: false
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:64:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Verificando agendamento: Time(02:00:00 - Time(03:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 2:0 (Machine GMT+2) -> 21:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 3:0 (Machine GMT+2) -> 22:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:79:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horários convertidos: 21:00:00 - 22:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:112:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horário atual: 21:16, Agendamento: 21:0 - 22:0, É atual: true
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:227:23)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Agendamento atual encontrado: https://twitch.tv/BoostTeam_
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:242:21)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Canal selecionado: https://twitch.tv/BoostTeam_
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:252:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Canal final retornado: https://twitch.tv/BoostTeam_
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+*** Response ***
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-06
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Sun, 07 Sep 2025 00:16:50 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 3596
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_b","schedules":[{"id":985,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(00:00:00","end_time":"Time(01:00:00"},{"id":986,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(01:00:00","end_time":"Time(02:00:00"},{"id":987,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(02:00:00","end_time":"Time(03:00:00"},{"id":988,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(03:00:00","end_time":"Time(04:00:00"},{"id":989,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(04:00:00","end_time":"Time(05:00:00"},{"id":990,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(05:00:00","end_time":"Time(06:00:00"},{"id":991,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(06:00:00","end_time":"Time(07:00:00"},{"id":992,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(07:00:00","end_time":"Time(08:00:00"},{"id":993,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(08:00:00","end_time":"Time(09:00:00"},{"id":994,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(09:00:00","end_time":"Time(10:00:00"},{"id":995,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(10:00:00","end_time":"Time(11:00:00"},{"id":996,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(11:00:00","end_time":"Time(12:00:00"},{"id":997,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(12:00:00","end_time":"Time(13:00:00"},{"id":998,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(13:00:00","end_time":"Time(14:00:00"},{"id":999,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(14:00:00","end_time":"Time(15:00:00"},{"id":1000,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(15:00:00","end_time":"Time(16:00:00"},{"id":1001,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(16:00:00","end_time":"Time(17:00:00"},{"id":1002,"streamer_url":"https://twitch.tv/BoostTeam_","date":"2025-09-06T00:00:00.000Z","start_time":"Time(17:00:00","end_time":"Time(18:00:00"},{"id":1003,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(18:00:00","end_time":"Time(19:00:00"},{"id":1004,"streamer_url":"https://twitch.tv/PlainIntegral18","date":"2025-09-06T00:00:00.000Z","start_time":"Time(19:00:00","end_time":"Time(20:00:00"},{"id":1005,"streamer_url":"https://twitch.tv/griingobrasileiro","date":"2025-09-06T00:00:00.000Z","start_time":"Time(20:00:00","end_time":"Time(21:00:00"},{"id":1006,"streamer_url":"https://twitch.tv/griingobrasileiro","date":"2025-09-06T00:00:00.000Z","start_time":"Time(21:00:00","end_time":"Time(22:00:00"},{"id":1007,"streamer_url":"https://twitch.tv/kob_natsu","date":"2025-09-06T00:00:00.000Z","start_time":"Time(22:00:00","end_time":"Time(23:00:00"},{"id":1008,"streamer_url":"https://twitch.tv/kob_natsu","date":"2025-09-06T00:00:00.000Z","start_time":"Time(23:00:00","end_time":"Time(24:00:00"}]}
+
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:64:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Verificando agendamento: Time(00:00:00 - Time(01:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 0:0 (Machine GMT+2) -> 19:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 1:0 (Machine GMT+2) -> 20:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:79:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horários convertidos: 19:00:00 - 20:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:112:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horário atual: 21:16, Agendamento: 19:0 - 20:0, É atual: false
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:64:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Verificando agendamento: Time(01:00:00 - Time(02:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 1:0 (Machine GMT+2) -> 20:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 2:0 (Machine GMT+2) -> 21:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:79:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horários convertidos: 20:00:00 - 21:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:112:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horário atual: 21:16, Agendamento: 20:0 - 21:0, É atual: false
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:64:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Verificando agendamento: Time(02:00:00 - Time(03:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 2:0 (Machine GMT+2) -> 21:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.info (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:77:14)
+│ #1   TimezoneService._convertFromTimezoneToBrazil (package:boost_sys_weblurk/core/services/timezone_service.dart:120:13)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 💡 Timezone conversion: 3:0 (Machine GMT+2) -> 22:0 (Brazil GMT-3)
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:79:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horários convertidos: 21:00:00 - 22:00:00
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl._isCurrentTimeInSchedule (package:boost_sys_weblurk/service/home/home_service_impl.dart:112:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Horário atual: 21:16, Agendamento: 21:0 - 22:0, É atual: true
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:227:23)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Agendamento atual encontrado: https://twitch.tv/BoostTeam_
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:242:21)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Canal selecionado: https://twitch.tv/BoostTeam_
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:252:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Canal final retornado: https://twitch.tv/BoostTeam_
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:197:17)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Retornando canal atual do cache
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+*** Response ***
+uri: https://api.boostapi.com.br/user/
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Sun, 07 Sep 2025 00:16:50 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 45
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"id":2,"nickname":"barba_09a","role":"user"}
+
+*** Response ***
+uri: https://api.boostapi.com.br/list-a/get?date=2025-09-07
+statusCode: 200
+headers:
+ connection: keep-alive
+ x-powered-by: Dart with package:shelf
+ access-control-allow-headers: content-type, authorization
+ access-control-allow-origin: *
+ date: Sun, 07 Sep 2025 00:16:50 GMT
+ access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+ content-length: 38
+ x-frame-options: SAMEORIGIN
+ content-type: application/json;charset=utf-8
+ x-xss-protection: 1; mode=block
+ x-content-type-options: nosniff
+ server: nginx/1.24.0 (Ubuntu)
+Response Text:
+{"list_name":"lista_a","schedules":[]}
+
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannelForList (package:boost_sys_weblurk/service/home/home_service_impl.dart:280:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Buscando canal da Lista B da API
 └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 *** Request ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-07
 method: GET
 responseType: ResponseType.json
 followRedirects: true
@@ -706,10 +822,28 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   _MyWebviewWidgetState._captureCurrentUrl (package:boost_sys_weblurk/core/ui/widgets/webview_widget.dart:233:22)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Capturando URL atual do WebView
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:197:17)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Retornando canal atual do cache
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   PollingServiceImpl.checkAndUpdateScore (package:boost_sys_weblurk/features/home/data/services/polling_services.dart:277:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Atualizando score para streamerId: 2
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 *** Request ***
 uri: https://api.boostapi.com.br/score/save
 method: POST
@@ -724,83 +858,30 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
-{streamerId: 29, date: 2025-08-26, hour: 10, minute: 1, points: 1, nickname: null}
+{streamerId: 2, date: 2025-09-07, hour: 2, minute: 16, points: 1, nickname: null}
 
-*** DioException ***:
-uri: https://api.boostapi.com.br/streamer/status/update
-DioException [bad response]: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
-The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
-Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
-
-uri: https://api.boostapi.com.br/streamer/status/update
-statusCode: 500
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:36 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 146
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"error":"Internal Server Error","message":"DatabaseException(message: Falha ao atualizar status do streamer, exception: null, stackTrace: null)"}
-
-[log] === DIO ERROR (Attempt 2/3) ===
-[log] Type: DioExceptionType.badResponse
-[log] Error: null
-[log] ========================
-*** Response ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
-[log] Message: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
-      The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
-      Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-      In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:36 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_b","schedules":[]}
-
-*** Response ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:37 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_b","schedules":[]}
-
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeViewModel._updateChannels (package:boost_sys_weblurk/features/home/presentation/viewmodels/home_viewmodel.dart:182:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Iniciando atualização de canais
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannelForList (package:boost_sys_weblurk/service/home/home_service_impl.dart:276:17)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Retornando canal da Lista A do cache
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannelForList (package:boost_sys_weblurk/service/home/home_service_impl.dart:280:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Buscando canal da Lista B da API
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 *** Request ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-07
 method: GET
 responseType: ResponseType.json
 followRedirects: true
@@ -813,19 +894,19 @@ extra: {retry: 3, retryDelay: 1000, auth_required: true}
 headers:
  Content-Type: application/json
  Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTc4MDkwMDQsImlhdCI6MTc1NzIwNDIwNCwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU3MjA0MjA0LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjIsInN1YiI6IjIifQ.ke0qSWaouggta1tvMe4zvLYYQbTqWPEQhjl_JyfZHuE
 data:
 null
 
 *** Response ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-07
 statusCode: 200
 headers:
  connection: keep-alive
  x-powered-by: Dart with package:shelf
  access-control-allow-headers: content-type, authorization
  access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:37 GMT
+ date: Sun, 07 Sep 2025 00:16:51 GMT
  access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
  content-length: 38
  x-frame-options: SAMEORIGIN
@@ -834,25 +915,7 @@ headers:
  x-content-type-options: nosniff
  server: nginx/1.24.0 (Ubuntu)
 Response Text:
-{"list_name":"lista_a","schedules":[]}
-
-*** Request ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
+{"list_name":"lista_b","schedules":[]}
 
 *** Response ***
 uri: https://api.boostapi.com.br/score/save
@@ -862,7 +925,7 @@ headers:
  x-powered-by: Dart with package:shelf
  access-control-allow-headers: content-type, authorization
  access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:37 GMT
+ date: Sun, 07 Sep 2025 00:16:51 GMT
  access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
  content-length: 38
  x-frame-options: SAMEORIGIN
@@ -873,327 +936,15 @@ headers:
 Response Text:
 {"message":"Score saved successfully"}
 
-*** Request ***
-uri: https://api.boostapi.com.br/streamer/status/update
-method: POST
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-{streamerId: 29, status: ON}
-
-*** Request ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
-
 *** Response ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
+uri: https://api.boostapi.com.br/list-b/get?date=2025-09-07
 statusCode: 200
 headers:
  connection: keep-alive
  x-powered-by: Dart with package:shelf
  access-control-allow-headers: content-type, authorization
  access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:37 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_a","schedules":[]}
-
-*** Request ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
-
-*** Response ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:38 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_b","schedules":[]}
-
-*** Response ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:38 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_a","schedules":[]}
-
-*** Request ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
-
-*** DioException ***:
-uri: https://api.boostapi.com.br/streamer/status/update
-DioException [bad response]: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
-The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
-Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
-
-uri: https://api.boostapi.com.br/streamer/status/update
-statusCode: 500
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:38 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 146
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"error":"Internal Server Error","message":"DatabaseException(message: Falha ao atualizar status do streamer, exception: null, stackTrace: null)"}
-
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ RestClientException(message: Internal Server Error, statusCode: 500, error: null, response: Instance of 'RestClientResponse<dynamic>')
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ #0   DioRestClient._throwRestClientException (package:boost_sys_weblurk/core/rest_client/dio/dio_rest_client.dart:264:5)
-[log] === DIO ERROR (Attempt 3/3) ===
-│ #1   DioRestClient._executeWithRetry (package:boost_sys_weblurk/core/rest_client/dio/dio_rest_client.dart:221:11)
-│ #2   <asynchronous suspension>
-│ #3   UserRepositoryImpl.updateLoginStatus (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:120:7)
-│ #4   <asynchronous suspension>
-│ #5   UserServiceImpl._updateLoginStatus (package:boost_sys_weblurk/service/user/user_service_impl.dart:111:7)
-│ #6   <asynchronous suspension>
-[log] Type: DioExceptionType.badResponse
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ ⛔ Failed to update login status
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ Instance of 'Failure'
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ #0   UserRepositoryImpl.updateLoginStatus (package:boost_sys_weblurk/repositories/user/user_repository_impl.dart:129:7)
-│ #1   <asynchronous suspension>
-│ #2   UserServiceImpl._updateLoginStatus (package:boost_sys_weblurk/service/user/user_service_impl.dart:111:7)
-│ #3   <asynchronous suspension>
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ ⛔ Failed to update login status
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ Instance of 'Failure'
-[log] Error: null
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ #0   LoggerAppLoggerImpl.error (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:73:14)
-│ #1   UserServiceImpl.login.<anonymous closure> (package:boost_sys_weblurk/service/user/user_service_impl.dart:46:17)
-│ #2   _FutureListener.handleError (dart:async/future_impl.dart:245:22)
-[log] ========================
-│ #3   Future._propagateToListeners.handleError (dart:async/future_impl.dart:963:47)
-│ #4   Future._propagateToListeners (dart:async/future_impl.dart:984:13)
-│ #5   Future._completeErrorObject (dart:async/future_impl.dart:741:5)
-│ #6   Future._completeError (dart:async/future_impl.dart:745:5)
-│ #7   <asynchronous suspension>
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-[log] === DIO ERROR DETAILS ===
-[log] Type: DioExceptionType.badResponse
-│ ⛔ Failed to update login status (non-blocking)
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-*** Response ***
-[log] Error: null
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
-[log] Response Status: 500
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:38 GMT
-[log] Response Message: Internal Server Error
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
-[log] Request URL: https://api.boostapi.com.br/streamer/status/update
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_b","schedules":[]}
-
-[log] Request Method: POST
-[log] Request Data: {streamerId: 29, status: ON}
-[log] ========================
-[log] Message: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
-      The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
-      Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-      In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
-[log] Message: This exception was thrown because the response has a status code of 500 and RequestOptions.validateStatus was configured to throw for this status code.
-      The status code of 500 has the following meaning: "Server error - the server failed to fulfil an apparently valid request"
-      Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-      In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code.
-[log] Request Headers: {Content-Type: application/json, Accept: application/json, Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg, content-length: 31}
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
-│ #1   _MyWebviewWidgetState._captureCurrentUrl (package:boost_sys_weblurk/core/ui/widgets/webview_widget.dart:233:22)
-├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-│ 🐛 Capturando URL atual do WebView
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-*** Response ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:39 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_b","schedules":[]}
-
-*** Request ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
-
-*** Response ***
-uri: https://api.boostapi.com.br/list-a/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:39 GMT
- access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
- content-length: 38
- x-frame-options: SAMEORIGIN
- content-type: application/json;charset=utf-8
- x-xss-protection: 1; mode=block
- x-content-type-options: nosniff
- server: nginx/1.24.0 (Ubuntu)
-Response Text:
-{"list_name":"lista_a","schedules":[]}
-
-*** Request ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-method: GET
-responseType: ResponseType.json
-followRedirects: true
-persistentConnection: true
-connectTimeout: 0:00:30.000000
-sendTimeout: 0:00:30.000000
-receiveTimeout: 0:00:30.000000
-receiveDataWhenStatusError: true
-extra: {retry: 3, retryDelay: 1000, auth_required: true}
-headers:
- Content-Type: application/json
- Accept: application/json
- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY4MTgwODksImlhdCI6MTc1NjIxMzI4OSwiaXNzIjoiYm9vc3QtdHdpdGNoIiwibmJmIjoxNzU2MjEzMjg5LCJyb2xlIjoidXNlciIsInN0cmVhbWVySWQiOjI3LCJzdWIiOiIyOSJ9.Af5VKc-krATspuuheZXXDR-aSroezJmD-clMdXyiuLg
-data:
-null
-
-*** Response ***
-uri: https://api.boostapi.com.br/list-b/get?date=2025-08-26
-statusCode: 200
-headers:
- connection: keep-alive
- x-powered-by: Dart with package:shelf
- access-control-allow-headers: content-type, authorization
- access-control-allow-origin: *
- date: Tue, 26 Aug 2025 13:01:40 GMT
+ date: Sun, 07 Sep 2025 00:16:51 GMT
  access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
  content-length: 38
  x-frame-options: SAMEORIGIN
@@ -1206,9 +957,45 @@ Response Text:
 
 ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 │ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeViewModel._updateChannels (package:boost_sys_weblurk/features/home/presentation/viewmodels/home_viewmodel.dart:229:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Finalizada atualização de canais
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
 │ #1   _MyWebviewWidgetState._captureCurrentUrl (package:boost_sys_weblurk/core/ui/widgets/webview_widget.dart:233:22)
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │ 🐛 Capturando URL atual do WebView
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeViewModel._updateChannels (package:boost_sys_weblurk/features/home/presentation/viewmodels/home_viewmodel.dart:182:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Iniciando atualização de canais
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannelForList (package:boost_sys_weblurk/service/home/home_service_impl.dart:276:17)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Retornando canal da Lista A do cache
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannelForList (package:boost_sys_weblurk/service/home/home_service_impl.dart:276:17)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Retornando canal da Lista B do cache
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeViewModel._updateChannels (package:boost_sys_weblurk/features/home/presentation/viewmodels/home_viewmodel.dart:229:15)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Finalizada atualização de canais
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
+│ #1   HomeServiceImpl.fetchCurrentChannel (package:boost_sys_weblurk/service/home/home_service_impl.dart:197:17)
+├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+│ 🐛 Retornando canal atual do cache
 └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 │ #0   LoggerAppLoggerImpl.debug (package:boost_sys_weblurk/core/logger/logger_app_logger_impl.dart:69:14)
