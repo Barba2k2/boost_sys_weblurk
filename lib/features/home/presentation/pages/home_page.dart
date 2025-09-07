@@ -78,6 +78,7 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.cosmicNavy,
       appBar: SyslurkAppBar(
         viewModel: widget.viewModel,
         loginViewModel: GetIt.I<LoginViewModel>(),
@@ -87,47 +88,106 @@ class _HomePageState extends State<HomePage>
         volumeService: GetIt.I<VolumeService>(),
         username: widget.viewModel.userLogged?.nickname,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ScheduleTabsWidget(viewModel: widget.viewModel),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.cosmicNavy,
+              AppColors.cosmicBlue,
+              AppColors.cosmicDarkPurple,
+            ],
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) => Container(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.refresh),
-                    title: const Text('Atualizar Agendamentos'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      widget.viewModel.loadSchedulesCommand.execute();
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.system_update),
-                    title: const Text('Verificar Atualização do App'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      widget.viewModel.checkUpdate();
-                    },
-                  ),
-                ],
-              ),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: ScheduleTabsWidget(viewModel: widget.viewModel),
             ),
-          );
-        },
-        child: const Icon(
-          Icons.menu,
-          color: AppColors.cardHeaderText,
+          ],
+        ),
+      ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.cosmicButtonStart,
+              AppColors.cosmicButtonEnd,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.cosmicBorder.withValues(alpha: 0.5),
+              blurRadius: 15,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: AppColors.cosmicNavy.withValues(alpha: 0.95),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (context) => Container(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.cosmicAccent,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ListTile(
+                      leading: Icon(
+                        Icons.refresh,
+                        color: AppColors.cosmicAccent,
+                      ),
+                      title: const Text(
+                        'Atualizar Agendamentos',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.viewModel.loadSchedulesCommand.execute();
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        Icons.system_update,
+                        color: AppColors.cosmicAccent,
+                      ),
+                      title: const Text(
+                        'Verificar Atualização do App',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.viewModel.checkUpdate();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          child: const Icon(
+            Icons.menu,
+            color: Colors.white,
+          ),
         ),
       ),
     );
