@@ -26,14 +26,52 @@ class AppRouter {
           ),
           GoRoute(
             path: AppRoutes.login,
-            builder: (context, state) => LoginPage(
-              viewModel: injector<LoginViewModel>(),
+            pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              child: LoginPage(
+                viewModel: injector<LoginViewModel>(),
+              ),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: animation.drive(
+                    Tween(
+                      begin: const Offset(1.0, 0.0),
+                      end: Offset.zero,
+                    ).chain(
+                      CurveTween(
+                        curve: Curves.easeInOut,
+                      ),
+                    ),
+                  ),
+                  child: child,
+                );
+              },
             ),
           ),
           GoRoute(
             path: AppRoutes.register,
-            builder: (context, state) => RegisterPage(
-              viewModel: injector<RegisterViewModel>(),
+            pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              child: RegisterPage(
+                viewModel: injector<RegisterViewModel>(),
+              ),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: animation.drive(
+                    Tween(
+                      begin: const Offset(1.0, 0.0),
+                      end: Offset.zero,
+                    ).chain(
+                      CurveTween(
+                        curve: Curves.easeInOut,
+                      ),
+                    ),
+                  ),
+                  child: child,
+                );
+              },
             ),
           ),
           GoRoute(
