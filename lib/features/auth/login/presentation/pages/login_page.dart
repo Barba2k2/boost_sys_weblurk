@@ -104,43 +104,75 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: true,
                     ),
                     const SizedBox(height: 20),
-                    ListenableBuilder(
-                      listenable: widget.viewModel.loginCommand,
-                      builder: (context, child) {
-                        final command = widget.viewModel.loginCommand;
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ListenableBuilder(
+                          listenable: widget.viewModel.loginCommand,
+                          builder: (context, child) {
+                            final command = widget.viewModel.loginCommand;
 
-                        return SizedBox(
-                          width: 200,
+                            return SizedBox(
+                              width: 150,
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed:
+                                    command.running ? null : _handleLogin,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.warning,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: command.running
+                                    ? const CircularProgressIndicator(
+                                        color: AppColors.cardHeaderText,
+                                      )
+                                    : const Text(
+                                        'Entrar',
+                                        style: TextStyle(
+                                          fontFamily: 'Ibrand',
+                                          color: AppColors.cardHeaderText,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 2.0,
+                                        ),
+                                      ),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(
+                          width: 150,
                           height: 50,
-                          child: ElevatedButton(
-                            onPressed: command.running ? null : _handleLogin,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.warning,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 16,
+                          child: OutlinedButton(
+                            onPressed: () => context.go(AppRoutes.register),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(
+                                color: AppColors.cardHeaderText,
+                                width: 2,
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: command.running
-                                ? const CircularProgressIndicator(
-                                    color: AppColors.cardHeaderText,
-                                  )
-                                : const Text(
-                                    'Entrar',
-                                    style: TextStyle(
-                                      fontFamily: 'Ibrand',
-                                      color: AppColors.cardHeaderText,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 2.0,
-                                    ),
-                                  ),
+                            child: const Text(
+                              'Cadastrar',
+                              style: TextStyle(
+                                fontFamily: 'Ibrand',
+                                color: AppColors.cardHeaderText,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 2.0,
+                              ),
+                            ),
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
                   ],
                 ),
