@@ -142,7 +142,6 @@ class PollingServiceImpl implements PollingService {
   void _startWatchdog(int streamerId) {
     _watchdogTimer?.cancel();
     _watchdogTimer = Timer.periodic(_watchdogInterval, (_) {
-      _logger.debug('Executando verificação do watchdog');
       _checkAndRestartIfNeeded(streamerId);
     });
   }
@@ -269,7 +268,8 @@ class PollingServiceImpl implements PollingService {
         final timeDiff = now.difference(_lastScoreUpdate!);
         if (timeDiff.inMinutes < 5) {
           _logger.debug(
-              'Score atualizado recentemente (${timeDiff.inMinutes} minutos atrás), pulando atualização');
+            'Score atualizado recentemente (${timeDiff.inMinutes} minutos atrás), pulando atualização',
+          );
           return;
         }
       }
