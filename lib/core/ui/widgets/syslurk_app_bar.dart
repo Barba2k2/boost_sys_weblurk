@@ -68,14 +68,17 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.cosmicNavy,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(
+              color: AppColors.cosmicBorder,
+            ),
           ),
           title: const Text(
             'Logout',
             style: TextStyle(
-              color: AppColors.cardHeaderText,
+              color: AppColors.cosmicAccent,
               fontFamily: 'Ibrand',
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -84,7 +87,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
           content: const Text(
             'Deseja realmente fazer logout?',
             style: TextStyle(
-              color: AppColors.cardHeaderText,
+              color: Colors.white70,
               fontFamily: 'Ibrand',
               fontSize: 16,
             ),
@@ -95,7 +98,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: const Text(
                 'Cancelar',
                 style: TextStyle(
-                  color: AppColors.cardHeaderText,
+                  color: Colors.white70,
                   fontFamily: 'Ibrand',
                   fontSize: 14,
                 ),
@@ -121,14 +124,14 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.cardHeaderText,
+                              AppColors.cosmicAccent,
                             ),
                           ),
                         )
                       : const Text(
                           'Sair',
                           style: TextStyle(
-                            color: AppColors.warning,
+                            color: AppColors.cosmicAccent,
                             fontFamily: 'Ibrand',
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -168,12 +171,19 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.appBar,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.cosmicNavy,
+                AppColors.cosmicBlue,
+              ],
+            ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.menuItemIconInactive.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                color: AppColors.cosmicBorder.withValues(alpha: 0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -204,7 +214,7 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                     return Text(
                       'Canal: $channelName',
                       style: const TextStyle(
-                        color: AppColors.menuItemIcon,
+                        color: Colors.white70,
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
@@ -237,16 +247,16 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.cosmicDarkPurple,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.3),
+                            color: AppColors.cosmicBorder,
                           ),
                         ),
                         child: Text(
                           timezoneDisplay,
                           style: const TextStyle(
-                            color: AppColors.primary,
+                            color: AppColors.cosmicAccent,
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                           ),
@@ -267,21 +277,35 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.menuButtonActive,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.cosmicButtonStart,
+                          AppColors.cosmicButtonEnd,
+                        ],
+                      ),
                       borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.cosmicBorder.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
                         const Icon(
                           Icons.account_circle,
                           size: 20,
-                          color: AppColors.menuItemIcon,
+                          color: Colors.white,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           username!,
                           style: const TextStyle(
-                            color: AppColors.menuItemIcon,
+                            color: Colors.white,
                             fontWeight: FontWeight.w500,
                             fontSize: 14,
                           ),
