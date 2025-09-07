@@ -30,21 +30,34 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Dialog(
-      backgroundColor: colorScheme.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: AppColors.cosmicNavy,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(
+          color: AppColors.cosmicBorder,
+        ),
+      ),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.2),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.cosmicNavy,
+              AppColors.cosmicBlue,
+            ],
           ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.cosmicBorder.withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -56,35 +69,50 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.3),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.cosmicButtonStart,
+                        AppColors.cosmicButtonEnd,
+                      ],
                     ),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.cosmicAccent.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: const Icon(
                     Icons.schedule,
                     size: 24,
-                    color: AppColors.primary,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(width: 16),
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Fuso Horário',
-                        style: theme.textTheme.headlineSmall?.copyWith(
+                        style: TextStyle(
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
+                          color: AppColors.cosmicAccent,
+                          fontFamily: 'Ibrand',
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       Text(
                         'Selecione seu fuso horário local para converter para horário do Brasil',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withValues(alpha: 0.7),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white70,
+                          fontFamily: 'Ibrand',
                         ),
                       ),
                     ],
@@ -99,36 +127,49 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.05),
+                color: AppColors.cosmicDarkPurple.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.2),
+                  color: AppColors.cosmicBorder,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.cosmicAccent.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Seu Fuso Horário Local:',
-                    style: theme.textTheme.labelMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
+                      color: AppColors.cosmicAccent,
+                      fontFamily: 'Ibrand',
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     widget.timezoneService.getTimezoneName(_selectedTimezone),
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    style: const TextStyle(
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface,
+                      color: Colors.white,
+                      fontFamily: 'Ibrand',
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Será convertido para horário do Brasil (GMT-3)',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white70,
                       fontStyle: FontStyle.italic,
+                      fontFamily: 'Ibrand',
                     ),
                   ),
                 ],
@@ -158,14 +199,26 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.primary.withValues(alpha: 0.1)
-                              : colorScheme.surfaceContainerHighest,
+                              ? AppColors.cosmicAccent.withValues(alpha: 0.2)
+                              : AppColors.cosmicDarkPurple
+                                  .withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isSelected
-                                ? AppColors.primary.withValues(alpha: 0.3)
-                                : colorScheme.outline.withValues(alpha: 0.2),
+                                ? AppColors.cosmicAccent
+                                : AppColors.cosmicBorder.withValues(alpha: 0.5),
+                            width: isSelected ? 2 : 1,
                           ),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: AppColors.cosmicAccent
+                                        .withValues(alpha: 0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: Row(
                           children: [
@@ -177,12 +230,12 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: isSelected
-                                      ? AppColors.primary
-                                      : colorScheme.outline,
+                                      ? AppColors.cosmicAccent
+                                      : AppColors.cosmicBorder,
                                   width: 2,
                                 ),
                                 color: isSelected
-                                    ? AppColors.primary
+                                    ? AppColors.cosmicAccent
                                     : Colors.transparent,
                               ),
                               child: isSelected
@@ -200,9 +253,8 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
                               _getTimezoneIcon(timezone['id']!),
                               size: 20,
                               color: isSelected
-                                  ? AppColors.primary
-                                  : colorScheme.onSurface
-                                      .withValues(alpha: 0.7),
+                                  ? AppColors.cosmicAccent
+                                  : Colors.white70,
                             ),
                             const SizedBox(width: 12),
 
@@ -213,19 +265,22 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
                                 children: [
                                   Text(
                                     timezone['name']!,
-                                    style: theme.textTheme.titleSmall?.copyWith(
+                                    style: TextStyle(
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w600,
                                       color: isSelected
-                                          ? AppColors.primary
-                                          : colorScheme.onSurface,
+                                          ? AppColors.cosmicAccent
+                                          : Colors.white,
+                                      fontFamily: 'Ibrand',
                                     ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     'GMT ${timezone['offset']}',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurface
-                                          .withValues(alpha: 0.6),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white70,
+                                      fontFamily: 'Ibrand',
                                     ),
                                   ),
                                 ],
@@ -249,52 +304,76 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
                     onPressed: () => context.pop(),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 20),
-                      side: BorderSide(
-                        color: colorScheme.outline,
+                      side: const BorderSide(
+                        color: AppColors.cosmicBorder,
+                        width: 2,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Cancelar',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.7),
+                      style: TextStyle(
+                        color: Colors.white70,
                         fontWeight: FontWeight.w500,
+                        fontFamily: 'Ibrand',
+                        fontSize: 16,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        await widget.timezoneService
-                            .setSelectedTimezone(_selectedTimezone);
-                        if (mounted) {
-                          context.pop(_selectedTimezone);
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          Messages.error('Erro ao salvar fuso horário: $e');
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.cosmicButtonStart,
+                          AppColors.cosmicButtonEnd,
+                        ],
                       ),
-                      elevation: 2,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.cosmicAccent.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      'Salvar',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          await widget.timezoneService
+                              .setSelectedTimezone(_selectedTimezone);
+                          if (mounted) {
+                            context.pop(_selectedTimezone);
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            Messages.error('Erro ao salvar fuso horário: $e');
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Salvar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Ibrand',
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
