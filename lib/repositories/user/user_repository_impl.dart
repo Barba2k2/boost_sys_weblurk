@@ -22,6 +22,37 @@ class UserRepositoryImpl implements UserRepository {
   final AppLogger _logger;
 
   @override
+  Future<void> register(String nickname, String password) async {
+    try {
+      await _restClient.unAuth().post(
+        '/auth/register',
+        data: {
+          'nickname': nickname,
+          'password': password,
+          'role': 'user', // Always register as user role
+        },
+      );
+    } on RestClientException catch (e, s) {
+      if (e.statusCode == HttpStatus.badRequest ||
+          e.statusCode == HttpStatus.conflict) {
+        final errorMessage = e.response.data?['message'] ?? 'Erro de validação';
+        if (errorMessage.contains('User already exists') ||
+            errorMessage.contains('Nickname already taken')) {
+          throw Failure(
+            message: 'Usuário já existe. Escolha outro nickname.',
+          );
+        }
+        throw Failure(message: errorMessage);
+      }
+      _logger.error('Repository - Failed to register user', e, s);
+      throw Failure(message: 'Erro ao cadastrar usuário');
+    } catch (e, s) {
+      _logger.error('Repository - Unexpected error during register', e, s);
+      throw Failure(message: 'Erro inesperado ao cadastrar usuário');
+    }
+  }
+
+  @override
   Future<String> login(String nickname, String password) async {
     try {
       final result = await _restClient.unAuth().post(
