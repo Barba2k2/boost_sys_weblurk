@@ -1,15 +1,17 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/di/injector.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/services/error_message_service.dart';
 import '../../../../../core/ui/app_colors.dart';
-import '../../../../../core/ui/widgets/boost_text_form_field.dart';
 import '../../../../../core/ui/widgets/messages.dart';
 import '../../../../../core/utils/result.dart';
+import '../../../register/presentation/viewmodels/register_viewmodel.dart';
 import '../viewmodels/login_viewmodel.dart';
+import '../widgets/animated_form_container.dart';
+import '../widgets/mode_toggle_link.dart';
+import '../widgets/typing_text_widget.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -26,10 +28,15 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _nicknameEC = TextEditingController();
   final _passwordEC = TextEditingController();
+  final _confirmPasswordEC = TextEditingController();
+
+  bool _isRegisterMode = false;
+  late final RegisterViewModel _registerViewModel;
 
   @override
   void initState() {
     super.initState();
+    _registerViewModel = i<RegisterViewModel>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Messages.setGlobalContext(context);
     });
@@ -39,6 +46,7 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _nicknameEC.dispose();
     _passwordEC.dispose();
+    _confirmPasswordEC.dispose();
     super.dispose();
   }
 
@@ -50,6 +58,27 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordEC.text,
       );
       widget.viewModel.loginCommand.execute(params);
+    }
+  }
+
+  void _toggleMode() {
+    setState(() {
+      _isRegisterMode = !_isRegisterMode;
+      if (!_isRegisterMode) {
+        _confirmPasswordEC.clear();
+      }
+    });
+  }
+
+  void _handleRegister() {
+    final formValid = _formKey.currentState?.validate() ?? false;
+    if (formValid) {
+      final params = RegisterParams(
+        nickname: _nicknameEC.text,
+        password: _passwordEC.text,
+        confirmPassword: _confirmPasswordEC.text,
+      );
+      _registerViewModel.registerCommand.execute(params);
     }
   }
 
@@ -159,12 +188,14 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 40),
 
-                          // Login Form
+                          // Login/Register Form
                           Column(
                             children: [
-                              const Text(
-                                'Fazer Login',
-                                style: TextStyle(
+                              TypingTextWidget(
+                                text: _isRegisterMode
+                                    ? 'Criar Conta'
+                                    : 'Fazer Login',
+                                style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 28,
                                   fontWeight: FontWeight.w700,
@@ -173,82 +204,36 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               const SizedBox(height: 24),
-
-                              BoostTextFormField(
-                                controller: _nicknameEC,
-                                label: 'Usuário',
-                                validator: widget.viewModel.validateUser,
-                              ),
-                              const SizedBox(height: 20),
-                              BoostTextFormField(
-                                controller: _passwordEC,
-                                label: 'Senha',
-                                validator: widget.viewModel.validatePassword,
-                                obscureText: true,
-                              ),
-                              const SizedBox(height: 32),
-
-                              // Login Button
                               ListenableBuilder(
-                                listenable: widget.viewModel.loginCommand,
+                                listenable: Listenable.merge([
+                                  widget.viewModel.loginCommand,
+                                  _registerViewModel.registerCommand,
+                                ]),
                                 builder: (context, child) {
-                                  final command = widget.viewModel.loginCommand;
+                                  final isLoginLoading =
+                                      widget.viewModel.loginCommand.running;
+                                  final isRegisterLoading = _registerViewModel
+                                      .registerCommand.running;
+                                  final isLoading =
+                                      isLoginLoading || isRegisterLoading;
 
-                                  return Container(
-                                    width: double.infinity,
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          AppColors.cosmicButtonStart,
-                                          AppColors.cosmicButtonEnd,
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppColors.cosmicBorder
-                                              .withValues(alpha: 0.5),
-                                          blurRadius: 15,
-                                          offset: const Offset(0, 6),
-                                        ),
-                                      ],
-                                    ),
-                                    child: ElevatedButton(
-                                      onPressed:
-                                          command.running ? null : _handleLogin,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shadowColor: Colors.transparent,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                        ),
-                                      ),
-                                      child: command.running
-                                          ? const SizedBox(
-                                              width: 24,
-                                              height: 24,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 3,
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                        Color>(Colors.white),
-                                              ),
-                                            )
-                                          : const Text(
-                                              'Entrar',
-                                              style: TextStyle(
-                                                fontFamily: 'Ibrand',
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w700,
-                                                letterSpacing: 1.5,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                    ),
+                                  return AnimatedFormContainer(
+                                    isRegisterMode: _isRegisterMode,
+                                    nicknameController: _nicknameEC,
+                                    passwordController: _passwordEC,
+                                    confirmPasswordController:
+                                        _confirmPasswordEC,
+                                    nicknameValidator: _isRegisterMode
+                                        ? _registerViewModel.validateNickname
+                                        : widget.viewModel.validateUser,
+                                    passwordValidator: _isRegisterMode
+                                        ? _registerViewModel.validatePassword
+                                        : widget.viewModel.validatePassword,
+                                    confirmPasswordValidator: _registerViewModel
+                                        .validateConfirmPassword,
+                                    onLogin: _handleLogin,
+                                    onRegister: _handleRegister,
+                                    isLoading: isLoading,
                                   );
                                 },
                               ),
@@ -256,40 +241,10 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 24),
 
-                          // Register Link
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                'Não tem conta? ',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () async {
-                                  await Future.delayed(
-                                    const Duration(milliseconds: 100),
-                                  );
-                                  if (mounted) {
-                                    context.go(AppRoutes.register);
-                                  }
-                                },
-                                child: const Text(
-                                  'Cadastre-se',
-                                  style: TextStyle(
-                                    color: AppColors.cosmicAccent,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: AppColors.cosmicAccent,
-                                    decorationThickness: 2,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          // Toggle Mode Link
+                          ModeToggleLink(
+                            isRegisterMode: _isRegisterMode,
+                            onToggle: _toggleMode,
                           ),
                         ],
                       ),
@@ -314,8 +269,30 @@ class _LoginPageState extends State<LoginPage> {
               if (command.error) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   final error = command.result?.errorOrNull;
+                  ErrorMessageService.instance.handleLoginError(error);
+                });
+              }
 
-                  log('error: $error');
+              return const SizedBox.shrink();
+            },
+          ),
+
+          // Register Command Listener
+          ListenableBuilder(
+            listenable: _registerViewModel.registerCommand,
+            builder: (context, child) {
+              final command = _registerViewModel.registerCommand;
+
+              if (command.completed) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Messages.success('Cadastro realizado com sucesso!');
+                  _toggleMode(); // Volta para o modo de login
+                });
+              }
+
+              if (command.error) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  final error = command.result?.errorOrNull;
                   ErrorMessageService.instance.handleLoginError(error);
                 });
               }
