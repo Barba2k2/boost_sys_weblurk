@@ -73,24 +73,45 @@ class _ScheduleTabsWidgetState extends State<ScheduleTabsWidget>
       children: [
         Container(
           decoration: BoxDecoration(
-            color: AppColors.menuButton,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.cosmicDarkPurple,
+                AppColors.cosmicNavy,
+              ],
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.10),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                color: AppColors.cosmicBorder.withValues(alpha: 0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: TabBar(
             controller: _tabController,
             onTap: (index) => widget.viewModel.switchTabCommand.execute(index),
-            labelColor: AppColors.menuItemIcon,
-            unselectedLabelColor: AppColors.menuItemIconInactive,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white60,
             indicatorSize: TabBarIndicatorSize.tab,
             indicator: BoxDecoration(
-              color: AppColors.appBar,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.cosmicButtonStart,
+                  AppColors.cosmicButtonEnd,
+                ],
+              ),
               borderRadius: indicatorRadius,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.cosmicAccent.withValues(alpha: 0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             labelStyle: const TextStyle(
               fontFamily: 'Ibrand',
