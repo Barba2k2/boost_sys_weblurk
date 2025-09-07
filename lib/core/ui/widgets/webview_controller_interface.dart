@@ -17,6 +17,9 @@ abstract class WebViewControllerInterface {
   /// Set popup window policy
   Future<void> setPopupWindowPolicy(dynamic policy);
 
+  /// Set user agent for desktop mode
+  Future<void> setUserAgent(String userAgent);
+
   /// Stream of loading state changes
   Stream<dynamic> get loadingState;
 
