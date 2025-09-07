@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import '../local_storage/local_storage.dart';
 import '../logger/app_logger.dart';
 
@@ -13,7 +14,7 @@ import '../logger/app_logger.dart';
 ///
 /// Conversion formula: BrazilTime = SelectedTime + (BrazilOffset - SelectedOffset)
 /// Where BrazilOffset = -3 and SelectedOffset is the user's timezone offset
-class TimezoneService {
+class TimezoneService extends ChangeNotifier {
   static const String _timezoneKey = 'selected_timezone';
   static const String _defaultTimezone = 'GMT-3';
 
@@ -76,6 +77,7 @@ class TimezoneService {
   Future<void> setSelectedTimezone(String timezoneId) async {
     try {
       await _localStorage.write<String>(_timezoneKey, timezoneId);
+      notifyListeners();
     } catch (e) {
       _logger.error('Erro ao salvar fuso horário: $e');
       throw Exception('Erro ao salvar configuração de fuso horário');

@@ -40,6 +40,22 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
     }
   }
 
+  Future<String> _getTimezoneDisplay() async {
+    try {
+      final selectedTimezone = await timezoneService.getSelectedTimezone();
+      final systemTimezone = timezoneService.getSystemTimezone();
+
+      // Only show timezone if it's different from system timezone
+      if (selectedTimezone != systemTimezone) {
+        return timezoneService.getTimezoneName(selectedTimezone);
+      }
+
+      return '';
+    } catch (e) {
+      return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -101,23 +117,60 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                 color: AppColors.menuButtonActive,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.account_circle,
-                    size: 20,
-                    color: AppColors.menuItemIcon,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    username!,
-                    style: const TextStyle(
-                      color: AppColors.menuItemIcon,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+              child: ListenableBuilder(
+                listenable: timezoneService,
+                builder: (context, child) {
+                  return FutureBuilder<String>(
+                    future: _getTimezoneDisplay(),
+                    builder: (context, snapshot) {
+                      final timezoneDisplay = snapshot.data ?? '';
+                      return Row(
+                        children: [
+                          const Icon(
+                            Icons.account_circle,
+                            size: 20,
+                            color: AppColors.menuItemIcon,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            username!,
+                            style: const TextStyle(
+                              color: AppColors.menuItemIcon,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                          if (timezoneDisplay.isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                timezoneDisplay,
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
             ),
         ],
