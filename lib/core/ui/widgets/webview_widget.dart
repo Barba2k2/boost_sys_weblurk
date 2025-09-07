@@ -230,7 +230,6 @@ $s
 
   Future<void> _captureCurrentUrl() async {
     try {
-      widget.logger?.debug('Capturando URL atual do WebView');
       await _controller.executeScript(
         '''
           if (window.chrome && window.chrome.webview) {
