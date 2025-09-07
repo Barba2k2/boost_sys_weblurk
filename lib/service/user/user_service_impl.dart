@@ -23,6 +23,19 @@ class UserServiceImpl implements UserService {
   final LocalSecureStorage _localSecureStorage;
 
   @override
+  Future<void> register(String nickname, String password) async {
+    try {
+      await _userRepository.register(nickname, password);
+    } catch (e, s) {
+      _logger.error('Service - Failed to register user', e, s);
+
+      final userFriendlyMessage =
+          ErrorMessageService.instance.extractUserFriendlyMessage(e);
+      throw Failure(message: userFriendlyMessage);
+    }
+  }
+
+  @override
   Future<void> login(String nickname, String password) async {
     try {
       final accessToken = await _userRepository.login(nickname, password);
