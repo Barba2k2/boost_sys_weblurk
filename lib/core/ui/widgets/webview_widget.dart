@@ -7,6 +7,7 @@ import 'package:webview_windows/webview_windows.dart';
 
 import '../../logger/app_logger.dart';
 import '../app_colors.dart';
+import '../config/webview_config.dart';
 import 'webview_android_controller.dart';
 import 'webview_controller_factory.dart';
 import 'webview_controller_interface.dart';
@@ -134,6 +135,9 @@ Erro original: $e
       await _initializeWebViewWithRetry();
       await _controller.setBackgroundColor(Colors.transparent);
 
+      // Set desktop user agent
+      await _controller.setUserAgent(WebViewConfig.defaultDesktopUserAgent);
+
       // Set popup policy only for Windows
       if (Platform.isWindows) {
         await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
@@ -260,6 +264,18 @@ $s
 
   Future<void> _captureCurrentUrl() async {
     try {
+      // Execute desktop mode script
+      await _controller.executeScript(WebViewConfig.forceDesktopModeScript);
+
+      // Execute post-load desktop script after a short delay
+      Future.delayed(const Duration(milliseconds: 500), () async {
+        try {
+          await _controller.executeScript(WebViewConfig.postLoadDesktopScript);
+        } catch (e) {
+          widget.logger?.error('Erro ao executar script pós-carregamento: $e');
+        }
+      });
+
       if (Platform.isWindows) {
         await _controller.executeScript(
           '''
