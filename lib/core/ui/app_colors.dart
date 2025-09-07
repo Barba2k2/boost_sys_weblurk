@@ -35,4 +35,14 @@ class AppColors {
   static const Color transparent = Colors.transparent;
   static const Color webviewBackground = Colors.black87;
   static const Color webviewText = Colors.white;
+
+  // Cosmic Theme Colors
+  static const Color cosmicDarkPurple = Color(0xFF1A0B2E);
+  static const Color cosmicBlue = Color(0xFF16213E);
+  static const Color cosmicNavy = Color(0xFF0F0F23);
+  static const Color cosmicPurple = Color(0xFF2D1B69);
+  static const Color cosmicAccent = Color(0xFF9C27B0);
+  static const Color cosmicButtonStart = Color(0xFF7B1FA2);
+  static const Color cosmicButtonEnd = Color(0xFF4A148C);
+  static const Color cosmicBorder = Color(0xFF4A148C);
 }
