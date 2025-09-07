@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -14,15 +15,20 @@ Future<void> main() async {
   await SentryService.init(
     appRunner: () async {
       await ApplicationConfig().consfigureApp();
-      await windowManager.ensureInitialized();
-      final WindowOptions windowOptions = const WindowOptions(
-        size: Size(1014, 624),
-        center: true,
-      );
-      windowManager.waitUntilReadyToShow(windowOptions, () async {
-        await windowManager.show();
-        await windowManager.focus();
-      });
+
+      // Initialize window manager only for Windows
+      if (Platform.isWindows) {
+        await windowManager.ensureInitialized();
+        final WindowOptions windowOptions = const WindowOptions(
+          size: Size(1014, 624),
+          center: true,
+        );
+        windowManager.waitUntilReadyToShow(windowOptions, () async {
+          await windowManager.show();
+          await windowManager.focus();
+        });
+      }
+
       await Injector.setup();
       ErrorHandler.setupErrorHandling();
       runApp(const Weblurk());
@@ -47,13 +53,13 @@ class _WeblurklState extends State<Weblurk> {
   Future<void> _checkForUpdates() async {
     // Aguarda um pequeno delay para garantir que a UI esteja pronta
     await Future.delayed(const Duration(seconds: 2));
-    
+
     // Use the new MVVM structure through UpdateController
     final updateService = ShorebirdUpdateService();
-    
+
     // Executar diagnóstico primeiro
     await updateService.debugShorebird();
-    
+
     final hasUpdate = await updateService.checkForUpdates();
     if (hasUpdate && mounted) {
       // Use the new MVVM UpdateController
