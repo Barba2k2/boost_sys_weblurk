@@ -106,6 +106,44 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
           ],
         ),
         actions: [
+          // Timezone display (outside and to the left)
+          ListenableBuilder(
+            listenable: timezoneService,
+            builder: (context, child) {
+              return FutureBuilder<String>(
+                future: _getTimezoneDisplay(),
+                builder: (context, snapshot) {
+                  final timezoneDisplay = snapshot.data ?? '';
+                  if (timezoneDisplay.isEmpty) return const SizedBox.shrink();
+                  
+                  return Container(
+                    margin: const EdgeInsets.only(right: 8, top: 10, bottom: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      timezoneDisplay,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          // Username display
           if (username != null)
             Container(
               margin: const EdgeInsets.all(10),
@@ -117,60 +155,23 @@ class SyslurkAppBar extends StatelessWidget implements PreferredSizeWidget {
                 color: AppColors.menuButtonActive,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: ListenableBuilder(
-                listenable: timezoneService,
-                builder: (context, child) {
-                  return FutureBuilder<String>(
-                    future: _getTimezoneDisplay(),
-                    builder: (context, snapshot) {
-                      final timezoneDisplay = snapshot.data ?? '';
-                      return Row(
-                        children: [
-                          const Icon(
-                            Icons.account_circle,
-                            size: 20,
-                            color: AppColors.menuItemIcon,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            username!,
-                            style: const TextStyle(
-                              color: AppColors.menuItemIcon,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14,
-                            ),
-                          ),
-                          if (timezoneDisplay.isNotEmpty) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color:
-                                      AppColors.primary.withValues(alpha: 0.3),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Text(
-                                timezoneDisplay,
-                                style: const TextStyle(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      );
-                    },
-                  );
-                },
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.account_circle,
+                    size: 20,
+                    color: AppColors.menuItemIcon,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    username!,
+                    style: const TextStyle(
+                      color: AppColors.menuItemIcon,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
         ],
