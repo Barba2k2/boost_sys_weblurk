@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/login/presentation/pages/login_page.dart';
 import '../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
 import '../../features/auth/login/presentation/viewmodels/login_viewmodel.dart';
+import '../../features/auth/register/presentation/pages/register_page.dart';
+import '../../features/auth/register/presentation/viewmodels/register_viewmodel.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import '../di/injector.dart';
@@ -26,6 +28,12 @@ class AppRouter {
             path: AppRoutes.login,
             builder: (context, state) => LoginPage(
               viewModel: injector<LoginViewModel>(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.register,
+            builder: (context, state) => RegisterPage(
+              viewModel: injector<RegisterViewModel>(),
             ),
           ),
           GoRoute(

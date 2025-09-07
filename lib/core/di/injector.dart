@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
 import '../../features/auth/login/presentation/viewmodels/login_viewmodel.dart';
+import '../../features/auth/register/presentation/viewmodels/register_viewmodel.dart';
 import '../../features/home/data/services/polling_services.dart';
 import '../../features/home/data/services/webview_service.dart';
 import '../../features/home/presentation/viewmodels/home_viewmodel.dart';
@@ -165,6 +166,12 @@ class Injector {
     i.registerFactory<LoginViewModel>(
       () => LoginViewModel(
         authStore: i(),
+        userService: i(),
+      ),
+    );
+
+    i.registerFactory<RegisterViewModel>(
+      () => RegisterViewModel(
         userService: i(),
       ),
     );
