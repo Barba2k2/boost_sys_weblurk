@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/login/presentation/pages/login_page.dart';
 import '../../features/auth/login/presentation/viewmodels/auth_viewmodel.dart';
 import '../../features/auth/login/presentation/viewmodels/login_viewmodel.dart';
-import '../../features/auth/register/presentation/pages/register_page.dart';
-import '../../features/auth/register/presentation/viewmodels/register_viewmodel.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import '../di/injector.dart';
@@ -18,7 +16,7 @@ class AppRouter {
         navigatorKey: NavigationService.navigatorKey,
         redirect: (context, state) => _redirect(context, state, injector()),
         refreshListenable: injector<AuthViewModel>(),
-        initialLocation: AppRoutes.splash,
+        initialLocation: AppRoutes.login,
         routes: [
           GoRoute(
             path: AppRoutes.splash,
@@ -30,46 +28,6 @@ class AppRouter {
               key: state.pageKey,
               child: LoginPage(
                 viewModel: injector<LoginViewModel>(),
-              ),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: animation.drive(
-                      Tween(
-                        begin: const Offset(0.0, 0.3),
-                        end: Offset.zero,
-                      ).chain(
-                        CurveTween(
-                          curve: Curves.easeOutCubic,
-                        ),
-                      ),
-                    ),
-                    child: ScaleTransition(
-                      scale: animation.drive(
-                        Tween(
-                          begin: 0.8,
-                          end: 1.0,
-                        ).chain(
-                          CurveTween(
-                            curve: Curves.easeOutCubic,
-                          ),
-                        ),
-                      ),
-                      child: child,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          GoRoute(
-            path: AppRoutes.register,
-            pageBuilder: (context, state) => CustomTransitionPage(
-              key: state.pageKey,
-              child: RegisterPage(
-                viewModel: injector<RegisterViewModel>(),
               ),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
@@ -121,20 +79,23 @@ class AppRouter {
     final authStore = injector<AuthViewModel>();
     final loggedIn = authStore.userLogged != null;
     final loggingIn = state.matchedLocation == AppRoutes.login;
+    final registering = state.matchedLocation == AppRoutes.register;
     final isSplash = state.matchedLocation == AppRoutes.splash;
 
     if (isSplash) {
-      return loggedIn ? AppRoutes.home : AppRoutes.login;
+      final redirect = loggedIn ? AppRoutes.home : AppRoutes.login;
+      return redirect;
     }
 
-    if (!loggedIn && !loggingIn) {
+    // If not logged in and not on auth pages, redirect to login
+    if (!loggedIn && !loggingIn && !registering) {
       return AppRoutes.login;
     }
 
-    if (loggedIn && loggingIn) {
+    // If logged in and on auth pages, redirect to home
+    if (loggedIn && (loggingIn || registering)) {
       return AppRoutes.home;
     }
-
     return null;
   }
 }
