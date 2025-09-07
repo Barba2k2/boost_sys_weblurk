@@ -73,9 +73,9 @@ class _LoginPageState extends State<LoginPage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xFF1A0B2E).withValues(alpha: 0.3),
-                    const Color(0xFF16213E).withValues(alpha: 0.4),
-                    const Color(0xFF0F0F23).withValues(alpha: 0.45),
+                    AppColors.cosmicDarkPurple.withValues(alpha: 0.3),
+                    AppColors.cosmicBlue.withValues(alpha: 0.4),
+                    AppColors.cosmicNavy.withValues(alpha: 0.45),
                   ],
                 ),
               ),
@@ -100,18 +100,18 @@ class _LoginPageState extends State<LoginPage> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Color(0xFF2D1B69),
-                          Color(0xFF1A0B2E),
-                          Color(0xFF16213E),
+                          AppColors.cosmicPurple,
+                          AppColors.cosmicDarkPurple,
+                          AppColors.cosmicBlue,
                         ],
                       ),
                       border: Border.all(
-                        color: const Color(0xFF4A148C).withValues(alpha: 0.6),
+                        color: AppColors.cosmicBorder.withValues(alpha: 0.6),
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF4A148C).withValues(alpha: 0.4),
+                          color: AppColors.cosmicBorder.withValues(alpha: 0.4),
                           blurRadius: 25,
                           spreadRadius: 3,
                         ),
@@ -148,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
                               const Text(
                                 'SysWebLurk',
                                 style: TextStyle(
-                                  color: Color(0xFF9C27B0),
+                                  color: AppColors.cosmicAccent,
                                   fontSize: 20,
                                   fontWeight: FontWeight.w600,
                                   fontFamily: 'Ibrand',
@@ -202,14 +202,14 @@ class _LoginPageState extends State<LoginPage> {
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                         colors: [
-                                          Color(0xFF7B1FA2),
-                                          Color(0xFF4A148C),
+                                          AppColors.cosmicButtonStart,
+                                          AppColors.cosmicButtonEnd,
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFF4A148C)
+                                          color: AppColors.cosmicBorder
                                               .withValues(alpha: 0.5),
                                           blurRadius: 15,
                                           offset: const Offset(0, 6),
@@ -280,11 +280,11 @@ class _LoginPageState extends State<LoginPage> {
                                 child: const Text(
                                   'Cadastre-se',
                                   style: TextStyle(
-                                    color: Color(0xFF9C27B0),
+                                    color: AppColors.cosmicAccent,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     decoration: TextDecoration.underline,
-                                    decorationColor: Color(0xFF9C27B0),
+                                    decorationColor: AppColors.cosmicAccent,
                                     decorationThickness: 2,
                                   ),
                                 ),
