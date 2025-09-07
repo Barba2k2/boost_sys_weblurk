@@ -33,18 +33,33 @@ class AppRouter {
               ),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: animation.drive(
-                    Tween(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).chain(
-                      CurveTween(
-                        curve: Curves.easeInOut,
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: animation.drive(
+                      Tween(
+                        begin: const Offset(0.0, 0.3),
+                        end: Offset.zero,
+                      ).chain(
+                        CurveTween(
+                          curve: Curves.easeOutCubic,
+                        ),
                       ),
                     ),
+                    child: ScaleTransition(
+                      scale: animation.drive(
+                        Tween(
+                          begin: 0.8,
+                          end: 1.0,
+                        ).chain(
+                          CurveTween(
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
+                      ),
+                      child: child,
+                    ),
                   ),
-                  child: child,
                 );
               },
             ),
@@ -58,18 +73,33 @@ class AppRouter {
               ),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: animation.drive(
-                    Tween(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).chain(
-                      CurveTween(
-                        curve: Curves.easeInOut,
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: animation.drive(
+                      Tween(
+                        begin: const Offset(0.0, 0.3),
+                        end: Offset.zero,
+                      ).chain(
+                        CurveTween(
+                          curve: Curves.easeOutCubic,
+                        ),
                       ),
                     ),
+                    child: ScaleTransition(
+                      scale: animation.drive(
+                        Tween(
+                          begin: 0.8,
+                          end: 1.0,
+                        ).chain(
+                          CurveTween(
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
+                      ),
+                      child: child,
+                    ),
                   ),
-                  child: child,
                 );
               },
             ),
