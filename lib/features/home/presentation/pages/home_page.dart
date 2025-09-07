@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../../auth/login/presentation/viewmodels/login_viewmodel.dart';
 import '../../../../core/services/settings_service.dart';
 import '../../../../core/services/timezone_service.dart';
 import '../../../../core/services/url_launcher_service.dart';
@@ -79,6 +80,7 @@ class _HomePageState extends State<HomePage>
     return Scaffold(
       appBar: SyslurkAppBar(
         viewModel: widget.viewModel,
+        loginViewModel: GetIt.I<LoginViewModel>(),
         settingsService: GetIt.I<SettingsService>(),
         timezoneService: GetIt.I<TimezoneService>(),
         urlLauncherService: GetIt.I<UrlLauncherService>(),
