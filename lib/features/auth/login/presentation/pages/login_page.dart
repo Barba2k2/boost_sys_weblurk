@@ -5,6 +5,7 @@ import '../../../../../core/di/injector.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/services/error_message_service.dart';
 import '../../../../../core/ui/app_colors.dart';
+import '../../../../../core/ui/config/login_ui_config.dart';
 import '../../../../../core/ui/widgets/messages.dart';
 import '../../../../../core/utils/result.dart';
 import '../../../register/presentation/viewmodels/register_viewmodel.dart';
@@ -146,9 +147,9 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ],
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 40,
-                      horizontal: 30,
+                    padding: EdgeInsets.symmetric(
+                      vertical: LoginUiConfig.getVerticalPadding(),
+                      horizontal: LoginUiConfig.getHorizontalPadding(),
                     ),
                     child: Form(
                       key: _formKey,
@@ -160,33 +161,37 @@ class _LoginPageState extends State<LoginPage> {
                             children: [
                               Image.asset(
                                 'assets/images/logo-cla-boost.png',
-                                height: 200,
+                                height: LoginUiConfig.getLogoHeight(),
                               ),
-                              const SizedBox(height: 10),
-                              const Text(
+                              SizedBox(height: LoginUiConfig.getSmallSpacing()),
+                              Text(
                                 'Boost Team',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 36,
+                                  fontSize: LoginUiConfig.getTitleFontSize(),
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Ibrand',
-                                  letterSpacing: 3.0,
+                                  letterSpacing:
+                                      LoginUiConfig.getTitleLetterSpacing(),
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              const Text(
+                              SizedBox(height: LoginUiConfig.getTinySpacing()),
+                              Text(
                                 'SysWebLurk',
                                 style: TextStyle(
                                   color: AppColors.cosmicAccent,
-                                  fontSize: 20,
+                                  fontSize: LoginUiConfig.getSubtitleFontSize(),
                                   fontWeight: FontWeight.w600,
                                   fontFamily: 'Ibrand',
-                                  letterSpacing: 2.0,
+                                  letterSpacing:
+                                      LoginUiConfig.getSubtitleLetterSpacing(),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 40),
+                          SizedBox(
+                            height: LoginUiConfig.getVerticalSpacing(),
+                          ),
 
                           // Login/Register Form
                           Column(
@@ -195,20 +200,26 @@ class _LoginPageState extends State<LoginPage> {
                                 text: _isRegisterMode
                                     ? 'Criar Conta'
                                     : 'Fazer Login',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 28,
+                                  fontSize:
+                                      LoginUiConfig.getFormTitleFontSize(),
                                   fontWeight: FontWeight.w700,
                                   fontFamily: 'Ibrand',
-                                  letterSpacing: 1.5,
+                                  letterSpacing:
+                                      LoginUiConfig.getFormTitleLetterSpacing(),
                                 ),
                               ),
-                              const SizedBox(height: 24),
+                              SizedBox(
+                                height: LoginUiConfig.getElementSpacing(),
+                              ),
                               ListenableBuilder(
-                                listenable: Listenable.merge([
-                                  widget.viewModel.loginCommand,
-                                  _registerViewModel.registerCommand,
-                                ]),
+                                listenable: Listenable.merge(
+                                  [
+                                    widget.viewModel.loginCommand,
+                                    _registerViewModel.registerCommand,
+                                  ],
+                                ),
                                 builder: (context, child) {
                                   final isLoginLoading =
                                       widget.viewModel.loginCommand.running;
@@ -239,7 +250,9 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(
+                            height: LoginUiConfig.getElementSpacing(),
+                          ),
 
                           // Toggle Mode Link
                           ModeToggleLink(
