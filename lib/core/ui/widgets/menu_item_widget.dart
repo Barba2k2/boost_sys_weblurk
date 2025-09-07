@@ -15,10 +15,16 @@ class MenuItemWidget extends PopupMenuItem<String> {
               Icon(
                 icon,
                 size: 20,
-                color: AppColors.menuItemIconInactive,
+                color: AppColors.cosmicAccent,
               ),
               const SizedBox(width: 10),
-              Text(label),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Ibrand',
+                ),
+              ),
             ],
           ),
         );
