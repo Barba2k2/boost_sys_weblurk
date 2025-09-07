@@ -66,7 +66,7 @@ class _RegisterPageState extends State<RegisterPage> {
               fit: BoxFit.cover,
             ),
           ),
-          // Dark overlay for better text readability
+          // Dark cosmic background overlay
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -74,8 +74,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.3),
-                    Colors.black.withValues(alpha: 0.7),
+                    const Color(0xFF1A0B2E).withValues(alpha: 0.3),
+                    const Color(0xFF16213E).withValues(alpha: 0.4),
+                    const Color(0xFF0F0F23).withValues(alpha: 0.45),
                   ],
                 ),
               ),
@@ -97,19 +98,27 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(24),
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            AppColors.surface.withValues(alpha: 0.95),
-                            AppColors.background.withValues(alpha: 0.9),
-                            AppColors.cardHeader.withValues(alpha: 0.8),
+                            Color(0xFF2D1B69),
+                            Color(0xFF1A0B2E),
+                            Color(0xFF16213E),
                           ],
                         ),
                         border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          width: 1,
+                          color: const Color(0xFF4A148C).withValues(alpha: 0.6),
+                          width: 2,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                const Color(0xFF4A148C).withValues(alpha: 0.4),
+                            blurRadius: 25,
+                            spreadRadius: 3,
+                          ),
+                        ],
                       ),
                       padding: const EdgeInsets.all(40),
                       child: Form(
@@ -117,188 +126,184 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Logo and Title with glow effect
-                            Image.asset(
-                              'assets/images/logo-cla-boost.png',
-                              height: 200,
-                            ),
-                            const SizedBox(height: 20),
-                            ShaderMask(
-                              shaderCallback: (bounds) =>
-                                  const LinearGradient(
-                                colors: [
-                                  AppColors.cardHeaderText,
-                                  AppColors.primary,
-                                  AppColors.accent,
-                                ],
-                              ).createShader(bounds),
-                              child: const Text(
-                                'Boost Team',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Ibrand',
-                                  letterSpacing: 3.0,
+                            // Logo and Title
+                            Column(
+                              children: [
+                                Image.asset(
+                                  'assets/images/logo-cla-boost.png',
+                                  height: 200,
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'SysWebLurk',
-                              style: TextStyle(
-                                color: AppColors.accent,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'Ibrand',
-                                letterSpacing: 2.0,
-                              ),
+                                const SizedBox(height: 20),
+                                const Text(
+                                  'Boost Team',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Ibrand',
+                                    letterSpacing: 3.0,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'SysWebLurk',
+                                  style: TextStyle(
+                                    color: Color(0xFF9C27B0),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Ibrand',
+                                    letterSpacing: 2.0,
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 40),
-                            
-                            // Register Form
-                            const Text(
-                              'Criar Conta',
-                              style: TextStyle(
-                                color: AppColors.cardHeaderText,
-                                fontSize: 26,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: 'Ibrand',
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            
-                            BoostTextFormField(
-                              controller: _nicknameEC,
-                              label: 'Nickname',
-                              validator: widget.viewModel.validateNickname,
-                            ),
-                            const SizedBox(height: 20),
-                            BoostTextFormField(
-                              controller: _passwordEC,
-                              label: 'Senha',
-                              validator: widget.viewModel.validatePassword,
-                              obscureText: true,
-                            ),
-                            const SizedBox(height: 20),
-                            BoostTextFormField(
-                              controller: _confirmPasswordEC,
-                              label: 'Confirmar Senha',
-                              validator: (value) => widget.viewModel.validateConfirmPassword(
-                                value,
-                                _passwordEC.text,
-                              ),
-                              obscureText: true,
-                            ),
-                            const SizedBox(height: 32),
-                            
-                            // Register Button with enhanced styling
-                            ListenableBuilder(
-                              listenable: widget.viewModel.registerCommand,
-                              builder: (context, child) {
-                                final command = widget.viewModel.registerCommand;
-                                final isLoading = command.running;
 
-                                return Container(
-                                  width: double.infinity,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        AppColors.primary,
-                                        AppColors.accent,
-                                      ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppColors.primary.withValues(alpha: 0.4),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 6),
-                                      ),
-                                    ],
+                            // Register Form
+                            Column(
+                              children: [
+                                const Text(
+                                  'Criar Conta',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w700,
+                                    fontFamily: 'Ibrand',
+                                    letterSpacing: 1.5,
                                   ),
-                                  child: ElevatedButton(
-                                    onPressed: isLoading ? null : _handleRegister,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
+                                ),
+                                const SizedBox(height: 24),
+
+                                BoostTextFormField(
+                                  controller: _nicknameEC,
+                                  label: 'Nickname',
+                                  validator: widget.viewModel.validateNickname,
+                                ),
+                                const SizedBox(height: 20),
+                                BoostTextFormField(
+                                  controller: _passwordEC,
+                                  label: 'Senha',
+                                  validator: widget.viewModel.validatePassword,
+                                  obscureText: true,
+                                ),
+                                const SizedBox(height: 20),
+                                BoostTextFormField(
+                                  controller: _confirmPasswordEC,
+                                  label: 'Confirmar Senha',
+                                  validator: (value) =>
+                                      widget.viewModel.validateConfirmPassword(
+                                    value,
+                                    _passwordEC.text,
+                                  ),
+                                  obscureText: true,
+                                ),
+                                const SizedBox(height: 32),
+
+                                // Register Button
+                                ListenableBuilder(
+                                  listenable: widget.viewModel.registerCommand,
+                                  builder: (context, child) {
+                                    final command =
+                                        widget.viewModel.registerCommand;
+                                    final isLoading = command.running;
+
+                                    return Container(
+                                      width: double.infinity,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Color(0xFF7B1FA2),
+                                            Color(0xFF4A148C),
+                                          ],
+                                        ),
                                         borderRadius: BorderRadius.circular(16),
-                                      ),
-                                    ),
-                                    child: isLoading
-                                        ? const SizedBox(
-                                            width: 24,
-                                            height: 24,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 3,
-                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                            ),
-                                          )
-                                        : const Text(
-                                            'Cadastrar',
-                                            style: TextStyle(
-                                              fontFamily: 'Ibrand',
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w700,
-                                              letterSpacing: 1.5,
-                                              color: Colors.white,
-                                            ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(0xFF4A148C)
+                                                .withValues(alpha: 0.5),
+                                            blurRadius: 15,
+                                            offset: const Offset(0, 6),
                                           ),
-                                  ),
-                                );
-                              },
+                                        ],
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed:
+                                            isLoading ? null : _handleRegister,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                          ),
+                                        ),
+                                        child: isLoading
+                                            ? const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 3,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                          Color>(Colors.white),
+                                                ),
+                                              )
+                                            : const Text(
+                                                'Cadastrar',
+                                                style: TextStyle(
+                                                  fontFamily: 'Ibrand',
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w700,
+                                                  letterSpacing: 1.5,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 24),
-                            
-                            // Login Link with enhanced styling
-                            Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: AppColors.primary.withValues(alpha: 0.3),
+
+                            // Login Link
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Já tem conta? ',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Já tem conta? ',
+                                GestureDetector(
+                                  onTap: () async {
+                                    await Future.delayed(
+                                      const Duration(milliseconds: 100),
+                                    );
+                                    if (mounted) {
+                                      context.go(AppRoutes.login);
+                                    }
+                                  },
+                                  child: const Text(
+                                    'Faça login',
                                     style: TextStyle(
-                                      color: AppColors.cardHeaderText.withValues(alpha: 0.8),
+                                      color: Color(0xFF9C27B0),
                                       fontSize: 16,
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.w700,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: Color(0xFF9C27B0),
+                                      decorationThickness: 2,
                                     ),
                                   ),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      await Future.delayed(
-                                        const Duration(milliseconds: 100),
-                                      );
-                                      if (mounted) {
-                                        context.go(AppRoutes.login);
-                                      }
-                                    },
-                                    child: const Text(
-                                      'Faça login',
-                                      style: TextStyle(
-                                        color: AppColors.accent,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        decoration: TextDecoration.underline,
-                                        decorationColor: AppColors.accent,
-                                        decorationThickness: 2,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
