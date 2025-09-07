@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../services/timezone_service.dart';
 import '../app_colors.dart';
+import '../widgets/messages.dart';
 
 /// Dialog for selecting timezone
 class TimezoneDialog extends StatefulWidget {
@@ -58,7 +60,6 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
                       color: AppColors.primary.withValues(alpha: 0.3),
-                      width: 1,
                     ),
                   ),
                   child: const Icon(
@@ -164,7 +165,6 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
                             color: isSelected
                                 ? AppColors.primary.withValues(alpha: 0.3)
                                 : colorScheme.outline.withValues(alpha: 0.2),
-                            width: 1,
                           ),
                         ),
                         child: Row(
@@ -246,9 +246,9 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => context.pop(),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
                       side: BorderSide(
                         color: colorScheme.outline,
                       ),
@@ -273,23 +273,18 @@ class _TimezoneDialogState extends State<TimezoneDialog> {
                         await widget.timezoneService
                             .setSelectedTimezone(_selectedTimezone);
                         if (mounted) {
-                          Navigator.of(context).pop(_selectedTimezone);
+                          context.pop(_selectedTimezone);
                         }
                       } catch (e) {
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Erro ao salvar fuso horário: $e'),
-                              backgroundColor: AppColors.error,
-                            ),
-                          );
+                          Messages.error('Erro ao salvar fuso horário: $e');
                         }
                       }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
