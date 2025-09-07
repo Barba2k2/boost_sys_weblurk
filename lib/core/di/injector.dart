@@ -26,6 +26,7 @@ import '../logger/logger_app_logger_impl.dart';
 import '../rest_client/dio/dio_rest_client.dart';
 import '../rest_client/rest_client.dart';
 import '../services/settings_service.dart';
+import '../services/timezone_service.dart';
 import '../services/url_launcher_service.dart';
 import '../services/volume_service.dart';
 
@@ -121,6 +122,7 @@ class Injector {
       () => HomeServiceImpl(
         homeRepository: i(),
         logger: i(),
+        timezoneService: i(),
       ),
     );
 
@@ -147,6 +149,13 @@ class Injector {
 
     i.registerLazySingleton<UrlLauncherService>(
       () => UrlLauncherService(
+        logger: i(),
+      ),
+    );
+
+    i.registerLazySingleton<TimezoneService>(
+      () => TimezoneService(
+        localStorage: i(),
         logger: i(),
       ),
     );
