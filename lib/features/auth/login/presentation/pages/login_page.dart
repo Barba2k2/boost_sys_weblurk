@@ -146,32 +146,31 @@ class _LoginPageState extends State<LoginPage> {
                             );
                           },
                         ),
-                        SizedBox(
-                          width: 150,
-                          height: 50,
-                          child: OutlinedButton(
-                            onPressed: () {
-                              print(
-                                  'Botão Cadastrar clicado - navegando para: ${AppRoutes.register}');
-                              GoRouter.of(context).go(AppRoutes.register);
-                            },
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
+                        GestureDetector(
+                          onTap: () {
+                            print('Botão Cadastrar clicado - navegando para: ${AppRoutes.register}');
+                            GoRouter.of(context).go(AppRoutes.register);
+                          },
+                          child: Container(
+                            width: 150,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              border: Border.all(
                                 color: AppColors.cardHeaderText,
                                 width: 2,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Text(
-                              'Cadastrar',
-                              style: TextStyle(
-                                fontFamily: 'Ibrand',
-                                color: AppColors.cardHeaderText,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 2.0,
+                            child: const Center(
+                              child: Text(
+                                'Cadastrar',
+                                style: TextStyle(
+                                  fontFamily: 'Ibrand',
+                                  color: AppColors.cardHeaderText,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 2.0,
+                                ),
                               ),
                             ),
                           ),
