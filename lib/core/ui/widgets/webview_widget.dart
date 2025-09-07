@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart';
+
 import '../../logger/app_logger.dart';
+import '../app_colors.dart';
 
 enum _WebViewState { initializing, ready, error }
 
@@ -249,20 +251,34 @@ $s
     switch (_viewState) {
       case _WebViewState.initializing:
         return Container(
-          color: Colors.black87,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppColors.cosmicNavy,
+                AppColors.cosmicBlue,
+                AppColors.cosmicDarkPurple,
+              ],
+            ),
+          ),
           child: const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircularProgressIndicator.adaptive(
                   backgroundColor: Colors.white,
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(AppColors.cosmicAccent),
                 ),
                 SizedBox(height: 16),
                 Text(
                   'Inicializando WebView...',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.cosmicAccent,
                     fontSize: 16,
+                    fontFamily: 'Ibrand',
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -313,8 +329,9 @@ $s
                 builder: (context, progress, _) {
                   return LinearProgressIndicator(
                     value: progress,
-                    backgroundColor: Colors.black12,
-                    color: Colors.purple,
+                    backgroundColor:
+                        AppColors.cosmicNavy.withValues(alpha: 0.3),
+                    color: AppColors.cosmicAccent,
                   );
                 },
               ),
