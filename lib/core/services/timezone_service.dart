@@ -96,7 +96,8 @@ class TimezoneService extends ChangeNotifier {
 
   /// Convert a DateTime from the selected timezone to Brazil time (GMT-3)
   Future<DateTime> convertFromSelectedTimezoneToBrazil(
-      DateTime dateTime) async {
+    DateTime dateTime,
+  ) async {
     try {
       final selectedTimezone = await getSelectedTimezone();
       return _convertFromTimezoneToBrazil(dateTime, selectedTimezone);
