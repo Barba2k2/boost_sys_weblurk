@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'core/application_config.dart';
@@ -10,10 +11,19 @@ import 'core/routes/router_config.dart';
 import 'core/services/sentry_service.dart';
 import 'core/services/shorebird_update_service.dart';
 import 'core/ui/ui_config.dart';
+import 'core/ui/widgets/android_back_button_handler.dart';
 
 Future<void> main() async {
   await SentryService.init(
     appRunner: () async {
+      // Lock orientation to landscape for Android
+      if (Platform.isAndroid) {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+      }
+
       await ApplicationConfig().consfigureApp();
 
       // Initialize window manager only for Windows
@@ -70,10 +80,12 @@ class _WeblurklState extends State<Weblurk> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: AppRouter.router,
-      title: UiConfig.title,
-      theme: UiConfig.theme,
+    return AndroidBackButtonHandler(
+      child: MaterialApp.router(
+        routerConfig: AppRouter.router,
+        title: UiConfig.title,
+        theme: UiConfig.theme,
+      ),
     );
   }
 }
