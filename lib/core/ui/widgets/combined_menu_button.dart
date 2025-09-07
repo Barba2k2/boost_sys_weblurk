@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../../features/home/presentation/viewmodels/home_viewmodel.dart';
 import '../../services/settings_service.dart';
+import '../../services/timezone_service.dart';
 import '../../services/url_launcher_service.dart';
 import '../../services/volume_service.dart';
 import '../app_colors.dart';
+import '../dialogs/timezone_dialog.dart';
 import '../widgets/messages.dart';
 import 'menu_item_widget.dart';
 
 class CombinedMenuButton extends StatefulWidget {
   final HomeViewModel viewModel;
   final SettingsService settingsService;
+  final TimezoneService timezoneService;
   final UrlLauncherService urlLauncherService;
   final VolumeService volumeService;
 
@@ -18,6 +21,7 @@ class CombinedMenuButton extends StatefulWidget {
     super.key,
     required this.viewModel,
     required this.settingsService,
+    required this.timezoneService,
     required this.urlLauncherService,
     required this.volumeService,
   });
@@ -112,7 +116,10 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         MenuItemWidget(
           label: 'Atualizar Listas',
           icon: Icons.refresh,
-          onTap: () {
+          onTap: () async {
+            // Limpar cache e recarregar listas
+            await widget.viewModel.loadSchedulesCommand.execute();
+            // Recarregar WebView com os novos dados
             widget.viewModel.reloadWebView();
           },
         ),
@@ -180,8 +187,27 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         MenuItemWidget(
           label: 'Fuso Horário',
           icon: Icons.schedule,
-          onTap: () {
-            Messages.info('Funcionalidade ainda não funcional');
+          onTap: () async {
+            try {
+              final currentTimezone =
+                  await widget.timezoneService.getSelectedTimezone();
+              final selectedTimezone = await showDialog<String>(
+                context: context,
+                builder: (context) => TimezoneDialog(
+                  timezoneService: widget.timezoneService,
+                  currentTimezone: currentTimezone,
+                ),
+              );
+
+              if (selectedTimezone != null &&
+                  selectedTimezone != currentTimezone) {
+                final timezoneName =
+                    widget.timezoneService.getTimezoneName(selectedTimezone);
+                Messages.info('Fuso horário alterado para: $timezoneName');
+              }
+            } catch (e) {
+              Messages.alert('Erro ao abrir configurações de fuso horário');
+            }
           },
         ),
         MenuItemWidget(
