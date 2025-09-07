@@ -56,7 +56,7 @@ class AnimatedFormContainer extends StatelessWidget {
         AnimatedContainer(
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeInOut,
-          height: isRegisterMode ? 80 : 0,
+          height: isRegisterMode ? 90 : 0,
           child: isRegisterMode
               ? Column(
                   children: [
