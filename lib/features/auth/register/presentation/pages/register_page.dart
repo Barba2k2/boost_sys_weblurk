@@ -59,213 +59,297 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Main content
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1a1a2e),
-                  Color(0xFF16213e),
-                  Color(0xFF0f3460),
-                ],
+          // Background Image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          // Dark overlay for better text readability
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.3),
+                    Colors.black.withValues(alpha: 0.7),
+                  ],
+                ),
               ),
             ),
-            child: SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: Card(
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Color(0xFF2c3e50),
-                              Color(0xFF34495e),
-                            ],
-                          ),
+          ),
+          // Main content
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 450),
+                  child: Card(
+                    elevation: 20,
+                    shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.surface.withValues(alpha: 0.95),
+                            AppColors.background.withValues(alpha: 0.9),
+                            AppColors.cardHeader.withValues(alpha: 0.8),
+                          ],
                         ),
-                        padding: const EdgeInsets.all(32),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Logo and Title
-                              Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color:
-                                      AppColors.primary.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: AppColors.primary
-                                        .withValues(alpha: 0.3),
-                                  ),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Image.asset(
-                                      'assets/images/logo-cla-boost.png',
-                                      height: 60,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    const Text(
-                                      'Boost Team',
-                                      style: TextStyle(
-                                        color: AppColors.cardHeaderText,
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Ibrand',
-                                        letterSpacing: 2.0,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'SysWebLurk',
-                                      style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        fontFamily: 'Ibrand',
-                                        letterSpacing: 1.5,
-                                      ),
-                                    ),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(40),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Logo and Title with glow effect
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    AppColors.primary.withValues(alpha: 0.2),
+                                    AppColors.accent.withValues(alpha: 0.1),
                                   ],
                                 ),
-                              ),
-                              const SizedBox(height: 32),
-
-                              // Register Form
-                              const Text(
-                                'Criar Conta',
-                                style: TextStyle(
-                                  color: AppColors.cardHeaderText,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'Ibrand',
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: AppColors.primary.withValues(alpha: 0.5),
+                                  width: 2,
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withValues(alpha: 0.3),
+                                    blurRadius: 20,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 24),
-
-                              BoostTextFormField(
-                                controller: _nicknameEC,
-                                label: 'Nickname',
-                                validator: widget.viewModel.validateNickname,
-                              ),
-                              const SizedBox(height: 16),
-                              BoostTextFormField(
-                                controller: _passwordEC,
-                                label: 'Senha',
-                                validator: widget.viewModel.validatePassword,
-                                obscureText: true,
-                              ),
-                              const SizedBox(height: 16),
-                              BoostTextFormField(
-                                controller: _confirmPasswordEC,
-                                label: 'Confirmar Senha',
-                                validator: (value) =>
-                                    widget.viewModel.validateConfirmPassword(
-                                  value,
-                                  _passwordEC.text,
-                                ),
-                                obscureText: true,
-                              ),
-                              const SizedBox(height: 24),
-
-                              // Register Button
-                              ListenableBuilder(
-                                listenable: widget.viewModel.registerCommand,
-                                builder: (context, child) {
-                                  final command =
-                                      widget.viewModel.registerCommand;
-                                  final isLoading = command.running;
-
-                                  return SizedBox(
-                                    width: double.infinity,
-                                    height: 50,
-                                    child: ElevatedButton(
-                                      onPressed:
-                                          isLoading ? null : _handleRegister,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary,
-                                        foregroundColor: Colors.white,
-                                        elevation: 4,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      child: isLoading
-                                          ? const SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                        Color>(Colors.white),
-                                              ),
-                                            )
-                                          : const Text(
-                                              'Cadastrar',
-                                              style: TextStyle(
-                                                fontFamily: 'Ibrand',
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w600,
-                                                letterSpacing: 1.0,
-                                              ),
-                                            ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
-                                  );
-                                },
+                                    child: Image.asset(
+                                      'assets/images/logo-cla-boost.png',
+                                      height: 70,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ShaderMask(
+                                    shaderCallback: (bounds) => LinearGradient(
+                                      colors: [
+                                        AppColors.cardHeaderText,
+                                        AppColors.primary,
+                                        AppColors.accent,
+                                      ],
+                                    ).createShader(bounds),
+                                    child: const Text(
+                                      'Boost Team',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Ibrand',
+                                        letterSpacing: 3.0,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'SysWebLurk',
+                                    style: TextStyle(
+                                      color: AppColors.accent,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Ibrand',
+                                      letterSpacing: 2.0,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 16),
+                            ),
+                            const SizedBox(height: 40),
+                            
+                            // Register Form with enhanced styling
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: AppColors.cardBackgroundOpacity,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: AppColors.primary.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Criar Conta',
+                                    style: TextStyle(
+                                      color: AppColors.cardHeaderText,
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.w700,
+                                      fontFamily: 'Ibrand',
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  
+                                  BoostTextFormField(
+                                    controller: _nicknameEC,
+                                    label: 'Nickname',
+                                    validator: widget.viewModel.validateNickname,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  BoostTextFormField(
+                                    controller: _passwordEC,
+                                    label: 'Senha',
+                                    validator: widget.viewModel.validatePassword,
+                                    obscureText: true,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  BoostTextFormField(
+                                    controller: _confirmPasswordEC,
+                                    label: 'Confirmar Senha',
+                                    validator: (value) => widget.viewModel.validateConfirmPassword(
+                                      value,
+                                      _passwordEC.text,
+                                    ),
+                                    obscureText: true,
+                                  ),
+                                  const SizedBox(height: 32),
+                                  
+                                  // Register Button with enhanced styling
+                                  ListenableBuilder(
+                                    listenable: widget.viewModel.registerCommand,
+                                    builder: (context, child) {
+                                      final command = widget.viewModel.registerCommand;
+                                      final isLoading = command.running;
 
-                              // Login Link
-                              Row(
+                                      return Container(
+                                        width: double.infinity,
+                                        height: 56,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              AppColors.primary,
+                                              AppColors.accent,
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.circular(16),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: AppColors.primary.withValues(alpha: 0.4),
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 6),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ElevatedButton(
+                                          onPressed: isLoading ? null : _handleRegister,
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.transparent,
+                                            shadowColor: Colors.transparent,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(16),
+                                            ),
+                                          ),
+                                          child: isLoading
+                                              ? const SizedBox(
+                                                  width: 24,
+                                                  height: 24,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 3,
+                                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                  ),
+                                                )
+                                              : const Text(
+                                                  'Cadastrar',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Ibrand',
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w700,
+                                                    letterSpacing: 1.5,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            
+                            // Login Link with enhanced styling
+                            Container(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.primary.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
                                     'Já tem conta? ',
                                     style: TextStyle(
-                                      color: AppColors.cardHeaderText
-                                          .withValues(alpha: 0.7),
-                                      fontSize: 14,
+                                      color: AppColors.cardHeaderText.withValues(alpha: 0.8),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   GestureDetector(
                                     onTap: () async {
                                       await Future.delayed(
-                                          const Duration(milliseconds: 100));
+                                        const Duration(milliseconds: 100),
+                                      );
                                       if (mounted) {
-                                        GoRouter.of(context)
-                                            .go(AppRoutes.login);
+                                        context.go(AppRoutes.login);
                                       }
                                     },
-                                    child: const Text(
+                                    child: Text(
                                       'Faça login',
                                       style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.accent,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
                                         decoration: TextDecoration.underline,
+                                        decorationColor: AppColors.accent,
+                                        decorationThickness: 2,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
