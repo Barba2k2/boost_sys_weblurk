@@ -150,7 +150,11 @@ class _LoginPageState extends State<LoginPage> {
                           width: 150,
                           height: 50,
                           child: OutlinedButton(
-                            onPressed: () => context.go(AppRoutes.register),
+                            onPressed: () {
+                              print(
+                                  'Botão Cadastrar clicado - navegando para: ${AppRoutes.register}');
+                              GoRouter.of(context).go(AppRoutes.register);
+                            },
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(
                                 color: AppColors.cardHeaderText,
