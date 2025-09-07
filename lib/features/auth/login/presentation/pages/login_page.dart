@@ -117,185 +117,132 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             // Logo and Title with glow effect
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    AppColors.primary.withValues(alpha: 0.2),
-                                    AppColors.accent.withValues(alpha: 0.1),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color:
-                                      AppColors.primary.withValues(alpha: 0.5),
-                                  width: 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primary
-                                        .withValues(alpha: 0.3),
-                                    blurRadius: 20,
-                                    spreadRadius: 2,
-                                  ),
+                            Image.asset(
+                              'assets/images/logo-cla-boost.png',
+                              height: 200,
+                            ),
+                            const SizedBox(height: 20),
+                            ShaderMask(
+                              shaderCallback: (bounds) => const LinearGradient(
+                                colors: [
+                                  AppColors.cardHeaderText,
+                                  AppColors.primary,
+                                  AppColors.accent,
                                 ],
+                              ).createShader(bounds),
+                              child: const Text(
+                                'Boost Team',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Ibrand',
+                                  letterSpacing: 3.0,
+                                ),
                               ),
-                              child: Column(
-                                children: [
-                                  Image.asset(
-                                    'assets/images/logo-cla-boost.png',
-                                    height: 100,
-                                  ),
-                                  const SizedBox(height: 20),
-                                  ShaderMask(
-                                    shaderCallback: (bounds) => LinearGradient(
-                                      colors: [
-                                        AppColors.cardHeaderText,
-                                        AppColors.primary,
-                                        AppColors.accent,
-                                      ],
-                                    ).createShader(bounds),
-                                    child: const Text(
-                                      'Boost Team',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Ibrand',
-                                        letterSpacing: 3.0,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'SysWebLurk',
-                                    style: TextStyle(
-                                      color: AppColors.accent,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'Ibrand',
-                                      letterSpacing: 2.0,
-                                    ),
-                                  ),
-                                ],
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'SysWebLurk',
+                              style: TextStyle(
+                                color: AppColors.accent,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Ibrand',
+                                letterSpacing: 2.0,
                               ),
                             ),
                             const SizedBox(height: 40),
 
-                            // Login Form with enhanced styling
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: AppColors.cardBackgroundOpacity,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color:
-                                      AppColors.primary.withValues(alpha: 0.2),
-                                ),
+                            // Login Form
+                            const Text(
+                              'Fazer Login',
+                              style: TextStyle(
+                                color: AppColors.cardHeaderText,
+                                fontSize: 26,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Ibrand',
+                                letterSpacing: 1.5,
                               ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Fazer Login',
-                                    style: TextStyle(
-                                      color: AppColors.cardHeaderText,
-                                      fontSize: 26,
-                                      fontWeight: FontWeight.w700,
-                                      fontFamily: 'Ibrand',
-                                      letterSpacing: 1.5,
+                            ),
+                            const SizedBox(height: 24),
+
+                            BoostTextFormField(
+                              controller: _nicknameEC,
+                              label: 'Usuário',
+                              validator: widget.viewModel.validateUser,
+                            ),
+                            const SizedBox(height: 20),
+                            BoostTextFormField(
+                              controller: _passwordEC,
+                              label: 'Senha',
+                              validator: widget.viewModel.validatePassword,
+                              obscureText: true,
+                            ),
+                            const SizedBox(height: 32),
+
+                            // Login Button with enhanced styling
+                            ListenableBuilder(
+                              listenable: widget.viewModel.loginCommand,
+                              builder: (context, child) {
+                                final command = widget.viewModel.loginCommand;
+
+                                return Container(
+                                  width: double.infinity,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        AppColors.primary,
+                                        AppColors.accent,
+                                      ],
                                     ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.primary
+                                            .withValues(alpha: 0.4),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 24),
-
-                                  BoostTextFormField(
-                                    controller: _nicknameEC,
-                                    label: 'Usuário',
-                                    validator: widget.viewModel.validateUser,
-                                  ),
-                                  const SizedBox(height: 20),
-                                  BoostTextFormField(
-                                    controller: _passwordEC,
-                                    label: 'Senha',
-                                    validator:
-                                        widget.viewModel.validatePassword,
-                                    obscureText: true,
-                                  ),
-                                  const SizedBox(height: 32),
-
-                                  // Login Button with enhanced styling
-                                  ListenableBuilder(
-                                    listenable: widget.viewModel.loginCommand,
-                                    builder: (context, child) {
-                                      final command =
-                                          widget.viewModel.loginCommand;
-
-                                      return Container(
-                                        width: double.infinity,
-                                        height: 56,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              AppColors.primary,
-                                              AppColors.accent,
-                                            ],
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: AppColors.primary
-                                                  .withValues(alpha: 0.4),
-                                              blurRadius: 12,
-                                              offset: const Offset(0, 6),
+                                  child: ElevatedButton(
+                                    onPressed:
+                                        command.running ? null : _handleLogin,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: command.running
+                                        ? const SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 3,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                      Colors.white),
                                             ),
-                                          ],
-                                        ),
-                                        child: ElevatedButton(
-                                          onPressed: command.running
-                                              ? null
-                                              : _handleLogin,
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.transparent,
-                                            shadowColor: Colors.transparent,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
+                                          )
+                                        : const Text(
+                                            'Entrar',
+                                            style: TextStyle(
+                                              fontFamily: 'Ibrand',
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 1.5,
+                                              color: Colors.white,
                                             ),
                                           ),
-                                          child: command.running
-                                              ? const SizedBox(
-                                                  width: 24,
-                                                  height: 24,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    strokeWidth: 3,
-                                                    valueColor:
-                                                        AlwaysStoppedAnimation<
-                                                                Color>(
-                                                            Colors.white),
-                                                  ),
-                                                )
-                                              : const Text(
-                                                  'Entrar',
-                                                  style: TextStyle(
-                                                    fontFamily: 'Ibrand',
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w700,
-                                                    letterSpacing: 1.5,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                        ),
-                                      );
-                                    },
                                   ),
-                                ],
-                              ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 24),
 
@@ -332,7 +279,7 @@ class _LoginPageState extends State<LoginPage> {
                                         context.go(AppRoutes.register);
                                       }
                                     },
-                                    child: Text(
+                                    child: const Text(
                                       'Cadastre-se',
                                       style: TextStyle(
                                         color: AppColors.accent,
