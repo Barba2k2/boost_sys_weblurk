@@ -81,15 +81,22 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
           child: Material(
             elevation: 8,
             borderRadius: BorderRadius.circular(8),
-            color: AppColors.success,
+            color: AppColors.cosmicNavy,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppColors.cosmicBorder,
+                  width: 1,
+                ),
+              ),
               child: Text(
                 message,
                 style: const TextStyle(
                   fontFamily: 'Ibrand',
-                  color: AppColors.cardHeaderText,
+                  color: AppColors.cosmicAccent,
                   fontSize: 18,
                 ),
                 textAlign: TextAlign.left,
@@ -138,7 +145,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
                 Icon(
                   Icons.volume_up,
                   size: 20,
-                  color: AppColors.menuItemIconInactive,
+                  color: AppColors.cosmicAccent,
                 ),
                 SizedBox(width: 10),
                 Text('Audio'),
