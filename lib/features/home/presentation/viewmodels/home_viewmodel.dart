@@ -46,6 +46,8 @@ class HomeViewModel extends ChangeNotifier {
   final PollingService _pollingService;
 
   Timer? _muteStateCheckTimer;
+  Timer? _debounceTimer;
+  bool _isUpdatingChannels = false;
 
   UserModel? get userLogged => _authViewmodel.userLogged;
 
@@ -85,6 +87,20 @@ class HomeViewModel extends ChangeNotifier {
     if (_authViewmodel.userLogged != null) {
       _pollingService.startPolling(_authViewmodel.userLogged!.id);
     }
+  }
+
+  /// Debounce para evitar chamadas múltiplas simultâneas
+  void _debounce(Function() callback) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), callback);
+  }
+
+  /// Verifica se já está atualizando canais para evitar chamadas simultâneas
+  bool _canUpdateChannels() {
+    if (_isUpdatingChannels) {
+      return false;
+    }
+    return true;
   }
 
   Future<void> _initializeCorrectChannel() async {
@@ -148,10 +164,19 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Future<void> updateChannels() async {
-    await updateChannelsCommand.execute();
+    if (!_canUpdateChannels()) return;
+
+    _debounce(() async {
+      await updateChannelsCommand.execute();
+    });
   }
 
   Future<Result<void>> _updateChannels() async {
+    if (!_canUpdateChannels()) {
+      return Result.ok(null);
+    }
+
+    _isUpdatingChannels = true;
     try {
       final channelA = await _homeService.fetchCurrentChannelForList('Lista A');
       final channelB = await _homeService.fetchCurrentChannelForList('Lista B');
@@ -197,6 +222,8 @@ class HomeViewModel extends ChangeNotifier {
       return Result.error(
         Exception('Erro ao atualizar canais: $e'),
       );
+    } finally {
+      _isUpdatingChannels = false;
     }
   }
 
@@ -257,10 +284,15 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<Result<List<ScheduleListModel>>> _loadSchedules() async {
     try {
+      // Limpar cache e buscar dados atualizados
+      await _homeService.updateLists();
       final schedules = await _homeService.fetchScheduleLists();
       _scheduleLists = schedules;
 
-      await updateChannels();
+      // Usar debounce para atualizar canais
+      _debounce(() async {
+        await updateChannels();
+      });
 
       notifyListeners();
 
@@ -324,7 +356,10 @@ class HomeViewModel extends ChangeNotifier {
       if (channel != null && channel.isNotEmpty) {
         _currentChannel = channel;
 
-        await updateChannels();
+        // Usar debounce para atualizar canais
+        _debounce(() async {
+          await updateChannels();
+        });
 
         notifyListeners();
 
@@ -387,6 +422,7 @@ class HomeViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _stopMuteStateCheck();
+    _debounceTimer?.cancel();
     _pollingService.stopPolling();
 
     _webviewControllerA?.dispose();
