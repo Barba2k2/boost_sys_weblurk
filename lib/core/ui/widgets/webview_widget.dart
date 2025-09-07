@@ -1,9 +1,16 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_windows/webview_windows.dart';
 
 import '../../logger/app_logger.dart';
 import '../app_colors.dart';
+import 'webview_android_controller.dart';
+import 'webview_controller_factory.dart';
+import 'webview_controller_interface.dart';
+import 'webview_windows_controller.dart';
 
 enum _WebViewState { initializing, ready, error }
 
@@ -17,7 +24,7 @@ class MyWebviewWidget extends StatefulWidget {
     super.key,
   });
 
-  final Function(WebviewController, String) onWebViewCreated;
+  final Function(WebViewControllerInterface, String) onWebViewCreated;
   final String tabIdentifier;
 
   final String initialUrl;
@@ -30,7 +37,7 @@ class MyWebviewWidget extends StatefulWidget {
 
 class _MyWebviewWidgetState extends State<MyWebviewWidget>
     with AutomaticKeepAliveClientMixin {
-  final WebviewController _controller = WebviewController();
+  late final WebViewControllerInterface _controller;
 
   _WebViewState _viewState = _WebViewState.initializing;
   bool _isNavigationLoading = false;
@@ -51,6 +58,7 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
     _currentUrl = (widget.currentUrl?.isNotEmpty ?? false)
         ? widget.currentUrl!
         : widget.initialUrl;
+    _controller = WebViewControllerFactory.createController();
     _initPlatformState();
   }
 
@@ -64,16 +72,19 @@ class _MyWebviewWidgetState extends State<MyWebviewWidget>
         if (i == maxRetries - 1) {
           // Última tentativa - melhorar mensagem de erro
           if (e.toString().contains('unsupported_platform')) {
+            final platformName = WebViewControllerFactory.getPlatformName();
             throw Exception('''
-WebView2 Runtime não encontrado ou não suportado.
+WebView não suportado na plataforma $platformName.
             
 Soluções:
-1. Baixe e instale o Microsoft Edge WebView2 Runtime em:
+1. Para Windows: Baixe e instale o Microsoft Edge WebView2 Runtime em:
    https://developer.microsoft.com/en-us/microsoft-edge/webview2/
    
-2. Execute o aplicativo como administrador
+2. Para Android: Verifique se o WebView está habilitado nas configurações
    
-3. Verifique se o antivírus não está bloqueando
+3. Execute o aplicativo como administrador (Windows)
+   
+4. Verifique se o antivírus não está bloqueando
 
 Erro original: $e
             ''');
@@ -105,6 +116,7 @@ Erro original: $e
 
     try {
       await _controller.loadUrl(url);
+      _currentUrl = url;
     } catch (e, s) {
       widget.logger?.error('Erro ao carregar nova URL: $url', e, s);
     }
@@ -121,7 +133,12 @@ Erro original: $e
       // Tentar inicializar com retry
       await _initializeWebViewWithRetry();
       await _controller.setBackgroundColor(Colors.transparent);
-      await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+
+      // Set popup policy only for Windows
+      if (Platform.isWindows) {
+        await _controller.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+      }
+
       await _disableJavaScriptDialogs();
       _setupEventListeners();
       await _controller.loadUrl(_currentUrl);
@@ -139,13 +156,15 @@ Erro original: $e
       if (mounted) {
         setState(() {
           _viewState = _WebViewState.error;
+          final platformName = WebViewControllerFactory.getPlatformName();
           _errorMessage = '''
-Erro ao inicializar WebView:
+Erro ao inicializar WebView na plataforma $platformName:
 ${e.toString()}
 
 Possíveis soluções:
-• Instale o Microsoft Edge WebView2 Runtime
-• Execute como administrador  
+• Para Windows: Instale o Microsoft Edge WebView2 Runtime
+• Para Android: Verifique se o WebView está habilitado
+• Execute como administrador (Windows)
 • Verifique antivírus/firewall
 
 StackTrace:
@@ -204,14 +223,23 @@ $s
     _loadingStateSubscription = _controller.loadingState.listen((state) {
       if (!mounted) return;
 
-      final isLoading = state != LoadingState.navigationCompleted;
+      bool isLoading;
+      if (Platform.isWindows) {
+        isLoading = state != LoadingState.navigationCompleted;
+      } else {
+        // For Android/iOS, check if state indicates loading
+        isLoading = state == 'loading';
+      }
+
       if (_isNavigationLoading != isLoading) {
         setState(() {
           _isNavigationLoading = isLoading;
         });
       }
 
-      if (state == LoadingState.navigationCompleted) {
+      if (Platform.isWindows && state == LoadingState.navigationCompleted) {
+        _captureCurrentUrl();
+      } else if (!Platform.isWindows && state == 'completed') {
         _captureCurrentUrl();
       }
     });
@@ -232,13 +260,18 @@ $s
 
   Future<void> _captureCurrentUrl() async {
     try {
-      await _controller.executeScript(
-        '''
-          if (window.chrome && window.chrome.webview) {
-            window.chrome.webview.postMessage('current_url:' + window.location.href);
-          }
-        ''',
-      );
+      if (Platform.isWindows) {
+        await _controller.executeScript(
+          '''
+            if (window.chrome && window.chrome.webview) {
+              window.chrome.webview.postMessage('current_url:' + window.location.href);
+            }
+          ''',
+        );
+      } else {
+        // For Android/iOS, the URL is already captured in the navigation delegate
+        _currentUrl = _controller.currentUrl ?? _currentUrl;
+      }
     } catch (e) {
       widget.logger?.error('Erro ao capturar URL atual: $e');
     }
@@ -251,8 +284,8 @@ $s
     switch (_viewState) {
       case _WebViewState.initializing:
         return Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
@@ -321,7 +354,7 @@ $s
         return Stack(
           children: [
             SizedBox.expand(
-              child: Webview(_controller),
+              child: _buildPlatformWebView(),
             ),
             if (_isNavigationLoading)
               ValueListenableBuilder<double>(
@@ -337,6 +370,16 @@ $s
               ),
           ],
         );
+    }
+  }
+
+  Widget _buildPlatformWebView() {
+    if (Platform.isWindows) {
+      final windowsController = _controller as WebViewWindowsController;
+      return Webview(windowsController.nativeController);
+    } else {
+      final androidController = _controller as WebViewAndroidController;
+      return WebViewWidget(controller: androidController.nativeController);
     }
   }
 
