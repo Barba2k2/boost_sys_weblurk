@@ -118,7 +118,17 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
       offset: const Offset(0, 40),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      color: AppColors.cosmicNavy,
+      surfaceTintColor: AppColors.cosmicNavy,
+      shadowColor: AppColors.cosmicBorder.withValues(alpha: 0.3),
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(
+          color: AppColors.cosmicBorder,
+          width: 1,
+        ),
+      ),
       itemBuilder: (context) => [
         MenuItemWidget(
           label: 'Atualizar Listas',
@@ -140,6 +150,17 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         PopupMenuItem<String>(
           child: PopupMenuButton<String>(
             offset: const Offset(150, 0),
+            color: AppColors.cosmicDarkPurple,
+            surfaceTintColor: AppColors.cosmicDarkPurple,
+            shadowColor: AppColors.cosmicBorder.withValues(alpha: 0.3),
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(
+                color: AppColors.cosmicBorder,
+                width: 1,
+              ),
+            ),
             child: const Row(
               children: [
                 Icon(
@@ -148,9 +169,18 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
                   color: AppColors.cosmicAccent,
                 ),
                 SizedBox(width: 10),
-                Text('Audio'),
+                Text(
+                  'Audio',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Ibrand',
+                  ),
+                ),
                 SizedBox(width: 40),
-                Icon(Icons.arrow_right),
+                Icon(
+                  Icons.arrow_right,
+                  color: AppColors.cosmicAccent,
+                ),
               ],
             ),
             itemBuilder: (context) => [
@@ -162,11 +192,17 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
                       const Icon(
                         Icons.check,
                         size: 18,
-                        color: Colors.green,
+                        color: AppColors.cosmicAccent,
                       ),
                     if (!_isMuted) const SizedBox(width: 18),
                     const SizedBox(width: 8),
-                    const Text('Mutado'),
+                    const Text(
+                      'Mutado',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Ibrand',
+                      ),
+                    ),
                   ],
                 ),
                 onTap: () {
@@ -178,10 +214,20 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
                 child: Row(
                   children: [
                     if (!_isMuted)
-                      const Icon(Icons.check, size: 18, color: Colors.green),
+                      const Icon(
+                        Icons.check,
+                        size: 18,
+                        color: AppColors.cosmicAccent,
+                      ),
                     if (_isMuted) const SizedBox(width: 18),
                     const SizedBox(width: 8),
-                    const Text('Desmutado'),
+                    const Text(
+                      'Desmutado',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Ibrand',
+                      ),
+                    ),
                   ],
                 ),
                 onTap: () {
