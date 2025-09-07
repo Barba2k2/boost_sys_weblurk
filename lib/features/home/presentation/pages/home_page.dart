@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../../core/services/settings_service.dart';
+import '../../../../core/services/timezone_service.dart';
 import '../../../../core/services/url_launcher_service.dart';
 import '../../../../core/services/volume_service.dart';
 import '../../../../core/ui/app_colors.dart';
@@ -79,6 +80,7 @@ class _HomePageState extends State<HomePage>
       appBar: SyslurkAppBar(
         viewModel: widget.viewModel,
         settingsService: GetIt.I<SettingsService>(),
+        timezoneService: GetIt.I<TimezoneService>(),
         urlLauncherService: GetIt.I<UrlLauncherService>(),
         volumeService: GetIt.I<VolumeService>(),
         username: widget.viewModel.userLogged?.nickname,
