@@ -65,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
               fit: BoxFit.cover,
             ),
           ),
-          // Dark overlay for better text readability
+          // Dark cosmic background overlay
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -73,229 +73,225 @@ class _LoginPageState extends State<LoginPage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.3),
-                    Colors.black.withValues(alpha: 0.7),
+                    const Color(0xFF1A0B2E).withValues(alpha: 0.3),
+                    const Color(0xFF16213E).withValues(alpha: 0.4),
+                    const Color(0xFF0F0F23).withValues(alpha: 0.45),
                   ],
                 ),
               ),
             ),
           ),
           // Main content
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 450),
-                  child: Card(
-                    elevation: 20,
-                    shadowColor: AppColors.primary.withValues(alpha: 0.3),
-                    shape: RoundedRectangleBorder(
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(12),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 500),
+                child: Card(
+                  elevation: 20,
+                  shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.surface.withValues(alpha: 0.95),
-                            AppColors.background.withValues(alpha: 0.9),
-                            AppColors.cardHeader.withValues(alpha: 0.8),
-                          ],
-                        ),
-                        border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF2D1B69),
+                          Color(0xFF1A0B2E),
+                          Color(0xFF16213E),
+                        ],
                       ),
-                      padding: const EdgeInsets.all(40),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Logo and Title with glow effect
-                            Image.asset(
-                              'assets/images/logo-cla-boost.png',
-                              height: 200,
-                            ),
-                            const SizedBox(height: 20),
-                            ShaderMask(
-                              shaderCallback: (bounds) => const LinearGradient(
-                                colors: [
-                                  AppColors.cardHeaderText,
-                                  AppColors.primary,
-                                  AppColors.accent,
-                                ],
-                              ).createShader(bounds),
-                              child: const Text(
+                      border: Border.all(
+                        color: const Color(0xFF4A148C).withValues(alpha: 0.6),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF4A148C).withValues(alpha: 0.4),
+                          blurRadius: 25,
+                          spreadRadius: 3,
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 40,
+                      horizontal: 30,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Logo and Title
+                          Column(
+                            children: [
+                              Image.asset(
+                                'assets/images/logo-cla-boost.png',
+                                height: 200,
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
                                 'Boost Team',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 32,
+                                  fontSize: 36,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Ibrand',
                                   letterSpacing: 3.0,
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'SysWebLurk',
-                              style: TextStyle(
-                                color: AppColors.accent,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'Ibrand',
-                                letterSpacing: 2.0,
-                              ),
-                            ),
-                            const SizedBox(height: 40),
-
-                            // Login Form
-                            const Text(
-                              'Fazer Login',
-                              style: TextStyle(
-                                color: AppColors.cardHeaderText,
-                                fontSize: 26,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: 'Ibrand',
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-
-                            BoostTextFormField(
-                              controller: _nicknameEC,
-                              label: 'Usuário',
-                              validator: widget.viewModel.validateUser,
-                            ),
-                            const SizedBox(height: 20),
-                            BoostTextFormField(
-                              controller: _passwordEC,
-                              label: 'Senha',
-                              validator: widget.viewModel.validatePassword,
-                              obscureText: true,
-                            ),
-                            const SizedBox(height: 32),
-
-                            // Login Button with enhanced styling
-                            ListenableBuilder(
-                              listenable: widget.viewModel.loginCommand,
-                              builder: (context, child) {
-                                final command = widget.viewModel.loginCommand;
-
-                                return Container(
-                                  width: double.infinity,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        AppColors.primary,
-                                        AppColors.accent,
-                                      ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppColors.primary
-                                            .withValues(alpha: 0.4),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 6),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed:
-                                        command.running ? null : _handleLogin,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                    ),
-                                    child: command.running
-                                        ? const SizedBox(
-                                            width: 24,
-                                            height: 24,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 3,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                      Colors.white),
-                                            ),
-                                          )
-                                        : const Text(
-                                            'Entrar',
-                                            style: TextStyle(
-                                              fontFamily: 'Ibrand',
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w700,
-                                              letterSpacing: 1.5,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 24),
-
-                            // Register Link with enhanced styling
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 24),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color:
-                                      AppColors.primary.withValues(alpha: 0.3),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'SysWebLurk',
+                                style: TextStyle(
+                                  color: Color(0xFF9C27B0),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Ibrand',
+                                  letterSpacing: 2.0,
                                 ),
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Não tem conta? ',
-                                    style: TextStyle(
-                                      color: AppColors.cardHeaderText
-                                          .withValues(alpha: 0.8),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      await Future.delayed(
-                                        const Duration(milliseconds: 100),
-                                      );
-                                      if (mounted) {
-                                        context.go(AppRoutes.register);
-                                      }
-                                    },
-                                    child: const Text(
-                                      'Cadastre-se',
-                                      style: TextStyle(
-                                        color: AppColors.accent,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        decoration: TextDecoration.underline,
-                                        decorationColor: AppColors.accent,
-                                        decorationThickness: 2,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                            ],
+                          ),
+                          const SizedBox(height: 40),
+
+                          // Login Form
+                          Column(
+                            children: [
+                              const Text(
+                                'Fazer Login',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'Ibrand',
+                                  letterSpacing: 1.5,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                              const SizedBox(height: 24),
+
+                              BoostTextFormField(
+                                controller: _nicknameEC,
+                                label: 'Usuário',
+                                validator: widget.viewModel.validateUser,
+                              ),
+                              const SizedBox(height: 20),
+                              BoostTextFormField(
+                                controller: _passwordEC,
+                                label: 'Senha',
+                                validator: widget.viewModel.validatePassword,
+                                obscureText: true,
+                              ),
+                              const SizedBox(height: 32),
+
+                              // Login Button
+                              ListenableBuilder(
+                                listenable: widget.viewModel.loginCommand,
+                                builder: (context, child) {
+                                  final command = widget.viewModel.loginCommand;
+
+                                  return Container(
+                                    width: double.infinity,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          Color(0xFF7B1FA2),
+                                          Color(0xFF4A148C),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFF4A148C)
+                                              .withValues(alpha: 0.5),
+                                          blurRadius: 15,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ElevatedButton(
+                                      onPressed:
+                                          command.running ? null : _handleLogin,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                      ),
+                                      child: command.running
+                                          ? const SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 3,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(Colors.white),
+                                              ),
+                                            )
+                                          : const Text(
+                                              'Entrar',
+                                              style: TextStyle(
+                                                fontFamily: 'Ibrand',
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w700,
+                                                letterSpacing: 1.5,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Register Link
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Não tem conta? ',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () async {
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 100),
+                                  );
+                                  if (mounted) {
+                                    context.go(AppRoutes.register);
+                                  }
+                                },
+                                child: const Text(
+                                  'Cadastre-se',
+                                  style: TextStyle(
+                                    color: Color(0xFF9C27B0),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Color(0xFF9C27B0),
+                                    decorationThickness: 2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
