@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:webview_windows/webview_windows.dart';
 import '../../../../core/logger/app_logger.dart';
+import '../../../../core/ui/widgets/webview_controller_interface.dart';
 
 abstract class WebViewService {
   bool get isVolumeControlAvailable;
@@ -9,8 +9,8 @@ abstract class WebViewService {
   Future<void> setWebViewVolume(double volume);
   Future<void> verifyAndFixMuteState(bool shouldBeMuted);
   void setWebViewControllers(
-    WebviewController? controllerA,
-    WebviewController? controllerB,
+    WebViewControllerInterface? controllerA,
+    WebViewControllerInterface? controllerB,
   );
   void dispose();
 }
@@ -21,8 +21,8 @@ class WebViewServiceImpl implements WebViewService {
   }) : _logger = logger;
 
   final AppLogger _logger;
-  WebviewController? _controllerA;
-  WebviewController? _controllerB;
+  WebViewControllerInterface? _controllerA;
+  WebViewControllerInterface? _controllerB;
   bool _isMuted = false;
 
   @override
@@ -30,8 +30,8 @@ class WebViewServiceImpl implements WebViewService {
 
   @override
   void setWebViewControllers(
-    WebviewController? controllerA,
-    WebviewController? controllerB,
+    WebViewControllerInterface? controllerA,
+    WebViewControllerInterface? controllerB,
   ) {
     _controllerA = controllerA;
     _controllerB = controllerB;
