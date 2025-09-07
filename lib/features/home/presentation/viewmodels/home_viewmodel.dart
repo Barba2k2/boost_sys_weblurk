@@ -1,19 +1,20 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
-import 'package:webview_windows/webview_windows.dart';
 
 import '../../../../core/logger/app_logger.dart';
+import '../../../../core/services/update_service.dart';
+import '../../../../core/services/volume_service.dart';
+import '../../../../core/ui/widgets/webview_controller_interface.dart';
 import '../../../../core/utils/command.dart';
 import '../../../../core/utils/result.dart';
-import '../../../../core/services/volume_service.dart';
-import '../../../../core/services/update_service.dart';
 import '../../../../models/schedule_list_model.dart';
 import '../../../../models/schedule_model.dart';
 import '../../../../models/user_model.dart';
 import '../../../../service/home/home_service.dart';
 import '../../../auth/login/presentation/viewmodels/auth_viewmodel.dart';
-import '../../data/services/webview_service.dart';
 import '../../data/services/polling_services.dart';
+import '../../data/services/webview_service.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
@@ -65,8 +66,8 @@ class HomeViewModel extends ChangeNotifier {
   String get currentChannelListA => _currentChannelListA;
   String get currentChannelListB => _currentChannelListB;
 
-  WebviewController? _webviewControllerA;
-  WebviewController? _webviewControllerB;
+  WebViewControllerInterface? _webviewControllerA;
+  WebViewControllerInterface? _webviewControllerB;
 
   late final loadSchedulesCommand =
       Command0<List<ScheduleListModel>>(_loadSchedules);
@@ -146,7 +147,10 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-  void onWebViewCreated(WebviewController controller, String identifier) {
+  void onWebViewCreated(
+    WebViewControllerInterface controller,
+    String identifier,
+  ) {
     try {
       if (identifier == 'listaA') {
         _webviewControllerA = controller;
