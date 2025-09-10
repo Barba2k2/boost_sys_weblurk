@@ -111,18 +111,18 @@ class RestartDialog extends StatelessWidget {
                   color: AppColors.warning.withValues(alpha: 0.3),
                 ),
               ),
-              child: Row(
+              child: const Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.restart_alt,
                     size: 18,
                     color: AppColors.warning,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Reinicialização necessária para aplicar mudanças',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.warning,
                         fontWeight: FontWeight.w500,
                         fontFamily: 'Ibrand',
