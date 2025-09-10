@@ -105,7 +105,20 @@ class TestRestClient implements RestClient {
     Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
   }) async {
-    throw UnimplementedError('Not needed for these tests');
+    calls.add(
+      {
+        'method': 'PUT',
+        'path': path,
+        'data': data,
+        'isAuthenticated': _isAuthenticated,
+      },
+    );
+
+    if (exceptions.containsKey('PUT:$path')) {
+      throw exceptions['PUT:$path'];
+    }
+
+    return responses['PUT:$path'] as RestClientResponse<T>;
   }
 
   @override
@@ -252,7 +265,7 @@ void main() {
         () async {
           restClient.setResponse(
             'GET',
-            '/user/',
+            '/user',
             RestClientResponse(
               data: {
                 'id': 1,
@@ -270,16 +283,31 @@ void main() {
           expect(result.nickname, 'testuser');
           expect(result.role, 'user');
           expect(result.status, 'ON');
-          expect(restClient.wasAuthUsed('GET', '/user/'), true);
+          expect(restClient.wasAuthUsed('GET', '/user'), true);
         },
       );
 
       test(
         'updateLoginStatus calls correct endpoint',
         () async {
+          // Setup mock responses
           restClient.setResponse(
-            'POST',
-            '/streamer/status/update',
+            'GET',
+            '/user',
+            RestClientResponse(
+              data: {
+                'id': 1,
+                'nickname': 'testuser',
+                'role': 'user',
+                'status': 'OFF'
+              },
+              statusCode: 200,
+            ),
+          );
+
+          restClient.setResponse(
+            'PUT',
+            '/streamers/1',
             RestClientResponse(
               statusCode: 200,
             ),
@@ -287,13 +315,14 @@ void main() {
 
           await userRepository.updateLoginStatus(1, 'ON');
 
+          expect(restClient.wasAuthUsed('GET', '/user'), true);
+          expect(restClient.wasAuthUsed('PUT', '/streamers/1'), true);
           expect(
-              restClient.wasAuthUsed('POST', '/streamer/status/update'), true);
-          expect(
-            restClient.getCallData('POST', '/streamer/status/update'),
+            restClient.getCallData('PUT', '/streamers/1'),
             {
-              'streamerId': 1,
-              'status': 'ON',
+              'nickname': 'testuser',
+              'role': 'user',
+              'status': true,
             },
           );
         },
