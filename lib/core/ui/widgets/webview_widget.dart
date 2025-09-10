@@ -276,6 +276,54 @@ $s
         }
       });
 
+      // Execute autoplay script after page loads completely
+      Future.delayed(const Duration(seconds: 2), () async {
+        try {
+          await _controller.executeScript('''
+            try {
+              // Força autoplay para todos os vídeos
+              const videoElements = document.querySelectorAll('video');
+              videoElements.forEach(video => {
+                if (video.paused) {
+                  video.autoplay = true;
+                  video.muted = false;
+                  
+                  video.play().catch(e => {
+                    console.log('[Page Load Autoplay] Erro ao dar play:', e);
+                    video.muted = true;
+                    video.play().catch(e2 => console.log('[Page Load Autoplay] Erro mesmo mutado:', e2));
+                  });
+                }
+              });
+              
+              // Específico para Twitch player
+              const twitchPlayer = document.querySelector('[data-a-target="twitch-player"]');
+              if (twitchPlayer) {
+                const video = twitchPlayer.querySelector('video');
+                if (video && video.paused) {
+                  console.log('[Page Load] Forçando autoplay Twitch...');
+                  video.autoplay = true;
+                  
+                  video.play().then(() => {
+                    console.log('[Page Load] Twitch autoplay iniciado');
+                  }).catch(e => {
+                    console.log('[Page Load] Erro Twitch autoplay:', e);
+                    video.muted = true;
+                    video.play().then(() => {
+                      setTimeout(() => { video.muted = false; }, 2000);
+                    }).catch(e2 => console.log('[Page Load] Erro Twitch mutado:', e2));
+                  });
+                }
+              }
+            } catch (e) {
+              console.error('[Page Load Autoplay] Erro geral:', e);
+            }
+          ''');
+        } catch (e) {
+          widget.logger?.error('Erro ao executar script de autoplay: $e');
+        }
+      });
+
       if (Platform.isWindows) {
         await _controller.executeScript(
           '''
