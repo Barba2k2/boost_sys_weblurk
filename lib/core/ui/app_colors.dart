@@ -45,4 +45,18 @@ class AppColors {
   static const Color cosmicButtonStart = Color(0xFF7B1FA2);
   static const Color cosmicButtonEnd = Color(0xFF4A148C);
   static const Color cosmicBorder = Color(0xFF4A148C);
+
+  // Menu Colors - Melhor contraste
+  static const Color menuBackgroundImproved = Color(0xFF1A1A2E);
+  static const Color menuIconBright = Color(0xFFE91E63);
+  static const Color menuIconSecondary = Color(0xFF00E676);
+  static const Color menuIconAccent = Color(0xFF03DAC6);
+  static const Color menuIconWarning = Color(0xFFFF6B00);
+  static const Color menuIconAudio = Colors.yellow;
+  static const Color menuIconDanger = Color(0xFFFF5252);
+  static const Color menuIconDiscord = Color(0xFF7289DA);
+  static const Color menuIconTwitch = Color(0xFF9146FF);
+  static const Color menuIconGoogle = Color(0xFF4285F4);
+  static const Color menuIconGoogleDrive = Color(0xFF34A853);
+  static const Color menuBorderImproved = Color(0xFF7C4DFF);
 }
