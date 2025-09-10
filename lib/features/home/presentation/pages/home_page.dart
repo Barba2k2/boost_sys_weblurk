@@ -152,7 +152,7 @@ class _HomePageState extends State<HomePage>
                     ),
                     const SizedBox(height: 20),
                     ListTile(
-                      leading: Icon(
+                      leading: const Icon(
                         Icons.refresh,
                         color: AppColors.cosmicAccent,
                       ),
@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage>
                       },
                     ),
                     ListTile(
-                      leading: Icon(
+                      leading: const Icon(
                         Icons.system_update,
                         color: AppColors.cosmicAccent,
                       ),
