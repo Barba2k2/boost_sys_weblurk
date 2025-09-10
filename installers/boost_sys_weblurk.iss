@@ -51,7 +51,6 @@ Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Rele
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\webview_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\Webview2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\win32audio_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\window_manager_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Projects\BoostTwitch\boost_sys_weblurk\build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
