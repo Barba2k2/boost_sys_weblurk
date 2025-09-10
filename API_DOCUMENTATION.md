@@ -12,6 +12,7 @@
    - [Pontuações](#pontuações)
    - [Status de Streamers](#status-de-streamers)
    - [Gerenciamento de Streamers](#gerenciamento-de-streamers)
+   - [Health Check](#health-check)
 5. [Modelos de Dados](#modelos-de-dados)
 6. [Códigos de Status HTTP](#códigos-de-status-http)
 7. [Exemplos de Uso](#exemplos-de-uso)
@@ -49,18 +50,27 @@ Crie um arquivo `.env` na raiz do projeto:
 ```env
 # Database Configuration
 DATABASE_HOST=localhost
-DATABASE_USER=your_user
-DATABASE_PASSWORD=your_password
+DATABASE_USER=boost_twitch
+DATABASE_PASSWORD=BoostTwitch2024
 DATABASE_NAME=boost_twitch
-DATABASE_PORT=5432
+DATABASE_PORT=5433
 DATABASE_SSL=false
 
 # Alternative database variable names (also supported)
 databaseHost=localhost
-databaseUser=your_user
-databasePassword=your_password
+databaseUser=boost_twitch
+databasePassword=BoostTwitch2024
 databaseName=boost_twitch
-databasePort=5432
+databasePort=5433
+
+# JWT Configuration
+JWT_SECRET=8VpVR43ycV2MU79bnoC1
+```
+
+**Nota:** Para desenvolvimento local, certifique-se de que o PostgreSQL esteja rodando na porta 5433. Se estiver usando Docker, execute:
+
+```bash
+docker run --name boost_db -e POSTGRES_USER=boost_twitch -e POSTGRES_PASSWORD=BoostTwitch2024 -e POSTGRES_DB=boost_twitch -p 5433:5432 -d postgres:15
 ```
 
 ### Executando com Dart
@@ -99,21 +109,104 @@ A API utiliza autenticação JWT (JSON Web Token) com sistema de refresh tokens.
 3. **Confirmação**: PATCH `/auth/confirm`
 4. **Refresh**: PUT `/auth/refresh`
 
-### Roles Disponíveis
+#### Roles Disponíveis
 
 - `admin`: Acesso completo a todos os endpoints
 - `user`: Acesso básico
 
-### PATCH `/auth/confirm`
+#### Fluxo Completo
+
+1. **Registrar usuário**
+2. **Fazer login** (recebe access_token)
+3. **Confirmar login** (recebe refresh_token)
+4. **Renovar token** (com refresh_token)
+
+#### Headers Obrigatórios
+
+- `Authorization: Bearer <access_token>` (para endpoints protegidos)
+- `Content-Type: application/json`
+
+#### Endpoints Públicos (Sem Autenticação)
+
+Os seguintes endpoints podem ser acessados sem autenticação:
+
+- `GET /health` - Health check da API
+- `POST /auth/register` - Registro de usuário
+- `POST /auth/login` - Login de usuário
+- `GET /public/score` - Consulta pública de pontuações
+
+#### Exemplos de Erro
+
+- 400: Dados inválidos
+- 401: Token ausente ou inválido
+- 403: Permissão insuficiente
+- 500: Erro interno
+
+---
+
+## 📡 Endpoints da API
+
+### 🔑 Autenticação
+
+#### POST `/auth/register`
+
+Registra um novo usuário.
+
+**Request Body:**
+
+```json
+{
+  "nickname": "usuario123",
+  "password": "senha123",
+  "role": "user"
+}
+```
+
+**Response 200:**
+
+```json
+{ "message": "User created successfully" }
+```
+
+**Response 400:**
+
+```json
+{ "message": "User already exists on database" }
+```
+
+#### POST `/auth/login`
+
+Realiza login do usuário e retorna um token de acesso.
+
+**Request Body:**
+
+```json
+{
+  "nickname": "usuario123",
+  "password": "senha123"
+}
+```
+
+**Response 200:**
+
+```json
+{ "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+```
+
+**Response 403:**
+
+```json
+{ "message": "User not found" }
+```
+
+#### PATCH `/auth/confirm`
 
 Confirma o login e gera refresh token.
 
-**Headers Obrigatórios:**
+**Headers obrigatórios:**
 
-```http
-Authorization: Bearer <access_token>
-Content-Type: application/json
-```
+- `Authorization: Bearer <access_token>`
+- `Content-Type: application/json`
 
 **Request Body:**
 
@@ -131,87 +224,31 @@ ou
 }
 ```
 
-**Response:**
+**Response 200:**
 
 ```json
 {
-  "access_token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refresh_token": "refresh_token_here"
+  "access_token": "Bearer <access_token>",
+  "refresh_token": "<refresh_token>"
 }
 ```
 
-> O backend extrai automaticamente o userId, streamerId e role do JWT enviado no header Authorization. Não envie esses dados em headers separados.
-
----
-
-### Exemplo de uso
-
-```bash
-# Confirmar login (web)
-curl -X PATCH http://localhost:8000/auth/confirm \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <access_token>" \
-  -d '{
-    "web_token": "web_token_here"
-  }'
-
-# Confirmar login (windows)
-curl -X PATCH http://localhost:8000/auth/confirm \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <access_token>" \
-  -d '{
-    "windows_token": "windows_token_here"
-  }'
-```
-
----
-
-## 📡 Endpoints da API
-
-### 🔑 Autenticação
-
-#### POST `/auth/register`
-
-Registra um novo usuário no sistema.
-
-**Request Body:**
+**Response 400:**
 
 ```json
-{
-  "nickname": "usuario123",
-  "password": "senha123",
-  "role": "user"
-  // "role": "admin" // para criar um admin
-}
+{ "message": "No token received" }
 ```
 
-**Response:**
+**Response 401:**
 
 ```json
-{
-  "message": "User created successfully"
-}
+{ "message": "Missing or invalid Authorization header" }
 ```
 
-#### POST `/auth/login`
-
-Realiza login do usuário e retorna um token de acesso.
-
-**Request Body:**
+**Response 500:**
 
 ```json
-{
-  "nickname": "usuario123",
-  "password": "senha123"
-}
-```
-
-**Response:**
-
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
+{ "message": "Error on confirm login" }
 ```
 
 #### PUT `/auth/refresh`
@@ -220,9 +257,10 @@ Renova o token de acesso usando o refresh token.
 
 **Headers Obrigatórios:**
 
-```
-access_token: current_access_token
-```
+- `id: <user_id>`
+- `streamerId: <streamer_id>` (opcional)
+- `access_token: <access_token>`
+- `Content-Type: application/json`
 
 **Request Body:**
 
@@ -232,7 +270,7 @@ access_token: current_access_token
 }
 ```
 
-**Response:**
+**Response 200:**
 
 ```json
 {
@@ -241,19 +279,24 @@ access_token: current_access_token
 }
 ```
 
+**Response 500:**
+
+```json
+{ "message": "Error on refresh token" }
+```
+
 ### 👤 Usuários
 
-#### GET `/user/`
+#### GET `/user`
 
 Obtém informações do usuário autenticado.
 
-**Headers Obrigatórios:**
+**Headers obrigatórios:**
 
-```http
-Authorization: access_token
-```
+- `Authorization: Bearer <access_token>`
+- `id: <user_id>` (obrigatório no header)
 
-**Response:**
+**Response 200:**
 
 ```json
 {
@@ -265,13 +308,17 @@ Authorization: access_token
 
 ### 📅 Agendamentos
 
-Agora os agendamentos estão separados em duas listas, cada uma com sua própria tabela e endpoints:
+O sistema suporta duas listas de agendamentos separadas: Lista A e Lista B, cada uma com seus próprios endpoints.
 
-### Lista A
+#### Lista A
 
-#### POST `/list-a/save`
+##### POST `/list-a`
 
-Cria ou atualiza todos os agendamentos da Lista A.
+Cria agendamento(s) na Lista A.
+
+**Headers Obrigatórios:**
+
+- `Authorization: Bearer <token>`
 
 **Request Body:**
 
@@ -284,30 +331,49 @@ Cria ou atualiza todos os agendamentos da Lista A.
       "date": "2024-01-15",
       "start_time": "21:00",
       "end_time": "22:00"
+    },
+    {
+      "streamer_url": "https://twitch.tv/streamer2",
+      "date": "2024-01-15",
+      "start_time": "22:00",
+      "end_time": "23:00"
     }
   ]
 }
 ```
 
-> **Observação:**
->
-> - O campo `date` aceita tanto o formato `"yyyy-MM-dd"` quanto o formato ISO 8601 completo (`"2024-01-15T00:00:00.000Z"`).
-> - O campo `list_name` **só é aceito como `lista_a` (sem espaços, minúsculo e com underscore)**. Qualquer outro valor (incluindo `Lista A`, `lista a`, etc.) será rejeitado com erro.
-> - **O backend sempre salva e retorna o nome da lista como `lista_a`, independentemente do valor enviado pelo front.**
-
-**Response:**
+**Response 200:**
 
 ```json
-{
-  "message": "Lista A saved successfully"
-}
+{ "message": "Schedules created successfully" }
 ```
 
-#### GET `/list-a/`
+**Response 400:**
 
-Retorna todos os agendamentos da Lista A.
+```json
+{ "message": "Invalid format. Use object with list_name and schedules key." }
+```
 
-**Response:**
+##### GET `/list-a`
+
+Retorna agendamentos da Lista A. Aceita filtro opcional por data.
+
+**Headers Obrigatórios:**
+
+- `Authorization: Bearer <token>`
+
+**Query Parameters:**
+
+- `date`: Data específica (opcional) - formato: `YYYY-MM-DD`
+
+**Exemplos:**
+
+```
+GET /list-a                    # Todos os agendamentos
+GET /list-a?date=2024-01-15   # Agendamentos de uma data específica
+```
+
+**Response 200:**
 
 ```json
 {
@@ -324,32 +390,15 @@ Retorna todos os agendamentos da Lista A.
 }
 ```
 
-#### GET `/list-a/get?date=2024-01-15`
+#### Lista B
 
-Retorna agendamentos da Lista A para uma data específica.
+##### POST `/list-b`
 
-**Response:**
+Cria agendamento(s) na Lista B.
 
-```json
-{
-  "list_name": "lista_a",
-  "schedules": [
-    {
-      "id": 1,
-      "streamer_url": "https://twitch.tv/streamer1",
-      "date": "2024-01-15T00:00:00.000Z",
-      "start_time": "21:00",
-      "end_time": "22:00"
-    }
-  ]
-}
-```
+**Headers Obrigatórios:**
 
-### Lista B
-
-#### POST `/list-b/save`
-
-Cria ou atualiza todos os agendamentos da Lista B.
+- `Authorization: Bearer <token>`
 
 **Request Body:**
 
@@ -359,7 +408,7 @@ Cria ou atualiza todos os agendamentos da Lista B.
   "schedules": [
     {
       "streamer_url": "https://twitch.tv/streamer2",
-      "date": "2024-01-15T00:00:00.000Z",
+      "date": "2024-01-15",
       "start_time": "22:00",
       "end_time": "23:00"
     }
@@ -367,25 +416,32 @@ Cria ou atualiza todos os agendamentos da Lista B.
 }
 ```
 
-> **Observação:**
->
-> - O campo `date` aceita tanto o formato `"yyyy-MM-dd"` quanto o formato ISO 8601 completo (`"2024-01-15T00:00:00.000Z"`).
-> - O campo `list_name` **só é aceito como `lista_b` (sem espaços, minúsculo e com underscore)**. Qualquer outro valor (incluindo `Lista B`, `lista b`, etc.) será rejeitado com erro.
-> - **O backend sempre salva e retorna o nome da lista como `lista_b`, independentemente do valor enviado pelo front.**
-
-**Response:**
+**Response 200:**
 
 ```json
-{
-  "message": "Lista B saved successfully"
-}
+{ "message": "Schedules created successfully" }
 ```
 
-#### GET `/list-b/`
+##### GET `/list-b`
 
-Retorna todos os agendamentos da Lista B.
+Retorna agendamentos da Lista B. Aceita filtro opcional por data.
 
-**Response:**
+**Headers Obrigatórios:**
+
+- `Authorization: Bearer <token>`
+
+**Query Parameters:**
+
+- `date`: Data específica (opcional) - formato: `YYYY-MM-DD`
+
+**Exemplos:**
+
+```
+GET /list-b                    # Todos os agendamentos
+GET /list-b?date=2024-01-15   # Agendamentos de uma data específica
+```
+
+**Response 200:**
 
 ```json
 {
@@ -399,59 +455,24 @@ Retorna todos os agendamentos da Lista B.
       "end_time": "23:00"
     }
   ]
-}
-```
-
-#### GET `/list-b/get?date=2024-01-15`
-
-Retorna agendamentos da Lista B para uma data específica.
-
-**Response:**
-
-```json
-{
-  "list_name": "lista_b",
-  "schedules": [
-    {
-      "id": 1,
-      "streamer_url": "https://twitch.tv/streamer2",
-      "date": "2024-01-15T00:00:00.000Z",
-      "start_time": "22:00",
-      "end_time": "23:00"
-    }
-  ]
-}
-```
-
-#### GET `/list-a/lists` ou `/list-b/lists`
-
-Retorna os nomes das listas disponíveis:
-
-**Response:**
-
-```json
-{
-  "list_names": ["Lista A", "Lista B"]
 }
 ```
 
 ### 🏆 Pontuações
 
-#### GET `/score/`
+#### GET `/score`
 
 Obtém pontuações (requer autenticação).
 
 **Headers Obrigatórios:**
 
-```http
-Authorization: Bearer <token>
-```
+- `Authorization: Bearer <token>`
 
 **Query Parameters:**
 
 - `date`: Data específica (opcional)
 
-**Response:**
+**Response 200:**
 
 ```json
 [
@@ -467,15 +488,13 @@ Authorization: Bearer <token>
 ]
 ```
 
-#### POST `/score/save`
+#### POST `/score`
 
 Salva uma nova pontuação (requer autenticação).
 
 **Headers Obrigatórios:**
 
-```http
-Authorization: Bearer <token>
-```
+- `Authorization: Bearer <token>`
 
 **Request Body:**
 
@@ -489,15 +508,19 @@ Authorization: Bearer <token>
 }
 ```
 
-#### DELETE `/score/delete/<streamerId>`
+**Response 200:**
+
+```json
+{ "message": "Score saved successfully" }
+```
+
+#### DELETE `/score/<streamerId>`
 
 Deleta uma pontuação (requer autenticação).
 
 **Headers Obrigatórios:**
 
-```http
-Authorization: Bearer <token>
-```
+- `Authorization: Bearer <token>`
 
 **Request Body:**
 
@@ -508,9 +531,15 @@ Authorization: Bearer <token>
 }
 ```
 
+**Response 200:**
+
+```json
+{ "message": "Score deleted successfully" }
+```
+
 ### 🌐 Pontuações Públicas
 
-#### GET `/public/score/`
+#### GET `/public/score`
 
 Obtém pontuações com filtros avançados (sem autenticação).
 
@@ -522,105 +551,125 @@ Obtém pontuações com filtros avançados (sem autenticação).
 - `startHour`: Hora inicial
 - `endHour`: Hora final
 
-**Exemplo:**
-
-```
-GET /public/score/?nickname=streamer123&startDate=2024-01-01&endDate=2024-01-31
-```
-
-### 📊 Status de Streamers
-
-#### POST `/streamer/status/update`
-
-Atualiza o status de um streamer.
-
-**Request Body:**
-
-```json
-{
-  "streamerId": 101,
-  "status": "ON"
-}
-```
-
-**Valores de Status:**
-
-- `"ON"`: Streamer online
-- `"OFF"`: Streamer offline
-
-**Response:**
-
-```json
-{
-  "message": "Status updated successfully"
-}
-```
-
-#### GET `/streamer/status/current`
-
-Obtém o status atual de todos os streamers.
-
-**Response:**
+**Response 200:**
 
 ```json
 [
   {
+    "id": 1,
     "streamerId": 101,
-    "nickname": "streamer123",
-    "status": "online",
-    "last_login": "2024-01-15T20:00:00.000Z",
-    "last_login_date": "15/01/2024",
-    "last_login_time": "20:00"
+    "date": "2024-01-15T00:00:00.000Z",
+    "hour": 20,
+    "minute": 30,
+    "points": 150,
+    "nickname": "streamer123"
   }
 ]
 ```
 
+### 📊 Status de Streamers
+
+#### GET `/streamers/status`
+
+Obtém o status atual de todos os streamers cadastrados no sistema.
+
+**Headers Obrigatórios:**
+
+- `Authorization: Bearer <token>`
+
+**Response 200:**
+
+```json
+[
+  {
+    "streamerId": 1,
+    "nickname": "admin",
+    "status": "online",
+    "last_login": "2024-01-15T20:00:00.000Z",
+    "last_login_date": "15/01/2024",
+    "last_login_time": "20:00"
+  },
+  {
+    "streamerId": 2,
+    "nickname": "streamer123",
+    "status": "offline",
+    "last_login": null,
+    "last_login_date": null,
+    "last_login_time": null
+  }
+]
+```
+
+**Campos da Resposta:**
+
+- `streamerId` (number): ID único do streamer
+- `nickname` (string): Nome de usuário do streamer
+- `status` (string): Status atual - `"online"` ou `"offline"`
+- `last_login` (string|null): Data e hora do último login em formato ISO 8601
+- `last_login_date` (string|null): Data do último login no formato DD/MM/YYYY
+- `last_login_time` (string|null): Hora do último login no formato HH:MM
+
+**Observações:**
+
+- O campo `status` é baseado no valor booleano `status` do streamer no banco de dados
+- Campos de data podem ser `null` se o streamer nunca fez login
+- A resposta sempre retorna um array, mesmo que vazio
+
 ### 👨‍💻 Gerenciamento de Streamers
 
-#### POST `/streamers/save`
+#### POST `/streamers`
 
 Cria um novo streamer (requer role admin).
 
 **Headers Obrigatórios:**
 
-```http
-Authorization: Bearer <admin_token>
-```
+- `Authorization: Bearer <admin_token>`
 
 **Request Body:**
+
+**Campos Obrigatórios:**
+
+- `nickname` (string): Nome de usuário do streamer
+- `password` (string): Senha do streamer
+- `role` (string): Role do usuário (`user`, `admin`, etc.)
+
+**Campos Opcionais:**
 
 ```json
 {
   "nickname": "streamer123",
   "password": "senha123",
-  "role": "user", // "admin" para criar um admin
-  // Campos opcionais:
+  "role": "user",
   "fullName": "Nome do Streamer",
   "email": "streamer@exemplo.com",
   "phone": "11999999999",
-  "platforms": ["twitch", "youtube"],
+  "platforms": ["twitch"],
   "usualStartTime": "20:00",
   "usualEndTime": "22:00",
   "streamDays": ["segunda", "terça", "quarta"],
-  "twitchChannel": "streamer123",
-  "youtubeChannel": "streamer123",
+  "twitchChannel": "https://twitch.tv/streamer123",
+  "youtubeChannel": "https://youtube.com/streamer123",
   "instagramHandle": "@streamer123",
   "tiktokHandle": "@streamer123",
-  "facebookPage": "streamer123"
+  "facebookPage": "https://facebook.com/streamer123"
 }
 ```
 
-#### GET `/streamers/`
+**Response 200:**
+
+```json
+{ "message": "Streamer created successfully" }
+```
+
+#### GET `/streamers`
 
 Lista todos os streamers (requer role admin).
 
 **Headers Obrigatórios:**
 
-```http
-Authorization: Bearer <admin_token>
-```
+- `Authorization: Bearer <admin_token>`
 
-**Response:**
+**Response 200:**
 
 ```json
 [
@@ -634,24 +683,75 @@ Authorization: Bearer <admin_token>
 ]
 ```
 
-#### PUT `/streamers/update/<id>`
+#### PUT `/streamers/<id>`
 
 Atualiza dados de um streamer (requer role admin).
 
 **Headers Obrigatórios:**
 
-```http
-Authorization: Bearer <admin_token>
+- `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+**Campos Obrigatórios:**
+
+- `nickname` (string): Nome de usuário do streamer
+- `role` (string): Role do usuário (`user`, `admin`, etc.)
+
+**Campos Opcionais:**
+
+```json
+{
+  "nickname": "streamer123_updated",
+  "role": "user",
+  "password": "nova_senha_123",
+  "fullName": "Nome Atualizado do Streamer",
+  "email": "streamer_updated@exemplo.com",
+  "phone": "11999999999",
+  "platforms": ["twitch", "youtube"],
+  "usualStartTime": "21:00",
+  "usualEndTime": "23:00",
+  "streamDays": ["segunda", "terça", "quinta"],
+  "twitchChannel": "https://twitch.tv/streamer123_updated",
+  "youtubeChannel": "https://youtube.com/streamer123_updated",
+  "instagramHandle": "@streamer123_updated",
+  "tiktokHandle": "@streamer123_updated",
+  "facebookPage": "https://facebook.com/streamer123_updated"
+}
 ```
 
-#### DELETE `/streamers/delete/<id>`
+**Response 200:**
+
+```json
+{ "message": "Streamer updated successfully" }
+```
+
+#### DELETE `/streamers/<id>`
 
 Remove um streamer (requer role admin).
 
 **Headers Obrigatórios:**
 
-```http
-Authorization: Bearer <admin_token>
+- `Authorization: Bearer <admin_token>`
+
+**Response 200:**
+
+```json
+{ "message": "Streamer deleted successfully" }
+```
+
+### 🔍 Health Check
+
+#### GET `/health`
+
+Verifica se a API está funcionando corretamente.
+
+**Observação:** Este endpoint não requer autenticação.
+
+**Response 200:**
+
+```
+OK
 ```
 
 ---
@@ -676,7 +776,7 @@ Authorization: Bearer <admin_token>
 }
 ```
 
-### Schedule
+### List A Schedule / List B Schedule
 
 ```json
 {
@@ -684,8 +784,7 @@ Authorization: Bearer <admin_token>
   "streamerUrl": "https://twitch.tv/streamer123",
   "date": "2024-01-15T00:00:00.000Z",
   "startTime": "20:00",
-  "endTime": "22:00",
-  "listName": "Lista A"
+  "endTime": "22:00"
 }
 ```
 
@@ -720,7 +819,30 @@ Authorization: Bearer <admin_token>
   "userId": 123,
   "fullName": "Nome do Streamer",
   "email": "streamer@exemplo.com",
-  "phone": "11999999999"
+  "phone": "11999999999",
+  "socialMedia": {
+    "id": 1,
+    "streamerId": 101,
+    "twitchChannel": "twitch_channel_url",
+    "youtubeChannel": "youtube_channel_url",
+    "instagramHandle": "@instagram_handle",
+    "tiktokHandle": "@tiktok_handle",
+    "facebookPage": "facebook_page_url"
+  }
+}
+```
+
+### Social Media
+
+```json
+{
+  "id": 1,
+  "streamerId": 101,
+  "twitchChannel": "twitch_channel_url",
+  "youtubeChannel": "youtube_channel_url",
+  "instagramHandle": "@instagram_handle",
+  "tiktokHandle": "@tiktok_handle",
+  "facebookPage": "facebook_page_url"
 }
 ```
 
@@ -783,14 +905,19 @@ curl -X PATCH http://localhost:8000/auth/confirm \
 ### Exemplo de Criação de Agendamento
 
 ```bash
-curl -X POST http://localhost:8000/schedules/save \
+curl -X POST http://localhost:8000/list-a \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '{
-    "streamerUrl": "https://twitch.tv/streamer123",
-    "date": "2024-01-15T00:00:00.000Z",
-    "startTime": "20:00",
-    "endTime": "22:00"
+    "list_name": "lista_a",
+    "schedules": [
+      {
+        "streamer_url": "https://twitch.tv/streamer123",
+        "date": "2024-01-15",
+        "start_time": "20:00",
+        "end_time": "22:00"
+      }
+    ]
   }'
 ```
 
@@ -798,10 +925,10 @@ curl -X POST http://localhost:8000/schedules/save \
 
 ```bash
 # Pontuações públicas com filtros
-curl "http://localhost:8000/public/score/?nickname=streamer123&startDate=2024-01-01&endDate=2024-01-31"
+curl "http://localhost:8000/public/score?nickname=streamer123&startDate=2024-01-01&endDate=2024-01-31"
 
 # Pontuações autenticadas
-curl -X GET http://localhost:8000/score/ \
+curl -X GET http://localhost:8000/score \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -809,27 +936,83 @@ curl -X GET http://localhost:8000/score/ \
 
 ```bash
 # Criar streamer (requer admin)
-curl -X POST http://localhost:8000/streamers/save \
+curl -X POST http://localhost:8000/streamers \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <admin_token>" \
   -d '{
     "nickname": "streamer123",
     "password": "senha123",
+    "role": "user",
     "fullName": "Nome do Streamer",
     "email": "streamer@exemplo.com",
-    "platforms": ["twitch"]
+    "phone": "11999999999",
+    "platforms": ["twitch"],
+    "usualStartTime": "20:00",
+    "usualEndTime": "22:00",
+    "streamDays": ["segunda", "terça", "quarta"]
+  }'
+
+# Atualizar streamer (requer admin) - nickname e role são obrigatórios
+curl -X PUT http://localhost:8000/streamers/101 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <admin_token>" \
+  -d '{
+    "nickname": "streamer123_updated",
+    "role": "user",
+    "password": "nova_senha_123",
+    "fullName": "Nome Atualizado do Streamer",
+    "email": "streamer_updated@exemplo.com",
+    "phone": "11999999999",
+    "platforms": ["twitch", "youtube"],
+    "usualStartTime": "21:00",
+    "usualEndTime": "23:00",
+    "streamDays": ["segunda", "terça", "quinta"],
+    "twitchChannel": "https://twitch.tv/streamer123_updated"
   }'
 ```
 
-### Exemplo de Atualização de Status
+### Exemplo de Health Check
 
 ```bash
-curl -X POST http://localhost:8000/streamer/status/update \
-  -H "Content-Type: application/json" \
-  -d '{
-    "streamerId": 101,
-    "status": "ON"
-  }'
+curl -X GET http://localhost:8000/health
+```
+
+**Response:**
+
+```
+OK
+```
+
+### Exemplo de Consulta de Status de Streamers
+
+```bash
+# Consultar status de todos os streamers
+curl -X GET http://localhost:8000/streamers/status \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json"
+```
+
+**Response:**
+
+```json
+[
+  {
+    "streamerId": 1,
+    "nickname": "admin",
+    "status": "online",
+    "last_login": "2024-01-15T20:00:00.000Z",
+    "last_login_date": "15/01/2024",
+    "last_login_time": "20:00"
+  },
+  {
+    "streamerId": 2,
+    "nickname": "streamer123",
+    "status": "offline",
+    "last_login": null,
+    "last_login_date": null,
+    "last_login_time": null
+  }
+]
 ```
 
 ---
@@ -890,6 +1073,6 @@ Para dúvidas, sugestões ou problemas, entre em contato através dos canais ofi
 
 ---
 
-**Versão da API:** 1.0.0  
+**Versão da API:** 1.0.1  
 **Porta Padrão:** 8000  
-**Última atualização:** Janeiro 2024
+**Última atualização:** Setembro 2025
