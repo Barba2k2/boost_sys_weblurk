@@ -131,7 +131,6 @@ class DownloadProgressDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: AppColors.cosmicBorder,
-                      width: 1,
                     ),
                   ),
                   child: ClipRRect(
