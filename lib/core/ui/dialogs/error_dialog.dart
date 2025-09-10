@@ -113,7 +113,6 @@ class ErrorDialog extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: AppColors.cosmicBorder,
-                    width: 1,
                   ),
                 ),
                 child: Column(
