@@ -125,7 +125,7 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<UserModel> getUserLogged() async {
     try {
-      final result = await _restClient.auth().get('/user/');
+      final result = await _restClient.auth().get('/user');
 
       return UserModel.fromMap(result.data);
     } on RestClientException catch (e, s) {
@@ -140,16 +140,30 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<void> updateLoginStatus(int userId, String status) async {
     try {
-      await _restClient.auth().post(
-        '/streamer/status/update',
+      // Usando endpoint PUT /streamers/<id> para atualizar status do streamer
+      // Primeiro obtemos os dados do usuário para ter as informações necessárias
+      final userResult = await _restClient.auth().get('/user');
+      final userData = userResult.data;
+
+      if (userData == null) {
+        throw Failure(message: 'User data not found');
+      }
+
+      // Atualiza o streamer usando o endpoint PUT
+      await _restClient.auth().put(
+        '/streamers/$userId',
         data: {
-          'streamerId': userId,
-          'status': status,
+          'nickname': userData['nickname'],
+          'role': userData['role'],
+          'status': status == 'ON', // Converte string para boolean
         },
       );
+
+      _logger.info('Login status updated successfully for user $userId');
     } catch (e, s) {
       _logger.error('Failed to update login status', e, s);
-      throw Failure(message: 'Failed to update login status');
+      // Não lance exceção para não quebrar o fluxo de login
+      _logger.warning('Status update failed but continuing with login process');
     }
   }
 }
