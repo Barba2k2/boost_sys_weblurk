@@ -8,6 +8,7 @@ abstract class WebViewService {
   Future<void> unmuteWebView();
   Future<void> setWebViewVolume(double volume);
   Future<void> verifyAndFixMuteState(bool shouldBeMuted);
+  Future<void> forceAutoplay();
   void setWebViewControllers(
     WebViewControllerInterface? controllerA,
     WebViewControllerInterface? controllerB,
@@ -224,6 +225,108 @@ class WebViewServiceImpl implements WebViewService {
       }
     } catch (e, s) {
       _logger.error('Error setting WebView volume', e, s);
+    }
+  }
+
+  /// Força o autoplay do player Twitch
+  @override
+  Future<void> forceAutoplay() async {
+    try {
+      const autoplayScript = '''
+        try {
+          // Força autoplay para todos os vídeos
+          const videoElements = document.querySelectorAll('video');
+          videoElements.forEach(video => {
+            if (video.paused) {
+              video.autoplay = true;
+              video.muted = false; // Desmuta se necessário
+              
+              // Tenta dar play
+              video.play().catch(e => {
+                console.log('[Autoplay] Erro ao dar play no vídeo:', e);
+                // Se falhar sem som, tenta com som desligado
+                video.muted = true;
+                video.play().catch(e2 => console.log('[Autoplay] Erro mesmo mutado:', e2));
+              });
+            }
+          });
+          
+          // Específico para Twitch player
+          const twitchPlayer = document.querySelector('[data-a-target="twitch-player"]');
+          if (twitchPlayer) {
+            const video = twitchPlayer.querySelector('video');
+            if (video && video.paused) {
+              console.log('[Twitch Player] Forçando autoplay...');
+              video.autoplay = true;
+              
+              // Tenta dar play
+              video.play().then(() => {
+                console.log('[Twitch Player] Autoplay iniciado com sucesso');
+              }).catch(e => {
+                console.log('[Twitch Player] Erro ao iniciar autoplay:', e);
+                // Fallback: tenta com mute temporário
+                video.muted = true;
+                video.play().then(() => {
+                  // Após 2 segundos, volta o som
+                  setTimeout(() => {
+                    video.muted = false;
+                  }, 2000);
+                }).catch(e2 => console.log('[Twitch Player] Erro mesmo mutado:', e2));
+              });
+            }
+          }
+          
+          // Força autoplay em iframes (se necessário)
+          const iframes = document.querySelectorAll('iframe');
+          iframes.forEach(iframe => {
+            try {
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+              const iframeVideos = iframeDoc.querySelectorAll('video');
+              iframeVideos.forEach(video => {
+                if (video.paused) {
+                  video.autoplay = true;
+                  video.play().catch(e => console.log('[Iframe] Erro autoplay:', e));
+                }
+              });
+            } catch (e) {
+              // Cross-origin iframe, ignorar
+            }
+          });
+          
+          // Observer para novos vídeos que podem ser carregados dinamicamente
+          const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+              mutation.addedNodes.forEach(function(node) {
+                if (node.tagName === 'VIDEO') {
+                  const video = node;
+                  video.autoplay = true;
+                  if (video.paused) {
+                    video.play().catch(e => console.log('[Observer] Erro autoplay:', e));
+                  }
+                }
+              });
+            });
+          });
+          
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
+          
+        } catch (e) {
+          console.error('[Autoplay Script] Erro geral:', e);
+        }
+      ''';
+
+      if (_controllerA != null) {
+        await _controllerA!.executeScript(autoplayScript);
+      }
+
+      if (_controllerB != null) {
+        await _controllerB!.executeScript(autoplayScript);
+      }
+    } catch (e, s) {
+      _logger.error('Error forcing autoplay', e, s);
     }
   }
 
