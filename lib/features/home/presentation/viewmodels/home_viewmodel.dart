@@ -162,6 +162,13 @@ class HomeViewModel extends ChangeNotifier {
         _webviewControllerA,
         _webviewControllerB,
       );
+
+      // Força autoplay após alguns segundos para dar tempo da página carregar
+      Future.delayed(const Duration(seconds: 3), () {
+        _webViewService.forceAutoplay().catchError((e) {
+          _logger.warning('Erro ao forçar autoplay: $e');
+        });
+      });
     } catch (e, s) {
       _logger.error('Erro ao registrar WebView controller', e, s);
     }
@@ -273,6 +280,13 @@ class HomeViewModel extends ChangeNotifier {
             'https://twitch.tv/BoostTeam_';
 
         await activeController.loadUrl(currentUrl);
+
+        // Força autoplay após carregar a nova URL
+        Future.delayed(const Duration(seconds: 3), () {
+          _webViewService.forceAutoplay().catchError((e) {
+            _logger.warning('Erro ao forçar autoplay após reload: $e');
+          });
+        });
       }
 
       return Result.ok(null);
@@ -288,6 +302,8 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<Result<List<ScheduleListModel>>> _loadSchedules() async {
     try {
+      _logger.info('[DEBUG] loadSchedules foi chamado');
+      print('[DEBUG] HomeViewModel - _loadSchedules foi executado');
       // Limpar cache e buscar dados atualizados
       await _homeService.updateLists();
       final schedules = await _homeService.fetchScheduleLists();
