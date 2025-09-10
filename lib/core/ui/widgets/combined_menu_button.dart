@@ -89,7 +89,6 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: AppColors.cosmicBorder,
-                  width: 1,
                 ),
               ),
               child: Text(
@@ -126,7 +125,6 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(
           color: AppColors.cosmicBorder,
-          width: 1,
         ),
       ),
       itemBuilder: (context) => [
@@ -156,9 +154,8 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
             elevation: 8,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              side: BorderSide(
+              side: const BorderSide(
                 color: AppColors.cosmicBorder,
-                width: 1,
               ),
             ),
             child: const Row(
