@@ -16,8 +16,8 @@ class ScheduleRepositoryImpl implements SchedulesRepository {
   @override
   Future<List> fetchSchedule() async {
     try {
-      final responseListA = await _restClient.auth().get('/list-a/');
-      final responseListB = await _restClient.auth().get('/list-b/');
+      final responseListA = await _restClient.auth().get('/list-a');
+      final responseListB = await _restClient.auth().get('/list-b');
 
       final List<dynamic> allSchedules = [];
 
