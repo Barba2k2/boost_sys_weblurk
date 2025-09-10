@@ -97,14 +97,14 @@ class WebViewConfig {
       
       // Force desktop CSS media queries
       const style = document.createElement('style');
-      style.textContent = \`
+      style.textContent = `
         @media (max-width: 768px) {
           body { min-width: 1200px !important; }
           .container { min-width: 1200px !important; }
           .mobile-only { display: none !important; }
           .desktop-only { display: block !important; }
         }
-      \`;
+      `;
       document.head.appendChild(style);
       
       console.log('Desktop mode forced successfully');
