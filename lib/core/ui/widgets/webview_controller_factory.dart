@@ -18,9 +18,8 @@ class WebViewControllerFactory {
       return WebViewWindowsController();
     } else if (Platform.isAndroid) {
       return WebViewAndroidController();
-    } else if (Platform.isIOS) {
-      // For now, use Android controller for iOS as well
-      // In the future, you can create a specific iOS implementation
+    } else if (Platform.isIOS || Platform.isMacOS) {
+      // Use webview_flutter for iOS and macOS (supports WKWebView)
       return WebViewAndroidController();
     } else {
       throw UnsupportedError(
@@ -31,7 +30,10 @@ class WebViewControllerFactory {
   /// Check if the current platform is supported
   static bool isPlatformSupported() {
     if (kIsWeb) return false;
-    return Platform.isWindows || Platform.isAndroid || Platform.isIOS;
+    return Platform.isWindows ||
+        Platform.isAndroid ||
+        Platform.isIOS ||
+        Platform.isMacOS;
   }
 
   /// Get the current platform name
