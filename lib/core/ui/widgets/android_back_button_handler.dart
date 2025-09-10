@@ -54,15 +54,15 @@ class AndroidBackButtonHandler extends StatelessWidget {
                   width: 2,
                 ),
               ),
-              title: Row(
+              title: const Row(
                 children: [
                   Icon(
                     Icons.exit_to_app,
                     color: AppColors.cosmicAccent,
                     size: 28,
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
+                  SizedBox(width: 12),
+                  Text(
                     'Sair do App',
                     style: TextStyle(
                       color: Colors.white,
