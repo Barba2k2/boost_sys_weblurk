@@ -116,21 +116,24 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
+      onSelected: (value) {},
       offset: const Offset(0, 40),
-      color: AppColors.cosmicNavy,
-      surfaceTintColor: AppColors.cosmicNavy,
-      shadowColor: AppColors.cosmicBorder.withValues(alpha: 0.3),
-      elevation: 8,
+      color: AppColors.menuBackgroundImproved,
+      surfaceTintColor: AppColors.menuBackgroundImproved,
+      shadowColor: AppColors.menuBorderImproved.withValues(alpha: 0.4),
+      elevation: 12,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(
-          color: AppColors.cosmicBorder,
+          color: AppColors.menuBorderImproved,
+          width: 1.5,
         ),
       ),
       itemBuilder: (context) => [
         MenuItemWidget(
           label: 'Atualizar Listas',
           icon: Icons.refresh,
+          iconColor: AppColors.menuIconSecondary,
           onTap: () async {
             // Limpar cache e recarregar listas
             await widget.viewModel.loadSchedulesCommand.execute();
@@ -141,12 +144,15 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         MenuItemWidget(
           label: 'Encerrar',
           icon: Icons.power_settings_new,
+          iconColor: AppColors.menuIconDanger,
           onTap: () {
             widget.settingsService.terminateApp();
           },
         ),
         PopupMenuItem<String>(
+          enabled: false,
           child: PopupMenuButton<String>(
+            onSelected: (value) {},
             offset: const Offset(150, 0),
             color: AppColors.cosmicDarkPurple,
             surfaceTintColor: AppColors.cosmicDarkPurple,
@@ -163,7 +169,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
                 Icon(
                   Icons.volume_up,
                   size: 20,
-                  color: AppColors.cosmicAccent,
+                  color: AppColors.menuIconAudio,
                 ),
                 SizedBox(width: 10),
                 Text(
@@ -176,7 +182,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
                 SizedBox(width: 40),
                 Icon(
                   Icons.arrow_right,
-                  color: AppColors.cosmicAccent,
+                  color: AppColors.menuIconAudio,
                 ),
               ],
             ),
@@ -189,7 +195,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
                       const Icon(
                         Icons.check,
                         size: 18,
-                        color: AppColors.cosmicAccent,
+                        color: AppColors.success,
                       ),
                     if (!_isMuted) const SizedBox(width: 18),
                     const SizedBox(width: 8),
@@ -214,7 +220,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
                       const Icon(
                         Icons.check,
                         size: 18,
-                        color: AppColors.cosmicAccent,
+                        color: AppColors.success,
                       ),
                     if (_isMuted) const SizedBox(width: 18),
                     const SizedBox(width: 8),
@@ -237,6 +243,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         MenuItemWidget(
           label: 'Fuso Horário',
           icon: Icons.schedule,
+          iconColor: AppColors.menuIconAccent,
           onTap: () async {
             try {
               final currentTimezone =
@@ -263,6 +270,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         MenuItemWidget(
           label: 'Pontuação',
           icon: Icons.leaderboard,
+          iconColor: AppColors.menuIconWarning,
           onTap: () async {
             await widget.urlLauncherService.launchURL(
               'https://docs.google.com/spreadsheets/d/1kh4zc2INhLEOGbLqqte8NnP4NsNRvFTgSWvKNKKM9qk/edit?usp=sharing',
@@ -272,6 +280,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         MenuItemWidget(
           label: 'Discord',
           icon: Icons.discord,
+          iconColor: AppColors.menuIconDiscord,
           onTap: () async {
             await widget.urlLauncherService.launchURL(
               'https://discord.gg/udteYpaGuB',
@@ -281,6 +290,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         MenuItemWidget(
           label: 'Redes Sociais',
           icon: Icons.live_tv_rounded,
+          iconColor: AppColors.menuIconTwitch,
           onTap: () async {
             await widget.urlLauncherService.launchURL(
               'https://www.twitch.com/BoostTeam_',
@@ -290,6 +300,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         MenuItemWidget(
           label: 'Formulário de horários',
           icon: Icons.edit_document,
+          iconColor: AppColors.menuIconGoogle,
           onTap: () async {
             await widget.urlLauncherService.launchURL(
               'https://forms.gle/RN4NGWm8Qvi1daqp7',
@@ -299,6 +310,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         MenuItemWidget(
           label: 'BoostTeam SysWeblurk',
           icon: Icons.edit_document,
+          iconColor: AppColors.menuIconGoogleDrive,
           onTap: () async {
             await widget.urlLauncherService.launchURL(
               'https://drive.google.com/drive/folders/1XsmNh_gpKYLEkMSaBPFLuT3Y5vDmeWC3?usp=sharing',
@@ -308,6 +320,7 @@ class _CombinedMenuButtonState extends State<CombinedMenuButton> {
         MenuItemWidget(
           label: 'Apoie o projeto',
           icon: Icons.card_giftcard_rounded,
+          iconColor: AppColors.menuIconWarning,
           onTap: () async {
             await widget.urlLauncherService.launchURL(
               'https://github.com/Barba2k2/boost_sys_weblurk',
