@@ -7,8 +7,9 @@ class MenuItemWidget extends PopupMenuItem<String> {
     required String label,
     required IconData icon,
     required VoidCallback onTap,
+    Color? iconColor,
   }) : super(
-          value: label,
+          value: null, // Remover valor para evitar conflitos
           onTap: onTap,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -17,7 +18,7 @@ class MenuItemWidget extends PopupMenuItem<String> {
                 Icon(
                   icon,
                   size: 20,
-                  color: AppColors.cosmicAccent,
+                  color: iconColor ?? AppColors.menuIconBright,
                 ),
                 const SizedBox(width: 12),
                 Text(
