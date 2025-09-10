@@ -11,39 +11,39 @@ dependencies:
   ###
   asuka: ^2.2.1
 
-  clarity_flutter: ^1.2.0
+  clarity_flutter: ^1.4.0
   cupertino_icons: ^1.0.8
-  dio: ^5.8.0+1
+  dio: ^5.9.0
   ffi: ^2.1.3
   flutter:
     sdk: flutter
-  flutter_dotenv: ^5.2.1
+  flutter_dotenv: ^6.0.0
   flutter_screenutil: ^5.9.3
   flutter_secure_storage: ^9.2.4
-  get_it: ^8.0.3
-  go_router: ^16.0.0
-  intl: ^0.19.0
-  logger: ^2.5.0
-  mockito: ^5.4.5
+  get_it: ^8.2.0
+  go_router: ^16.2.1
+  intl: ^0.20.2
+  logger: ^2.6.1
+  mockito: ^5.5.1
   mocktail: ^1.0.4
-  package_info_plus: ^8.0.3
+  package_info_plus: ^8.3.1
   process_run: ^1.2.4
-  sentry_flutter: ^9.5.0
-  shared_preferences: ^2.3.2
+  sentry_flutter: ^9.6.0
+  shared_preferences: ^2.5.3
   shorebird_code_push: ^2.0.4
   url_launcher: ^6.3.2
   uuid: ^4.5.1
   validatorless: ^1.2.3
-  web_socket_channel: ^3.0.2
+  web_socket_channel: ^3.0.3
   
   webview_windows: ^0.4.0
-  webview_flutter: ^4.4.2
-  win32: ^5.8.0
-  window_manager: ^0.4.3
+  webview_flutter: ^4.13.0
+  win32: ^5.14.0
+  window_manager: ^0.5.1
 
 dev_dependencies:
   sentry_dart_plugin: ^3.1.1
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
 
