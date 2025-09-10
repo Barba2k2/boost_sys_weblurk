@@ -25,10 +25,10 @@ class HomeRepositoryImpl implements HomeRepository {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
       final responseListA = await _restClient.auth().get(
-            '/list-a/get?date=$formattedDate',
+            '/list-a?date=$formattedDate',
           );
       final responseListB = await _restClient.auth().get(
-            '/list-b/get?date=$formattedDate',
+            '/list-b?date=$formattedDate',
           );
 
       final List<ScheduleModel> allSchedules = [];
@@ -80,10 +80,10 @@ class HomeRepositoryImpl implements HomeRepository {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
       final responseListA = await _restClient.auth().get(
-            '/list-a/get?date=$formattedDate',
+            '/list-a?date=$formattedDate',
           );
       final responseListB = await _restClient.auth().get(
-            '/list-b/get?date=$formattedDate',
+            '/list-b?date=$formattedDate',
           );
 
       final List<ScheduleListModel> scheduleLists = [];
@@ -137,35 +137,30 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<List<String>> getAvailableListNames() async {
     try {
-      final response = await _restClient.auth().get('/list-a/lists');
+      // Como não existe um endpoint específico para listar nomes,
+      // fazemos chamadas para verificar se as listas estão disponíveis
+      final List<String> availableNames = [];
 
-      if (response.statusCode == 200) {
-        final data = response.data;
-        if (data is Map<String, dynamic> && data['list_names'] != null) {
-          return List<String>.from(data['list_names']);
-        }
-        return ['Lista A', 'Lista B'];
-      } else {
-        throw Failure(
-          message:
-              'Erro ao carregar nomes das listas (código ${response.statusCode})',
-        );
+      try {
+        await _restClient.auth().get('/list-a');
+        availableNames.add('Lista A');
+      } catch (e) {
+        _logger.warning('Lista A não disponível');
       }
-    } on RestClientException catch (e, s) {
-      _logger.error(
-        'Error on get list names (status code: ${e.statusCode})',
-        e,
-        s,
-      );
-      throw Failure(
-        message:
-            'Erro do RestClient ao buscar nomes das listas: ${e.message ?? e.statusCode}',
-      );
+
+      try {
+        await _restClient.auth().get('/list-b');
+        availableNames.add('Lista B');
+      } catch (e) {
+        _logger.warning('Lista B não disponível');
+      }
+
+      // Se nenhuma lista estiver disponível, retorna as padrão
+      return availableNames.isEmpty ? ['Lista A', 'Lista B'] : availableNames;
     } catch (e, s) {
       _logger.error('Error on get list names', e, s);
-      throw Failure(
-        message: 'Erro genérico ao buscar nomes das listas: ${e.toString()}',
-      );
+      // Retorna as listas padrão em caso de erro
+      return ['Lista A', 'Lista B'];
     }
   }
 
@@ -181,11 +176,11 @@ class HomeRepositoryImpl implements HomeRepository {
           listName.toLowerCase().replaceAll(' ', '').replaceAll('_', '');
       String endpoint;
       if (normalized == 'listaa') {
-        endpoint = '/list-a/get?date=$formattedDate';
+        endpoint = '/list-a?date=$formattedDate';
       } else if (normalized == 'listab') {
-        endpoint = '/list-b/get?date=$formattedDate';
+        endpoint = '/list-b?date=$formattedDate';
       } else {
-        endpoint = '/list-a/get?date=$formattedDate';
+        endpoint = '/list-a?date=$formattedDate';
       }
 
       final response = await _restClient.auth().get(endpoint);
@@ -225,10 +220,10 @@ class HomeRepositoryImpl implements HomeRepository {
       final formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
       final responseListA = await _restClient.auth().get(
-            '/list-a/get?date=$formattedDate',
+            '/list-a?date=$formattedDate',
           );
       final responseListB = await _restClient.auth().get(
-            '/list-b/get?date=$formattedDate',
+            '/list-b?date=$formattedDate',
           );
 
       final List<ScheduleModel> allSchedules = [];
@@ -314,7 +309,7 @@ class HomeRepositoryImpl implements HomeRepository {
   Future<void> saveScore(ScoreModel score) async {
     try {
       final response = await _restClient.auth().post(
-            '/score/save',
+            '/score',
             data: score.toMap(),
           );
 
